@@ -127,7 +127,8 @@ export default function DAOs() {
                       <Image
                         src={token.image_url || dao.image_url}
                         alt={dao.name}
-                        fill
+                        width={48}
+                        height={48}
                         className="object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                     </div>
