@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { Message } from '@/lib/chat/types';
 import { useThreadsStore } from "./threads";
+import { getStacksAddress } from "@/lib/address";
 
 // Global WebSocket instance
 let globalWs: WebSocket | null = null;
@@ -39,6 +40,8 @@ interface ChatState {
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
 }
+
+const userAddress = getStacksAddress()
 
 export const useChatStore = create<ChatState>((set, get) => ({
   messages: {},
@@ -176,7 +179,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   setActiveThread: (threadId) => {
     set({ activeThreadId: threadId });
-    localStorage.setItem("activeThreadId", threadId)
+    localStorage.setItem(`${userAddress}_activeThreadId`, threadId)
 
     const state = get();
     if (!state.fetchedThreads.has(threadId)) {
@@ -249,9 +252,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
   setActiveThreadId: (threadId) => {
     set({ activeThreadId: threadId })
     if (threadId) {
-      localStorage.setItem("activeThreadId", threadId)
+      localStorage.setItem(`${userAddress}_activeThreadId`, threadId)
     } else {
-      localStorage.removeItem("activeThreadId")
+      localStorage.removeItem(`${userAddress}_activeThreadId`)
     }
   },
 
@@ -267,7 +270,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   clearActiveThread: () => {
     set({ activeThreadId: null })
-    localStorage.removeItem("activeThreadId")
+    localStorage.removeItem(`${userAddress}_activeThreadId`)
   },
 }))
 
