@@ -23,10 +23,13 @@ interface ChatState {
   sendMessage: (threadId: string, content: string) => void;
   addMessage: (message: Message) => void;
   clearMessages: (threadId: string) => void;
+  setMessages: (threadId: string, messages: Message[]) => void;
 
   // Threads
   setActiveThread: (threadId: string) => void;
   getThreadHistory: () => void;
+  setActiveThreadId: (threadId: string | null) => void;
+  clearActiveThread: () => void;
 
   // Agent
   setSelectedAgent: (agentId: string | null) => void;
@@ -59,7 +62,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
 
     try {
-      const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:8000/chat/ws";
+      const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:8000/chat/ws"
       if (!wsUrl) {
         throw new Error("WebSocket URL not configured");
       }
@@ -134,8 +137,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
       fetchedThreads: new Set(Array.from(state.fetchedThreads).filter(id => id !== threadId))
     }));
 
-    // Remove thread from threads store
+    // Remove thread from threads store and local storage
     useThreadsStore.getState().removeThread(threadId);
+    localStorage.removeItem(`messages_${threadId}`)
   },
 
   addMessage: (message: Message) => {
@@ -149,97 +153,121 @@ export const useChatStore = create<ChatState>((set, get) => ({
           const updatedMessages = [...messages];
           updatedMessages[updatedMessages.length - 1] = {
             ...lastMessage,
-            content: lastMessage.content + (message.content || ''),
-            status: message.status
-          };
+            content: lastMessage.content + (message.content || ""),
+            status: message.status,
+          }
           return {
             messages: {
               ...state.messages,
               [message.thread_id]: updatedMessages
-            }
-          };
+            },
+          }
         }
       }
 
-      // For non-token messages or new token messages
-      return {
-        messages: {
-          ...state.messages,
-          [message.thread_id]: [...messages, message]
-        }
+      const newMessages = {
+        ...state.messages,
+        [message.thread_id]: [...messages, message]
       };
-    });
+      localStorage.setItem(`messages_${message.thread_id}`, JSON.stringify(newMessages[message.thread_id]));
+      return { messages: newMessages };
+    })
   },
 
   setActiveThread: (threadId) => {
     set({ activeThreadId: threadId });
+    localStorage.setItem("activeThreadId", threadId)
 
-    // Only get thread history if we haven't fetched it before
     const state = get();
     if (!state.fetchedThreads.has(threadId)) {
       setTimeout(() => {
-        get().getThreadHistory();
-        // Add thread to fetched set after getting history
-        set(state => ({
-          fetchedThreads: new Set(Array.from(state.fetchedThreads).concat([threadId]))
-        }));
-      }, 0);
+        get().getThreadHistory()
+        set((state) => ({
+          fetchedThreads: new Set(Array.from(state.fetchedThreads).concat([threadId])),
+        }))
+      }, 0)
     }
   },
 
   getThreadHistory: () => {
     if (!globalWs || globalWs.readyState !== WebSocket.OPEN) {
-      set({ error: "WebSocket not connected" });
-      return;
+      set({ error: "WebSocket not connected" })
+      return
     }
-    // Send message through WebSocket
     try {
-      globalWs.send(JSON.stringify({
-        type: "history",
-        role: "user",
-        status: "sent",
-        thread_id: get().activeThreadId,
-        agent_id: get().selectedAgentId
-      }));
+      globalWs.send(
+        JSON.stringify({
+          type: "history",
+          role: "user",
+          status: "sent",
+          thread_id: get().activeThreadId,
+          agent_id: get().selectedAgentId,
+        }),
+      )
     } catch (error) {
-      set({ error: "Failed to send message" });
-      console.error("Send error:", error);
+      set({ error: "Failed to send message" })
+      console.error("Send error:", error)
     }
   },
 
   sendMessage: (threadId, content) => {
     if (!globalWs || globalWs.readyState !== WebSocket.OPEN) {
-      set({ error: "WebSocket not connected" });
-      return;
+      set({ error: "WebSocket not connected" })
+      return
     }
 
-    // Add user message immediately
     get().addMessage({
       agent_id: get().selectedAgentId,
       thread_id: threadId,
       role: "user",
       content,
       type: "message",
-      status: "sent"
-    });
+      status: "sent",
+    })
 
-    // Send message through WebSocket
     try {
-      globalWs.send(JSON.stringify({
-        type: "message",
-        role: "user",
-        status: "sent",
-        content,
-        thread_id: threadId,
-        agent_id: get().selectedAgentId
-      }));
+      globalWs.send(
+        JSON.stringify({
+          type: "message",
+          role: "user",
+          status: "sent",
+          content,
+          thread_id: threadId,
+          agent_id: get().selectedAgentId,
+        }),
+      )
     } catch (error) {
-      set({ error: "Failed to send message" });
-      console.error("Send error:", error);
+      set({ error: "Failed to send message" })
+      console.error("Send error:", error)
     }
   },
 
   setConnectionStatus: (isConnected) => set({ isConnected }),
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),
-}));
+
+  setActiveThreadId: (threadId) => {
+    set({ activeThreadId: threadId })
+    if (threadId) {
+      localStorage.setItem("activeThreadId", threadId)
+    } else {
+      localStorage.removeItem("activeThreadId")
+    }
+  },
+
+  setMessages: (threadId, messages) => {
+    set((state) => ({
+      messages: {
+        ...state.messages,
+        [threadId]: messages,
+      },
+    }))
+    localStorage.setItem(`messages_${threadId}`, JSON.stringify(messages))
+  },
+
+  clearActiveThread: () => {
+    set({ activeThreadId: null })
+    localStorage.removeItem("activeThreadId")
+  },
+}))
+

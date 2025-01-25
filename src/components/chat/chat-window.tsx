@@ -7,7 +7,6 @@ import { useSessionStore } from "@/store/session";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AgentWalletSelector from "./agent-selector";
 import { CreateThreadButton } from "../threads/CreateThreadButton";
-// import { StartGuide } from "../reusables/StartGuide";
 
 export function ChatWindow() {
   const {
@@ -20,6 +19,8 @@ export function ChatWindow() {
     connect,
     disconnect,
     activeThreadId,
+    setActiveThreadId,
+    setMessages,
   } = useChatStore();
 
   const { accessToken } = useSessionStore();
@@ -59,6 +60,22 @@ export function ChatWindow() {
     };
   }, [accessToken, memoizedConnect, memoizedDisconnect]);
 
+  useEffect(() => {
+    const storedThreadId = localStorage.getItem("activeThreadId");
+    if (storedThreadId) {
+      setActiveThreadId(storedThreadId);
+    }
+  }, [setActiveThreadId]);
+
+  useEffect(() => {
+    if (activeThreadId) {
+      const storedMessages = localStorage.getItem(`messages_${activeThreadId}`);
+      if (storedMessages) {
+        setMessages(activeThreadId, JSON.parse(storedMessages));
+      }
+    }
+  }, [activeThreadId, setMessages]);
+
   if (!accessToken) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -75,7 +92,6 @@ export function ChatWindow() {
         <div className="text-center space-y-4 p-4 sm:p-6 lg:p-8 -mt-20">
           <div className="flex justify-center gap-3">
             <CreateThreadButton />
-            <div className="md:block hidden">{/* <StartGuide /> */}</div>
           </div>
         </div>
       </div>

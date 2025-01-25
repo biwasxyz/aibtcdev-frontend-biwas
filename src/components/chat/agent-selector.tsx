@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import { useState, useEffect } from "react";
 import { Bot, Copy, Check, ExternalLink, Plus } from "lucide-react";
 import { useAgents } from "@/hooks/use-agents";
@@ -18,7 +18,7 @@ import {
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Agent, Wallet } from "@/types/supabase";
+import type { Agent, Wallet } from "@/types/supabase";
 
 // Dynamically import Stacks components
 const StacksComponents = dynamic(() => import("../wallet/stacks-component"), {
@@ -68,6 +68,14 @@ export function AgentWalletSelector({
     }
   }, [userId, fetchWallets]);
 
+  useEffect(() => {
+    // Restore selected agent ID from localStorage on component mount
+    const storedAgentId = localStorage.getItem("selectedAgentId");
+    if (storedAgentId) {
+      onSelect(storedAgentId);
+    }
+  }, [onSelect]);
+
   const truncateAddress = (address: string) => {
     if (!address) return "";
     return `${address.slice(0, 5)}...${address.slice(-5)}`;
@@ -105,6 +113,11 @@ export function AgentWalletSelector({
 
   const handleSelect = (agentId: string | null) => {
     onSelect(agentId);
+    if (agentId) {
+      localStorage.setItem("selectedAgentId", agentId);
+    } else {
+      localStorage.removeItem("selectedAgentId");
+    }
     setOpen(false);
   };
 
