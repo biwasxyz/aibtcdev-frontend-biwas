@@ -169,7 +169,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         ...state.messages,
         [message.thread_id]: [...messages, message]
       };
-      localStorage.setItem(`messages_${message.thread_id}`, JSON.stringify(newMessages[message.thread_id]));
+      // localStorage.setItem(`messages_${message.thread_id}`, JSON.stringify(newMessages[message.thread_id]));
       return { messages: newMessages };
     })
   },
@@ -262,7 +262,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         [threadId]: messages,
       },
     }))
-    localStorage.setItem(`messages_${threadId}`, JSON.stringify(messages))
+    // localStorage.setItem(`messages_${threadId}`, JSON.stringify(messages))
   },
 
   clearActiveThread: () => {
