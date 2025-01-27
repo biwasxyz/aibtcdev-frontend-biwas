@@ -7,7 +7,6 @@ import { useSessionStore } from "@/store/session";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AgentWalletSelector from "./agent-selector";
 import { CreateThreadButton } from "../threads/CreateThreadButton";
-// import { StartGuide } from "../reusables/StartGuide";
 
 export function ChatWindow() {
   const {
@@ -23,7 +22,6 @@ export function ChatWindow() {
   } = useChatStore();
 
   const { accessToken } = useSessionStore();
-
   const threadMessages = activeThreadId ? messages[activeThreadId] || [] : [];
 
   const memoizedConnect = useCallback(
@@ -75,7 +73,6 @@ export function ChatWindow() {
         <div className="text-center space-y-4 p-4 sm:p-6 lg:p-8 -mt-20">
           <div className="flex justify-center gap-3">
             <CreateThreadButton />
-            <div className="md:block hidden">{/* <StartGuide /> */}</div>
           </div>
         </div>
       </div>
@@ -84,7 +81,8 @@ export function ChatWindow() {
 
   return (
     <div className="flex flex-col relative h-[94dvh] md:h-[100dvh] w-full min-w-0 max-w-full">
-      <div className="sticky top-0 flex items-center justify-between px-2 md:px-4 h-14 border-b border-border/10 min-w-0 bg-background/80 backdrop-blur-sm w-full">
+      {/* Header with shadow */}
+      <div className="sticky top-0 flex items-center justify-between px-2 md:px-4 h-14 min-w-0 backdrop-blur-sm w-full shadow-lg">
         <div className="flex items-center gap-2 overflow-hidden min-w-0 flex-1">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div>
@@ -102,6 +100,7 @@ export function ChatWindow() {
         </div>
       </div>
 
+      {/* Message list */}
       <div className="flex-1 overflow-hidden w-full min-w-0 max-w-full">
         <ScrollArea className="h-full w-full pb-4">
           <div className="flex flex-col justify-end min-h-full w-full max-w-full">
@@ -118,7 +117,8 @@ export function ChatWindow() {
         </ScrollArea>
       </div>
 
-      <div className="sticky bottom-0 border-t border-border/10 bg-background/80 backdrop-blur-sm w-full min-w-0 pb-safe">
+      {/* Input with shadow */}
+      <div className="sticky bottom-0 w-full min-w-0 pb-safe shadow-lg">
         <div className="px-2 md:px-4">
           <div className="relative">
             <ChatInput

@@ -36,7 +36,7 @@ const AgentAvatar = memo(({ agent }: { agent: Agent | null }) => {
       </AvatarFallback>
       {shouldShowOverlay && (
         <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-          <span className="text-xs font-bold text-white">
+          <span className="text-sm font-bold text-white">
             {agent.name.charAt(0).toUpperCase()}
           </span>
         </div>
@@ -80,7 +80,7 @@ export const MarkdownComponents: Components = {
   ),
   code: ({ children, ...props }) => (
     <code
-      className="rounded bg-zinc-700/50 px-1.5 py-0.5 text-sm font-mono"
+      className="rounded bg-zinc-700/50 px-1.5 py-0.5 text-md font-mono"
       {...props}
     >
       {children}
@@ -115,7 +115,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
         )}
       >
         {message.role === "user" ? (
-          <User className="h-3 w-3" />
+          <User className="h-5 w-5" />
         ) : (
           <AgentAvatar agent={agent} />
         )}
@@ -138,14 +138,14 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
           {message.type === "tool" && message.tool && (
             <div
               className={cn(
-                "text-xs font-medium mb-1",
+                "text-sm font-medium mb-1",
                 message.role === "user" ? "text-blue-100" : "text-indigo-400"
               )}
             >
               {message.tool}
             </div>
           )}
-          <div className="text-sm leading-relaxed break-words [&>*:last-child]:mb-0">
+          <div className="text-md leading-relaxed break-words [&>*:last-child]:mb-0">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={MarkdownComponents}
@@ -161,9 +161,9 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
               message.role === "user" ? "flex-row-reverse" : "flex-row"
             )}
           >
-            <p className="text-xs text-zinc-500">
+            {/* <p className="text-sm text-zinc-500">
               {new Date(message.created_at).toLocaleTimeString()}
-            </p>
+            </p> */}
             {message.status === "processing" && (
               <Clock className="h-3 w-3 text-zinc-400 animate-pulse" />
             )}
