@@ -134,11 +134,11 @@ export function ThreadList({
 
   return (
     <div className="flex flex-col flex-1">
-      <div className="flex-1 p-2 border-t border-zinc-800/50" id="step2">
+      <div className="flex-1 p-2" id="step2">
         <div className="px-3 py-2">
-          <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+          {/* <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
             Recent Chats
-          </h3>
+          </h3> */}
         </div>
         <ScrollArea className="h-[calc(100vh-280px)]">
           <div className="space-y-4 pr-2">

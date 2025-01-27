@@ -95,7 +95,7 @@ export default function ApplicationLayout({
   return (
     <div className="flex flex-col h-screen bg-zinc-950">
       {/* Mobile Navigation Bar */}
-      <div className="md:hidden h-14 px-2 flex items-center justify-between border-b border-zinc-800/50 bg-zinc-900">
+      <div className="md:hidden h-14 px-2 flex items-center justify-between bg-zinc-900">
         <Button
           variant="ghost"
           size="sm"
@@ -127,7 +127,7 @@ export default function ApplicationLayout({
           onMouseEnter={() => !isMobile && setIsHovered(true)}
           onMouseLeave={() => !isMobile && setIsHovered(false)}
           className={cn(
-            "border-r border-zinc-800/50 flex flex-col transition-all duration-300 ease-in-out",
+            " flex flex-col transition-all duration-300 ease-in-out",
             "fixed md:relative inset-y-0 left-0 z-20",
             isMobile
               ? "bg-zinc-900 w-[min(100vw,320px)]"
@@ -137,7 +137,7 @@ export default function ApplicationLayout({
           )}
         >
           {/* Header */}
-          <div className="h-14 px-4 flex items-center justify-between border-b border-zinc-800/50">
+          <div className="h-14 px-4 flex items-center justify-between">
             <div className="flex items-center gap-2 overflow-hidden">
               <Image
                 src="/logos/aibtcdev-avatar-1000px.png"
