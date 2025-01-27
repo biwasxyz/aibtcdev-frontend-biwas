@@ -60,7 +60,7 @@ export default function ApplicationLayout({
   const [rightPanelOpen, setRightPanelOpen] = React.useState(false);
   const [hasUser, setHasUser] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
-  const [isExpanded, setIsExpanded] = React.useState(true);
+  const [isExpanded, setIsExpanded] = React.useState<boolean | null>(null);
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -76,17 +76,15 @@ export default function ApplicationLayout({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Load isExpanded state from localStorage on mount
   React.useEffect(() => {
     const savedState = localStorage.getItem("isExpanded");
-    if (savedState !== null) {
-      setIsExpanded(savedState === "true");
-    }
+    setIsExpanded(savedState !== null ? savedState === "true" : true);
   }, []);
 
-  // Save isExpanded state to localStorage whenever it changes
   React.useEffect(() => {
-    localStorage.setItem("isExpanded", isExpanded.toString());
+    if (isExpanded !== null) {
+      localStorage.setItem("isExpanded", isExpanded.toString());
+    }
   }, [isExpanded]);
 
   React.useEffect(() => {
@@ -116,8 +114,12 @@ export default function ApplicationLayout({
   };
 
   const toggleSidebar = () => {
-    setIsExpanded(!isExpanded);
+    setIsExpanded((prev) => !prev);
   };
+
+  if (isExpanded === null) {
+    return null;
+  }
 
   const ToggleButton = () => (
     <Button
