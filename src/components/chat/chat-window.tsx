@@ -82,7 +82,7 @@ export function ChatWindow() {
   return (
     <div className="flex flex-col relative h-[94dvh] md:h-[100dvh] w-full min-w-0 max-w-full">
       {/* Header with shadow */}
-      <div className="sticky top-0 flex items-center justify-between px-2 md:px-4 h-14 min-w-0 backdrop-blur-sm w-full shadow-sm">
+      <div className="sticky top-0 flex items-center justify-between px-2 md:px-4 h-14 min-w-0 backdrop-blur-sm w-full shadow-lg">
         <div className="flex items-center gap-2 overflow-hidden min-w-0 flex-1">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div>
