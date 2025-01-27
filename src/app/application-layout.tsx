@@ -76,6 +76,19 @@ export default function ApplicationLayout({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // Load isExpanded state from localStorage on mount
+  React.useEffect(() => {
+    const savedState = localStorage.getItem("isExpanded");
+    if (savedState !== null) {
+      setIsExpanded(savedState === "true");
+    }
+  }, []);
+
+  // Save isExpanded state to localStorage whenever it changes
+  React.useEffect(() => {
+    localStorage.setItem("isExpanded", isExpanded.toString());
+  }, [isExpanded]);
+
   React.useEffect(() => {
     const checkUser = async () => {
       const {
