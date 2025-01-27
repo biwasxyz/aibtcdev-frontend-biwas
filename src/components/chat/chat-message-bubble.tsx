@@ -115,7 +115,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
         )}
       >
         {message.role === "user" ? (
-          <User className="h-3 w-3" />
+          <User className="h-5 w-5" />
         ) : (
           <AgentAvatar agent={agent} />
         )}
@@ -161,9 +161,9 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
               message.role === "user" ? "flex-row-reverse" : "flex-row"
             )}
           >
-            <p className="text-sm text-zinc-500">
+            {/* <p className="text-sm text-zinc-500">
               {new Date(message.created_at).toLocaleTimeString()}
-            </p>
+            </p> */}
             {message.status === "processing" && (
               <Clock className="h-3 w-3 text-zinc-400 animate-pulse" />
             )}
