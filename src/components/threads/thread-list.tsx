@@ -165,7 +165,7 @@ export function ThreadList({
                         variant="ghost"
                         className={`flex-1 justify-start hover:bg-zinc-800/50 hover:text-white relative ${
                           thread.id === activeThreadId
-                            ? "bg-zinc-800/50 text-white"
+                            ? "text-white"
                             : "text-zinc-400"
                         }`}
                         onClick={() => handleThreadClick(thread.id)}
@@ -178,7 +178,7 @@ export function ThreadList({
                               onChange={(e) => setEditedTitle(e.target.value)}
                               onBlur={() => handleSubmit(thread.id)}
                               onKeyDown={(e) => handleKeyDown(e, thread.id)}
-                              className="bg-zinc-900 text-white px-2 py-1 rounded w-full text-sm"
+                              className=" text-white px-2 py-1 rounded w-full text-sm"
                               autoFocus
                               onClick={(e) => e.stopPropagation()}
                             />
