@@ -7,7 +7,6 @@ import { useSessionStore } from "@/store/session";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AgentWalletSelector from "./agent-selector";
 import { CreateThreadButton } from "../threads/CreateThreadButton";
-import { getStacksAddress } from "@/lib/address";
 
 export function ChatWindow() {
   const {
@@ -20,12 +19,9 @@ export function ChatWindow() {
     connect,
     disconnect,
     activeThreadId,
-    setActiveThreadId,
-    setMessages,
   } = useChatStore();
 
   const { accessToken } = useSessionStore();
-  const userAddress = getStacksAddress();
   const threadMessages = activeThreadId ? messages[activeThreadId] || [] : [];
 
   const memoizedConnect = useCallback(
@@ -60,24 +56,6 @@ export function ChatWindow() {
       }
     };
   }, [accessToken, memoizedConnect, memoizedDisconnect]);
-
-  useEffect(() => {
-    const storedThreadId = localStorage.getItem(
-      `${userAddress}_activeThreadId`
-    );
-    if (storedThreadId) {
-      setActiveThreadId(storedThreadId);
-    }
-  }, [setActiveThreadId, userAddress]);
-
-  useEffect(() => {
-    if (activeThreadId) {
-      const storedMessages = localStorage.getItem(`messages_${activeThreadId}`);
-      if (storedMessages) {
-        setMessages(activeThreadId, JSON.parse(storedMessages));
-      }
-    }
-  }, [activeThreadId, setMessages]);
 
   if (!accessToken) {
     return (

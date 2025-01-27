@@ -3,6 +3,11 @@ import { Message } from '@/lib/chat/types';
 import { useThreadsStore } from "./threads";
 import { getStacksAddress } from "@/lib/address";
 
+
+// Local storage key for active thread
+const address = getStacksAddress()
+const ACTIVE_THREAD_KEY = `${address}_activeThreadId`;
+
 // Global WebSocket instance
 let globalWs: WebSocket | null = null;
 
@@ -24,13 +29,11 @@ interface ChatState {
   sendMessage: (threadId: string, content: string) => void;
   addMessage: (message: Message) => void;
   clearMessages: (threadId: string) => void;
-  setMessages: (threadId: string, messages: Message[]) => void;
 
   // Threads
   setActiveThread: (threadId: string) => void;
-  getThreadHistory: () => void;
-  setActiveThreadId: (threadId: string | null) => void;
   clearActiveThread: () => void;
+  getThreadHistory: () => void;
 
   // Agent
   setSelectedAgent: (agentId: string | null) => void;
@@ -41,12 +44,16 @@ interface ChatState {
   setError: (error: string | null) => void;
 }
 
-const userAddress = getStacksAddress()
+// Helper function to get stored thread ID
+const getStoredThreadId = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(ACTIVE_THREAD_KEY);
+};
 
 export const useChatStore = create<ChatState>((set, get) => ({
   messages: {},
   fetchedThreads: new Set(),
-  activeThreadId: null,
+  activeThreadId: getStoredThreadId(), // Initialize from localStorage
   selectedAgentId: null,
   isConnected: false,
   isLoading: false,
@@ -76,6 +83,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
       globalWs.onopen = () => {
         // console.log('WebSocket connected');
         set({ isConnected: true, error: null, ws: globalWs });
+
+        // Fetch thread history for stored thread if it exists
+        const storedThreadId = getStoredThreadId();
+        if (storedThreadId && !get().fetchedThreads.has(storedThreadId)) {
+          get().setActiveThread(storedThreadId);
+        }
       };
 
       globalWs.onclose = () => {
@@ -140,11 +153,37 @@ export const useChatStore = create<ChatState>((set, get) => ({
       fetchedThreads: new Set(Array.from(state.fetchedThreads).filter(id => id !== threadId))
     }));
 
-    // Remove thread from threads store and local storage
+    // Clear from localStorage
+    localStorage.removeItem(ACTIVE_THREAD_KEY);
+
+    // Remove thread from threads store
     useThreadsStore.getState().removeThread(threadId);
-    localStorage.removeItem(`messages_${threadId}`)
   },
 
+  setActiveThread: (threadId) => {
+    set({ activeThreadId: threadId });
+
+    // Store in localStorage
+    localStorage.setItem(ACTIVE_THREAD_KEY, threadId);
+
+    // Only get thread history if we haven't fetched it before
+    const state = get();
+    if (!state.fetchedThreads.has(threadId)) {
+      setTimeout(() => {
+        get().getThreadHistory();
+        set(state => ({
+          fetchedThreads: new Set(Array.from(state.fetchedThreads).concat([threadId]))
+        }));
+      }, 0);
+    }
+  },
+
+  clearActiveThread: () => {
+    set({ activeThreadId: null });
+    localStorage.removeItem(ACTIVE_THREAD_KEY);
+  },
+
+  // Rest of the store implementation remains the same
   addMessage: (message: Message) => {
     set((state) => {
       const messages = state.messages[message.thread_id] || [];
@@ -156,67 +195,50 @@ export const useChatStore = create<ChatState>((set, get) => ({
           const updatedMessages = [...messages];
           updatedMessages[updatedMessages.length - 1] = {
             ...lastMessage,
-            content: lastMessage.content + (message.content || ""),
-            status: message.status,
-          }
+            content: lastMessage.content + (message.content || ''),
+            status: message.status
+          };
           return {
             messages: {
               ...state.messages,
               [message.thread_id]: updatedMessages
-            },
-          }
+            }
+          };
         }
       }
 
-      const newMessages = {
-        ...state.messages,
-        [message.thread_id]: [...messages, message]
+      return {
+        messages: {
+          ...state.messages,
+          [message.thread_id]: [...messages, message]
+        }
       };
-      // localStorage.setItem(`messages_${message.thread_id}`, JSON.stringify(newMessages[message.thread_id]));
-      return { messages: newMessages };
-    })
-  },
-
-  setActiveThread: (threadId) => {
-    set({ activeThreadId: threadId });
-    localStorage.setItem(`${userAddress}_activeThreadId`, threadId)
-
-    const state = get();
-    if (!state.fetchedThreads.has(threadId)) {
-      setTimeout(() => {
-        get().getThreadHistory()
-        set((state) => ({
-          fetchedThreads: new Set(Array.from(state.fetchedThreads).concat([threadId])),
-        }))
-      }, 0)
-    }
+    });
   },
 
   getThreadHistory: () => {
     if (!globalWs || globalWs.readyState !== WebSocket.OPEN) {
-      set({ error: "WebSocket not connected" })
-      return
+      set({ error: "WebSocket not connected" });
+      return;
     }
     try {
-      globalWs.send(
-        JSON.stringify({
-          type: "history",
-          role: "user",
-          status: "sent",
-          thread_id: get().activeThreadId,
-          agent_id: get().selectedAgentId,
-        }),
-      )
+      globalWs.send(JSON.stringify({
+        type: "history",
+        role: "user",
+        status: "sent",
+        thread_id: get().activeThreadId,
+        agent_id: get().selectedAgentId
+      }));
     } catch (error) {
-      set({ error: "Failed to send message" })
-      console.error("Send error:", error)
+      set({ error: "Failed to send message" });
+      console.error("Send error:", error);
     }
   },
 
   sendMessage: (threadId, content) => {
     if (!globalWs || globalWs.readyState !== WebSocket.OPEN) {
-      set({ error: "WebSocket not connected" })
-      return
+      set({ error: "WebSocket not connected" });
+      return;
     }
 
     get().addMessage({
@@ -225,52 +247,25 @@ export const useChatStore = create<ChatState>((set, get) => ({
       role: "user",
       content,
       type: "message",
-      status: "sent",
-    })
+      status: "sent"
+    });
 
     try {
-      globalWs.send(
-        JSON.stringify({
-          type: "message",
-          role: "user",
-          status: "sent",
-          content,
-          thread_id: threadId,
-          agent_id: get().selectedAgentId,
-        }),
-      )
+      globalWs.send(JSON.stringify({
+        type: "message",
+        role: "user",
+        status: "sent",
+        content,
+        thread_id: threadId,
+        agent_id: get().selectedAgentId
+      }));
     } catch (error) {
-      set({ error: "Failed to send message" })
-      console.error("Send error:", error)
+      set({ error: "Failed to send message" });
+      console.error("Send error:", error);
     }
   },
 
   setConnectionStatus: (isConnected) => set({ isConnected }),
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),
-
-  setActiveThreadId: (threadId) => {
-    set({ activeThreadId: threadId })
-    if (threadId) {
-      localStorage.setItem(`${userAddress}_activeThreadId`, threadId)
-    } else {
-      localStorage.removeItem(`${userAddress}_activeThreadId`)
-    }
-  },
-
-  setMessages: (threadId, messages) => {
-    set((state) => ({
-      messages: {
-        ...state.messages,
-        [threadId]: messages,
-      },
-    }))
-    // localStorage.setItem(`messages_${threadId}`, JSON.stringify(messages))
-  },
-
-  clearActiveThread: () => {
-    set({ activeThreadId: null })
-    localStorage.removeItem(`${userAddress}_activeThreadId`)
-  },
-}))
-
+}));
