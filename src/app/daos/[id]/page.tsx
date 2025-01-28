@@ -68,9 +68,8 @@ export default function DAOPage() {
 
   const { data: treasuryTokens, isLoading: isLoadingTreasuryTokens } = useQuery(
     {
-      queryKey: ["treasuryTokens", treasuryAddress, tokenPrice?.priceUsd],
-      queryFn: () =>
-        fetchTreasuryTokens(treasuryAddress!, tokenPrice!.priceUsd),
+      queryKey: ["treasuryTokens", treasuryAddress, tokenPrice?.price],
+      queryFn: () => fetchTreasuryTokens(treasuryAddress!, tokenPrice!.price),
       enabled: !!treasuryAddress && !!tokenPrice,
     }
   );
