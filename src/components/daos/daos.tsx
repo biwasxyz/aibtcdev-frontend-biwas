@@ -10,6 +10,7 @@ import type { Token } from "@/types/supabase";
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import Link from "next/link";
+import { fetchTokenPrice } from "@/queries/daoQueries";
 
 interface DAO {
   id: string;
@@ -23,6 +24,7 @@ interface DAO {
   extensions?: Array<{
     id: string;
     type: string;
+    contract_principal?: string;
   }>;
 }
 
@@ -57,6 +59,33 @@ const fetchTokens = async (): Promise<Token[]> => {
   return tokensData || [];
 };
 
+const fetchTokenPrices = async (
+  daos: DAO[],
+  tokens: Token[]
+): Promise<
+  Record<string, { price: number; marketCap: number; holders: number }>
+> => {
+  const prices: Record<
+    string,
+    { price: number; marketCap: number; holders: number }
+  > = {};
+  for (const dao of daos) {
+    const extension = dao.extensions?.find((ext) => ext.type === "dex");
+    const token = tokens?.find((t) => t.dao_id === dao.id);
+    if (extension && token) {
+      try {
+        const priceUsd = await fetchTokenPrice(extension.contract_principal!);
+        prices[dao.id] = priceUsd;
+        console.log(priceUsd);
+      } catch (error) {
+        console.error(`Error fetching price for DAO ${dao.id}:`, error);
+        prices[dao.id] = { price: 0, marketCap: 0, holders: 0 };
+      }
+    }
+  }
+  return prices;
+};
+
 export default function DAOs() {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -72,7 +101,14 @@ export default function DAOs() {
     staleTime: 100000,
   });
 
-  const isLoading = isLoadingDAOs || isLoadingTokens;
+  const { data: tokenPrices, isLoading: isLoadingTokenPrices } = useQuery({
+    queryKey: ["tokenPrices", daos, tokens],
+    queryFn: () => fetchTokenPrices(daos || [], tokens || []),
+    enabled: !!daos && !!tokens,
+    staleTime: 60000, // 1 minute
+  });
+
+  const isLoading = isLoadingDAOs || isLoadingTokens || isLoadingTokenPrices;
 
   const filteredDAOs =
     daos?.filter(
@@ -107,6 +143,7 @@ export default function DAOs() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filteredDAOs.map((dao) => {
           const token = tokens?.find((token) => token.dao_id === dao.id);
+          const tokenPrice = tokenPrices?.[dao.id];
           const placeholderPrice = " TBD";
           return (
             <Link href={`/daos/${dao.id}`} key={dao.id}>
@@ -135,12 +172,24 @@ export default function DAOs() {
                       )}
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium">${placeholderPrice}</p>
+                      {/* <p className="text-sm font-medium">
+                        ${tokenPrice?.price.toString() || placeholderPrice}
+                      </p> */}
                     </div>
                   </div>
                   <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
                     {dao.mission}
                   </p>
+                  <div className="mt-3 text-sm">
+                    <p>Token Price: ${tokenPrice?.price.toString() || "TBD"}</p>
+                    <p>
+                      Market Cap: $
+                      {tokenPrice?.marketCap.toLocaleString() || "TBD"}
+                    </p>
+                    <p>
+                      Holders: {tokenPrice?.holders.toLocaleString() || "TBD"}
+                    </p>
+                  </div>
                 </div>
               </Card>
             </Link>
