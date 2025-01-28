@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/utils/supabase/client";
 import Image from "next/image";
 import { Loader2, Search } from "lucide-react";
 import { Heading } from "@/components/ui/heading";
-import { Token } from "@/types/supabase";
+import type { Token } from "@/types/supabase";
 import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import Link from "next/link";
 
 interface DAO {
   id: string;
@@ -24,70 +26,60 @@ interface DAO {
   }>;
 }
 
+const fetchDAOs = async (): Promise<DAO[]> => {
+  const { data: daosData, error: daosError } = await supabase
+    .from("daos")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (daosError) throw daosError;
+  if (!daosData) return [];
+
+  const { data: extensionsData, error: extensionsError } = await supabase
+    .from("extensions")
+    .select("*");
+
+  if (extensionsError) throw extensionsError;
+
+  return daosData.map((dao) => ({
+    ...dao,
+    extensions: extensionsData?.filter((cap) => cap.dao_id === dao.id) || [],
+  }));
+};
+
+const fetchTokens = async (): Promise<Token[]> => {
+  const { data: tokensData, error: tokensError } = await supabase
+    .from("tokens")
+    .select("*");
+  if (tokensError) throw tokensError;
+  return tokensData || [];
+};
+
 export default function DAOs() {
-  const [daos, setDAOs] = useState<DAO[]>([]);
-  const [tokens, setTokens] = useState<Token[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    fetchDAOs();
-    fetchTokens();
-  }, []);
+  const { data: daos, isLoading: isLoadingDAOs } = useQuery({
+    queryKey: ["daos"],
+    queryFn: fetchDAOs,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-  const fetchTokens = async () => {
-    try {
-      setLoading(true);
-      const { data: tokensData, error: tokensError } = await supabase
-        .from("tokens")
-        .select("*");
-      if (tokensError) throw tokensError;
-      setTokens(tokensData);
-    } catch (error) {
-      console.error("Error fetching tokens:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: tokens, isLoading: isLoadingTokens } = useQuery({
+    queryKey: ["tokens"],
+    queryFn: fetchTokens,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-  const fetchDAOs = async () => {
-    try {
-      setLoading(true);
-      const { data: daosData, error: daosError } = await supabase
-        .from("daos")
-        .select("*")
-        .order("created_at", { ascending: false });
+  const isLoading = isLoadingDAOs || isLoadingTokens;
 
-      if (daosError) throw daosError;
-      if (!daosData) return;
+  const filteredDAOs =
+    daos?.filter(
+      (dao) =>
+        dao.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        dao.mission.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
 
-      const { data: extensionsData, error: extensionsError } = await supabase
-        .from("extensions")
-        .select("*");
-
-      if (extensionsError) throw extensionsError;
-
-      const enrichedDAOs = daosData.map((dao) => ({
-        ...dao,
-        extensions:
-          extensionsData?.filter((cap) => cap.dao_id === dao.id) || [],
-      }));
-
-      setDAOs(enrichedDAOs);
-    } catch (error) {
-      console.error("Error fetching daos:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredDAOs = daos.filter(
-    (dao) =>
-      dao.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dao.mission.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -112,46 +104,44 @@ export default function DAOs() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filteredDAOs.map((dao) => {
-          const token = tokens.find((token) => token.dao_id === dao.id);
+          const token = tokens?.find((token) => token.dao_id === dao.id);
           const placeholderPrice = " TBD";
           return (
-            <Card
-              key={dao.id}
-              className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg"
-              onClick={() => (window.location.href = `/daos/${dao.id}`)}
-            >
-              <div className="p-4">
-                <div className="flex items-center gap-3">
-                  {token?.image_url && (
-                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
-                      <Image
-                        src={token.image_url || dao.image_url}
-                        alt={dao.name}
-                        width={48}
-                        height={48}
-                        className="object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-base font-semibold group-hover:text-primary">
-                      {dao.name}
-                    </h3>
-                    {token?.symbol && (
-                      <p className="text-sm text-muted-foreground">
-                        {token.symbol}
-                      </p>
+            <Link href={`/daos/${dao.id}`} key={dao.id}>
+              <Card className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg">
+                <div className="p-4">
+                  <div className="flex items-center gap-3">
+                    {token?.image_url && (
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
+                        <Image
+                          src={token.image_url || dao.image_url}
+                          alt={dao.name}
+                          width={48}
+                          height={48}
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
+                        />
+                      </div>
                     )}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-base font-semibold group-hover:text-primary">
+                        {dao.name}
+                      </h3>
+                      {token?.symbol && (
+                        <p className="text-sm text-muted-foreground">
+                          {token.symbol}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">${placeholderPrice}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">${placeholderPrice}</p>
-                  </div>
+                  <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
+                    {dao.mission}
+                  </p>
                 </div>
-                <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
-                  {dao.mission}
-                </p>
-              </div>
-            </Card>
+              </Card>
+            </Link>
           );
         })}
       </div>
