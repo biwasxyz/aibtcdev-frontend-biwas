@@ -1,6 +1,6 @@
 import { supabase } from "@/utils/supabase/client"
 import { sdkFaktory } from "@/lib/faktory-fun"
-import type { Extension, DAO, Holder, Token } from "@/types/supabase"
+import type { Extension, DAO, Holder, Token, Proposal } from "@/types/supabase"
 
 
 interface MarketStats {
@@ -207,4 +207,16 @@ export const fetchMarketStats = async (
     console.log('Final market stats:', stats);
 
     return stats
+}
+
+export const fetchProposals = async (daoId: string): Promise<Proposal[]> => {
+    console.log("Fetching proposals for DAO ID:", daoId)
+    const { data, error } = await supabase.from("proposals").select("*").eq("dao_id", daoId)
+
+    if (error) {
+        console.error("Error fetching proposals:", error)
+        throw error
+    }
+    console.log("Fetched proposals:", data)
+    return data
 }

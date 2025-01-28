@@ -70,6 +70,20 @@ export interface Extension {
   status: string | null;
 }
 
+export interface Proposal {
+  id: string;
+  created_at: string;
+  title: string;
+  description: string;
+  code: string | null;
+  link: string | null;
+  monetary_ask: null;
+  status: "DRAFT" | "PENDING" | "DEPLOYED" | "FAILED";
+  contract_principal: string;
+  tx_id: string;
+  dao_id: string;
+}
+
 export interface CronEntry {
   id?: string;
   profile_id?: string;
