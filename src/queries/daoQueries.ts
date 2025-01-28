@@ -94,10 +94,11 @@ export const fetchHolders = async (
     const data: HiroHolderResponse = await response.json();
     // console.log('Raw holders response:', data);
 
-    const holdersWithPercentage = data.results.map((holder: any) => ({
+    const holdersWithPercentage = data.results.map((holder: { address: string; balance: string }) => ({
         ...holder,
         percentage: (Number(holder.balance) / Number(data.total_supply)) * 100,
     }));
+
 
     // console.log(`Processed holders (${holdersWithPercentage.length} entries):`, holdersWithPercentage.slice(0, 3));
     // console.log(`Total supply: ${data.total_supply}, Holder count: ${data.total}`);
