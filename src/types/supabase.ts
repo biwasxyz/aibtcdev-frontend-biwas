@@ -29,6 +29,7 @@ export interface Token {
   symbol: string;
   decimals: number;
   image_url: string;
+  max_supply: number;
 }
 
 export interface DAO {

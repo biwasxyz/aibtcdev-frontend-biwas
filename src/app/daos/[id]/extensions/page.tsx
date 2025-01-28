@@ -5,7 +5,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import DAOExtensions from "@/components/daos/dao-extensions";
 import { useDAODetails } from "@/hooks/use-dao-details";
 
-export const runtime = 'edge';
+export const runtime = "edge";
 
 export default function ExtensionsPage() {
   const params = useParams();
