@@ -61,13 +61,13 @@ export default function DAOs() {
   const { data: daos, isLoading: isLoadingDAOs } = useQuery({
     queryKey: ["daos"],
     queryFn: fetchDAOs,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    // staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const { data: tokens, isLoading: isLoadingTokens } = useQuery({
     queryKey: ["tokens"],
     queryFn: fetchTokens,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    // staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const isLoading = isLoadingDAOs || isLoadingTokens;
