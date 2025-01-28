@@ -15,6 +15,7 @@ export default function HoldersPage() {
   const { data: token, isLoading: isLoadingToken } = useQuery({
     queryKey: ["token", id],
     queryFn: () => fetchToken(id),
+    staleTime: 1000000,
   });
 
   const { data: holdersData, isLoading: isLoadingHolders } = useQuery({

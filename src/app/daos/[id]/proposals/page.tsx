@@ -15,6 +15,7 @@ export default function ProposalsPage() {
   const { data: proposals, isLoading } = useQuery({
     queryKey: ["proposals", id],
     queryFn: () => fetchProposals(id),
+    staleTime: 1000000,
   });
 
   if (isLoading) {

@@ -27,6 +27,8 @@ interface DAO {
 }
 
 const fetchDAOs = async (): Promise<DAO[]> => {
+  // IF YOU SEE THIS ITS FETCHING FROM SUPABASE IF NOT ITS FETCHING FROM CACHE
+  console.log("Fetching DAOs from Supabase...");
   const { data: daosData, error: daosError } = await supabase
     .from("daos")
     .select("*")
@@ -59,15 +61,15 @@ export default function DAOs() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: daos, isLoading: isLoadingDAOs } = useQuery({
-    queryKey: ["daos"],
-    queryFn: fetchDAOs,
-    // staleTime: 5 * 60 * 1000, // 5 minutes
+    queryKey: ["daos"], // Unique key to identify this query
+    queryFn: fetchDAOs, // Function to fetch DAOs
+    staleTime: 1000000, // Data is considered "fresh" for 1000 second. During this time, no refetch from supabase will happen.
   });
 
   const { data: tokens, isLoading: isLoadingTokens } = useQuery({
     queryKey: ["tokens"],
     queryFn: fetchTokens,
-    // staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 100000,
   });
 
   const isLoading = isLoadingDAOs || isLoadingTokens;

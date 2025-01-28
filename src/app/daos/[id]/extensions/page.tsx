@@ -15,6 +15,7 @@ export default function ExtensionsPage() {
   const { data: daoExtensions, isLoading } = useQuery({
     queryKey: ["daoExtensions", id],
     queryFn: () => fetchDAOExtensions(id),
+    staleTime: 1000000,
   });
 
   if (isLoading) {
