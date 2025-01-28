@@ -29,8 +29,6 @@ interface DAO {
 }
 
 const fetchDAOs = async (): Promise<DAO[]> => {
-  // IF YOU SEE THIS ITS FETCHING FROM SUPABASE IF NOT ITS FETCHING FROM CACHE
-  console.log("Fetching DAOs from Supabase...");
   const { data: daosData, error: daosError } = await supabase
     .from("daos")
     .select("*")
@@ -76,7 +74,6 @@ const fetchTokenPrices = async (
       try {
         const priceUsd = await fetchTokenPrice(extension.contract_principal!);
         prices[dao.id] = priceUsd;
-        console.log(priceUsd);
       } catch (error) {
         console.error(`Error fetching price for DAO ${dao.id}:`, error);
         prices[dao.id] = { price: 0, marketCap: 0, holders: 0 };
@@ -90,25 +87,23 @@ export default function DAOs() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: daos, isLoading: isLoadingDAOs } = useQuery({
-    queryKey: ["daos"], // Unique key to identify this query
-    queryFn: fetchDAOs, // Function to fetch DAOs
-    staleTime: 1000000, // Data is considered "fresh" for 1000 second. During this time, no refetch from supabase will happen.
+    queryKey: ["daos"],
+    queryFn: fetchDAOs,
+    staleTime: 1000000,
   });
 
-  const { data: tokens, isLoading: isLoadingTokens } = useQuery({
+  const { data: tokens } = useQuery({
     queryKey: ["tokens"],
     queryFn: fetchTokens,
     staleTime: 100000,
   });
 
-  const { data: tokenPrices, isLoading: isLoadingTokenPrices } = useQuery({
+  const { data: tokenPrices, isFetching: isFetchingTokenPrices } = useQuery({
     queryKey: ["tokenPrices", daos, tokens],
     queryFn: () => fetchTokenPrices(daos || [], tokens || []),
     enabled: !!daos && !!tokens,
-    staleTime: 60000, // 1 minute
+    staleTime: 1000000,
   });
-
-  const isLoading = isLoadingDAOs || isLoadingTokens || isLoadingTokenPrices;
 
   const filteredDAOs =
     daos?.filter(
@@ -116,14 +111,6 @@ export default function DAOs() {
         dao.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         dao.mission.toLowerCase().includes(searchQuery.toLowerCase())
     ) || [];
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto space-y-6 px-4 py-6">
@@ -140,64 +127,72 @@ export default function DAOs() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filteredDAOs.map((dao) => {
-          const token = tokens?.find((token) => token.dao_id === dao.id);
-          const tokenPrice = tokenPrices?.[dao.id];
-          const placeholderPrice = " TBD";
-          return (
-            <Link href={`/daos/${dao.id}`} key={dao.id}>
-              <Card className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg">
-                <div className="p-4">
-                  <div className="flex items-center gap-3">
-                    {token?.image_url && (
-                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
-                        <Image
-                          src={token.image_url || dao.image_url}
-                          alt={dao.name}
-                          width={48}
-                          height={48}
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                        />
+      {isLoadingDAOs ? (
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredDAOs.map((dao) => {
+            const token = tokens?.find((token) => token.dao_id === dao.id);
+            const tokenPrice = tokenPrices?.[dao.id];
+
+            return (
+              <Link href={`/daos/${dao.id}`} key={dao.id}>
+                <Card className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg">
+                  <div className="p-4">
+                    <div className="flex items-center gap-3">
+                      {token?.image_url && (
+                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
+                          <Image
+                            src={token.image_url || dao.image_url}
+                            alt={dao.name}
+                            width={48}
+                            height={48}
+                            className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-base font-semibold group-hover:text-primary">
+                          {dao.name}
+                        </h3>
+                        {token?.symbol && (
+                          <p className="text-sm text-muted-foreground">
+                            {token.symbol}
+                          </p>
+                        )}
                       </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-base font-semibold group-hover:text-primary">
-                        {dao.name}
-                      </h3>
-                      {token?.symbol && (
-                        <p className="text-sm text-muted-foreground">
-                          {token.symbol}
-                        </p>
+                    </div>
+                    <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
+                      {dao.mission}
+                    </p>
+                    <div className="mt-3 text-sm">
+                      {isFetchingTokenPrices ? (
+                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                      ) : (
+                        <>
+                          <p>Token Price: ${tokenPrice?.price || "TBD"}</p>
+                          <p>
+                            Market Cap: $
+                            {tokenPrice?.marketCap?.toLocaleString() || "TBD"}
+                          </p>
+                          <p>
+                            Holders:{" "}
+                            {tokenPrice?.holders?.toLocaleString() || "TBD"}
+                          </p>
+                        </>
                       )}
                     </div>
-                    <div className="text-right">
-                      {/* <p className="text-sm font-medium">
-                        ${tokenPrice?.price.toString() || placeholderPrice}
-                      </p> */}
-                    </div>
                   </div>
-                  <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
-                    {dao.mission}
-                  </p>
-                  <div className="mt-3 text-sm">
-                    <p>Token Price: ${tokenPrice?.price.toString() || "TBD"}</p>
-                    <p>
-                      Market Cap: $
-                      {tokenPrice?.marketCap.toLocaleString() || "TBD"}
-                    </p>
-                    <p>
-                      Holders: {tokenPrice?.holders.toLocaleString() || "TBD"}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          );
-        })}
-      </div>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+      )}
 
-      {filteredDAOs.length === 0 && (
+      {filteredDAOs.length === 0 && !isLoadingDAOs && (
         <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed">
           <p className="text-center text-muted-foreground">
             No DAOs found matching your search.
