@@ -112,19 +112,14 @@ export const fetchHolders = async (
 
 export const fetchTokenPrice = async (
     dex: string,
-): Promise<{ price: number; marketCap: number; holders: number }> => {
-    // console.log('Fetching token price for DEX:', dex);
+): Promise<{ price: number; marketCap: number; holders: number; price24hChanges: number | null }> => {
     const { data } = await sdkFaktory.getToken(dex);
-    // console.log('Raw token price response:', data);
-
-    const result = {
+    return {
         price: data.priceUsd ? Number(data.priceUsd) : 0,
         marketCap: data.marketCap ? Number(data.marketCap) : 0,
         holders: data.holders ? Number(data.holders) : 0,
+        price24hChanges: data.price24hChanges ? Number(data.price24hChanges) : null,
     };
-    // console.log('Processed token metrics:', result);
-
-    return result;
 };
 
 export const fetchTreasuryTokens = async (treasuryAddress: string, tokenPrice: number): Promise<TreasuryToken[]> => {
