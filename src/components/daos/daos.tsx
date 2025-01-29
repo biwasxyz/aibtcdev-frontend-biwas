@@ -200,7 +200,7 @@ const DAOCard = ({ dao, token, tokenPrice, isFetchingPrice }: DAOCardProps) => {
                 <Skeleton className="h-5 w-20" />
               ) : (
                 <p className="font-medium">
-                  ${tokenPrice?.price?.toFixed(2) || "0.00"}
+                  ${tokenPrice?.price?.toFixed(8) || "0.00"}
                 </p>
               )}
             </div>
