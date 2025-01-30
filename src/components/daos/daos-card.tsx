@@ -5,13 +5,17 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2 } from "lucide-react";
 import { BsTwitterX } from "react-icons/bs";
-import { DAO, Token } from "@/types/supabase";
+import type { DAO, Token } from "@/types/supabase";
+import { getBuyParams } from "@/queries/daoQueries";
+// import { BuyDialog } from "./buy-dialog";
 
 interface DAOCardProps {
   dao: DAO;
@@ -38,6 +42,45 @@ export const DAOCard = ({
   tokenPrice,
   isFetchingPrice,
 }: DAOCardProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  //   const [isBuyDialogOpen, setIsBuyDialogOpen] = useState(false);
+
+  //   const handleBuy = async (stxAmount: number, tx: any) => {
+  //     setIsLoading(true);
+  //     try {
+  //       console.log(`Token purchase initiated for ${dao.name}!`, tx);
+  //       // Here you can add any additional logic to handle the transaction
+  //       alert(`Token purchase initiated for ${dao.name}!`);
+  //     } catch (error) {
+  //       console.error(`Error buying token for ${dao.name}:`, error);
+  //       alert(`Failed to buy token for ${dao.name}`);
+  //     } finally {
+  //       setIsLoading(false);
+  //       setIsBuyDialogOpen(false);
+  //     }
+  //   };
+
+  //   const getDaoBuyParams = async (stxAmount: number) => {
+  //     const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
+
+  //     if (!dexExtension?.contract_principal) {
+  //       throw new Error(`No DEX found for ${dao.name}`);
+  //     }
+
+  //     const stx = stxAmount * 1e6; // Convert STX to microSTX
+  //     const senderAddress = "SP2FW2AQXTBKYY8DXP18PCXZGWQT4S2RH7HC6WA4H";
+
+  //     return await getBuyParams(
+  //       stx,
+  //       dexExtension.contract_principal,
+  //       senderAddress
+  //     );
+  //   };
+
+  const hasDex = dao.extensions?.some(
+    (ext) => ext.type === "dex" && ext.contract_principal
+  );
+
   return (
     <div className="group h-full">
       <Card className="transition-all duration-200 hover:shadow-lg">
@@ -48,7 +91,9 @@ export const DAOCard = ({
                 src={
                   token?.image_url ||
                   dao.image_url ||
-                  "/placeholder.svg?height=64&width=64"
+                  "/placeholder.svg?height=64&width=64" ||
+                  "/placeholder.svg" ||
+                  "/placeholder.svg"
                 }
                 alt={dao.name}
                 width={64}
@@ -136,31 +181,56 @@ export const DAOCard = ({
               </div>
             </div>
           </CardContent>
-
-          <CardFooter className="grid grid-cols-2 gap-4 text-sm">
-            <div className="space-y-2">
-              <p className="text-muted-foreground">Market Cap</p>
-              {isFetchingPrice ? (
-                <Skeleton className="h-5 w-24" />
-              ) : (
-                <p className="font-medium">
-                  ${formatNumber(tokenPrice?.marketCap || 0)}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-muted-foreground">Holders</p>
-              {isFetchingPrice ? (
-                <Skeleton className="h-5 w-20" />
-              ) : (
-                <p className="font-medium">{tokenPrice?.holders || 0}</p>
-              )}
-            </div>
-          </CardFooter>
         </Link>
 
-        {dao.user_id && (
+        <CardFooter className="grid grid-cols-2 gap-4 text-sm">
+          <div className="space-y-2">
+            <p className="text-muted-foreground">Market Cap</p>
+            {isFetchingPrice ? (
+              <Skeleton className="h-5 w-24" />
+            ) : (
+              <p className="font-medium">
+                ${formatNumber(tokenPrice?.marketCap || 0)}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-muted-foreground">Holders</p>
+            {isFetchingPrice ? (
+              <Skeleton className="h-5 w-20" />
+            ) : (
+              <p className="font-medium">{tokenPrice?.holders || 0}</p>
+            )}
+          </div>
+        </CardFooter>
+
+        {/* {hasDex ? (
+          <CardFooter className="mt-2 pt-2">
+            <Button
+              onClick={() => setIsBuyDialogOpen(true)}
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Buying {token?.symbol || "token"}...
+                </>
+              ) : (
+                `Buy ${token?.symbol || "token"}`
+              )}
+            </Button>
+          </CardFooter>
+        ) : (
+          <CardFooter className="mt-2 pt-2">
+            <Button className="w-full" disabled>
+              Can&apos;t buy yet
+            </Button>
+          </CardFooter>
+        )} */}
+
+        {dao.user_id ? (
           <CardFooter className="mt-2 flex items-center gap-2 border-t pt-3 text-sm text-muted-foreground">
             <span>Prompted by:</span>
             <Link
@@ -175,8 +245,20 @@ export const DAOCard = ({
               </span>
             </Link>
           </CardFooter>
+        ) : (
+          <CardFooter className="mt-2 flex items-center gap-2 border-t pt-3 text-sm text-muted-foreground">
+            <span>Prompted by: none</span>
+          </CardFooter>
         )}
       </Card>
+
+      {/* <BuyDialog
+        isOpen={isBuyDialogOpen}
+        onClose={() => setIsBuyDialogOpen(false)}
+        onConfirm={handleBuy}
+        tokenSymbol={token?.symbol || "token"}
+        getBuyParams={getDaoBuyParams}
+      /> */}
     </div>
   );
 };
