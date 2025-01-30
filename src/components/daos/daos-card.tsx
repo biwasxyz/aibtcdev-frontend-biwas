@@ -42,7 +42,7 @@ export const DAOCard = ({
   tokenPrice,
   isFetchingPrice,
 }: DAOCardProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  //   const [isLoading, setIsLoading] = useState(false);
   //   const [isBuyDialogOpen, setIsBuyDialogOpen] = useState(false);
 
   //   const handleBuy = async (stxAmount: number, tx: any) => {
@@ -68,6 +68,8 @@ export const DAOCard = ({
   //     }
 
   //     const stx = stxAmount * 1e6; // Convert STX to microSTX
+
+  //     SET IT LATER USING AGENT SELECTOR FOR DAO
   //     const senderAddress = "SP2FW2AQXTBKYY8DXP18PCXZGWQT4S2RH7HC6WA4H";
 
   //     return await getBuyParams(
@@ -77,9 +79,9 @@ export const DAOCard = ({
   //     );
   //   };
 
-  const hasDex = dao.extensions?.some(
-    (ext) => ext.type === "dex" && ext.contract_principal
-  );
+  //   const hasDex = dao.extensions?.some(
+  //     (ext) => ext.type === "dex" && ext.contract_principal
+  //   );
 
   return (
     <div className="group h-full">

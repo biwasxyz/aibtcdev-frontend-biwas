@@ -36,6 +36,9 @@ export const BuyDialog = ({
       try {
         const buyParams = await getBuyParams(amount);
         const tx = await makeContractCall(buyParams);
+        // WHERE DOES THE wallet and broadcastTransaction come from I do not see any import in sdk or stacks.js?
+        // const signedTx = await wallet.signTransaction(tx);
+        // const broadcastedTx = await broadcastTransaction(signedTx, network);
         onConfirm(amount, tx);
       } catch (error) {
         console.error("Error making contract call:", error);
