@@ -8,13 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowUp, Loader2 } from "lucide-react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { BsTwitterX } from "react-icons/bs";
 import type { DAO, Token } from "@/types/supabase";
-import { getBuyParams } from "@/queries/daoQueries";
+// import { getBuyParams } from "@/queries/daoQueries";
+// import { useState } from "react";
+// import { broadcastTransaction, makeContractCall } from "@stacks/transactions";
+// import { STACKS_MAINNET, STACKS_TESTNET } from "@stacks/network";
 // import { BuyDialog } from "./buy-dialog";
 
 interface DAOCardProps {
@@ -45,15 +47,42 @@ export const DAOCard = ({
   //   const [isLoading, setIsLoading] = useState(false);
   //   const [isBuyDialogOpen, setIsBuyDialogOpen] = useState(false);
 
-  //   const handleBuy = async (stxAmount: number, tx: any) => {
+  //   const handleBuy = async (stxAmount: number) => {
   //     setIsLoading(true);
   //     try {
-  //       console.log(`Token purchase initiated for ${dao.name}!`, tx);
-  //       // Here you can add any additional logic to handle the transaction
-  //       alert(`Token purchase initiated for ${dao.name}!`);
+  //       const buyParams = await getDaoBuyParams(stxAmount);
+  //       console.log(`Buy params for ${dao.name}:`, buyParams);
+
+  //       // Create a new StacksMainnet instance
+  //       const network =
+  //         process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
+  //           ? STACKS_MAINNET
+  //           : STACKS_TESTNET;
+
+  //       // Prepare the contract call options
+  //       const contractCallOptions = {
+  //         ...buyParams,
+  //         network,
+  //       };
+
+  //       // Make the contract call
+  //       const transaction = await makeContractCall(contractCallOptions);
+
+  //       // Broadcast the transaction
+  //       const broadcastResponse = await broadcastTransaction({
+  //         transaction,
+  //         network,
+  //       });
+  //       const txId = broadcastResponse.txid;
+
+  //       console.log(
+  //         `Transaction broadcasted for ${dao.name}. Transaction ID:`,
+  //         txId
+  //       );
+  //       alert(`Purchase initiated for ${dao.name}. Transaction ID: ${txId}`);
   //     } catch (error) {
-  //       console.error(`Error buying token for ${dao.name}:`, error);
-  //       alert(`Failed to buy token for ${dao.name}`);
+  //       console.error(`Error during purchase for ${dao.name}:`, error);
+  //       alert(`Failed to complete purchase for ${dao.name}. Please try again.`);
   //     } finally {
   //       setIsLoading(false);
   //       setIsBuyDialogOpen(false);
@@ -62,14 +91,13 @@ export const DAOCard = ({
 
   //   const getDaoBuyParams = async (stxAmount: number) => {
   //     const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
-
   //     if (!dexExtension?.contract_principal) {
   //       throw new Error(`No DEX found for ${dao.name}`);
   //     }
 
   //     const stx = stxAmount * 1e6; // Convert STX to microSTX
 
-  //     SET IT LATER USING AGENT SELECTOR FOR DAO
+  //     // TODO: Replace this with the actual sender address i.e. agent address
   //     const senderAddress = "SP2FW2AQXTBKYY8DXP18PCXZGWQT4S2RH7HC6WA4H";
 
   //     return await getBuyParams(
@@ -207,6 +235,9 @@ export const DAOCard = ({
           </div>
         </CardFooter>
 
+        <CardFooter className="mt-2 pt-2">
+          <Button disabled>Buy (coming soon)</Button>
+        </CardFooter>
         {/* {hasDex ? (
           <CardFooter className="mt-2 pt-2">
             <Button
@@ -217,7 +248,7 @@ export const DAOCard = ({
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Buying {token?.symbol || "token"}...
+                  Processing...
                 </>
               ) : (
                 `Buy ${token?.symbol || "token"}`
@@ -259,7 +290,6 @@ export const DAOCard = ({
         onClose={() => setIsBuyDialogOpen(false)}
         onConfirm={handleBuy}
         tokenSymbol={token?.symbol || "token"}
-        getBuyParams={getDaoBuyParams}
       /> */}
     </div>
   );

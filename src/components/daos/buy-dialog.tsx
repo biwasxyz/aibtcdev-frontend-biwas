@@ -9,14 +9,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { makeContractCall } from "@stacks/transactions";
 
 interface BuyDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (stxAmount: number, buyParams: any) => void;
+  onConfirm: (stxAmount: number) => Promise<void>;
   tokenSymbol: string;
-  getBuyParams: (stxAmount: number) => Promise<any>;
 }
 
 export const BuyDialog = ({
@@ -24,30 +22,19 @@ export const BuyDialog = ({
   onClose,
   onConfirm,
   tokenSymbol,
-  getBuyParams,
 }: BuyDialogProps) => {
   const [stxAmount, setStxAmount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirm = async () => {
-    const amount = Number.parseFloat(stxAmount);
-    if (!isNaN(amount) && amount > 0) {
-      setIsLoading(true);
-      try {
-        const buyParams = await getBuyParams(amount);
-        const tx = await makeContractCall(buyParams);
-        // WHERE DOES THE wallet and broadcastTransaction come from I do not see any import in sdk or stacks.js?
-        // const signedTx = await wallet.signTransaction(tx);
-        // const broadcastedTx = await broadcastTransaction(signedTx, network);
-        onConfirm(amount, tx);
-      } catch (error) {
-        console.error("Error making contract call:", error);
-        alert("Failed to make contract call. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      alert("Please enter a valid STX amount");
+    setIsLoading(true);
+    try {
+      await onConfirm(Number.parseFloat(stxAmount));
+      onClose();
+    } catch (error) {
+      console.error("Error during purchase:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -73,11 +60,11 @@ export const BuyDialog = ({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button onClick={onClose} variant="outline">
             Cancel
           </Button>
-          <Button onClick={handleConfirm} disabled={isLoading}>
-            {isLoading ? "Processing..." : "Confirm"}
+          <Button onClick={handleConfirm} disabled={!stxAmount || isLoading}>
+            {isLoading ? "Processing..." : "Confirm Purchase"}
           </Button>
         </DialogFooter>
       </DialogContent>

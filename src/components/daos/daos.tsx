@@ -152,7 +152,7 @@ export default function DAOs() {
         <div className="space-y-2">
           <Heading className="text-3xl font-bold sm:text-4xl">DAOs</Heading>
           <p className="text-lg text-muted-foreground">
-            Explore and discover decentralized autonomous organizations
+            Explore and discover AI DAOs
           </p>
         </div>
         <div className="relative w-full sm:max-w-xs">
