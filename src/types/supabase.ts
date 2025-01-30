@@ -41,6 +41,9 @@ export type SortField =
 export interface DAO {
   id: string;
   name: string;
+  website_url: string;
+  x_url: string;
+  telegram_url: string;
   mission: string;
   description: string;
   image_url: string;

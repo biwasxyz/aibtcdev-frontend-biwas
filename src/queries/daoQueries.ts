@@ -122,6 +122,16 @@ export const fetchTokenPrice = async (
     };
 };
 
+export const getBuyParams = async (stx: number, dex: string, senderAddress: string) => {
+    const buyParams = await sdkFaktory.getBuyParams({
+        dexContract: dex, // Replace with the actual dex contract
+        stx: stx, // amount in microSTX
+        //   slippage, // optional, default 15%
+        senderAddress
+    })
+    return buyParams
+}
+
 export const fetchTreasuryTokens = async (treasuryAddress: string, tokenPrice: number): Promise<TreasuryToken[]> => {
     // console.log(`Fetching treasury tokens for address: ${treasuryAddress}`);
     const response = await fetch(`https://api.${STACKS_NETWORK}.hiro.so/extended/v1/address/${treasuryAddress}/balances`);
@@ -215,3 +225,4 @@ export const fetchProposals = async (daoId: string): Promise<Proposal[]> => {
     // console.log("Fetched proposals:", data);
     return data;
 };
+
