@@ -5,7 +5,6 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
@@ -162,10 +161,6 @@ export const DAOCard = ({
             )}
           </div>
         </CardFooter>
-
-        <CardFooter className="mt-2 pt-2">
-          <Button disabled>Buy (coming soon)</Button>
-        </CardFooter>
         {dao.user_id ? (
           <CardFooter className="mt-2 flex items-center gap-2 border-t pt-3 text-sm text-muted-foreground">
             <span>Prompted by:</span>
@@ -183,7 +178,7 @@ export const DAOCard = ({
           </CardFooter>
         ) : (
           <CardFooter className="mt-2 flex items-center gap-2 border-t pt-3 text-sm text-muted-foreground">
-            <span>Prompted by: none</span>
+            <span>Prompted by: X user</span>
           </CardFooter>
         )}
       </Card>

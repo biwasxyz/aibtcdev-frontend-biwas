@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/utils/supabase/client";
@@ -15,7 +15,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DAOCard } from "./daos-card";
-import { DAO, Token, SortField } from "@/types/supabase";
+import type { DAO, Token, SortField } from "@/types/supabase";
+import { createDaoAgent } from "../agents/dao-agent";
+import { useToast } from "@/hooks/use-toast";
 
 const fetchDAOs = async (): Promise<DAO[]> => {
   const { data: daosData, error: daosError } = await supabase
@@ -105,6 +107,30 @@ const fetchTokenPrices = async (
 export default function DAOs() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<SortField>("created_at");
+  const { toast } = useToast();
+  const agentInitialized = useRef(false);
+
+  const initializeAgent = useCallback(async () => {
+    if (agentInitialized.current) return;
+
+    try {
+      const agent = await createDaoAgent();
+      if (agent) {
+        toast({
+          title: "DAO Agent Initialized",
+          description: "Your DAO agent has been set up successfully.",
+          variant: "default",
+        });
+        agentInitialized.current = true;
+      }
+    } catch (error) {
+      console.error("Error initializing DAO agent:", error);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    initializeAgent();
+  }, [initializeAgent]);
 
   const { data: daos, isLoading: isLoadingDAOs } = useQuery({
     queryKey: ["daos"],
