@@ -13,11 +13,6 @@ import Link from "next/link";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { BsTwitterX } from "react-icons/bs";
 import type { DAO, Token } from "@/types/supabase";
-// import { getBuyParams } from "@/queries/daoQueries";
-// import { useState } from "react";
-// import { broadcastTransaction, makeContractCall } from "@stacks/transactions";
-// import { STACKS_MAINNET, STACKS_TESTNET } from "@stacks/network";
-// import { BuyDialog } from "./buy-dialog";
 
 interface DAOCardProps {
   dao: DAO;
@@ -44,73 +39,6 @@ export const DAOCard = ({
   tokenPrice,
   isFetchingPrice,
 }: DAOCardProps) => {
-  //   const [isLoading, setIsLoading] = useState(false);
-  //   const [isBuyDialogOpen, setIsBuyDialogOpen] = useState(false);
-
-  //   const handleBuy = async (stxAmount: number) => {
-  //     setIsLoading(true);
-  //     try {
-  //       const buyParams = await getDaoBuyParams(stxAmount);
-  //       console.log(`Buy params for ${dao.name}:`, buyParams);
-
-  //       // Create a new StacksMainnet instance
-  //       const network =
-  //         process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
-  //           ? STACKS_MAINNET
-  //           : STACKS_TESTNET;
-
-  //       // Prepare the contract call options
-  //       const contractCallOptions = {
-  //         ...buyParams,
-  //         network,
-  //       };
-
-  //       // Make the contract call
-  //       const transaction = await makeContractCall(contractCallOptions);
-
-  //       // Broadcast the transaction
-  //       const broadcastResponse = await broadcastTransaction({
-  //         transaction,
-  //         network,
-  //       });
-  //       const txId = broadcastResponse.txid;
-
-  //       console.log(
-  //         `Transaction broadcasted for ${dao.name}. Transaction ID:`,
-  //         txId
-  //       );
-  //       alert(`Purchase initiated for ${dao.name}. Transaction ID: ${txId}`);
-  //     } catch (error) {
-  //       console.error(`Error during purchase for ${dao.name}:`, error);
-  //       alert(`Failed to complete purchase for ${dao.name}. Please try again.`);
-  //     } finally {
-  //       setIsLoading(false);
-  //       setIsBuyDialogOpen(false);
-  //     }
-  //   };
-
-  //   const getDaoBuyParams = async (stxAmount: number) => {
-  //     const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
-  //     if (!dexExtension?.contract_principal) {
-  //       throw new Error(`No DEX found for ${dao.name}`);
-  //     }
-
-  //     const stx = stxAmount * 1e6; // Convert STX to microSTX
-
-  //     // TODO: Replace this with the actual sender address i.e. agent address
-  //     const senderAddress = "SP2FW2AQXTBKYY8DXP18PCXZGWQT4S2RH7HC6WA4H";
-
-  //     return await getBuyParams(
-  //       stx,
-  //       dexExtension.contract_principal,
-  //       senderAddress
-  //     );
-  //   };
-
-  //   const hasDex = dao.extensions?.some(
-  //     (ext) => ext.type === "dex" && ext.contract_principal
-  //   );
-
   return (
     <div className="group h-full">
       <Card className="transition-all duration-200 hover:shadow-lg">
@@ -238,31 +166,6 @@ export const DAOCard = ({
         <CardFooter className="mt-2 pt-2">
           <Button disabled>Buy (coming soon)</Button>
         </CardFooter>
-        {/* {hasDex ? (
-          <CardFooter className="mt-2 pt-2">
-            <Button
-              onClick={() => setIsBuyDialogOpen(true)}
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                `Buy ${token?.symbol || "token"}`
-              )}
-            </Button>
-          </CardFooter>
-        ) : (
-          <CardFooter className="mt-2 pt-2">
-            <Button className="w-full" disabled>
-              Can&apos;t buy yet
-            </Button>
-          </CardFooter>
-        )} */}
-
         {dao.user_id ? (
           <CardFooter className="mt-2 flex items-center gap-2 border-t pt-3 text-sm text-muted-foreground">
             <span>Prompted by:</span>
@@ -284,13 +187,6 @@ export const DAOCard = ({
           </CardFooter>
         )}
       </Card>
-
-      {/* <BuyDialog
-        isOpen={isBuyDialogOpen}
-        onClose={() => setIsBuyDialogOpen(false)}
-        onConfirm={handleBuy}
-        tokenSymbol={token?.symbol || "token"}
-      /> */}
     </div>
   );
 };
