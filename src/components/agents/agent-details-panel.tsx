@@ -1,11 +1,14 @@
-import { Settings } from "lucide-react";
+"use client";
+import { useEffect } from "react";
+import { Settings, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Agent } from "@/types/supabase";
+import type { Agent } from "@/types/supabase";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useWalletStore } from "@/store/wallet";
-import { Copy, Check } from "lucide-react";
+import { useSessionStore } from "@/store/session";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface AgentDetailsPanelProps {
   agent: Agent;
@@ -13,8 +16,23 @@ interface AgentDetailsPanelProps {
 
 export function AgentDetailsPanel({ agent }: AgentDetailsPanelProps) {
   const router = useRouter();
-  const { agentWallets, balances } = useWalletStore();
+  const { agentWallets, balances, fetchWallets } = useWalletStore();
+  const { userId } = useSessionStore();
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (userId) {
+      fetchWallets(userId).catch((err) => {
+        console.error("Failed to fetch wallets:", err);
+        toast({
+          title: "Error",
+          description: "Failed to fetch wallet information",
+          variant: "destructive",
+        });
+      });
+    }
+  }, [userId, fetchWallets, toast]);
 
   // Find the wallet for this agent
   const agentWallet = agentWallets.find(
@@ -40,6 +58,11 @@ export function AgentDetailsPanel({ agent }: AgentDetailsPanelProps) {
       setTimeout(() => setCopiedAddress(null), 2000);
     } catch (err) {
       console.error("Failed to copy address:", err);
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy address to clipboard",
+        variant: "destructive",
+      });
     }
   };
 
