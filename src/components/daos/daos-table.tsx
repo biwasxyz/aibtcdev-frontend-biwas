@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { BsTwitterX } from "react-icons/bs";
 import Link from "next/link";
@@ -7,6 +7,31 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { DAO, Token } from "@/types/supabase";
 import { Loader } from "../reusables/loader";
+import { AgentSelectorSheet } from "./dao-agent-selector";
+import { useWalletStore } from "@/store/wallet";
+import { useToast } from "@/hooks/use-toast";
+
+interface TokenBalance {
+  balance: string;
+  total_sent: string;
+  total_received: string;
+}
+
+interface NFTBalance {
+  count: number;
+  total_sent: number;
+  total_received: number;
+}
+
+interface WalletBalance {
+  stx: TokenBalance;
+  fungible_tokens: {
+    [key: string]: TokenBalance;
+  };
+  non_fungible_tokens: {
+    [key: string]: NFTBalance;
+  };
+}
 
 interface DAOTableProps {
   daos: DAO[];
@@ -36,10 +61,60 @@ export const DAOTable = ({
   tokenPrices,
   isFetchingPrice,
 }: DAOTableProps) => {
+  console.log("Fetched DAOs:", daos);
+  console.log("Fetched Tokens:", tokens);
+  console.log("Fetched Token Prices:", tokenPrices);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [participatingDaoId, setParticipatingDaoId] = useState<string | null>(
+    null
+  );
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const { toast } = useToast();
+
   const getDexPrincipal = useCallback((dao: DAO) => {
     const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
     return dexExtension?.contract_principal || "";
   }, []);
+
+  const handleParticipate = (daoId: string) => {
+    console.log("Participating in DAO:", daoId);
+    const token = tokens?.find((t) => t.dao_id === daoId);
+    setParticipatingDaoId(daoId);
+  };
+
+  const handleAgentSelect = (agentId: string | null) => {
+    console.log("Selected agent:", agentId);
+    const token = tokens?.find((t) => t.dao_id === participatingDaoId);
+    const tokenSymbol = token?.symbol;
+
+    setSelectedAgentId(agentId);
+    if (agentId && participatingDaoId) {
+      const dao = daos.find((d) => d.id === participatingDaoId);
+      const dexPrincipal = getDexPrincipal(dao!);
+
+      console.log("Participation details:", {
+        agentId,
+        daoId: participatingDaoId,
+        dexPrincipal,
+        tokenSymbol,
+      });
+
+      alert(
+        `Participating with Agent ID: ${agentId}\nDAO ID: ${participatingDaoId}\nContract Principal: ${dexPrincipal}\nToken Symbol: ${tokenSymbol}`
+      );
+    }
+    setParticipatingDaoId(null);
+  };
+
+  const handleTransfer = (agentId: string, tokenSymbol: string) => {
+    console.log("Initiating transfer:", { agentId, tokenSymbol });
+    // Implement the transfer logic here
+    setIsTransferModalOpen(false);
+    toast({
+      title: "Transfer Initiated",
+      description: `Transfer of ${tokenSymbol} to your agent has been initiated.`,
+    });
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -164,12 +239,7 @@ export const DAOTable = ({
                 </td>
                 <td className="p-3">
                   {dexPrincipal ? (
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        alert(`Contract Principal: ${dexPrincipal}`);
-                      }}
-                    >
+                    <Button size="sm" onClick={() => handleParticipate(dao.id)}>
                       Participate
                     </Button>
                   ) : (
@@ -183,6 +253,61 @@ export const DAOTable = ({
           })}
         </tbody>
       </table>
+      <AgentSelectorSheet
+        selectedAgentId={selectedAgentId}
+        onSelect={handleAgentSelect}
+        open={!!participatingDaoId}
+        requiredTokenSymbol={
+          tokens?.find((t) => t.dao_id === participatingDaoId)?.symbol
+        }
+        onOpenChange={(open) => {
+          if (!open) setParticipatingDaoId(null);
+        }}
+      />
+      {isTransferModalOpen && selectedAgentId && participatingDaoId && (
+        <TransferModal
+          agentId={selectedAgentId}
+          tokenSymbol={
+            tokens?.find((t) => t.dao_id === participatingDaoId)?.symbol || ""
+          }
+          onTransfer={handleTransfer}
+          onClose={() => setIsTransferModalOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+interface TransferModalProps {
+  agentId: string;
+  tokenSymbol: string;
+  onTransfer: (agentId: string, tokenSymbol: string) => void;
+  onClose: () => void;
+}
+
+const TransferModal: React.FC<TransferModalProps> = ({
+  agentId,
+  tokenSymbol,
+  onTransfer,
+  onClose,
+}) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg">
+        <h2 className="text-xl font-bold mb-4">Transfer Tokens</h2>
+        <p className="mb-4">
+          Your agent doesn't have enough {tokenSymbol} tokens. Would you like to
+          transfer some?
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={() => onTransfer(agentId, tokenSymbol)}>
+            Transfer
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
