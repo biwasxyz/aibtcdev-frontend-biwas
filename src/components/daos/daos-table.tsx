@@ -45,7 +45,6 @@ export const DAOTable = ({
   const [participatingDaoId, setParticipatingDaoId] = useState<string | null>(
     null
   );
-  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const { toast } = useToast();
 
   const getDexPrincipal = useCallback((dao: DAO) => {
@@ -80,16 +79,6 @@ export const DAOTable = ({
       );
     }
     setParticipatingDaoId(null);
-  };
-
-  const handleTransfer = (agentId: string, tokenSymbol: string) => {
-    console.log("Initiating transfer:", { agentId, tokenSymbol });
-    // Implement the transfer logic here
-    setIsTransferModalOpen(false);
-    toast({
-      title: "Transfer Initiated",
-      description: `Transfer of ${tokenSymbol} to your agent has been initiated.`,
-    });
   };
 
   return (
