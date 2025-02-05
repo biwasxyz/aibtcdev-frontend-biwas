@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import type { DAO, Token } from "@/types/supabase";
 import { Loader } from "../reusables/loader";
 import { AgentSelectorSheet } from "./dao-agent-selector";
-import { useToast } from "@/hooks/use-toast";
 
 interface DAOTableProps {
   daos: DAO[];
@@ -45,7 +44,6 @@ export const DAOTable = ({
   const [participatingDaoId, setParticipatingDaoId] = useState<string | null>(
     null
   );
-  const { toast } = useToast();
 
   const getDexPrincipal = useCallback((dao: DAO) => {
     const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
