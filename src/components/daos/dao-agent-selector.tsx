@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bot, Copy, Check, Lock, Send } from "lucide-react";
+import { Bot, Copy, Check, Send } from "lucide-react";
 import { useAgents } from "@/hooks/use-agents";
 import { useWalletStore, WalletBalance } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -14,8 +15,15 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import Image from "next/image";
-import type { Agent, Wallet } from "@/types/supabase";
+import type { Agent, Wallet, DAO, Token } from "@/types/supabase";
 
 interface AgentSelectorSheetProps {
   selectedAgentId: string | null;
@@ -23,7 +31,8 @@ interface AgentSelectorSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   requiredTokenSymbol?: string;
-  onTransferRequest?: (agentId: string, tokenSymbol: string) => void;
+  daos: DAO[];
+  tokens?: Token[];
 }
 
 export function AgentSelectorSheet({
@@ -32,7 +41,8 @@ export function AgentSelectorSheet({
   open,
   onOpenChange,
   requiredTokenSymbol,
-  onTransferRequest,
+  daos,
+  tokens,
 }: AgentSelectorSheetProps) {
   const { agents, loading: agentsLoading } = useAgents();
   const {
@@ -45,6 +55,14 @@ export function AgentSelectorSheet({
   const { toast } = useToast();
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [selectedTransferAgent, setSelectedTransferAgent] = useState<{
+    id: string;
+    name: string;
+    tokenSymbol: string;
+    dexPrincipal: string;
+    contractPrincipal: string;
+  } | null>(null);
 
   // Filter out archived agents
   const activeAgents = agents.filter((agent) => !agent.is_archived);
@@ -61,6 +79,11 @@ export function AgentSelectorSheet({
   const truncateAddress = (address: string) => {
     if (!address) return "";
     return `${address.slice(0, 5)}...${address.slice(-5)}`;
+  };
+
+  const getDexPrincipal = (dao: DAO) => {
+    const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
+    return dexExtension?.contract_principal || "";
   };
 
   const copyToClipboard = async (address: string) => {
@@ -108,8 +131,74 @@ export function AgentSelectorSheet({
     onOpenChange(false);
   };
 
-  const handleTransferRequest = (agentId: string, tokenSymbol: string) => {
-    onTransferRequest?.(agentId, tokenSymbol);
+  const handleTransferRequest = (
+    agentId: string,
+    name: string,
+    tokenSymbol: string
+  ) => {
+    const token = tokens?.find((t) => t.symbol === tokenSymbol);
+    const dao = daos.find((d) => d.id === token?.dao_id);
+
+    if (dao && token) {
+      const dexPrincipal = getDexPrincipal(dao);
+      setSelectedTransferAgent({
+        id: agentId,
+        name,
+        tokenSymbol,
+        dexPrincipal,
+        contractPrincipal: token.contract_principal,
+      });
+      setTransferModalOpen(true);
+    }
+  };
+
+  const TransferTokenModal = () => {
+    const [amount, setAmount] = useState("");
+
+    const handleTransfer = () => {
+      if (!selectedTransferAgent) return;
+
+      // TODO: ACTUAL IMPLEMENTATION LEFT
+      console.log({
+        agentId: selectedTransferAgent.id,
+        agentName: selectedTransferAgent.name,
+        tokenSymbol: selectedTransferAgent.tokenSymbol,
+        dexPrincipal: selectedTransferAgent.dexPrincipal,
+        contractPrincipal: selectedTransferAgent.contractPrincipal,
+        amount,
+      });
+
+      toast({
+        title: "Transfer Initiated",
+        description: `Preparing to transfer ${amount} ${selectedTransferAgent.tokenSymbol} tokens`,
+      });
+
+      setTransferModalOpen(false);
+    };
+
+    return (
+      <Dialog open={transferModalOpen} onOpenChange={setTransferModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Transfer Tokens to {selectedTransferAgent?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Transfer {selectedTransferAgent?.tokenSymbol} tokens
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              type="number"
+              placeholder="Enter amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <Button onClick={handleTransfer}>Transfer</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
   };
 
   if (error) {
@@ -130,136 +219,143 @@ export function AgentSelectorSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[400px]">
-        <SheetHeader>
-          <SheetTitle>Select an Agent</SheetTitle>
-          <SheetDescription>
-            {requiredTokenSymbol
-              ? `Choose an agent with ${requiredTokenSymbol} tokens`
-              : "Choose an agent to participate"}
-          </SheetDescription>
-        </SheetHeader>
-        <div className="mt-4 space-y-4 overflow-y-auto max-h-[calc(100vh-200px)]">
-          {activeAgents.map((agent) => {
-            const wallet = agentWallets.find((w) => w.agent_id === agent.id);
-            const walletAddress = wallet ? getWalletAddress(wallet) : null;
-            const balance = walletAddress ? balances[walletAddress] : null;
-            const isEligible = balance
-              ? isAgentEligible(balance, requiredTokenSymbol)
-              : false;
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent className="w-[400px]">
+          <SheetHeader>
+            <SheetTitle>Select an Agent</SheetTitle>
+            <SheetDescription>
+              {requiredTokenSymbol
+                ? `Choose an agent with ${requiredTokenSymbol} tokens`
+                : "Choose an agent to participate"}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-4 space-y-4 overflow-y-auto max-h-[calc(100vh-200px)]">
+            {activeAgents.map((agent) => {
+              const wallet = agentWallets.find((w) => w.agent_id === agent.id);
+              const walletAddress = wallet ? getWalletAddress(wallet) : null;
+              const balance = walletAddress ? balances[walletAddress] : null;
+              const isEligible = balance
+                ? isAgentEligible(balance, requiredTokenSymbol)
+                : false;
 
-            return (
-              <div
-                key={agent.id}
-                className={`flex flex-col p-3 rounded-lg ${
-                  isEligible
-                    ? "cursor-pointer hover:bg-accent"
-                    : "opacity-50 cursor-not-allowed"
-                } ${selectedAgentId === agent.id ? "bg-accent/50" : ""}`}
-                onClick={() => isEligible && handleSelect(agent.id)}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <AgentAvatar agent={agent} className="h-8 w-8" />
-                    <div>
-                      <span className="font-medium">{agent.name}</span>
-                      {walletAddress && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <code>{truncateAddress(walletAddress)}</code>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-4 w-4 p-0"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              copyToClipboard(walletAddress);
-                            }}
-                          >
-                            {copiedAddress === walletAddress ? (
-                              <Check className="h-3 w-3" />
-                            ) : (
-                              <Copy className="h-3 w-3" />
-                            )}
-                          </Button>
-                        </div>
+              return (
+                <div
+                  key={agent.id}
+                  className={`flex flex-col p-3 rounded-lg ${
+                    isEligible
+                      ? "cursor-pointer hover:bg-accent"
+                      : "opacity-50 cursor-not-allowed"
+                  } ${selectedAgentId === agent.id ? "bg-accent/50" : ""}`}
+                  onClick={() => isEligible && handleSelect(agent.id)}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <AgentAvatar agent={agent} className="h-8 w-8" />
+                      <div>
+                        <span className="font-medium">{agent.name}</span>
+                        {walletAddress && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <code>{truncateAddress(walletAddress)}</code>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-4 w-4 p-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyToClipboard(walletAddress);
+                              }}
+                            >
+                              {copiedAddress === walletAddress ? (
+                                <Check className="h-3 w-3" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {!isEligible && requiredTokenSymbol && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex items-center gap-1 mt-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTransferRequest(
+                            agent.id,
+                            agent.name,
+                            requiredTokenSymbol
+                          );
+                        }}
+                      >
+                        <Send className="h-3 w-3" />
+                        Transfer Tokens
+                      </Button>
+                    )}
+                  </div>
+
+                  {balance && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">STX</span>
+                        <span className="text-foreground">
+                          {formatBalance(balance.stx.balance)}
+                        </span>
+                      </div>
+
+                      {Object.entries(balance.fungible_tokens).map(
+                        ([tokenId, token]) => {
+                          const [, tokenSymbol] = tokenId.split("::");
+                          return (
+                            <div
+                              key={tokenId}
+                              className={`flex justify-between text-sm ${
+                                requiredTokenSymbol === tokenSymbol
+                                  ? "font-bold text-foreground"
+                                  : ""
+                              }`}
+                            >
+                              <span className="text-muted-foreground">
+                                {tokenSymbol}
+                              </span>
+                              <span className="text-foreground">
+                                {formatBalance(token.balance)}
+                              </span>
+                            </div>
+                          );
+                        }
+                      )}
+
+                      {Object.entries(balance.non_fungible_tokens).map(
+                        ([tokenId, token]) => {
+                          const [, tokenSymbol] = tokenId.split("::");
+                          return (
+                            <div
+                              key={tokenId}
+                              className="flex justify-between text-sm"
+                            >
+                              <span className="text-muted-foreground">
+                                {tokenSymbol || "NFT"}
+                              </span>
+                              <span className="text-foreground">
+                                {token.count} items
+                              </span>
+                            </div>
+                          );
+                        }
                       )}
                     </div>
-                  </div>
-                  {!isEligible && requiredTokenSymbol && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex items-center gap-1"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTransferRequest(agent.id, requiredTokenSymbol);
-                      }}
-                    >
-                      <Send className="h-3 w-3" />
-                      Transfer
-                    </Button>
                   )}
                 </div>
-
-                {balance && (
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">STX</span>
-                      <span className="text-foreground">
-                        {formatBalance(balance.stx.balance)}
-                      </span>
-                    </div>
-
-                    {Object.entries(balance.fungible_tokens).map(
-                      ([tokenId, token]) => {
-                        const [, tokenSymbol] = tokenId.split("::");
-                        return (
-                          <div
-                            key={tokenId}
-                            className={`flex justify-between text-sm ${
-                              requiredTokenSymbol === tokenSymbol
-                                ? "font-bold text-foreground"
-                                : ""
-                            }`}
-                          >
-                            <span className="text-muted-foreground">
-                              {tokenSymbol}
-                            </span>
-                            <span className="text-foreground">
-                              {formatBalance(token.balance)}
-                            </span>
-                          </div>
-                        );
-                      }
-                    )}
-
-                    {Object.entries(balance.non_fungible_tokens).map(
-                      ([tokenId, token]) => {
-                        const [, tokenSymbol] = tokenId.split("::");
-                        return (
-                          <div
-                            key={tokenId}
-                            className="flex justify-between text-sm"
-                          >
-                            <span className="text-muted-foreground">
-                              {tokenSymbol || "NFT"}
-                            </span>
-                            <span className="text-foreground">
-                              {token.count} items
-                            </span>
-                          </div>
-                        );
-                      }
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </SheetContent>
-    </Sheet>
+              );
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
+      <TransferTokenModal />
+    </>
   );
 }
 

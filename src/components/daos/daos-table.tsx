@@ -239,17 +239,9 @@ export const DAOTable = ({
         onOpenChange={(open) => {
           if (!open) setParticipatingDaoId(null);
         }}
+        daos={daos}
+        tokens={tokens}
       />
-      {isTransferModalOpen && selectedAgentId && participatingDaoId && (
-        <TransferModal
-          agentId={selectedAgentId}
-          tokenSymbol={
-            tokens?.find((t) => t.dao_id === participatingDaoId)?.symbol || ""
-          }
-          onTransfer={handleTransfer}
-          onClose={() => setIsTransferModalOpen(false)}
-        />
-      )}
     </div>
   );
 };
