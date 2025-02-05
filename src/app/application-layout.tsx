@@ -165,7 +165,7 @@ export default function ApplicationLayout({
                       : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
+                  {/* <item.icon className="h-5 w-5" /> */}
                   <span>{item.name}</span>
                 </Link>
               );
