@@ -245,37 +245,3 @@ export const DAOTable = ({
     </div>
   );
 };
-
-interface TransferModalProps {
-  agentId: string;
-  tokenSymbol: string;
-  onTransfer: (agentId: string, tokenSymbol: string) => void;
-  onClose: () => void;
-}
-
-const TransferModal: React.FC<TransferModalProps> = ({
-  agentId,
-  tokenSymbol,
-  onTransfer,
-  onClose,
-}) => {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg">
-        <h2 className="text-xl font-bold mb-4">Transfer Tokens</h2>
-        <p className="mb-4">
-          Your agent doesn&apos;t have enough {tokenSymbol} tokens. Would you
-          like to transfer some?
-        </p>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={() => onTransfer(agentId, tokenSymbol)}>
-            Transfer
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
