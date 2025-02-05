@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bot, Copy, Check, Lock } from "lucide-react";
+import { Bot, Copy, Check, Lock, Send } from "lucide-react";
 import { useAgents } from "@/hooks/use-agents";
 import { useWalletStore, WalletBalance } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
@@ -23,6 +23,7 @@ interface AgentSelectorSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   requiredTokenSymbol?: string;
+  onTransferRequest?: (agentId: string, tokenSymbol: string) => void;
 }
 
 export function AgentSelectorSheet({
@@ -31,6 +32,7 @@ export function AgentSelectorSheet({
   open,
   onOpenChange,
   requiredTokenSymbol,
+  onTransferRequest,
 }: AgentSelectorSheetProps) {
   const { agents, loading: agentsLoading } = useAgents();
   const {
@@ -85,15 +87,6 @@ export function AgentSelectorSheet({
       : wallet.testnet_address;
   };
 
-  const handleSelect = (agentId: string | null) => {
-    console.log("Agent selection attempt:", {
-      agentId,
-      requiredTokenSymbol,
-    });
-    onSelect(agentId);
-    onOpenChange(false);
-  };
-
   const isAgentEligible = (
     balance: WalletBalance,
     requiredTokenSymbol?: string
@@ -108,6 +101,15 @@ export function AgentSelectorSheet({
     );
 
     return hasRequiredToken;
+  };
+
+  const handleSelect = (agentId: string | null) => {
+    onSelect(agentId);
+    onOpenChange(false);
+  };
+
+  const handleTransferRequest = (agentId: string, tokenSymbol: string) => {
+    onTransferRequest?.(agentId, tokenSymbol);
   };
 
   if (error) {
@@ -184,8 +186,19 @@ export function AgentSelectorSheet({
                       )}
                     </div>
                   </div>
-                  {!isEligible && (
-                    <Lock className="h-4 w-4 text-muted-foreground" />
+                  {!isEligible && requiredTokenSymbol && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex items-center gap-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTransferRequest(agent.id, requiredTokenSymbol);
+                      }}
+                    >
+                      <Send className="h-3 w-3" />
+                      Transfer
+                    </Button>
                   )}
                 </div>
 

@@ -8,30 +8,7 @@ import { Button } from "@/components/ui/button";
 import type { DAO, Token } from "@/types/supabase";
 import { Loader } from "../reusables/loader";
 import { AgentSelectorSheet } from "./dao-agent-selector";
-import { useWalletStore } from "@/store/wallet";
 import { useToast } from "@/hooks/use-toast";
-
-interface TokenBalance {
-  balance: string;
-  total_sent: string;
-  total_received: string;
-}
-
-interface NFTBalance {
-  count: number;
-  total_sent: number;
-  total_received: number;
-}
-
-interface WalletBalance {
-  stx: TokenBalance;
-  fungible_tokens: {
-    [key: string]: TokenBalance;
-  };
-  non_fungible_tokens: {
-    [key: string]: NFTBalance;
-  };
-}
 
 interface DAOTableProps {
   daos: DAO[];
@@ -78,7 +55,6 @@ export const DAOTable = ({
 
   const handleParticipate = (daoId: string) => {
     console.log("Participating in DAO:", daoId);
-    const token = tokens?.find((t) => t.dao_id === daoId);
     setParticipatingDaoId(daoId);
   };
 
@@ -296,8 +272,8 @@ const TransferModal: React.FC<TransferModalProps> = ({
       <div className="bg-white p-6 rounded-lg">
         <h2 className="text-xl font-bold mb-4">Transfer Tokens</h2>
         <p className="mb-4">
-          Your agent doesn't have enough {tokenSymbol} tokens. Would you like to
-          transfer some?
+          Your agent doesn&apos;t have enough {tokenSymbol} tokens. Would you
+          like to transfer some?
         </p>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>
