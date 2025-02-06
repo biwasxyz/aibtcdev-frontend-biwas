@@ -267,7 +267,7 @@ export function AgentSelectorSheet({
                   key={agent.id}
                   className={`flex flex-col p-3 rounded-lg ${
                     isEligible
-                      ? "cursor-pointer hover:bg-accent"
+                      ? "cursor-pointer"
                       : "opacity-50 cursor-not-allowed"
                   } ${selectedAgentId === agent.id ? "bg-accent/50" : ""}`}
                   onClick={() => isEligible && handleSelect(agent.id)}
@@ -299,7 +299,7 @@ export function AgentSelectorSheet({
                         )}
                       </div>
                     </div>
-                    {!isEligible && requiredTokenSymbol && walletAddress && (
+                    {requiredTokenSymbol && walletAddress && (
                       <Button
                         size="sm"
                         variant="outline"
