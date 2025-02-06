@@ -24,7 +24,6 @@ interface TokenTransferProps {
   token: string;
   buttonText?: string;
   onSuccess?: () => void;
-  onError?: (error: any) => void;
 }
 
 export function TokenTransfer({
@@ -36,7 +35,6 @@ export function TokenTransfer({
   token,
   buttonText = "Transfer Tokens",
   onSuccess,
-  onError,
 }: TokenTransferProps) {
   const transferToken = async () => {
     const stacksNetwork: StacksNetwork =
@@ -80,7 +78,6 @@ export function TokenTransfer({
       onSuccess?.();
     } catch (error) {
       console.error("Error initiating transfer:", error);
-      onError?.(error);
     }
   };
 

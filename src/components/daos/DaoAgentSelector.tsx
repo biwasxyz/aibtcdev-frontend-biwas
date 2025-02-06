@@ -215,10 +215,10 @@ export function AgentSelectorSheet({
     setTransferModalOpen(false);
   };
 
-  const handleTransferError = (error: any) => {
+  const handleTransferError = () => {
     toast({
       title: "Transfer Failed",
-      description: error.message || "Failed to initiate transfer",
+      description: "Failed to initiate transfer",
       variant: "destructive",
     });
   };

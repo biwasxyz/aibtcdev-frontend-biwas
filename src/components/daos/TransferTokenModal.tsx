@@ -30,7 +30,7 @@ interface TransferModalProps {
     walletAddress: string;
   } | null;
   onSuccess: () => void;
-  onError: (error: any) => void;
+  onError: () => void;
 }
 
 /**
@@ -38,7 +38,7 @@ interface TransferModalProps {
  * Handles token transfer functionality with amount input and confirmation
  */
 export const TransferTokenModal = memo(
-  ({ isOpen, onOpenChange, agent, onSuccess, onError }: TransferModalProps) => {
+  ({ isOpen, onOpenChange, agent, onSuccess }: TransferModalProps) => {
     const [amount, setAmount] = useState("");
 
     // Reset amount when modal closes
@@ -101,7 +101,6 @@ export const TransferTokenModal = memo(
               token={agent.tokenSymbol}
               buttonText="Transfer"
               onSuccess={handleTransferSuccess}
-              onError={onError}
             />
           </div>
         </DialogContent>
