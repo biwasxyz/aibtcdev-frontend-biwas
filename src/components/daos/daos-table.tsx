@@ -63,18 +63,18 @@ export const DAOTable = ({
     setSelectedAgentId(agentId);
     if (agentId && participatingDaoId) {
       const dao = daos.find((d) => d.id === participatingDaoId);
-      const dexPrincipal = getDexPrincipal(dao!);
+      // const dexPrincipal = getDexPrincipal(dao!);
 
-      console.log("Participation details:", {
-        agentId,
-        daoId: participatingDaoId,
-        dexPrincipal,
-        tokenSymbol,
-      });
+      // console.log("Participation details:", {
+      //   agentId,
+      //   daoId: participatingDaoId,
+      //   dexPrincipal,
+      //   tokenSymbol,
+      // });
 
-      alert(
-        `Participating with Agent ID: ${agentId}\nDAO ID: ${participatingDaoId}\nContract Principal: ${dexPrincipal}\nToken Symbol: ${tokenSymbol}`
-      );
+      // alert(
+      //   `Participating with Agent ID: ${agentId}\nDAO ID: ${participatingDaoId}\nContract Principal: ${dexPrincipal}\nToken Symbol: ${tokenSymbol}`
+      // );
     }
     setParticipatingDaoId(null);
   };

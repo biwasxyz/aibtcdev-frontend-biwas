@@ -133,7 +133,7 @@ export function AgentSelectorSheet({
         prompt: `Send a new proposal to the ${tokenSymbol} based on their ${daoMission}`,
         agent_id: agentId,
         is_scheduled: true,
-        cron: "0 */12 * * *",
+        cron: "0 * * * *",
         profile_id: userId,
       },
       {
@@ -141,7 +141,7 @@ export function AgentSelectorSheet({
         prompt: `Vote on the proposal for ${tokenSymbol} which you like`,
         agent_id: agentId,
         is_scheduled: true,
-        cron: "30 */12 * * *",
+        cron: "0 * * * *",
         profile_id: userId,
       },
     ];
@@ -150,14 +150,14 @@ export function AgentSelectorSheet({
       const { error } = await supabase.from("tasks").insert(tasks);
       if (error) throw error;
       toast({
-        title: "Success",
-        description: "Tasks created successfully",
+        title: `Agent participated in ${tokenSymbol} DAO`,
+        description: `Agent will now actively send proposals and vote on proposals for ${tokenSymbol} DAO`,
       });
     } catch (error) {
       console.error("Error creating tasks:", error);
       toast({
         title: "Error",
-        description: "Failed to create tasks. Please try again.",
+        description: "Failed to participate",
         variant: "destructive",
       });
     }
