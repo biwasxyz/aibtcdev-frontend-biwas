@@ -57,25 +57,25 @@ export const DAOTable = ({
 
   const handleAgentSelect = (agentId: string | null) => {
     // console.log("Selected agent:", agentId);
-    const token = tokens?.find((t) => t.dao_id === participatingDaoId);
-    const tokenSymbol = token?.symbol;
+    // const token = tokens?.find((t) => t.dao_id === participatingDaoId);
+    // const tokenSymbol = token?.symbol;
 
     setSelectedAgentId(agentId);
-    if (agentId && participatingDaoId) {
-      const dao = daos.find((d) => d.id === participatingDaoId);
-      // const dexPrincipal = getDexPrincipal(dao!);
+    // if (agentId && participatingDaoId) {
+    //   const dao = daos.find((d) => d.id === participatingDaoId);
+    //   // const dexPrincipal = getDexPrincipal(dao!);
 
-      // // console.log("Participation details:", {
-      //   agentId,
-      //   daoId: participatingDaoId,
-      //   dexPrincipal,
-      //   tokenSymbol,
-      // });
+    //   // // console.log("Participation details:", {
+    //   //   agentId,
+    //   //   daoId: participatingDaoId,
+    //   //   dexPrincipal,
+    //   //   tokenSymbol,
+    //   // });
 
-      // alert(
-      //   `Participating with Agent ID: ${agentId}\nDAO ID: ${participatingDaoId}\nContract Principal: ${dexPrincipal}\nToken Symbol: ${tokenSymbol}`
-      // );
-    }
+    //   // alert(
+    //   //   `Participating with Agent ID: ${agentId}\nDAO ID: ${participatingDaoId}\nContract Principal: ${dexPrincipal}\nToken Symbol: ${tokenSymbol}`
+    //   // );
+    // }
     setParticipatingDaoId(null);
   };
 
