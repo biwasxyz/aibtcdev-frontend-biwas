@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { DAO, Token } from "@/types/supabase";
 import { Loader } from "../reusables/loader";
-import { AgentSelectorSheet } from "./dao-agent-selector";
+import { AgentSelectorSheet } from "./DaoAgentSelector";
 
 interface DAOTableProps {
   daos: DAO[];
