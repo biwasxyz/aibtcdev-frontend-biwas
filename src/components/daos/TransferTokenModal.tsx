@@ -62,13 +62,13 @@ export const TransferTokenModal = memo(
     const amountInMicroTokens = Number(amount) * 1000000;
 
     const handleTransferSuccess = () => {
-      console.log({
-        amount: amountInMicroTokens,
-        contractName,
-        tokenSymbol: agent.tokenSymbol,
-        sender: contractAddress,
-        receiver: agent.walletAddress,
-      });
+      // console.log({
+      //   amount: amountInMicroTokens,
+      //   contractName,
+      //   tokenSymbol: agent.tokenSymbol,
+      //   sender: contractAddress,
+      //   receiver: agent.walletAddress,
+      // });
       onSuccess();
     };
 

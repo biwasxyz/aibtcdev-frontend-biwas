@@ -37,9 +37,9 @@ export const DAOTable = ({
   tokenPrices,
   isFetchingPrice,
 }: DAOTableProps) => {
-  console.log("Fetched DAOs:", daos);
-  console.log("Fetched Tokens:", tokens);
-  console.log("Fetched Token Prices:", tokenPrices);
+  // console.log("Fetched DAOs:", daos);
+  // console.log("Fetched Tokens:", tokens);
+  // console.log("Fetched Token Prices:", tokenPrices);
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [participatingDaoId, setParticipatingDaoId] = useState<string | null>(
     null
@@ -51,12 +51,12 @@ export const DAOTable = ({
   }, []);
 
   const handleParticipate = (daoId: string) => {
-    console.log("Participating in DAO:", daoId);
+    // console.log("Participating in DAO:", daoId);
     setParticipatingDaoId(daoId);
   };
 
   const handleAgentSelect = (agentId: string | null) => {
-    console.log("Selected agent:", agentId);
+    // console.log("Selected agent:", agentId);
     const token = tokens?.find((t) => t.dao_id === participatingDaoId);
     const tokenSymbol = token?.symbol;
 
@@ -65,7 +65,7 @@ export const DAOTable = ({
       const dao = daos.find((d) => d.id === participatingDaoId);
       // const dexPrincipal = getDexPrincipal(dao!);
 
-      // console.log("Participation details:", {
+      // // console.log("Participation details:", {
       //   agentId,
       //   daoId: participatingDaoId,
       //   dexPrincipal,
