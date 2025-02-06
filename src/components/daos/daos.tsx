@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/utils/supabase/client";
@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DAOCard } from "./daos-card";
+import { DAOTable } from "./daos-table";
 import type { DAO, Token, SortField } from "@/types/supabase";
 import { createDaoAgent } from "../agents/dao-agent";
 import { useToast } from "@/hooks/use-toast";
@@ -135,20 +135,20 @@ export default function DAOs() {
   const { data: daos, isLoading: isLoadingDAOs } = useQuery({
     queryKey: ["daos"],
     queryFn: fetchDAOs,
-    staleTime: 1000000,
+    staleTime: 600000, // 10 minutes
   });
 
   const { data: tokens } = useQuery({
     queryKey: ["tokens"],
     queryFn: fetchTokens,
-    staleTime: 100000,
+    staleTime: 600000, // 10 minutes
   });
 
   const { data: tokenPrices, isFetching: isFetchingTokenPrices } = useQuery({
     queryKey: ["tokenPrices", daos, tokens],
     queryFn: () => fetchTokenPrices(daos || [], tokens || []),
     enabled: !!daos && !!tokens,
-    staleTime: 1000000,
+    staleTime: 600000, // 10 minutes
   });
 
   const filteredAndSortedDAOs = (() => {
@@ -173,13 +173,34 @@ export default function DAOs() {
   })();
 
   return (
-    <div className="container mx-auto space-y-8 px-4 py-8">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-2">
-          <Heading className="text-3xl font-bold sm:text-4xl">DAOs</Heading>
-          <p className="text-lg text-muted-foreground">
-            Explore and discover AI DAOs
-          </p>
+    <div className="container mx-auto space-y-6 px-4 py-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="space-y-2">
+            <Heading className="text-3xl font-bold sm:text-4xl">
+              {!isLoadingDAOs && (
+                <p className="text-sm text-muted-foreground">
+                  Total AI DAOs: {filteredAndSortedDAOs.length}
+                </p>
+              )}
+            </Heading>
+          </div>
+          <div className="flex items-center gap-2">
+            <Select
+              value={sortField}
+              onValueChange={(value) => setSortField(value as SortField)}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created_at">Date Added</SelectItem>
+                <SelectItem value="price">Token Price</SelectItem>
+                <SelectItem value="price24hChanges">24h Change</SelectItem>
+                <SelectItem value="marketCap">Market Cap</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
@@ -192,53 +213,17 @@ export default function DAOs() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-start">
-        <div className="flex items-center gap-2">
-          <p className="text-sm text-muted-foreground">Sort by:</p>
-          <Select
-            value={sortField}
-            onValueChange={(value) => setSortField(value as SortField)}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="created_at">Date Added</SelectItem>
-              <SelectItem value="price">Token Price</SelectItem>
-              <SelectItem value="price24hChanges">24h Change</SelectItem>
-              <SelectItem value="marketCap">Market Cap</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {!isLoadingDAOs && (
-          <p className="text-sm text-muted-foreground">
-            Showing {filteredAndSortedDAOs.length} DAOs
-          </p>
-        )}
-      </div>
-
       {isLoadingDAOs ? (
         <div className="flex min-h-[50vh] items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredAndSortedDAOs.map((dao) => {
-            const token = tokens?.find((token) => token.dao_id === dao.id);
-            const tokenPrice = tokenPrices?.[dao.id];
-
-            return (
-              <DAOCard
-                key={dao.id}
-                dao={dao}
-                token={token}
-                tokenPrice={tokenPrice}
-                isFetchingPrice={isFetchingTokenPrices}
-              />
-            );
-          })}
-        </div>
+        <DAOTable
+          daos={filteredAndSortedDAOs}
+          tokens={tokens}
+          tokenPrices={tokenPrices}
+          isFetchingPrice={isFetchingTokenPrices}
+        />
       )}
 
       {filteredAndSortedDAOs.length === 0 && !isLoadingDAOs && (
