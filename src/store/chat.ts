@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { Message } from '@/lib/chat/types';
 import { useThreadsStore } from "./threads";
+import { getStacksAddress } from "@/lib/address";
+
+
+// Local storage key for active thread
+const address = getStacksAddress()
+const ACTIVE_THREAD_KEY = `${address}_activeThreadId`;
 
 // Global WebSocket instance
 let globalWs: WebSocket | null = null;
@@ -26,6 +32,7 @@ interface ChatState {
 
   // Threads
   setActiveThread: (threadId: string) => void;
+  clearActiveThread: () => void;
   getThreadHistory: () => void;
 
   // Agent
@@ -37,10 +44,16 @@ interface ChatState {
   setError: (error: string | null) => void;
 }
 
+// Helper function to get stored thread ID
+const getStoredThreadId = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(ACTIVE_THREAD_KEY);
+};
+
 export const useChatStore = create<ChatState>((set, get) => ({
   messages: {},
   fetchedThreads: new Set(),
-  activeThreadId: null,
+  activeThreadId: getStoredThreadId(), // Initialize from localStorage
   selectedAgentId: null,
   isConnected: false,
   isLoading: false,
@@ -59,7 +72,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
 
     try {
-      const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:8000/chat/ws";
+      const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:8000/chat/ws"
       if (!wsUrl) {
         throw new Error("WebSocket URL not configured");
       }
@@ -70,6 +83,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
       globalWs.onopen = () => {
         // console.log('WebSocket connected');
         set({ isConnected: true, error: null, ws: globalWs });
+
+        // Fetch thread history for stored thread if it exists
+        const storedThreadId = getStoredThreadId();
+        if (storedThreadId && !get().fetchedThreads.has(storedThreadId)) {
+          get().setActiveThread(storedThreadId);
+        }
       };
 
       globalWs.onclose = () => {
@@ -134,10 +153,37 @@ export const useChatStore = create<ChatState>((set, get) => ({
       fetchedThreads: new Set(Array.from(state.fetchedThreads).filter(id => id !== threadId))
     }));
 
+    // Clear from localStorage
+    localStorage.removeItem(ACTIVE_THREAD_KEY);
+
     // Remove thread from threads store
     useThreadsStore.getState().removeThread(threadId);
   },
 
+  setActiveThread: (threadId) => {
+    set({ activeThreadId: threadId });
+
+    // Store in localStorage
+    localStorage.setItem(ACTIVE_THREAD_KEY, threadId);
+
+    // Only get thread history if we haven't fetched it before
+    const state = get();
+    if (!state.fetchedThreads.has(threadId)) {
+      setTimeout(() => {
+        get().getThreadHistory();
+        set(state => ({
+          fetchedThreads: new Set(Array.from(state.fetchedThreads).concat([threadId]))
+        }));
+      }, 0);
+    }
+  },
+
+  clearActiveThread: () => {
+    set({ activeThreadId: null });
+    localStorage.removeItem(ACTIVE_THREAD_KEY);
+  },
+
+  // Rest of the store implementation remains the same
   addMessage: (message: Message) => {
     set((state) => {
       const messages = state.messages[message.thread_id] || [];
@@ -161,7 +207,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
         }
       }
 
-      // For non-token messages or new token messages
       return {
         messages: {
           ...state.messages,
@@ -171,28 +216,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
   },
 
-  setActiveThread: (threadId) => {
-    set({ activeThreadId: threadId });
-
-    // Only get thread history if we haven't fetched it before
-    const state = get();
-    if (!state.fetchedThreads.has(threadId)) {
-      setTimeout(() => {
-        get().getThreadHistory();
-        // Add thread to fetched set after getting history
-        set(state => ({
-          fetchedThreads: new Set(Array.from(state.fetchedThreads).concat([threadId]))
-        }));
-      }, 0);
-    }
-  },
-
   getThreadHistory: () => {
     if (!globalWs || globalWs.readyState !== WebSocket.OPEN) {
       set({ error: "WebSocket not connected" });
       return;
     }
-    // Send message through WebSocket
     try {
       globalWs.send(JSON.stringify({
         type: "history",
@@ -213,7 +241,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return;
     }
 
-    // Add user message immediately
     get().addMessage({
       agent_id: get().selectedAgentId,
       thread_id: threadId,
@@ -223,7 +250,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       status: "sent"
     });
 
-    // Send message through WebSocket
     try {
       globalWs.send(JSON.stringify({
         type: "message",

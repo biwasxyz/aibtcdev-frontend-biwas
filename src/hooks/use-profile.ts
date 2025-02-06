@@ -20,7 +20,7 @@ export function useProfile() {
       try {
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error) throw error;
-        
+        // console.log(user)
         setProfile({
           user,
           loading: false,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
@@ -17,22 +17,38 @@ interface ChatInputProps {
 export function ChatInput({ disabled = false }: ChatInputProps) {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const { sendMessage, activeThreadId } = useChatStore();
   const { accessToken } = useSessionStore();
+
+  // Handle mobile keyboard resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (textareaRef.current && window.visualViewport) {
+        const viewport = window.visualViewport;
+        textareaRef.current.style.maxHeight = `${viewport.height * 0.4}px`;
+
+        // Scroll input into view when keyboard appears
+        if (containerRef.current) {
+          containerRef.current.scrollIntoView({ block: "end" });
+        }
+      }
+    };
+
+    window.visualViewport?.addEventListener("resize", handleResize);
+    return () =>
+      window.visualViewport?.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-
       if (!input.trim() || !accessToken || !activeThreadId) return;
 
       try {
-        await sendMessage(activeThreadId, input.trim());
+        sendMessage(activeThreadId, input.trim());
         setInput("");
-        // Reset textarea height
-        if (textareaRef.current) {
-          textareaRef.current.style.height = "auto";
-        }
+        textareaRef.current?.style.setProperty("height", "auto");
       } catch (error) {
         console.error("Failed to send message:", error);
       }
@@ -53,44 +69,49 @@ export function ChatInput({ disabled = false }: ChatInputProps) {
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setInput(e.target.value);
-
-      // Auto-resize the textarea
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
-        textareaRef.current.style.height =
-          Math.min(textareaRef.current.scrollHeight, 200) + "px";
+        textareaRef.current.style.height = `${Math.min(
+          textareaRef.current.scrollHeight,
+          200
+        )}px`;
       }
     },
     []
   );
 
-  if (!accessToken) {
-    return null;
-  }
+  const handleFocus = () => {
+    // Mobile scroll fix
+    setTimeout(() => {
+      textareaRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 300);
+  };
+
+  if (!accessToken) return null;
 
   return (
-    <div className="w-full min-w-0 border-zinc-800">
-      <div className="mx-auto max-w-5xl px-2 py-2 w-full min-w-0">
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col md:flex-row gap-2 w-full min-w-0"
-        >
-          <div className="flex flex-1 gap-2 min-w-0 w-full">
+    <div ref={containerRef} className="w-full  backdrop-blur ">
+      <div className="mx-auto max-w-5xl px-2 md:px-4 py-2 w-full">
+        <form onSubmit={handleSubmit} className="flex gap-2 w-full">
+          <div className="flex flex-1 gap-2 items-end w-full">
             <div className="relative flex-1 min-w-0">
               <Textarea
                 ref={textareaRef}
                 value={input}
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
+                onClick={handleFocus}
+                onFocus={handleFocus}
                 placeholder="Type a message..."
                 disabled={disabled}
                 className={cn(
                   "min-h-[44px] h-11 max-h-[200px] resize-none w-full",
-                  "py-2.5 px-3 bg-background/50 backdrop-blur-sm border-border/10",
-                  "text-foreground placeholder-muted-foreground",
-                  "text-sm rounded-xl",
-                  "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                  "transition-colors duration-200"
+                  "py-2.5 px-4 border border-muted",
+                  "text-base placeholder:text-muted-foreground",
+                  "rounded-xl md:rounded-2xl",
+                  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "transition-all duration-200",
+                  "scroll-pb-2"
                 )}
                 rows={1}
               />
@@ -98,7 +119,7 @@ export function ChatInput({ disabled = false }: ChatInputProps) {
             <Button
               type="submit"
               disabled={disabled || !input.trim()}
-              className="h-11 w-11 rounded-full p-0 flex-shrink-0"
+              className="h-11 w-11 rounded-full p-0 flex-shrink-0 mb-1"
             >
               <Send className="h-4 w-4" />
             </Button>

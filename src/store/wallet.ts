@@ -14,7 +14,7 @@ interface NFTBalance {
     total_received: number;
 }
 
-interface WalletBalance {
+export interface WalletBalance {
     stx: TokenBalance;
     fungible_tokens: {
         [key: string]: TokenBalance;
