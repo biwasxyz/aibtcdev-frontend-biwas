@@ -1,11 +1,11 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Bot, Copy, Check, Send } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useAgents } from "@/hooks/use-agents";
-import { useWalletStore, WalletBalance } from "@/store/wallet";
+import { useWalletStore, type WalletBalance } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,6 +24,103 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import type { Agent, Wallet, DAO, Token } from "@/types/supabase";
+
+const TokenTransfer = dynamic(
+  () =>
+    import("@/components/auth/token-transfer").then((mod) => mod.TokenTransfer),
+  {
+    ssr: false,
+  }
+);
+
+interface TransferModalProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  agent: {
+    id: string;
+    name: string;
+    tokenSymbol: string;
+    dexPrincipal: string;
+    contractPrincipal: string;
+    walletAddress: string;
+  } | null;
+  onSuccess: () => void;
+  onError: (error: any) => void;
+}
+
+const TransferTokenModal = memo(
+  ({ isOpen, onOpenChange, agent, onSuccess, onError }: TransferModalProps) => {
+    const [amount, setAmount] = useState("");
+
+    useEffect(() => {
+      if (!isOpen) {
+        setAmount("");
+      }
+    }, [isOpen]);
+
+    if (!agent) return null;
+
+    const { contractAddress, contractName } = (() => {
+      const [address, name] = agent.dexPrincipal.split(".");
+      // Remove the "-dex" suffix from the contract name
+      const cleanedContractName = name.endsWith("-dex")
+        ? name.slice(0, -4)
+        : name;
+      return { contractAddress: address, contractName: cleanedContractName };
+    })();
+
+    const amountInMicroTokens = Number(amount) * 1000000;
+
+    const handleTransferSuccess = () => {
+      console.log({
+        amount: amountInMicroTokens,
+        contractName,
+        tokenSymbol: agent.tokenSymbol,
+        sender: contractAddress,
+        receiver: agent.walletAddress,
+      });
+      onSuccess();
+    };
+
+    return (
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Transfer Tokens to {agent.name}</DialogTitle>
+            <DialogDescription>
+              Transfer {agent.tokenSymbol} tokens
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              type="number"
+              placeholder="Enter amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <TokenTransfer
+              network={
+                process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
+                  ? "mainnet"
+                  : "testnet"
+              }
+              amount={amountInMicroTokens}
+              recipient={agent.walletAddress}
+              contractAddress={contractAddress}
+              contractName={contractName}
+              token={agent.tokenSymbol}
+              buttonText="Transfer"
+              onSuccess={handleTransferSuccess}
+              onError={onError}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+);
+
+TransferTokenModal.displayName = "TransferTokenModal";
 
 interface AgentSelectorSheetProps {
   selectedAgentId: string | null;
@@ -62,6 +159,7 @@ export function AgentSelectorSheet({
     tokenSymbol: string;
     dexPrincipal: string;
     contractPrincipal: string;
+    walletAddress: string;
   } | null>(null);
 
   // Filter out archived agents
@@ -75,6 +173,48 @@ export function AgentSelectorSheet({
       });
     }
   }, [userId, fetchWallets]);
+
+  const createTasks = async (
+    agentId: string,
+    tokenSymbol: string,
+    daoMission: string
+  ) => {
+    const tasks = [
+      {
+        name: "Send Proposal",
+        prompt: `Send a new proposal to the ${tokenSymbol} based on their ${daoMission}`,
+        agent_id: agentId,
+        is_scheduled: true,
+        cron: "0 */12 * * *", // Every 12 hours
+        profile_id: userId,
+      },
+      {
+        name: "Vote on proposal",
+        prompt: `Vote on the proposal for ${tokenSymbol} which you like`,
+        agent_id: agentId,
+        is_scheduled: true,
+        cron: "30 */12 * * *", // Every 12 hours, 30 minutes after sending proposal
+        profile_id: userId,
+      },
+    ];
+
+    try {
+      const { error } = await supabase.from("tasks").insert(tasks);
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Tasks created successfully",
+      });
+    } catch (error) {
+      console.error("Error creating tasks:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create tasks. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const truncateAddress = (address: string) => {
     if (!address) return "";
@@ -126,7 +266,22 @@ export function AgentSelectorSheet({
     return hasRequiredToken;
   };
 
-  const handleSelect = (agentId: string | null) => {
+  const handleSelect = async (agentId: string | null) => {
+    if (agentId && requiredTokenSymbol) {
+      const dao = daos.find((d) => {
+        const token = tokens?.find((t) => t.dao_id === d.id);
+        return token?.symbol === requiredTokenSymbol;
+      });
+
+      if (dao) {
+        await createTasks(
+          agentId,
+          requiredTokenSymbol,
+          dao.mission || "mission"
+        );
+      }
+    }
+
     onSelect(agentId);
     onOpenChange(false);
   };
@@ -134,7 +289,8 @@ export function AgentSelectorSheet({
   const handleTransferRequest = (
     agentId: string,
     name: string,
-    tokenSymbol: string
+    tokenSymbol: string,
+    walletAddress: string
   ) => {
     const token = tokens?.find((t) => t.symbol === tokenSymbol);
     const dao = daos.find((d) => d.id === token?.dao_id);
@@ -147,58 +303,26 @@ export function AgentSelectorSheet({
         tokenSymbol,
         dexPrincipal,
         contractPrincipal: token.contract_principal,
+        walletAddress,
       });
       setTransferModalOpen(true);
     }
   };
 
-  const TransferTokenModal = () => {
-    const [amount, setAmount] = useState("");
+  const handleTransferSuccess = () => {
+    toast({
+      title: "Transfer Initiated",
+      description: "The transfer has been initiated successfully",
+    });
+    setTransferModalOpen(false);
+  };
 
-    const handleTransfer = () => {
-      if (!selectedTransferAgent) return;
-
-      // TODO: ACTUAL IMPLEMENTATION LEFT
-      console.log({
-        agentId: selectedTransferAgent.id,
-        agentName: selectedTransferAgent.name,
-        tokenSymbol: selectedTransferAgent.tokenSymbol,
-        dexPrincipal: selectedTransferAgent.dexPrincipal,
-        contractPrincipal: selectedTransferAgent.contractPrincipal,
-        amount,
-      });
-
-      toast({
-        title: "Transfer Initiated",
-        description: `Preparing to transfer ${amount} ${selectedTransferAgent.tokenSymbol} tokens`,
-      });
-
-      setTransferModalOpen(false);
-    };
-
-    return (
-      <Dialog open={transferModalOpen} onOpenChange={setTransferModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Transfer Tokens to {selectedTransferAgent?.name}
-            </DialogTitle>
-            <DialogDescription>
-              Transfer {selectedTransferAgent?.tokenSymbol} tokens
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              type="number"
-              placeholder="Enter amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-            <Button onClick={handleTransfer}>Transfer</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
+  const handleTransferError = (error: any) => {
+    toast({
+      title: "Transfer Failed",
+      description: error.message || "Failed to initiate transfer",
+      variant: "destructive",
+    });
   };
 
   if (error) {
@@ -276,7 +400,7 @@ export function AgentSelectorSheet({
                         )}
                       </div>
                     </div>
-                    {!isEligible && requiredTokenSymbol && (
+                    {!isEligible && requiredTokenSymbol && walletAddress && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -286,7 +410,8 @@ export function AgentSelectorSheet({
                           handleTransferRequest(
                             agent.id,
                             agent.name,
-                            requiredTokenSymbol
+                            requiredTokenSymbol,
+                            walletAddress
                           );
                         }}
                       >
@@ -354,7 +479,13 @@ export function AgentSelectorSheet({
           </div>
         </SheetContent>
       </Sheet>
-      <TransferTokenModal />
+      <TransferTokenModal
+        isOpen={transferModalOpen}
+        onOpenChange={setTransferModalOpen}
+        agent={selectedTransferAgent}
+        onSuccess={handleTransferSuccess}
+        onError={handleTransferError}
+      />
     </>
   );
 }
