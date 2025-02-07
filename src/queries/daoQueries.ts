@@ -1,6 +1,6 @@
 import { supabase } from "@/utils/supabase/client";
 import { sdkFaktory } from "@/lib/faktory-fun";
-import type { Extension, DAO, Holder, Token, Proposal } from "@/types/supabase";
+import type { DAO, Holder, Token, Proposal, Extension } from "@/types/supabase";
 
 interface MarketStats {
     price: number;
@@ -84,6 +84,7 @@ export const fetchDAOs = async (): Promise<DAO[]> => {
         return {
             ...dao,
             user_id: xUser?.user_id,
+            // filter the extensions basedo on the dao_id
             extensions: extensionsData?.filter((cap) => cap.dao_id === dao.id) || [],
         };
     });
@@ -164,6 +165,12 @@ export const fetchTokenPrices = async (
 
     return prices;
 };
+
+export const fetchDAOExtensions = async (id: string): Promise<Extension[]> => {
+    const { data, error } = await supabase.from("extensions").select("*").eq("dao_id", id)
+    if (error) throw error
+    return data
+}
 
 export const fetchHolders = async (
     contractPrincipal: string,
