@@ -22,18 +22,21 @@ export default function DAOPage() {
   const { data: dao, isLoading: isLoadingDAO } = useQuery({
     queryKey: ["dao", id],
     queryFn: () => fetchDAO(id),
+    staleTime: 600000, // 10 minutes
   });
 
   const { data: token, isLoading: isLoadingToken } = useQuery({
     queryKey: ["token", id],
     queryFn: () => fetchToken(id),
     enabled: !!dao,
+    staleTime: 600000, // 10 minutes
   });
 
   const { data: extensions, isLoading: isLoadingExtensions } = useQuery({
     queryKey: ["extensions", id],
     queryFn: () => fetchDAOExtensions(id),
     enabled: !!dao,
+    staleTime: 600000, // 10 minutes
   });
 
   const dex = extensions?.find((ext) => ext.type === "dex")?.contract_principal;

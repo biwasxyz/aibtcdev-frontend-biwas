@@ -2,9 +2,9 @@
 
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import DAOExtensions from "@/components/daos/dao-extensions";
 import { fetchDAOExtensions } from "@/queries/daoQueries";
+import { Loader } from "@/components/reusables/loader";
 
 export const runtime = "edge";
 
@@ -15,11 +15,11 @@ export default function ExtensionsPage() {
   const { data: daoExtensions, isLoading } = useQuery({
     queryKey: ["daoExtensions", id],
     queryFn: () => fetchDAOExtensions(id),
-    staleTime: 1000000,
+    staleTime: 600000, // 10 minutes
   });
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <Loader />;
   }
 
   return (
