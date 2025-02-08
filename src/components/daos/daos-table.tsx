@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import type { DAO, Token } from "@/types/supabase";
 import { Loader } from "../reusables/loader";
 import { AgentSelectorSheet } from "./DaoAgentSelector";
+import { LineChart, Line, ResponsiveContainer } from "recharts";
 
 interface DAOTableProps {
   daos: DAO[];
@@ -22,6 +23,13 @@ interface DAOTableProps {
     }
   >;
   isFetchingPrice?: boolean;
+  trades: Record<
+    string,
+    {
+      data: Array<{ timestamp: number; price: number }>;
+      isLoading: boolean;
+    }
+  >;
 }
 
 const formatNumber = (num: number) => {
@@ -36,10 +44,8 @@ export const DAOTable = ({
   tokens,
   tokenPrices,
   isFetchingPrice,
+  trades,
 }: DAOTableProps) => {
-  // console.log("Fetched DAOs:", daos);
-  // console.log("Fetched Tokens:", tokens);
-  // console.log("Fetched Token Prices:", tokenPrices);
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [participatingDaoId, setParticipatingDaoId] = useState<string | null>(
     null
@@ -51,32 +57,19 @@ export const DAOTable = ({
   }, []);
 
   const handleParticipate = (daoId: string) => {
-    // console.log("Participating in DAO:", daoId);
     setParticipatingDaoId(daoId);
   };
 
   const handleAgentSelect = (agentId: string | null) => {
-    // console.log("Selected agent:", agentId);
-    // const token = tokens?.find((t) => t.dao_id === participatingDaoId);
-    // const tokenSymbol = token?.symbol;
-
     setSelectedAgentId(agentId);
-    // if (agentId && participatingDaoId) {
-    //   const dao = daos.find((d) => d.id === participatingDaoId);
-    //   // const dexPrincipal = getDexPrincipal(dao!);
-
-    //   // // console.log("Participation details:", {
-    //   //   agentId,
-    //   //   daoId: participatingDaoId,
-    //   //   dexPrincipal,
-    //   //   tokenSymbol,
-    //   // });
-
-    //   // alert(
-    //   //   `Participating with Agent ID: ${agentId}\nDAO ID: ${participatingDaoId}\nContract Principal: ${dexPrincipal}\nToken Symbol: ${tokenSymbol}`
-    //   // );
-    // }
     setParticipatingDaoId(null);
+  };
+
+  const getChartColor = (data: Array<{ timestamp: number; price: number }>) => {
+    if (data.length < 2) return "#8884d8";
+    const startPrice = data[0].price;
+    const endPrice = data[data.length - 1].price;
+    return endPrice >= startPrice ? "#22c55e" : "#ef4444";
   };
 
   return (
@@ -84,13 +77,12 @@ export const DAOTable = ({
       <table className="w-full min-w-[800px] border-collapse text-sm">
         <thead>
           <tr className="border-b">
-            <th className="p-3 text-left font-medium">DAO</th>
-            <th className="p-3 text-left font-medium">Token Price</th>
-            <th className="p-3 text-left font-medium">24h Change</th>
-            <th className="p-3 text-left font-medium">Market Cap</th>
-            <th className="p-3 text-left font-medium">Holders</th>
-            <th className="p-3 text-left font-medium">Prompted By</th>
-            <th className="p-3 text-left font-medium">Action</th>
+            <th className="p-4 text-left font-medium">DAO</th>
+            <th className="p-4 text-left font-medium">Price Info</th>
+            <th className="p-4 text-left font-medium">Price History</th>
+            <th className="p-4 text-left font-medium">Holders</th>
+            <th className="p-4 text-left font-medium">Prompted By</th>
+            <th className="p-4 text-left font-medium">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -98,12 +90,19 @@ export const DAOTable = ({
             const token = tokens?.find((t) => t.dao_id === dao.id);
             const tokenPrice = tokenPrices?.[dao.id];
             const dexPrincipal = getDexPrincipal(dao);
+            const tradeData = trades[dao.id];
+            const isPriceUp =
+              tokenPrice?.price24hChanges != null &&
+              tokenPrice.price24hChanges > 0;
+            const isPriceDown =
+              tokenPrice?.price24hChanges != null &&
+              tokenPrice.price24hChanges < 0;
 
             return (
-              <tr key={dao.id} className="border-b">
-                <td className="p-3">
+              <tr key={dao.id} className="border-b hover:bg-zinc-900">
+                <td className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="relative h-10 w-10 overflow-hidden rounded-lg">
+                    <div className="relative h-12 w-12 overflow-hidden rounded-lg">
                       <Image
                         src={
                           token?.image_url ||
@@ -111,8 +110,8 @@ export const DAOTable = ({
                           "/placeholder.svg"
                         }
                         alt={dao.name}
-                        width={40}
-                        height={40}
+                        width={48}
+                        height={48}
                         className="object-cover"
                       />
                     </div>
@@ -135,58 +134,81 @@ export const DAOTable = ({
                     </div>
                   </div>
                 </td>
-                <td className="p-3">
+                <td className="p-4">
                   {isFetchingPrice ? (
                     <Loader />
                   ) : (
-                    <span>${tokenPrice?.price?.toFixed(8) || "0.00"}</span>
-                  )}
-                </td>
-                <td className="p-3">
-                  {isFetchingPrice ? (
-                    <Loader />
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      {tokenPrice?.price24hChanges != null ? (
-                        <>
-                          {tokenPrice.price24hChanges > 0 ? (
-                            <ArrowUp className="h-3 w-3 text-green-500" />
-                          ) : tokenPrice.price24hChanges < 0 ? (
-                            <ArrowDown className="h-3 w-3 text-red-500" />
+                    <div className="space-y-1">
+                      <div className="text-lg font-semibold">
+                        Token Price: ${tokenPrice?.price?.toFixed(8) || "0.00"}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`flex items-center gap-1 ${
+                            isPriceUp
+                              ? "text-green-500"
+                              : isPriceDown
+                              ? "text-red-500"
+                              : "text-gray-500"
+                          }`}
+                        >
+                          24hrChange:
+                          {isPriceUp ? (
+                            <ArrowUp className="h-3 w-3" />
+                          ) : isPriceDown ? (
+                            <ArrowDown className="h-3 w-3" />
                           ) : null}
-                          <span
-                            className={
-                              tokenPrice.price24hChanges > 0
-                                ? "text-green-500"
-                                : tokenPrice.price24hChanges < 0
-                                ? "text-red-500"
-                                : ""
-                            }
-                          >
-                            {Math.abs(tokenPrice.price24hChanges).toFixed(2)}%
+                          <span>
+                            {tokenPrice?.price24hChanges != null
+                              ? `${Math.abs(tokenPrice.price24hChanges).toFixed(
+                                  2
+                                )}%`
+                              : "0.00%"}
                           </span>
-                        </>
-                      ) : (
-                        "0.00%"
-                      )}
+                        </div>
+                        <span className="text-gray-400">•</span>
+                        <span className="text-gray-600">
+                          MCap: ${formatNumber(tokenPrice?.marketCap || 0)}
+                        </span>
+                      </div>
                     </div>
                   )}
                 </td>
-                <td className="p-3">
+                <td className="p-4">
+                  <div className="h-20 w-40">
+                    {tradeData?.isLoading ? (
+                      <div className="flex h-full items-center justify-center">
+                        <Loader />
+                      </div>
+                    ) : tradeData?.data.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={tradeData.data}>
+                          <Line
+                            type="monotone"
+                            dataKey="price"
+                            stroke={getChartColor(tradeData.data)}
+                            dot={false}
+                            strokeWidth={2}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-muted-foreground">
+                        No trades
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td className="p-4">
                   {isFetchingPrice ? (
                     <Loader />
                   ) : (
-                    <span>${formatNumber(tokenPrice?.marketCap || 0)}</span>
+                    <span className="text-gray-600">
+                      {tokenPrice?.holders || 0}
+                    </span>
                   )}
                 </td>
-                <td className="p-3">
-                  {isFetchingPrice ? (
-                    <Loader />
-                  ) : (
-                    <span>{tokenPrice?.holders || 0}</span>
-                  )}
-                </td>
-                <td className="p-3">
+                <td className="p-4">
                   {dao.user_id ? (
                     <Link
                       href={`https://x.com/i/user/${dao.user_id}`}
@@ -200,7 +222,7 @@ export const DAOTable = ({
                     <span className="text-muted-foreground">-</span>
                   )}
                 </td>
-                <td className="p-3">
+                <td className="p-4">
                   {dexPrincipal ? (
                     <Button size="sm" onClick={() => handleParticipate(dao.id)}>
                       Participate
@@ -232,3 +254,5 @@ export const DAOTable = ({
     </div>
   );
 };
+
+export default DAOTable;
