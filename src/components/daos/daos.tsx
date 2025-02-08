@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DAOTable } from "./daos-table";
-import type { SortField } from "@/types/supabase";
+import type { DAO, SortField } from "@/types/supabase";
 import { createDaoAgent } from "../agents/dao-agent";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -75,8 +75,8 @@ export default function DAOs() {
   });
 
   // Helper function to get dex principal and token contract
-  const getTokenContract = useCallback((dao: any) => {
-    const dexExtension = dao.extensions?.find((ext: any) => ext.type === "dex");
+  const getTokenContract = useCallback((dao: DAO) => {
+    const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
     const dexPrincipal = dexExtension?.contract_principal;
     return dexPrincipal ? dexPrincipal.replace(/-dex$/, "") : null;
   }, []);
