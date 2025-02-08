@@ -144,6 +144,7 @@ export const fetchTokenPrices = async (
             if (extension && token) {
                 try {
                     const { data } = await sdkFaktory.getToken(extension.contract_principal!);
+                    console.log(data)
                     prices[dao.id] = {
                         price: data.priceUsd ? Number(data.priceUsd) : 0,
                         marketCap: data.marketCap ? Number(data.marketCap) : 0,
