@@ -24,7 +24,7 @@ import {
 
 export default function DAOs() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<SortField>("created_at");
+  const [sortField, setSortField] = useState<SortField>("price");
   const { toast } = useToast();
   const agentInitialized = useRef(false);
 
@@ -90,9 +90,7 @@ export default function DAOs() {
         queryKey: ["tokenTrades", tokenContract],
         queryFn: async () => {
           if (!tokenContract) return [];
-          // console.log("Fetching trades for contract:", tokenContract);
           const trades = await fetchTokenTrades(tokenContract);
-          // console.log("Trades data:", trades);
           return trades
             .map((trade) => ({
               timestamp: trade.timestamp,
@@ -117,9 +115,14 @@ export default function DAOs() {
       ) || [];
 
     return filtered.sort((a, b) => {
-      if (sortField === "created_at") {
+      if (sortField === "created_at" || sortField === "newest") {
         return (
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      }
+      if (sortField === "oldest") {
+        return (
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         );
       }
 
@@ -162,7 +165,9 @@ export default function DAOs() {
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="created_at">Date Added</SelectItem>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
+                <SelectItem value="holders">Holders</SelectItem>
                 <SelectItem value="price">Token Price</SelectItem>
                 <SelectItem value="price24hChanges">24h Change</SelectItem>
                 <SelectItem value="marketCap">Market Cap</SelectItem>
