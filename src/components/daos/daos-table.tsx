@@ -198,11 +198,14 @@ export const DAOTable = ({
             </div>
             <div>
               {dexPrincipal ? (
-                <Button size="sm" onClick={() => handleParticipate(dao.id)}>
+                <Button
+                  size="default"
+                  onClick={() => handleParticipate(dao.id)}
+                >
                   Participate
                 </Button>
               ) : (
-                <Button size="sm" disabled>
+                <Button size="default" disabled>
                   Participate
                 </Button>
               )}
