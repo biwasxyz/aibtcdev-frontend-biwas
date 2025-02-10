@@ -91,6 +91,7 @@ export default function DAOs() {
         queryFn: async () => {
           if (!tokenContract) return [];
           const trades = await fetchTokenTrades(tokenContract);
+          console.log("Trades for", tokenContract, trades);
           return trades
             .map((trade) => ({
               timestamp: trade.timestamp,

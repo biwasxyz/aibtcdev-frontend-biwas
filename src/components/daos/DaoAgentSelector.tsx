@@ -18,6 +18,7 @@ import {
 import { AgentAvatar } from "../reusables/AgentAvatar";
 import { AgentBalance } from "../reusables/AgentBalance";
 import { TransferTokenModal } from "./TransferTokenModal";
+import { SuccessModal } from "../reusables/SuccessModal";
 import type { Wallet, DAO, Token } from "@/types/supabase";
 
 interface AgentSelectorSheetProps {
@@ -57,6 +58,10 @@ export function AgentSelectorSheet({
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [participatingAgentId, setParticipatingAgentId] = useState<
+    string | null
+  >(null);
   const [selectedTransferAgent, setSelectedTransferAgent] = useState<{
     id: string;
     name: string;
@@ -149,10 +154,8 @@ export function AgentSelectorSheet({
     try {
       const { error } = await supabase.from("tasks").insert(tasks);
       if (error) throw error;
-      toast({
-        title: `Agent participated in ${tokenSymbol} DAO`,
-        description: `Agent will now actively send proposals and vote on proposals for ${tokenSymbol} DAO`,
-      });
+      setParticipatingAgentId(agentId);
+      setSuccessModalOpen(true);
     } catch (error) {
       console.error("Error creating tasks:", error);
       toast({
@@ -339,6 +342,14 @@ export function AgentSelectorSheet({
         onSuccess={handleTransferSuccess}
         onError={handleTransferError}
       />
+      {requiredTokenSymbol && participatingAgentId && (
+        <SuccessModal
+          isOpen={successModalOpen}
+          onOpenChange={setSuccessModalOpen}
+          agentId={participatingAgentId}
+          tokenSymbol={requiredTokenSymbol}
+        />
+      )}
     </>
   );
 }
