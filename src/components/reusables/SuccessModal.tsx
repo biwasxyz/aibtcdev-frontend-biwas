@@ -14,14 +14,12 @@ interface SuccessModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   agentId: string;
-  tokenSymbol: string;
 }
 
 export function SuccessModal({
   isOpen,
   onOpenChange,
   agentId,
-  tokenSymbol,
 }: SuccessModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -31,11 +29,11 @@ export function SuccessModal({
             <CheckCircle2 className="h-6 w-6 text-green-600" />
           </div>
           <DialogTitle className="text-center pt-4">
-            Successfully Joined {tokenSymbol} DAO
+            Successfully participated in DAO.
           </DialogTitle>
           <DialogDescription className="text-center">
             Your agent will now actively participate by sending proposals and
-            voting in the {tokenSymbol} DAO.
+            voting every hour.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:justify-center">

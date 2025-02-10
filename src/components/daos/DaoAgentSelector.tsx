@@ -347,7 +347,6 @@ export function AgentSelectorSheet({
           isOpen={successModalOpen}
           onOpenChange={setSuccessModalOpen}
           agentId={participatingAgentId}
-          tokenSymbol={requiredTokenSymbol}
         />
       )}
     </>
