@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getStacksAddress } from "@/lib/address";
+import AuthButton from "@/components/home/auth-button";
 
 interface ApplicationLayoutProps {
   children: React.ReactNode;
@@ -173,7 +174,7 @@ export default function ApplicationLayout({
           </div>
         </nav>
         <div className="w-1/4 flex justify-end">
-          {hasUser && (
+          {hasUser ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -202,6 +203,8 @@ export default function ApplicationLayout({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          ) : (
+            <AuthButton />
           )}
         </div>
       </div>
