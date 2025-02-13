@@ -21,7 +21,7 @@ export default function AgentsPage() {
   });
 
   const [showArchived, setShowArchived] = useState(false);
-  const { userId } = useSessionStore();
+  const { userId, accessToken } = useSessionStore();
   const { agentWallets, balances, fetchWallets } = useWalletStore();
   const { toast } = useToast();
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
@@ -38,6 +38,16 @@ export default function AgentsPage() {
       });
     }
   }, [userId, fetchWallets, toast]);
+
+  if (!accessToken) {
+    return (
+      <div className=" text-center">
+        <p className="text-muted-foreground">
+          Please connect your wallet to use agents
+        </p>
+      </div>
+    );
+  }
 
   if (isLoadingAgents) {
     return <div>Loading agents...</div>;

@@ -68,7 +68,7 @@ export default function StacksAuth() {
       }
 
       toast({
-        description: "Redirecting to dashboard...",
+        description: "connection succesfull...",
         variant: "default",
       });
 
@@ -135,7 +135,7 @@ export default function StacksAuth() {
       const success = await handleAuthentication(stxAddress, signature);
 
       if (success) {
-        router.push("/daos");
+        window.location.reload();
       }
     } catch (error) {
       console.error("Authentication error:", error);
