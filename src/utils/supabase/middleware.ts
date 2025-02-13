@@ -47,7 +47,7 @@ export const updateSession = async (request: NextRequest) => {
     if (request.nextUrl.pathname.startsWith("/admin")) {
       if (userError || !user) {
         // If no user, redirect to login
-        return NextResponse.redirect(new URL("/", request.url));
+        return NextResponse.redirect(new URL("/daos", request.url));
       }
 
       // Check user role in profiles table
@@ -72,6 +72,11 @@ export const updateSession = async (request: NextRequest) => {
     // if (request.nextUrl.pathname.startsWith("/chat") && (userError || !user)) {
     //   return NextResponse.redirect(new URL("/", request.url));
     // }
+
+    // Redirect root route to /daos
+    if (request.nextUrl.pathname === "/") {
+      return NextResponse.redirect(new URL("/daos", request.url));
+    }
 
     if (request.nextUrl.pathname.startsWith("/profile") && (userError || !user)) {
       return NextResponse.redirect(new URL("/", request.url))
