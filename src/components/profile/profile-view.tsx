@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { getStacksAddress } from "@/lib/address";
 
 interface Profile {
   id: string;
@@ -22,6 +23,7 @@ interface TelegramUser {
   profile_id: string | null;
 }
 
+const stacksAddress = getStacksAddress();
 export function ProfileView() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
@@ -210,9 +212,7 @@ export function ProfileView() {
                 Connected Wallet
               </label>
               <div className="font-mono text-sm bg-muted/30 p-2 rounded-md">
-                {profile?.email
-                  ? profile.email.split("@")[0].toUpperCase()
-                  : "No wallet connected"}
+                {stacksAddress}
               </div>
             </div>
           </CardContent>

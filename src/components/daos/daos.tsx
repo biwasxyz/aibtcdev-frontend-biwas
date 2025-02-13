@@ -1,12 +1,9 @@
 "use client";
-
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/utils/supabase/client";
 import { Loader2, Search } from "lucide-react";
 import { Heading } from "@/components/ui/heading";
-import { fetchTokenPrice } from "@/queries/daoQueries";
 import {
   Select,
   SelectContent,
@@ -15,101 +12,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DAOTable } from "./daos-table";
-import type { DAO, Token, SortField } from "@/types/supabase";
+import type { DAO, SortField } from "@/types/supabase";
 import { createDaoAgent } from "../agents/dao-agent";
 import { useToast } from "@/hooks/use-toast";
-
-const fetchDAOs = async (): Promise<DAO[]> => {
-  const { data: daosData, error: daosError } = await supabase
-    .from("daos")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .eq("is_broadcasted", true);
-
-  if (daosError) throw daosError;
-  if (!daosData) return [];
-
-  const { data: xUsersData, error: xUsersError } = await supabase
-    .from("x_users")
-    .select("id, user_id");
-
-  if (xUsersError) throw xUsersError;
-
-  const { data: extensionsData, error: extensionsError } = await supabase
-    .from("extensions")
-    .select("*");
-
-  if (extensionsError) throw extensionsError;
-
-  return daosData.map((dao) => {
-    const xUser = xUsersData?.find((user) => user.id === dao.author_id);
-    return {
-      ...dao,
-      user_id: xUser?.user_id,
-      extensions: extensionsData?.filter((cap) => cap.dao_id === dao.id) || [],
-    };
-  });
-};
-
-const fetchTokens = async (): Promise<Token[]> => {
-  const { data: tokensData, error: tokensError } = await supabase
-    .from("tokens")
-    .select("*");
-  if (tokensError) throw tokensError;
-  return tokensData || [];
-};
-
-const fetchTokenPrices = async (
-  daos: DAO[],
-  tokens: Token[]
-): Promise<
-  Record<
-    string,
-    {
-      price: number;
-      marketCap: number;
-      holders: number;
-      price24hChanges: number | null;
-    }
-  >
-> => {
-  const prices: Record<
-    string,
-    {
-      price: number;
-      marketCap: number;
-      holders: number;
-      price24hChanges: number | null;
-    }
-  > = {};
-
-  for (const dao of daos) {
-    const extension = dao.extensions?.find((ext) => ext.type === "dex");
-    const token = tokens?.find((t) => t.dao_id === dao.id);
-    if (extension && token) {
-      try {
-        const priceUsd = await fetchTokenPrice(extension.contract_principal!);
-        prices[dao.id] = priceUsd;
-      } catch (error) {
-        console.error(`Error fetching price for DAO ${dao.id}:`, error);
-        prices[dao.id] = {
-          price: 0,
-          marketCap: 0,
-          holders: 0,
-          price24hChanges: null,
-        };
-      }
-    }
-  }
-  return prices;
-};
+import {
+  fetchDAOs,
+  fetchTokens,
+  fetchTokenPrices,
+  fetchTokenTrades,
+} from "@/queries/daoQueries";
 
 export default function DAOs() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<SortField>("created_at");
+  const [sortField, setSortField] = useState<SortField>("price");
   const { toast } = useToast();
   const agentInitialized = useRef(false);
 
+  // Initialize DAO agent
   const initializeAgent = useCallback(async () => {
     if (agentInitialized.current) return;
 
@@ -132,25 +51,62 @@ export default function DAOs() {
     initializeAgent();
   }, [initializeAgent]);
 
+  // Fetch DAOs with TanStack Query
   const { data: daos, isLoading: isLoadingDAOs } = useQuery({
     queryKey: ["daos"],
     queryFn: fetchDAOs,
     staleTime: 600000, // 10 minutes
   });
 
+  // Fetch tokens with TanStack Query
   const { data: tokens } = useQuery({
     queryKey: ["tokens"],
     queryFn: fetchTokens,
     staleTime: 600000, // 10 minutes
   });
 
+  // Fetch token prices with TanStack Query
   const { data: tokenPrices, isFetching: isFetchingTokenPrices } = useQuery({
     queryKey: ["tokenPrices", daos, tokens],
     queryFn: () => fetchTokenPrices(daos || [], tokens || []),
     enabled: !!daos && !!tokens,
     staleTime: 600000, // 10 minutes
+    refetchInterval: 300000, // Refetch every 5 minutes for price updates
   });
 
+  // Helper function to get dex principal and token contract
+  const getTokenContract = useCallback((dao: DAO) => {
+    const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
+    const dexPrincipal = dexExtension?.contract_principal;
+    return dexPrincipal ? dexPrincipal.replace(/-dex$/, "") : null;
+  }, []);
+
+  // Fetch token trades for all DAOs
+  const tradeQueries = useQueries({
+    queries: (daos || []).map((dao) => {
+      const tokenContract = getTokenContract(dao);
+
+      return {
+        queryKey: ["tokenTrades", tokenContract],
+        queryFn: async () => {
+          if (!tokenContract) return [];
+          const trades = await fetchTokenTrades(tokenContract);
+          console.log("Trades for", tokenContract, trades);
+          return trades
+            .map((trade) => ({
+              timestamp: trade.timestamp,
+              price: trade.pricePerToken,
+            }))
+            .sort((a, b) => a.timestamp - b.timestamp);
+        },
+        enabled: !!tokenContract,
+        staleTime: 300000, // 5 minutes
+        cacheTime: 600000, // 10 minutes
+      };
+    }),
+  });
+
+  // Filter and sort DAOs
   const filteredAndSortedDAOs = (() => {
     const filtered =
       daos?.filter(
@@ -160,9 +116,14 @@ export default function DAOs() {
       ) || [];
 
     return filtered.sort((a, b) => {
-      if (sortField === "created_at") {
+      if (sortField === "created_at" || sortField === "newest") {
         return (
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      }
+      if (sortField === "oldest") {
+        return (
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         );
       }
 
@@ -171,6 +132,17 @@ export default function DAOs() {
       return valueB - valueA;
     });
   })();
+
+  // Create a map of trades data for each DAO
+  const tradesMap = Object.fromEntries(
+    tradeQueries.map((query, index) => [
+      daos?.[index]?.id,
+      {
+        data: query.data || [],
+        isLoading: query.isLoading,
+      },
+    ])
+  );
 
   return (
     <div className="container mx-auto space-y-6 px-4 py-6">
@@ -194,7 +166,9 @@ export default function DAOs() {
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="created_at">Date Added</SelectItem>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
+                <SelectItem value="holders">Holders</SelectItem>
                 <SelectItem value="price">Token Price</SelectItem>
                 <SelectItem value="price24hChanges">24h Change</SelectItem>
                 <SelectItem value="marketCap">Market Cap</SelectItem>
@@ -223,6 +197,7 @@ export default function DAOs() {
           tokens={tokens}
           tokenPrices={tokenPrices}
           isFetchingPrice={isFetchingTokenPrices}
+          trades={tradesMap}
         />
       )}
 

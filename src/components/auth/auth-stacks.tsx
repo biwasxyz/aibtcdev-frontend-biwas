@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +27,6 @@ export default function StacksAuth() {
   const [showTerms, setShowTerms] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [userData, setUserData] = useState<any>(null);
-  const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -68,7 +66,7 @@ export default function StacksAuth() {
       }
 
       toast({
-        description: "Redirecting to dashboard...",
+        description: "connection succesfull...",
         variant: "default",
       });
 
@@ -135,7 +133,7 @@ export default function StacksAuth() {
       const success = await handleAuthentication(stxAddress, signature);
 
       if (success) {
-        router.push("/daos");
+        window.location.reload();
       }
     } catch (error) {
       console.error("Authentication error:", error);
