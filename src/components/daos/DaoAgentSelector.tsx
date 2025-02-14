@@ -152,7 +152,8 @@ export function AgentSelectorSheet({
       {
         name: "Vote on proposal",
         prompt: `Analyze the active proposals in the ${tokenSymbol} DAO and vote on the most beneficial one based on:
-        - Alignment with the DAO's mission.
+        - Alignment with the DAO's mission:\n
+        ${daoMission}
         - Feasibility of execution.
         - Potential positive impact.
         - Required resources and funding.
