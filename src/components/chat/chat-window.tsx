@@ -32,48 +32,34 @@ export function ChatWindow() {
 
   const memoizedConnect = useCallback(
     (token: string) => {
-      console.log("Attempting to connect...");
-      connect(token);
+      if (!isConnected && token) {
+        console.log("Attempting to connect...");
+        connect(token);
+      }
     },
-    [connect]
+    [connect, isConnected]
   );
-
-  const memoizedDisconnect = useCallback(() => {
-    console.log("Disconnecting...");
-    disconnect();
-  }, [disconnect]);
 
   useEffect(() => {
     if (!accessToken) return;
 
-    const connectWithDelay = () => {
-      setTimeout(() => {
-        memoizedConnect(accessToken);
-      }, 3000); //add 3 seconds delay before connecting
-    };
-
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        // console.log("Page is now visible. Checking connection...");
-        if (!isConnected) {
-          // console.log("Not connected. Attempting to reconnect...");
-          connectWithDelay();
-        } else {
-          // console.log("Already connected. No action needed.");
-        }
+      if (document.visibilityState === "visible" && !isConnected) {
+        memoizedConnect(accessToken);
       }
     };
 
-    connectWithDelay();
+    // Initial connection
+    memoizedConnect(accessToken);
+
+    // Add visibility change listener
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
+    // Cleanup
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      if (process.env.NODE_ENV !== "development") {
-        memoizedDisconnect();
-      }
     };
-  }, [accessToken, memoizedConnect, memoizedDisconnect, isConnected]);
+  }, [accessToken, memoizedConnect, isConnected]);
 
   if (!accessToken) {
     return (
