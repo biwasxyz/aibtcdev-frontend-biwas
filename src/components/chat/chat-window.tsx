@@ -23,7 +23,6 @@ export function ChatWindow() {
     selectedAgentId,
     setSelectedAgent,
     connect,
-    disconnect,
     activeThreadId,
   } = useChatStore();
 
