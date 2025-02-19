@@ -47,13 +47,9 @@ export function ChatWindow() {
     if (!accessToken) return;
 
     const connectWithDelay = () => {
-      if (process.env.NODE_ENV === "development") {
-        setTimeout(() => {
-          memoizedConnect(accessToken);
-        }, 100);
-      } else {
+      setTimeout(() => {
         memoizedConnect(accessToken);
-      }
+      }, 100);
     };
 
     const handleVisibilityChange = () => {
