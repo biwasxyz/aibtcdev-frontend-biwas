@@ -49,7 +49,7 @@ export function ChatWindow() {
     const connectWithDelay = () => {
       setTimeout(() => {
         memoizedConnect(accessToken);
-      }, 100);
+      }, 3000); //add 3 seconds delay before connecting
     };
 
     const handleVisibilityChange = () => {
