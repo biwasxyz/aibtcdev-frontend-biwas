@@ -160,7 +160,7 @@ export default function ApplicationLayout({
                   key={item.id}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                    "flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg transition-colors",
                     isActive
                       ? "text-white"
                       : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
@@ -179,9 +179,9 @@ export default function ApplicationLayout({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="h-10 px-4 flex items-center gap-2"
+                  className="h-8 px-3 flex items-center gap-2"
                 >
-                  <User className="h-5 w-5 text-zinc-400" />
+                  <User className="h-6 w-6 text-zinc-400" />
                   <span className="text-sm text-white">
                     {truncateAddress(stacksAddress)}
                   </span>
