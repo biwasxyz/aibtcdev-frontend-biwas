@@ -110,7 +110,6 @@ export default function ApplicationLayout({
           />
         </div>
         <div className="flex items-center gap-2">
-          <SocialLinks />
           {hasUser && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -175,10 +174,10 @@ export default function ApplicationLayout({
                 </Link>
               );
             })}
+            <SocialLinks />
           </div>
         </nav>
         <div className="w-1/4 flex justify-end items-center gap-4">
-          <SocialLinks />
           {hasUser ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

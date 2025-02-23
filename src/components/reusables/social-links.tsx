@@ -1,23 +1,15 @@
-import Link from "next/link";
-import { BsGithub, BsTwitterX, BsMessenger, BsFileText } from "react-icons/bs";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { BsGithub, BsTwitterX, BsDiscord, BsFileText } from "react-icons/bs";
 
 export function SocialLinks() {
   const links = [
     {
       name: "GitHub",
-      href: "https://github.com/aibtc",
+      href: "https://github.com/aibtcdev",
       icon: BsGithub,
     },
     {
       name: "AIBTC on X",
-      href: "https://x.com/aibtc",
+      href: "https://x.com/aibtcdev",
       icon: BsTwitterX,
     },
     {
@@ -27,8 +19,8 @@ export function SocialLinks() {
     },
     {
       name: "Discord",
-      href: "https://discord.gg/aibtc",
-      icon: BsMessenger,
+      href: "https://discord.com/invite/Z59Z3FNbEX",
+      icon: BsDiscord,
     },
     {
       name: "Docs",
@@ -38,50 +30,32 @@ export function SocialLinks() {
   ];
 
   return (
-    <div className="flex items-center gap-2">
-      {/* Desktop - Show all icons */}
-      <div className="hidden md:flex items-center gap-2">
-        {links.map((link) => (
-          <Button
-            key={link.href}
-            variant="ghost"
-            size="icon"
-            asChild
-            className="h-9 w-9 text-zinc-400 hover:text-white"
-          >
-            <Link href={link.href} target="_blank" rel="noopener noreferrer">
-              <link.icon className="h-5 w-5" />
-              <span className="sr-only">{link.name}</span>
-            </Link>
-          </Button>
-        ))}
-      </div>
+    <div className="relative group inline-block">
+      <button className="flex items-center space-x-2 px-4 py-2 text-zinc-400 hover:text-white">
+        <span>Links</span>
+      </button>
 
-      {/* Mobile - Show in dropdown */}
-      <div className="md:hidden">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-zinc-400">
-              <BsMessenger className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {links.map((link) => (
-              <DropdownMenuItem key={link.href} asChild>
-                <Link
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center"
-                >
-                  <link.icon className="mr-2 h-4 w-4" />
-                  <span>{link.name}</span>
-                </Link>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="hidden group-hover:block absolute z-50 right-0 mt-2 w-48 rounded-md shadow-lg bg-zinc-800 ring-1 ring-black ring-opacity-5">
+        <div className="py-1" role="menu" aria-orientation="vertical">
+          {links.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-white cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <link.icon className="mr-2 h-4 w-4" />
+              <span>{link.name}</span>
+            </a>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
+
+export default SocialLinks;
