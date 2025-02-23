@@ -110,7 +110,7 @@ export default function ApplicationLayout({
           />
         </div>
         <div className="flex items-center gap-2">
-          {hasUser && (
+          {hasUser ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-zinc-400">
@@ -134,6 +134,8 @@ export default function ApplicationLayout({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          ) : (
+            <AuthButton />
           )}
         </div>
       </div>
