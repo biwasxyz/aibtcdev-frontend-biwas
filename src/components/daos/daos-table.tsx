@@ -10,13 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { DAO, Token } from "@/types/supabase";
 import { Loader } from "../reusables/loader";
 import { AgentSelectorSheet } from "./DaoAgentSelector";
-import {
-  LineChart,
-  Line,
-  ResponsiveContainer,
-  Tooltip as RechartsTooltip,
-  XAxis,
-} from "recharts";
+import { LineChart, Line, Tooltip as RechartsTooltip, XAxis } from "recharts";
 
 interface DAOTableProps {
   daos: DAO[];
