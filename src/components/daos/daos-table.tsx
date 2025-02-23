@@ -93,41 +93,37 @@ export const DAOTable = ({
     }
     if (tradeData.data.length > 0) {
       return (
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={tradeData.data}>
-            <XAxis dataKey="timestamp" hide />
-            <RechartsTooltip
-              content={({ active, payload }) => {
-                if (
-                  active &&
-                  payload &&
-                  payload.length > 0 &&
-                  payload[0].value !== undefined
-                ) {
-                  return (
-                    <div className="bg-popover text-popover-foreground rounded-md shadow-md p-2 text-xs">
-                      <p>Price: ${Number(payload[0].value).toFixed(4)}</p>
-                      <p>
-                        Time:{" "}
-                        {new Date(
-                          payload[0].payload.timestamp
-                        ).toLocaleString()}
-                      </p>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Line
-              type="monotone"
-              dataKey="price"
-              stroke={getChartColor(tradeData.data)}
-              dot={false}
-              strokeWidth={2}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <LineChart data={tradeData.data} width={200} height={100}>
+          <XAxis dataKey="timestamp" className="hidden" />
+          <RechartsTooltip
+            content={({ active, payload }) => {
+              if (
+                active &&
+                payload &&
+                payload.length > 0 &&
+                payload[0].value !== undefined
+              ) {
+                return (
+                  <div className="bg-popover text-popover-foreground rounded-md shadow-md p-2 text-xs">
+                    <p>Price: ${Number(payload[0].value).toFixed(4)}</p>
+                    <p>
+                      Time:{" "}
+                      {new Date(payload[0].payload.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                );
+              }
+              return null;
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="price"
+            stroke={getChartColor(tradeData.data)}
+            dot={false}
+            strokeWidth={2}
+          />
+        </LineChart>
       );
     }
     return (
