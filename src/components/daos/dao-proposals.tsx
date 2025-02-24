@@ -33,10 +33,10 @@ import {
   Link as LinkIcon,
   Code,
   DollarSign,
-  ExternalLink,
+  // ExternalLink,
   Filter,
   Hash,
-  Building,
+  // Building,
   Wallet,
 } from "lucide-react";
 
