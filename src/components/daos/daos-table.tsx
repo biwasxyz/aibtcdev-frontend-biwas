@@ -1,16 +1,15 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { BsTwitterX } from "react-icons/bs";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { DAO, Token } from "@/types/supabase";
 import { Loader } from "../reusables/loader";
-import { AgentSelectorSheet } from "./DaoAgentSelector";
 import { LineChart, Line, Tooltip as RechartsTooltip, XAxis } from "recharts";
+import { DAOChatButton } from "./dao-chat-button";
 
 interface DAOTableProps {
   daos: DAO[];
@@ -48,24 +47,10 @@ export const DAOTable = ({
   isFetchingPrice,
   trades,
 }: DAOTableProps) => {
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
-  const [participatingDaoId, setParticipatingDaoId] = useState<string | null>(
-    null
-  );
-
   const getDexPrincipal = useCallback((dao: DAO) => {
     const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
     return dexExtension?.contract_principal || "";
   }, []);
-
-  const handleParticipate = (daoId: string) => {
-    setParticipatingDaoId(daoId);
-  };
-
-  const handleAgentSelect = (agentId: string | null) => {
-    setSelectedAgentId(agentId);
-    setParticipatingDaoId(null);
-  };
 
   const getChartColor = (data: Array<{ timestamp: number; price: number }>) => {
     if (data.length < 2) return "#8884d8";
@@ -229,17 +214,19 @@ export const DAOTable = ({
             </div>
             <div>
               {dexPrincipal ? (
-                <Button
-                  size="default"
-                  onClick={() => handleParticipate(dao.id)}
-                  className="bg-primary"
-                >
-                  Participate
-                </Button>
+                <DAOChatButton
+                  daoId={dao.id}
+                  dao={dao}
+                  token={token}
+                  className="bg-primary hover:bg-primary/90"
+                />
               ) : (
-                <Button size="default" disabled>
-                  Participate
-                </Button>
+                <DAOChatButton
+                  daoId={dao.id}
+                  dao={dao}
+                  token={token}
+                  disabled
+                />
               )}
             </div>
           </div>
@@ -292,6 +279,7 @@ export const DAOTable = ({
                           src={
                             token?.image_url ||
                             dao.image_url ||
+                            "/placeholder.svg" ||
                             "/placeholder.svg"
                           }
                           alt={dao.name}
@@ -395,17 +383,21 @@ export const DAOTable = ({
                   </td>
                   <td className="p-4 text-center">
                     {dexPrincipal ? (
-                      <Button
+                      <DAOChatButton
+                        daoId={dao.id}
+                        dao={dao}
+                        token={token}
                         size="sm"
-                        onClick={() => handleParticipate(dao.id)}
-                        className="bg-primary hover:bg-secondary"
-                      >
-                        Participate
-                      </Button>
+                        className="bg-primary hover:bg-primary/90"
+                      />
                     ) : (
-                      <Button size="sm" disabled>
-                        Participate
-                      </Button>
+                      <DAOChatButton
+                        daoId={dao.id}
+                        dao={dao}
+                        token={token}
+                        size="sm"
+                        disabled
+                      />
                     )}
                   </td>
                 </tr>
@@ -415,19 +407,6 @@ export const DAOTable = ({
         </table>
       </div>
       <div className="md:hidden space-y-4">{daos.map(renderDAOCard)}</div>
-      <AgentSelectorSheet
-        selectedAgentId={selectedAgentId}
-        onSelect={handleAgentSelect}
-        open={!!participatingDaoId}
-        requiredTokenSymbol={
-          tokens?.find((t) => t.dao_id === participatingDaoId)?.symbol
-        }
-        onOpenChange={(open) => {
-          if (!open) setParticipatingDaoId(null);
-        }}
-        daos={daos}
-        tokens={tokens}
-      />
     </div>
   );
 };
