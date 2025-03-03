@@ -58,7 +58,6 @@ export const DAOTable = ({
   daos,
   tokens,
   tokenPrices,
-  isFetchingPrice,
   trades,
 }: DAOTableProps) => {
   const getDexPrincipal = useCallback((dao: DAO) => {
