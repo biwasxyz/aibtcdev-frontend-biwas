@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback } from "react";
-import { BsTwitterX } from "react-icons/bs";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -174,7 +173,8 @@ export const DAOTable = ({
                   src={
                     token?.image_url ||
                     dao.image_url ||
-                    "/placeholder.svg?height=40&width=40"
+                    "/placeholder.svg?height=40&width=40" ||
+                    "/placeholder.svg"
                   }
                   alt={dao.name}
                   width={40}
@@ -207,25 +207,6 @@ export const DAOTable = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {dao.user_id && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link
-                        href={`https://x.com/i/user/${dao.user_id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-primary"
-                      >
-                        <BsTwitterX className="h-3.5 w-3.5" />
-                      </Link>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>View on X</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
               <DAOChatButton
                 daoId={dao.id}
                 dao={dao}
@@ -323,7 +304,6 @@ export const DAOTable = ({
               <th className="p-3 text-right font-medium text-xs">24h Change</th>
               <th className="p-3 text-right font-medium text-xs">Market Cap</th>
               <th className="p-3 text-right font-medium text-xs">Holders</th>
-              <th className="p-3 text-center font-medium text-xs">Social</th>
               <th className="p-3 text-center font-medium text-xs">Action</th>
             </tr>
           </thead>
@@ -346,7 +326,8 @@ export const DAOTable = ({
                           src={
                             token?.image_url ||
                             dao.image_url ||
-                            "/placeholder.svg?height=32&width=32"
+                            "/placeholder.svg?height=32&width=32" ||
+                            "/placeholder.svg"
                           }
                           alt={dao.name}
                           width={32}
@@ -427,31 +408,6 @@ export const DAOTable = ({
                     ) : (
                       tokenPrice?.holders?.toLocaleString() || 0
                     )}
-                  </td>
-                  <td className="p-3">
-                    <div className="flex justify-center">
-                      {dao.user_id ? (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Link
-                                href={`https://x.com/i/user/${dao.user_id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-primary"
-                              >
-                                <BsTwitterX className="h-4 w-4" />
-                              </Link>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>View on X</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </div>
                   </td>
                   <td className="p-3">
                     <div className="flex justify-center">
