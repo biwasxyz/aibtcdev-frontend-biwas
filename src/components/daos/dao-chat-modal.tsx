@@ -15,6 +15,7 @@ import { useSessionStore } from "@/store/session";
 import { fetchProposals } from "@/queries/daoQueries";
 import DAOProposals from "@/components/daos/dao-proposals";
 import type { DAO, Token } from "@/types/supabase";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface DAOChatModalProps {
   daoId: string;
@@ -208,15 +209,34 @@ export function DAOChatModal({
         )}
       </DialogTrigger>
       <DialogContent className="max-w-[90vw] w-[90vw] h-[90vh] p-0 rounded-lg">
-        <div className="grid grid-cols-2 h-full overflow-hidden">
-          {/* Chat Section - Left Side */}
-          <div className="h-full border-r flex flex-col overflow-auto">
-            {renderChatSection()}
+        <div className="h-full overflow-hidden">
+          {/* Desktop view */}
+          <div className="hidden md:grid md:grid-cols-2 h-full">
+            {/* Chat Section - Left Side */}
+            <div className="h-full border-r flex flex-col overflow-auto">
+              {renderChatSection()}
+            </div>
+
+            {/* Proposals Section - Right Side */}
+            <div className="h-full flex flex-col overflow-auto">
+              {renderProposalsSection()}
+            </div>
           </div>
 
-          {/* Proposals Section - Right Side */}
-          <div className="h-full flex flex-col overflow-auto">
-            {renderProposalsSection()}
+          {/* Mobile view */}
+          <div className="md:hidden h-full">
+            <Tabs defaultValue="chat" className="h-full flex flex-col">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="chat">Chat</TabsTrigger>
+                <TabsTrigger value="proposals">Proposals</TabsTrigger>
+              </TabsList>
+              <TabsContent value="chat" className="flex-1 overflow-auto">
+                {renderChatSection()}
+              </TabsContent>
+              <TabsContent value="proposals" className="flex-1 overflow-auto">
+                {renderProposalsSection()}
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </DialogContent>
