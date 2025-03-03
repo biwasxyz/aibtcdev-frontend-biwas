@@ -7,9 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, MessageSquare } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageList } from "@/components/chat/message-list";
 import AgentWalletSelector from "@/components/chat/agent-selector";
@@ -110,8 +108,8 @@ export function DAOChatModal({
 
     if (!activeThreadId) {
       return (
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center space-y-4 p-4">
+        <div className="flex items-center justify-center h-full backdrop-blur-sm">
+          <div className="text-center space-y-4 p-4 -mt-20">
             <div className="flex justify-center gap-3">
               <CreateThreadButton />
             </div>
@@ -122,9 +120,9 @@ export function DAOChatModal({
 
     return (
       <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between px-4 h-14 backdrop-blur-sm shadow-sm z-10">
-          <div className="flex items-center gap-2 overflow-hidden min-w-0 flex-1">
+        {/* Header - fixed height */}
+        <div className="flex-shrink-0 h-14 flex items-center justify-between px-4 shadow-md bg-background z-10">
+          <div className="flex items-center gap-2  min-w-0 flex-1">
             <div>
               <AgentWalletSelector
                 selectedAgentId={selectedAgentId}
@@ -139,9 +137,9 @@ export function DAOChatModal({
           </div>
         </div>
 
-        {/* Message list */}
-        <ScrollArea className="flex-1 w-full">
-          <div className="flex flex-col justify-end min-h-full w-full p-4">
+        {/* Middle scrollable area - takes remaining space */}
+        <div className="flex-1 overflow-auto">
+          <div className="p-4">
             {chatError && (
               <Alert variant="destructive" className="my-2">
                 <AlertDescription>{chatError}</AlertDescription>
@@ -149,10 +147,10 @@ export function DAOChatModal({
             )}
             <MessageList messages={threadMessages} />
           </div>
-        </ScrollArea>
+        </div>
 
-        {/* Input */}
-        <div className="sticky bottom-0 w-full p-4 bg-background/80 backdrop-blur-sm border-t">
+        {/* Footer - fixed height */}
+        <div className="flex-shrink-0 h-20 border-t px-4 py-3 bg-background z-10">
           <ChatInput
             selectedAgentId={selectedAgentId}
             onAgentSelect={setSelectedAgent}
@@ -166,26 +164,37 @@ export function DAOChatModal({
   const renderProposalsSection = () => {
     if (isProposalsLoading) {
       return (
-        <div className="flex justify-center items-center min-h-[200px] w-full">
+        <div className="flex justify-center items-center h-full w-full">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       );
     }
 
     return (
-      <div className="p-4">
-        {dao && (
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-2">{dao.name}</h2>
-            {token && (
-              <div className="text-sm text-muted-foreground mb-2">
-                Token: ${token.symbol}
-              </div>
-            )}
-            <p className="text-sm text-muted-foreground">{dao.mission}</p>
+      <div className="flex flex-col h-full">
+        {/* Header - fixed height */}
+        <div className="flex-shrink-0 h-14 flex items-center justify-between px-4 shadow-md bg-background z-10">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <h2 className="text-lg font-semibold truncate">
+              {dao?.name || "DAO Information"}
+            </h2>
           </div>
-        )}
-        <DAOProposals proposals={proposals || []} />
+          {token && (
+            <div className="text-sm text-muted-foreground">
+              Token: ${token.symbol}
+            </div>
+          )}
+        </div>
+
+        {/* Middle scrollable area - takes remaining space */}
+        <div className="flex-1 overflow-auto">
+          <div className="p-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              {dao?.mission || "DAO mission and details will appear here."}
+            </p>
+            <DAOProposals proposals={proposals || []} />
+          </div>
+        </div>
       </div>
     );
   };
@@ -200,16 +209,15 @@ export function DAOChatModal({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-[90vw] w-[90vw] h-[85vh] p-0">
-        <div className="flex h-full">
+      <DialogContent className="max-w-[90vw] w-[90vw] h-[90vh] p-0 rounded-lg">
+        <div className="grid grid-cols-2 h-full overflow-hidden">
           {/* Chat Section - Left Side */}
-          <div className="w-1/2 h-full border-r">{renderChatSection()}</div>
-
-          {/* Separator */}
-          <Separator orientation="vertical" />
+          <div className="h-full border-r flex flex-col overflow-auto">
+            {renderChatSection()}
+          </div>
 
           {/* Proposals Section - Right Side */}
-          <div className="w-1/2 h-full overflow-auto">
+          <div className="h-full flex flex-col overflow-auto">
             {renderProposalsSection()}
           </div>
         </div>
