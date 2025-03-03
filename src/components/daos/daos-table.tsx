@@ -37,7 +37,7 @@ interface DAOTableProps {
       price24hChanges: number | null;
     }
   >;
-  isFetchingPrice?: boolean;
+  isFetchingPrice: boolean;
   trades: Record<
     string,
     {
@@ -58,6 +58,7 @@ export const DAOTable = ({
   daos,
   tokens,
   tokenPrices,
+  isFetchingPrice,
   trades,
 }: DAOTableProps) => {
   const getDexPrincipal = useCallback((dao: DAO) => {
@@ -164,8 +165,8 @@ export const DAOTable = ({
     const tradeData = trades[dao.id];
 
     return (
-      <Card key={dao.id} className="overflow-hidden">
-        <CardContent className="p-0">
+      <Card key={dao.id} className="overflow-hidden h-full">
+        <CardContent className="p-0 h-full flex flex-col">
           <div className="p-3 border-b flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative h-10 w-10 overflow-hidden rounded-md flex-shrink-0">
@@ -242,7 +243,10 @@ export const DAOTable = ({
             </p>
           </div>
 
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs
+            defaultValue="overview"
+            className="w-full flex-grow flex flex-col"
+          >
             <TabsList className="w-full grid grid-cols-2 rounded-none border-b h-9">
               <TabsTrigger value="overview" className="text-xs">
                 Overview
@@ -251,35 +255,52 @@ export const DAOTable = ({
                 Chart
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="overview" className="p-3 pt-2">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+            <TabsContent
+              value="overview"
+              className="p-3 pt-2 flex-grow flex flex-col justify-center"
+            >
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs h-full">
                 <div>
                   <div className="text-muted-foreground">Price</div>
                   <div className="font-medium">
-                    ${tokenPrice?.price?.toFixed(8) || "0.00000000"}
+                    {isFetchingPrice ? (
+                      <Loader />
+                    ) : (
+                      `$${tokenPrice?.price?.toFixed(8) || "0.00000000"}`
+                    )}
                   </div>
                 </div>
                 <div>
                   <div className="text-muted-foreground">24h Change</div>
                   <div className="font-medium">
-                    {renderPriceChange(tokenPrice?.price24hChanges)}
+                    {isFetchingPrice ? (
+                      <Loader />
+                    ) : (
+                      renderPriceChange(tokenPrice?.price24hChanges)
+                    )}
                   </div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">MC</div>
+                  <div className="text-muted-foreground">Market Cap</div>
                   <div className="font-medium">
-                    ${formatNumber(tokenPrice?.marketCap || 0)}
+                    {isFetchingPrice ? (
+                      <Loader />
+                    ) : (
+                      `$${formatNumber(tokenPrice?.marketCap || 0)}`
+                    )}
                   </div>
                 </div>
                 <div>
                   <div className="text-muted-foreground">Holders</div>
-                  <div className="font-medium">{tokenPrice?.holders || 0}</div>
+                  <div className="font-medium">
+                    {isFetchingPrice ? <Loader /> : tokenPrice?.holders || 0}
+                  </div>
                 </div>
               </div>
             </TabsContent>
             <TabsContent
               value="chart"
-              className="p-3 h-[100px] flex items-center"
+              className="p-3 flex-grow flex items-center justify-center"
             >
               {renderChart(tradeData)}
             </TabsContent>
@@ -297,14 +318,12 @@ export const DAOTable = ({
             <tr className="border-b bg-muted/50">
               <th className="p-3 text-left font-medium text-xs">DAO</th>
               <th className="p-3 text-left font-medium text-xs">Mission</th>
-              <th className="p-3 text-left font-medium text-xs">Chart</th>
+              <th className="p-3 text-left font-medium text-xs">Chart (7d)</th>
               <th className="p-3 text-right font-medium text-xs">Price</th>
               <th className="p-3 text-right font-medium text-xs">24h Change</th>
-              <th className="p-3 text-right font-medium text-xs">MC</th>
+              <th className="p-3 text-right font-medium text-xs">Market Cap</th>
               <th className="p-3 text-right font-medium text-xs">Holders</th>
-              <th className="p-3 text-center font-medium text-xs">
-                Prompted By
-              </th>
+              <th className="p-3 text-center font-medium text-xs">Social</th>
               <th className="p-3 text-center font-medium text-xs">Action</th>
             </tr>
           </thead>
@@ -380,18 +399,34 @@ export const DAOTable = ({
                     </div>
                   </td>
                   <td className="p-3 text-right font-medium">
-                    ${tokenPrice?.price?.toFixed(8) || "0.00000000"}
+                    {isFetchingPrice ? (
+                      <Loader />
+                    ) : (
+                      `$${tokenPrice?.price?.toFixed(8) || "0.00000000"}`
+                    )}
                   </td>
                   <td className="p-3 text-right">
                     <div className="flex justify-end">
-                      {renderPriceChange(tokenPrice?.price24hChanges)}
+                      {isFetchingPrice ? (
+                        <Loader />
+                      ) : (
+                        renderPriceChange(tokenPrice?.price24hChanges)
+                      )}
                     </div>
                   </td>
                   <td className="p-3 text-right font-medium">
-                    ${formatNumber(tokenPrice?.marketCap || 0)}
+                    {isFetchingPrice ? (
+                      <Loader />
+                    ) : (
+                      `$${formatNumber(tokenPrice?.marketCap || 0)}`
+                    )}
                   </td>
                   <td className="p-3 text-right font-medium">
-                    {tokenPrice?.holders?.toLocaleString() || 0}
+                    {isFetchingPrice ? (
+                      <Loader />
+                    ) : (
+                      tokenPrice?.holders?.toLocaleString() || 0
+                    )}
                   </td>
                   <td className="p-3">
                     <div className="flex justify-center">

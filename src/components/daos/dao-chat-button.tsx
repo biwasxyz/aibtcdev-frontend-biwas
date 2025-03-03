@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, type ButtonProps } from "@/components/ui/button";
-import { MessageSquare } from "lucide-react";
+import { Bot } from "lucide-react";
 import { DAOChatModal } from "./dao-chat-modal";
 import type { DAO, Token } from "@/types/supabase";
 
@@ -33,7 +33,7 @@ export function DAOChatButton({
           data-modal-trigger="dao-chat"
           {...props}
         >
-          <MessageSquare className="h-4 w-4" />
+          <Bot className="h-4 w-4" />
           <span>Participate</span>
         </Button>
       }
