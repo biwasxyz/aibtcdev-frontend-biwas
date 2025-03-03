@@ -1,8 +1,16 @@
 "use client";
 
+import type React from "react";
+
 import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, MessageSquare } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -209,6 +217,11 @@ export function DAOChatModal({
         )}
       </DialogTrigger>
       <DialogContent className="max-w-[90vw] w-[90vw] h-[90vh] p-0 rounded-lg">
+        <DialogTitle className="sr-only">DAO Chat and Proposals</DialogTitle>
+        <DialogDescription className="sr-only">
+          Chat with your agent to vote on, send, and create proposals for your
+          DAO
+        </DialogDescription>
         <div className="h-full overflow-hidden">
           {/* Desktop view */}
           <div className="hidden md:grid md:grid-cols-2 h-full">
