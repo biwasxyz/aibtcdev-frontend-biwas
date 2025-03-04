@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getStacksAddress } from "@/lib/address";
 import AuthButton from "@/components/home/auth-button";
-import { SocialLinks } from "@/components/reusables/social-links";
 
 interface ApplicationLayoutProps {
   children: React.ReactNode;
@@ -176,7 +175,6 @@ export default function ApplicationLayout({
                 </Link>
               );
             })}
-            <SocialLinks />
           </div>
         </nav>
         <div className="w-1/4 flex justify-end items-center gap-4">
