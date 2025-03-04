@@ -61,7 +61,9 @@ export const DAOTable = ({
   trades,
 }: DAOTableProps) => {
   const getDexPrincipal = useCallback((dao: DAO) => {
-    const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
+    const dexExtension = dao.extensions?.find(
+      (ext) => ext.type === "dex" || ext.type === "TOKEN_DEX"
+    );
     return dexExtension?.contract_principal || "";
   }, []);
 
@@ -174,6 +176,9 @@ export const DAOTable = ({
                     token?.image_url ||
                     dao.image_url ||
                     "/placeholder.svg?height=40&width=40" ||
+                    "/placeholder.svg" ||
+                    "/placeholder.svg" ||
+                    "/placeholder.svg" ||
                     "/placeholder.svg"
                   }
                   alt={dao.name}
@@ -293,13 +298,13 @@ export const DAOTable = ({
 
   return (
     <div className="space-y-4">
-      <div className="hidden md:block overflow-x-auto rounded-lg border">
-        <table className="w-full min-w-[1000px] border-collapse text-sm">
+      <div className="hidden md:block overflow-x-auto rounded-lg border w-full">
+        <table className="w-full min-w-[1000px] border-collapse text-sm table-fixed">
           <thead>
             <tr className="border-b bg-muted/50">
               <th className="p-3 text-left font-medium text-xs">DAO</th>
               <th className="p-3 text-left font-medium text-xs">Mission</th>
-              <th className="p-3 text-left font-medium text-xs">Chart (7d)</th>
+              <th className="p-3 text-center font-medium text-xs">Chart</th>
               <th className="p-3 text-right font-medium text-xs">Price</th>
               <th className="p-3 text-right font-medium text-xs">24h Change</th>
               <th className="p-3 text-right font-medium text-xs">Market Cap</th>
@@ -327,6 +332,9 @@ export const DAOTable = ({
                             token?.image_url ||
                             dao.image_url ||
                             "/placeholder.svg?height=32&width=32" ||
+                            "/placeholder.svg" ||
+                            "/placeholder.svg" ||
+                            "/placeholder.svg" ||
                             "/placeholder.svg"
                           }
                           alt={dao.name}
@@ -360,7 +368,7 @@ export const DAOTable = ({
                       </div>
                     </div>
                   </td>
-                  <td className="p-3 max-w-[200px]">
+                  <td className="p-3 w-[25%] max-w-[300px]">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -374,8 +382,8 @@ export const DAOTable = ({
                       </Tooltip>
                     </TooltipProvider>
                   </td>
-                  <td className="p-3">
-                    <div className="h-16 w-[180px]">
+                  <td className="p-3 w-[15%]">
+                    <div className="mx-auto h-16 w-[180px]">
                       {renderChart(tradeData, true)}
                     </div>
                   </td>

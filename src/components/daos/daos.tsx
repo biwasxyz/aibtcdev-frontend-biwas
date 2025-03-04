@@ -76,7 +76,9 @@ export default function DAOs() {
 
   // Helper function to get dex principal and token contract
   const getTokenContract = useCallback((dao: DAO) => {
-    const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
+    const dexExtension = dao.extensions?.find(
+      (ext) => ext.type === "dex" || ext.type === "TOKEN_DEX"
+    );
     const dexPrincipal = dexExtension?.contract_principal;
     return dexPrincipal ? dexPrincipal.replace(/-dex$/, "") : null;
   }, []);
