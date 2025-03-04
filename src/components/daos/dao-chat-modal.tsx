@@ -168,7 +168,7 @@ export function DAOChatModal({
   const EXTENSION_PROMPTS: Record<string, (extension: Extension) => string> = {
     // NEW TYPES
     TOKEN_DEX: (extension) =>
-      `Buy 0.008 sbtc of ${extension.contract_principal}. Ensure you have sufficient balance before proceeding.`,
+      `Buy 1 million satoshis of ${extension.contract_principal}. Ensure you have sufficient balance before proceeding.`,
     EXTENSIONS_CORE_PROPOSALS: (extension) =>
       `Submit a new proposal to modify the DAO's governance structure using ${extension.contract_principal}. Provide a clear rationale and expected benefits.`,
     EXTENSIONS_ACTION_PROPOSALS: (extension) =>
