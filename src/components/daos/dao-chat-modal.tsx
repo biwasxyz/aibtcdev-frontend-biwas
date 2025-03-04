@@ -154,7 +154,7 @@ export function DAOChatModal({
         </div>
 
         {/* Footer - fixed height */}
-        <div className="flex-shrink-0 h-20 border-t px-4 py-3 bg-background z-10">
+        <div className="sticky bottom-0 w-full min-w-0 pb-safe shadow-lg z-20">
           <ChatInput
             selectedAgentId={selectedAgentId}
             onAgentSelect={setSelectedAgent}
