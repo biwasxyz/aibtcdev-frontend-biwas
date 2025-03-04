@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -16,13 +15,13 @@ import {
   XAxis,
   ResponsiveContainer,
 } from "recharts";
-import { DAOChatButton } from "./dao-chat-button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 interface DAOTableProps {
   daos: DAO[];
@@ -60,13 +59,6 @@ export const DAOTable = ({
   isFetchingPrice,
   trades,
 }: DAOTableProps) => {
-  const getDexPrincipal = useCallback((dao: DAO) => {
-    const dexExtension = dao.extensions?.find(
-      (ext) => ext.type === "dex" || ext.type === "TOKEN_DEX"
-    );
-    return dexExtension?.contract_principal || "";
-  }, []);
-
   const getChartColor = (data: Array<{ timestamp: number; price: number }>) => {
     if (data.length < 2) return "#8884d8";
     const startPrice = data[0].price;
@@ -162,7 +154,7 @@ export const DAOTable = ({
   const renderDAOCard = (dao: DAO) => {
     const token = tokens?.find((t) => t.dao_id === dao.id);
     const tokenPrice = tokenPrices?.[dao.id];
-    const dexPrincipal = getDexPrincipal(dao);
+    // const dexPrincipal = getDexPrincipal(dao);
     const tradeData = trades[dao.id];
 
     return (
@@ -212,14 +204,15 @@ export const DAOTable = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <DAOChatButton
-                daoId={dao.id}
-                dao={dao}
-                token={token}
+              <Button
                 size="sm"
-                className={dexPrincipal ? "bg-primary hover:bg-primary/90" : ""}
-                disabled={!dexPrincipal}
-              />
+                variant="outline"
+                disabled
+                className="text-gray-400 cursor-not-allowed"
+              >
+                Quick Buy <br />
+                (available soon)
+              </Button>
             </div>
           </div>
 
@@ -316,7 +309,7 @@ export const DAOTable = ({
             {daos.map((dao) => {
               const token = tokens?.find((t) => t.dao_id === dao.id);
               const tokenPrice = tokenPrices?.[dao.id];
-              const dexPrincipal = getDexPrincipal(dao);
+              // const dexPrincipal = getDexPrincipal(dao);
               const tradeData = trades[dao.id];
 
               return (
@@ -419,16 +412,15 @@ export const DAOTable = ({
                   </td>
                   <td className="p-3">
                     <div className="flex justify-center">
-                      <DAOChatButton
-                        daoId={dao.id}
-                        dao={dao}
-                        token={token}
+                      <Button
                         size="sm"
-                        className={
-                          dexPrincipal ? "bg-primary hover:bg-primary/90" : ""
-                        }
-                        disabled={!dexPrincipal}
-                      />
+                        variant="outline"
+                        disabled
+                        className="text-gray-400 cursor-not-allowed"
+                      >
+                        Quick Buy <br />
+                        (available soon)
+                      </Button>
                     </div>
                   </td>
                 </tr>
