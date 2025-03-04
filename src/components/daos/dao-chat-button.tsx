@@ -27,7 +27,7 @@ export function DAOChatButton({
       token={token}
       trigger={
         <Button
-          variant="outline"
+          variant="primary"
           size={size}
           className={`gap-2 ${className}`}
           data-modal-trigger="dao-chat"

@@ -14,6 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { fetchDAO, fetchToken } from "@/queries/daoQueries";
+import { DAOChatButton } from "@/components/daos/dao-chat-button";
 
 interface DAO {
   id: string;
@@ -108,6 +109,9 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                 {dao.mission}
               </p>
             )}
+            <div className="mt-3">
+              <DAOChatButton daoId={id} />
+            </div>
           </div>
         </div>
 
