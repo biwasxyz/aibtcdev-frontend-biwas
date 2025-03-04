@@ -303,7 +303,7 @@ export function DAOChatModal({
         </DialogTitle>
         <DialogDescription className="sr-only">
           Chat with your agent and see examples of how to interact with your
-          DAO's extensions
+          DAO&apos;s extensions
         </DialogDescription>
         <div className="h-full overflow-hidden">
           {/* Desktop view */}
