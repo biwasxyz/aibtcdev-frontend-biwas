@@ -101,11 +101,7 @@ export function DAOChatModal({
     if (!accessToken) {
       return (
         <div className="flex items-center justify-center h-full">
-          <Alert>
-            <AlertDescription>
-              Please sign in to start chatting
-            </AlertDescription>
-          </Alert>
+          Please sign in to start chatting
         </div>
       );
     }
