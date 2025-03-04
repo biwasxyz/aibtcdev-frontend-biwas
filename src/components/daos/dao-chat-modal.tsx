@@ -20,8 +20,8 @@ import AgentWalletSelector from "@/components/chat/agent-selector";
 import { CreateThreadButton } from "@/components/threads/CreateThreadButton";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
-import { fetchProposals } from "@/queries/daoQueries";
-import DAOProposals from "@/components/daos/dao-proposals";
+import { fetchDAOExtensions } from "@/queries/daoQueries";
+import DAOExtensions from "@/components/daos/dao-extensions";
 import type { DAO, Token } from "@/types/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -62,10 +62,10 @@ export function DAOChatModal({
   const { accessToken } = useSessionStore();
   const threadMessages = activeThreadId ? messages[activeThreadId] || [] : [];
 
-  const { data: proposals, isLoading: isProposalsLoading } = useQuery({
-    queryKey: ["proposals", daoId],
-    queryFn: () => fetchProposals(daoId),
-    staleTime: 1000000,
+  const { data: daoExtensions, isLoading: isExtensionsLoading } = useQuery({
+    queryKey: ["daoExtensions", daoId],
+    queryFn: () => fetchDAOExtensions(daoId),
+    staleTime: 600000, // 10 minutes
     enabled: open, // Only fetch when modal is open
   });
 
@@ -168,8 +168,8 @@ export function DAOChatModal({
     );
   };
 
-  const renderProposalsSection = () => {
-    if (isProposalsLoading) {
+  const renderExtensionsSection = () => {
+    if (isExtensionsLoading) {
       return (
         <div className="flex justify-center items-center h-full w-full">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -199,7 +199,7 @@ export function DAOChatModal({
             <p className="text-sm text-muted-foreground mb-4">
               {dao?.mission || "DAO mission and details will appear here."}
             </p>
-            <DAOProposals proposals={proposals || []} />
+            <DAOExtensions extensions={daoExtensions || []} />
           </div>
         </div>
       </div>
@@ -219,8 +219,8 @@ export function DAOChatModal({
       <DialogContent className="max-w-[90vw] w-[90vw] h-[90vh] p-0 rounded-lg">
         <DialogTitle className="sr-only">DAO Chat and Proposals</DialogTitle>
         <DialogDescription className="sr-only">
-          Chat with your agent to vote on, send, and create proposals for your
-          DAO
+          Chat with your agent to manage and monitor your DAO's extensions and
+          capabilities
         </DialogDescription>
         <div className="h-full overflow-hidden">
           {/* Desktop view */}
@@ -230,9 +230,9 @@ export function DAOChatModal({
               {renderChatSection()}
             </div>
 
-            {/* Proposals Section - Right Side */}
+            {/* Extensions Section - Right Side */}
             <div className="h-full flex flex-col overflow-auto">
-              {renderProposalsSection()}
+              {renderExtensionsSection()}
             </div>
           </div>
 
@@ -241,13 +241,13 @@ export function DAOChatModal({
             <Tabs defaultValue="chat" className="h-full flex flex-col">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="chat">Chat</TabsTrigger>
-                <TabsTrigger value="proposals">Proposals</TabsTrigger>
+                <TabsTrigger value="extensions">Extensions</TabsTrigger>
               </TabsList>
               <TabsContent value="chat" className="flex-1 overflow-auto">
                 {renderChatSection()}
               </TabsContent>
-              <TabsContent value="proposals" className="flex-1 overflow-auto">
-                {renderProposalsSection()}
+              <TabsContent value="extensions" className="flex-1 overflow-auto">
+                {renderExtensionsSection()}
               </TabsContent>
             </Tabs>
           </div>
