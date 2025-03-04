@@ -166,6 +166,7 @@ export function DAOChatModal({
   };
 
   const EXTENSION_PROMPTS: Record<string, (extension: Extension) => string> = {
+    // NEW TYPES
     TOKEN_DEX: (extension) =>
       `Buy 0.008 sbtc of ${extension.contract_principal}. Ensure you have sufficient balance before proceeding.`,
     EXTENSIONS_CORE_PROPOSALS: (extension) =>
@@ -182,10 +183,37 @@ export function DAOChatModal({
       `Propose an official DAO-wide announcement via ${extension.contract_principal}. Outline the message content and its importance to members.`,
     EXTENSIONS_PAYMENTS: (extension) =>
       `Submit a proposal to execute a scheduled payment for DAO operations using ${extension.contract_principal}. Detail the amount and recipient.`,
+
+    // OLD TYPES
+    pool: (extension) =>
+      `Manage liquidity pool operations for ${extension.contract_principal}. Provide details on your pooling strategy.`,
+    "aibtc-token-owner": (extension) =>
+      `Execute token owner actions for ${extension.contract_principal}. Outline the specific management task.`,
+    "aibtc-action-proposals": (extension) =>
+      `Submit an action proposal using ${extension.contract_principal}. Describe the proposed action and its rationale.`,
+    "aibtc-payments-invoices": (extension) =>
+      `Process a payment invoice through ${extension.contract_principal}. Provide invoice details and justification.`,
+    "aibtc-treasury": (extension) =>
+      `Propose a treasury management action for ${extension.contract_principal}. Specify the financial operation.`,
+    "aibtc-bank-account": (extension) =>
+      `Interact with the DAO's bank account using ${extension.contract_principal}. Describe the intended transaction.`,
+    "aibtc-onchain-messaging": (extension) =>
+      `Send an on-chain message via ${extension.contract_principal}. Craft a clear and concise communication.`,
+    "aibtc-base-bootstrap-initialization": (extension) =>
+      `Initialize DAO bootstrap process using ${extension.contract_principal}. Outline the initialization steps.`,
+    "aibtc-core-proposals": (extension) =>
+      `Submit a core proposal for DAO governance using ${extension.contract_principal}. Provide comprehensive details.`,
+    "aibtcdev-base-dao": (extension) =>
+      `Interact with the base DAO development framework using ${extension.contract_principal}. Specify your development intent.`,
   };
 
   const generatePrompt = (extension: Extension) => {
-    const promptGenerator = EXTENSION_PROMPTS[extension.type];
+    // Check for exact match or variations of the type
+    const promptGenerator =
+      EXTENSION_PROMPTS[extension.type] ||
+      EXTENSION_PROMPTS[extension.type.toUpperCase()] ||
+      EXTENSION_PROMPTS[extension.type.toLowerCase()];
+
     return promptGenerator ? promptGenerator(extension) : "";
   };
 
