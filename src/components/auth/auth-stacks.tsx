@@ -148,11 +148,7 @@ export default function StacksAuth() {
 
   return (
     <StacksProvider>
-      <Button
-        onClick={handleAuth}
-        disabled={isLoading}
-        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-lg font-bold transition-all duration-200 border-0"
-      >
+      <Button onClick={handleAuth} disabled={isLoading} variant="primary">
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -167,193 +163,94 @@ export default function StacksAuth() {
         <DialogContent className="sm:max-w-[800px] h-[90vh] overflow-auto">
           <DialogHeader>
             <DialogTitle className="text-3xl font-bold">
-              Disclaimer and Terms of Use
+              AIBTC Disclosures
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="h-full pr-4">
             <div className="prose dark:prose-invert max-w-none space-y-8">
               <section>
                 <p className="text-zinc-800 dark:text-zinc-200">
-                  By accessing, downloading, installing, or otherwise using this
-                  product (the &quot;AIBTC.DEV&quot;), you acknowledge that you
-                  have read, understood, and agree to be bound by these terms.
-                  If you do not agree with these terms, you must immediately
-                  cease all use of the Product.
+                  By using the AIBTC application (the &quot;App&quot;), you
+                  agree and acknowledge the following:
                 </p>
               </section>
 
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
-                  &quot;As-Is&quot; Provision
+                  AIBTC does not control funds or DAOs
                 </h2>
                 <p className="text-zinc-800 dark:text-zinc-200">
-                  This Product is provided on an &quot;as-is&quot; and
-                  &quot;as-available&quot; basis without any warranties or
-                  representations of any kind, whether express, implied, or
-                  statutory. To the fullest extent permitted by law, we
-                  expressly disclaim any and all warranties, including but not
-                  limited to implied warranties of merchantability, fitness for
-                  a particular purpose, non-infringement, title, reliability,
-                  security, accuracy, or availability.
-                </p>
-                <p className="mt-4 text-zinc-800 dark:text-zinc-200">
-                  We make no representations or guarantees that:
-                </p>
-                <ul className="list-disc pl-6 mt-2 text-zinc-800 dark:text-zinc-200">
-                  <li>
-                    The Product will meet your specific needs or expectations;
-                  </li>
-                  <li>
-                    The Product will be uninterrupted, timely, secure, or
-                    error-free;
-                  </li>
-                  <li>
-                    The results, data, or outputs obtained through the Product
-                    will be accurate, complete, reliable, or error-free;
-                  </li>
-                  <li>
-                    Any defects or errors in the Product will be corrected.
-                  </li>
-                </ul>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4">
-                  Assumption of Risk
-                </h2>
-                <p className="text-zinc-800 dark:text-zinc-200">
-                  You expressly acknowledge and accept that your use of the
-                  Product is at your sole risk. We shall not be liable for any
-                  losses or damages of any kind, including but not limited to:
-                </p>
-                <ul className="list-disc pl-6 mt-2 text-zinc-800 dark:text-zinc-200">
-                  <li>
-                    Direct, indirect, incidental, consequential, special, or
-                    punitive damages;
-                  </li>
-                  <li>
-                    Financial losses, including but not limited to loss of
-                    income, revenue, or profits;
-                  </li>
-                  <li>
-                    Data breaches, security incidents, unauthorized access to
-                    data, or loss or corruption of data;
-                  </li>
-                  <li>
-                    Errors, inaccuracies, or omissions in the Product&apos;s
-                    outputs or functionalities;
-                  </li>
-                  <li>
-                    Any outcomes or consequences of decisions, transactions, or
-                    actions taken based on the use of the Product.
-                  </li>
-                </ul>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4">
-                  Limitation of Liability
-                </h2>
-                <p className="text-zinc-800 dark:text-zinc-200">
-                  To the maximum extent permitted by applicable law, we shall
-                  not be liable for any damages arising out of or related to:
-                </p>
-                <ol className="list-decimal pl-6 mt-2 text-zinc-800 dark:text-zinc-200">
-                  <li>The use or inability to use the Product;</li>
-                  <li>
-                    Any errors, bugs, vulnerabilities, or interruptions in the
-                    Product;
-                  </li>
-                  <li>
-                    Unauthorized access to your data, transactions, or
-                    communications;
-                  </li>
-                  <li>Any failure of the Product to perform as expected;</li>
-                  <li>Any reliance placed on the Product or its outputs;</li>
-                  <li>
-                    Any losses or damages arising from the actions or inactions
-                    of third parties.
-                  </li>
-                </ol>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4">Indemnification</h2>
-                <p className="text-zinc-800 dark:text-zinc-200">
-                  You agree to indemnify, defend, and hold harmless us, our
-                  affiliates, officers, directors, employees, agents, licensors,
-                  and suppliers from and against any claims, liabilities,
-                  damages, losses, or expenses (including reasonable legal fees
-                  and costs) arising out of or in any way connected with your:
-                </p>
-                <ul className="list-disc pl-6 mt-2 text-zinc-800 dark:text-zinc-200">
-                  <li>Use or misuse of the Product;</li>
-                  <li>Violation of these terms;</li>
-                  <li>
-                    Violation of any applicable laws, regulations, or
-                    third-party rights;
-                  </li>
-                  <li>
-                    Misrepresentation or reliance on the Product&apos;s outputs.
-                  </li>
-                </ul>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4">
-                  User Responsibility
-                </h2>
-                <p className="text-zinc-800 dark:text-zinc-200">
-                  The Product is intended solely as a tool to assist users. You
-                  are solely responsible for:
-                </p>
-                <ul className="list-disc pl-6 mt-2 text-zinc-800 dark:text-zinc-200">
-                  <li>
-                    Conducting your own research and due diligence before making
-                    any decisions, transactions, or actions based on the Product
-                    or its outputs;
-                  </li>
-                  <li>
-                    Safeguarding your data, credentials, accounts, and any
-                    sensitive information;
-                  </li>
-                  <li>
-                    Ensuring compliance with applicable laws, regulations, and
-                    industry standards.
-                  </li>
-                </ul>
-                <p className="mt-4 text-zinc-800 dark:text-zinc-200">
-                  We make no recommendations, endorsements, or assurances
-                  regarding the suitability of the Product for any specific use
-                  case. You acknowledge and agree that any reliance on the
-                  Product, its outputs, or related materials is at your own
-                  discretion and risk.
+                  AIBTC provides software to assist users in interacting with
+                  blockchain networks. We do not hold user funds, issue tokens,
+                  or exercise control over any DAO treasury.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
-                  No Professional Advice
+                  Users control all Token and DAO activities
                 </h2>
                 <p className="text-zinc-800 dark:text-zinc-200">
-                  The Product is not intended to provide professional advice of
-                  any kind, including but not limited to legal, financial,
-                  medical, or technical advice. You are encouraged to consult
-                  with appropriate professionals before relying on or acting
-                  upon any information or outputs from the Product.
+                  Users initiate and execute all token-related actions, purchase
+                  seats, and launch DAOs. AIBTC does not manage or originate
+                  such activities.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
-                  Termination and Updates
+                  Users are responsible for their own funds and DAO treasuries
                 </h2>
                 <p className="text-zinc-800 dark:text-zinc-200">
-                  We reserve the right to modify, suspend, or discontinue the
-                  Product at any time, with or without notice, and without
-                  liability to you. We also reserve the right to update these
-                  terms, and your continued use of the Product constitutes
-                  acceptance of any such updates.
+                  Users are responsible for their own secret keys and control of
+                  their own funds. DAO treasury funds are managed via the
+                  governance mechanism of each DAO.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  Users must comply with applicable laws
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  By using the App, users agree to comply with all applicable
+                  laws and regulations, including those governing DAO
+                  activities. AIBTC does not guarantee legal compliance of DAOs
+                  launched on the platform.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  Users and DAO members should consult advisors
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  Any documents, examples, or demos provided by AIBTC serve only
+                  illustrative purposes and should not be considered financial,
+                  legal, or tax advice.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  Blockchain transactions are final and irreversible
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  All blockchain transactions are irreversible and without
+                  refunds. Users bear sole responsibility for evaluating
+                  transactions before executing them.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  AIBTC is not responsible for indirect, incidental, or
+                  consequential damages
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  Under no circumstances shall AIBTC be liable for indirect,
+                  incidental, or consequential damages, including lost profits,
+                  even if advised of such possibilities.
                 </p>
               </section>
             </div>
