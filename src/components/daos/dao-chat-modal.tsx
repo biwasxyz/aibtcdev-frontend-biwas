@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -12,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare, Copy, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageList } from "@/components/chat/message-list";
@@ -21,8 +20,7 @@ import { CreateThreadButton } from "@/components/threads/CreateThreadButton";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
 import { fetchDAOExtensions } from "@/queries/daoQueries";
-import DAOExtensions from "@/components/daos/dao-extensions";
-import type { DAO, Token } from "@/types/supabase";
+import type { DAO, Token, Extension } from "@/types/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface DAOChatModalProps {
@@ -36,13 +34,12 @@ interface DAOChatModalProps {
 
 export function DAOChatModal({
   daoId,
-  dao,
-  token,
   trigger,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: DAOChatModalProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
 
   // Use either controlled or uncontrolled state
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
@@ -168,7 +165,38 @@ export function DAOChatModal({
     );
   };
 
-  const renderExtensionsSection = () => {
+  const EXTENSION_PROMPTS: Record<string, (extension: Extension) => string> = {
+    TOKEN_DEX: (extension) =>
+      `Buy 0.008 sbtc of ${extension.contract_principal}. Ensure you have sufficient balance before proceeding.`,
+    EXTENSIONS_CORE_PROPOSALS: (extension) =>
+      `Submit a new proposal to modify the DAO's governance structure using ${extension.contract_principal}. Provide a clear rationale and expected benefits.`,
+    EXTENSIONS_ACTION_PROPOSALS: (extension) =>
+      `Propose an action to update or upgrade a smart contract using ${extension.contract_principal}. Include the reason and expected impact of this upgrade.`,
+    EXTENSIONS_TREASURY: (extension) =>
+      `Submit a proposal to allocate DAO funds for a specific initiative using ${extension.contract_principal}. Specify the amount and justification.`,
+    ACTIONS_TREASURY_ALLOW_ASSET: (extension) =>
+      `Propose to whitelist a new asset in the DAO treasury through ${extension.contract_principal}. Provide details on why this asset should be allowed.`,
+    EXTENSIONS_MESSAGING: (extension) =>
+      `Draft and send a proposal to notify DAO members about an upcoming vote through ${extension.contract_principal}. Ensure clarity and completeness of information.`,
+    ACTIONS_MESSAGING_SEND_MESSAGE: (extension) =>
+      `Propose an official DAO-wide announcement via ${extension.contract_principal}. Outline the message content and its importance to members.`,
+    EXTENSIONS_PAYMENTS: (extension) =>
+      `Submit a proposal to execute a scheduled payment for DAO operations using ${extension.contract_principal}. Detail the amount and recipient.`,
+  };
+
+  const generatePrompt = (extension: Extension) => {
+    const promptGenerator = EXTENSION_PROMPTS[extension.type];
+    return promptGenerator ? promptGenerator(extension) : "";
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedPrompt(text);
+      setTimeout(() => setCopiedPrompt(null), 2000);
+    });
+  };
+
+  const renderPromptsSection = () => {
     if (isExtensionsLoading) {
       return (
         <div className="flex justify-center items-center h-full w-full">
@@ -177,29 +205,54 @@ export function DAOChatModal({
       );
     }
 
+    // Filter out extensions that would generate empty prompts
+    const validExtensions = daoExtensions
+      ? daoExtensions.filter((extension: Extension) => {
+          const prompt = generatePrompt(extension);
+          return prompt.trim() !== "";
+        })
+      : [];
+
     return (
       <div className="flex flex-col h-full">
         {/* Header - fixed height */}
         <div className="flex-shrink-0 h-14 flex items-center justify-between px-4 shadow-md bg-background z-10">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <h2 className="text-lg font-semibold truncate">
-              {dao?.name || "DAO Information"}
+              Sample Prompts To Interact with DAO
             </h2>
           </div>
-          {token && (
-            <div className="text-sm text-muted-foreground">
-              Token: ${token.symbol}
-            </div>
-          )}
         </div>
 
         {/* Middle scrollable area - takes remaining space */}
         <div className="flex-1 overflow-auto">
-          <div className="p-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              {dao?.mission || "DAO mission and details will appear here."}
-            </p>
-            <DAOExtensions extensions={daoExtensions || []} />
+          <div className="p-4 space-y-4">
+            {validExtensions.length > 0 ? (
+              validExtensions.map((extension: Extension) => (
+                <div
+                  key={extension.id}
+                  className="bg-background/50 backdrop-blur-sm p-3 rounded-lg border relative group"
+                >
+                  <p className="text-sm text-muted-foreground pr-8">
+                    {generatePrompt(extension)}
+                  </p>
+                  <button
+                    onClick={() => copyToClipboard(generatePrompt(extension))}
+                    className="absolute top-2 right-2 p-1 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    {copiedPrompt === generatePrompt(extension) ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No active extensions found.
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -217,10 +270,12 @@ export function DAOChatModal({
         )}
       </DialogTrigger>
       <DialogContent className="max-w-[90vw] w-[90vw] h-[90vh] p-0 rounded-lg">
-        <DialogTitle className="sr-only">DAO Chat and Proposals</DialogTitle>
+        <DialogTitle className="sr-only">
+          DAO Chat and Interaction Examples
+        </DialogTitle>
         <DialogDescription className="sr-only">
-          Chat with your agent to manage and monitor your DAO's extensions and
-          capabilities
+          Chat with your agent and see examples of how to interact with your
+          DAO's extensions
         </DialogDescription>
         <div className="h-full overflow-hidden">
           {/* Desktop view */}
@@ -230,9 +285,9 @@ export function DAOChatModal({
               {renderChatSection()}
             </div>
 
-            {/* Extensions Section - Right Side */}
+            {/* Prompts Section - Right Side */}
             <div className="h-full flex flex-col overflow-auto">
-              {renderExtensionsSection()}
+              {renderPromptsSection()}
             </div>
           </div>
 
@@ -241,13 +296,13 @@ export function DAOChatModal({
             <Tabs defaultValue="chat" className="h-full flex flex-col">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="chat">Chat</TabsTrigger>
-                <TabsTrigger value="extensions">Extensions</TabsTrigger>
+                <TabsTrigger value="prompts">Examples</TabsTrigger>
               </TabsList>
               <TabsContent value="chat" className="flex-1 overflow-auto">
                 {renderChatSection()}
               </TabsContent>
-              <TabsContent value="extensions" className="flex-1 overflow-auto">
-                {renderExtensionsSection()}
+              <TabsContent value="prompts" className="flex-1 overflow-auto">
+                {renderPromptsSection()}
               </TabsContent>
             </Tabs>
           </div>
