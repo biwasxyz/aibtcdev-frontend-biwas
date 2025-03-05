@@ -126,11 +126,6 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
     return new Date(start.getTime() + 24 * 60 * 60 * 1000);
   };
 
-  const formatBlockNumber = (num: number | null) => {
-    if (num === null) return "N/A";
-    return num.toLocaleString();
-  };
-
   const BlockVisual = ({ value }: { value: number | null }) => {
     if (value === null) return <span>N/A</span>;
     const blocks = Math.min(Math.floor(value / 1000), 10);
