@@ -5,7 +5,7 @@ import {
   Card,
   CardHeader,
   CardContent,
-  CardFooter,
+  CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,22 +16,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import { Proposal } from "@/types/supabase";
+import type { Proposal } from "@/types/supabase";
 import {
   Timer,
   CheckCircle2,
   FileEdit,
   XCircle,
-  Link as LinkIcon,
+  Code,
   Filter,
   Hash,
   Wallet,
-  UserCircle,
-  Target,
-  Clock,
-  Blocks,
-  ExternalLink,
+  Calendar,
+  User,
+  Activity,
+  Layers,
+  ArrowRight,
+  Copy,
+  CheckIcon,
 } from "lucide-react";
 
 interface DAOProposalsProps {
@@ -74,21 +83,65 @@ const StatusBadge = ({ status }: { status: Proposal["status"] }) => {
   );
 };
 
-const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const truncateString = (
+  str: string,
+  startLength: number,
+  endLength: number
+) => {
+  if (!str) return "";
+  if (str.length <= startLength + endLength) return str;
+  return `${str.slice(0, startLength)}...${str.slice(-endLength)}`;
+};
 
-  const truncateString = (str: string, length: number) => {
-    if (!str) return "";
-    return str.length <= length ? str : `${str.substring(0, length)}...`;
+const CopyButton = ({ text }: { text: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const getTxLink = () => {
-    const baseUrl = "http://explorer.hiro.so/txid/";
-    const chainParam =
-      process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
-        ? "?chain=testnet"
-        : "";
-    return `${baseUrl}${proposal.tx_id}${chainParam}`;
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-6 w-6"
+      onClick={handleCopy}
+      title="Copy to clipboard"
+    >
+      {copied ? (
+        <CheckIcon className="h-3 w-3 text-green-500" />
+      ) : (
+        <Copy className="h-3 w-3" />
+      )}
+      <span className="sr-only">Copy to clipboard</span>
+    </Button>
+  );
+};
+
+const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
+  const getEstimatedEndDate = (createdAt: string): Date => {
+    const start = new Date(createdAt);
+    return new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  };
+
+  const formatBlockNumber = (num: number | null) => {
+    if (num === null) return "N/A";
+    return num.toLocaleString();
+  };
+
+  const BlockVisual = ({ value }: { value: number | null }) => {
+    if (value === null) return <span>N/A</span>;
+    const blocks = Math.min(Math.floor(value / 1000), 10);
+    return (
+      <div className="flex items-center gap-1">
+        {[...Array(blocks)].map((_, i) => (
+          <div key={i} className="w-2 h-2 bg-primary rounded-sm" />
+        ))}
+        <span className="ml-2 text-xs">{value.toLocaleString()}</span>
+      </div>
+    );
   };
 
   return (
@@ -106,90 +159,103 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
           <StatusBadge status={proposal.status} />
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Clock className="h-4 w-4" />
-                <span>
-                  Created: {format(new Date(proposal.created_at), "PPp")}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Blocks className="h-4 w-4" />
-                <span>Created at Block: {proposal.created_at_block}</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Target className="h-4 w-4" />
-                <span>Start Block: {proposal.start_block}</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Target className="h-4 w-4" />
-                <span>End Block: {proposal.end_block}</span>
-              </div>
+      <CardContent className="space-y-6">
+        {/* Overview Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>
+                Created: {format(new Date(proposal.created_at), "PPp")}
+              </span>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <UserCircle className="h-4 w-4" />
-                <span>Creator: {truncateString(proposal.creator, 20)}</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <UserCircle className="h-4 w-4" />
-                <span>Caller: {truncateString(proposal.caller, 20)}</span>
-              </div>
-              {proposal.liquid_tokens !== null && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Wallet className="h-4 w-4" />
-                  <span>Liquid Tokens: {proposal.liquid_tokens}</span>
-                </div>
-              )}
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Timer className="h-4 w-4" />
+              <span>
+                Ends: {format(getEstimatedEndDate(proposal.created_at), "PPp")}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <User className="h-4 w-4" />
+              <span>Creator: {truncateString(proposal.creator, 8, 8)}</span>
+              <CopyButton text={proposal.creator} />
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Activity className="h-4 w-4" />
+              <span>Action: {truncateString(proposal.action, 8, 8)}</span>
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 gap-2 text-sm bg-muted/50 rounded-lg p-4">
+        <Separator />
+
+        {/* Technical Details Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="space-y-2">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Hash className="h-4 w-4" />
               <span className="font-mono">
-                Proposal ID: {proposal.proposal_id}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Hash className="h-4 w-4" />
-              <span className="font-mono">
-                TX ID:
+                tx_id:{" "}
                 <a
-                  href={getTxLink()}
+                  href={`http://explorer.hiro.so/txid/${proposal.tx_id}${
+                    process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
+                      ? "?chain=testnet"
+                      : ""
+                  }`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ml-2 hover:text-blue-600 inline-flex items-center"
+                  className="hover:underline "
                 >
-                  {proposal.tx_id}
-                  <ExternalLink className="ml-1 h-3 w-3" />
+                  {truncateString(proposal.tx_id, 8, 8)}
                 </a>
               </span>
+              <CopyButton text={proposal.tx_id} />
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Wallet className="h-4 w-4" />
               <span className="font-mono">
-                Principal: {proposal.contract_principal}
+                Principal: {truncateString(proposal.contract_principal, 8, 8)}
               </span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Target className="h-4 w-4" />
-              <span className="font-mono">Action: {proposal.action}</span>
+              <CopyButton text={proposal.contract_principal} />
             </div>
           </div>
-
-          {proposal.parameters && (
-            <div className="bg-muted/50 rounded-lg p-4 text-sm">
-              <h4 className="font-semibold mb-2">Parameters</h4>
-              <p className="overflow-x-auto whitespace-pre-wrap break-words">
-                {proposal.parameters}
-              </p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Layers className="h-4 w-4" />
+              <span>Created block:</span>
+              <BlockVisual value={proposal.created_at_block} />
             </div>
-          )}
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <ArrowRight className="h-4 w-4" />
+              <span>Start block:</span>
+              <BlockVisual value={proposal.start_block} />
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Timer className="h-4 w-4" />
+              <span>End block:</span>
+              <BlockVisual value={proposal.end_block} />
+            </div>
+          </div>
         </div>
+
+        {/* Parameters Section (if available) */}
+        {proposal.parameters && (
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="parameters">
+              <AccordionTrigger className="text-sm font-normal text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Code className="h-4 w-4" />
+                  <span>Parameters</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <pre className="bg-muted/50 p-2 rounded-md text-xs overflow-x-auto">
+                  {proposal.parameters}
+                </pre>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
       </CardContent>
     </Card>
   );
@@ -206,20 +272,22 @@ function DAOProposals({ proposals }: DAOProposalsProps) {
 
   const stats = {
     active: proposals.filter((p) => p.status === "DEPLOYED").length,
+    pending: proposals.filter((p) => p.status === "PENDING").length,
+    draft: proposals.filter((p) => p.status === "DRAFT").length,
+    failed: proposals.filter((p) => p.status === "FAILED").length,
     total: proposals.length,
     successRate: (() => {
-      const totalNonDeployedProposals = proposals.filter(
-        (p) => p.status !== "DEPLOYED"
+      const totalCompletedProposals = proposals.filter(
+        (p) => p.status === "DEPLOYED" || p.status === "FAILED"
       ).length;
 
-      // If no proposals or no non-deployed proposals, return 0 or 100
-      if (proposals.length === 0) return 0;
-      if (totalNonDeployedProposals === 0) return 100;
+      // If no completed proposals, return 0
+      if (totalCompletedProposals === 0) return 0;
 
       // Calculate success rate
       return Math.round(
         (proposals.filter((p) => p.status === "DEPLOYED").length /
-          totalNonDeployedProposals) *
+          totalCompletedProposals) *
           100
       );
     })(),
@@ -227,35 +295,77 @@ function DAOProposals({ proposals }: DAOProposalsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="p-6">
-          <CardHeader className="p-0">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="p-4">
+          <CardHeader className="p-0 pb-2">
             <h3 className="text-sm font-medium text-muted-foreground">
               Active Proposals
             </h3>
           </CardHeader>
-          <CardContent className="p-0 pt-4">
-            <div className="text-2xl font-bold">{stats.active}</div>
+          <CardContent className="p-0">
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{stats.active}</div>
+              <Badge
+                variant="secondary"
+                className="ml-2 bg-green-500/10 text-green-500"
+              >
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+                Deployed
+              </Badge>
+            </div>
           </CardContent>
         </Card>
-        <Card className="p-6">
-          <CardHeader className="p-0">
+
+        <Card className="p-4">
+          <CardHeader className="p-0 pb-2">
+            <h3 className="text-sm font-medium text-muted-foreground">
+              Pending Proposals
+            </h3>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="flex items-center">
+              <div className="text-2xl font-bold">{stats.pending}</div>
+              <Badge
+                variant="secondary"
+                className="ml-2 bg-blue-500/10 text-blue-500"
+              >
+                <Timer className="h-3 w-3 mr-1" />
+                Pending
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="p-4">
+          <CardHeader className="p-0 pb-2">
             <h3 className="text-sm font-medium text-muted-foreground">
               Success Rate
             </h3>
           </CardHeader>
-          <CardContent className="p-0 pt-4">
+          <CardContent className="p-0">
             <div className="text-2xl font-bold">{stats.successRate}%</div>
+            <p className="text-xs text-muted-foreground">
+              Of completed proposals
+            </p>
           </CardContent>
         </Card>
-        <Card className="p-6">
-          <CardHeader className="p-0">
+
+        <Card className="p-4">
+          <CardHeader className="p-0 pb-2">
             <h3 className="text-sm font-medium text-muted-foreground">
               Total Proposals
             </h3>
           </CardHeader>
-          <CardContent className="p-0 pt-4">
+          <CardContent className="p-0">
             <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="flex gap-1 mt-1">
+              <Badge variant="outline" className="text-xs">
+                {stats.draft} drafts
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {stats.failed} failed
+              </Badge>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -284,11 +394,19 @@ function DAOProposals({ proposals }: DAOProposalsProps) {
         </div>
       </div>
 
-      <div className="grid gap-4">
-        {filteredProposals.map((proposal) => (
-          <ProposalCard key={proposal.id} proposal={proposal} />
-        ))}
-      </div>
+      {filteredProposals.length === 0 ? (
+        <Card className="p-8 text-center">
+          <CardDescription>
+            No proposals found with the selected filter.
+          </CardDescription>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {filteredProposals.map((proposal) => (
+            <ProposalCard key={proposal.id} proposal={proposal} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

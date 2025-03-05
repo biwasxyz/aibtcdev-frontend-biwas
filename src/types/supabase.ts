@@ -91,7 +91,6 @@ export interface Proposal {
   created_at: string;
   title: string;
   description: string;
-  code: string | null;
   link: string | null;
   monetary_ask: null;
   status: "DRAFT" | "PENDING" | "DEPLOYED" | "FAILED";
