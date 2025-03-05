@@ -13,22 +13,24 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://app.aibtc.dev"),
   title: {
-    default: "AIBTCDEV",
-    template: "%s | AIBTCDEV",
+    default: "AIBTC",
+    template: "%s | AIBTC",
   },
-  description: "The Bitcoin DeFAI Console",
+  description:
+    "AI-powered agents. Bitcoin-backed DAOs. Fully autonomous governance.",
   keywords: ["Bitcoin", "AI", "Stacks", "L2", "Trading", "DAO"],
-  authors: [{ name: "AIBTCDEV" }],
+  authors: [{ name: "AIBTC" }],
   openGraph: {
-    title: "AIBTCDEV",
-    description: "The Bitcoin DeFAI Console",
+    title: "AIBTC",
+    description:
+      "AI-powered agents. Bitcoin-backed DAOs. Fully autonomous governance.",
     type: "website",
     images: [
       {
         url: "https://app.aibtc.dev/logos/aibtcdev-avatar-1000px.png",
         width: 1000,
         height: 1000,
-        alt: "AIBTCDEV",
+        alt: "AIBTC",
       },
     ],
   },

@@ -148,11 +148,7 @@ export default function StacksAuth() {
 
   return (
     <StacksProvider>
-      <Button
-        onClick={handleAuth}
-        disabled={isLoading}
-        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-lg font-bold transition-all duration-200 border-0"
-      >
+      <Button onClick={handleAuth} disabled={isLoading} variant="primary">
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -167,193 +163,267 @@ export default function StacksAuth() {
         <DialogContent className="sm:max-w-[800px] h-[90vh] overflow-auto">
           <DialogHeader>
             <DialogTitle className="text-3xl font-bold">
-              Disclaimer and Terms of Use
+              AIBTC Disclosures
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="h-full pr-4">
             <div className="prose dark:prose-invert max-w-none space-y-8">
               <section>
                 <p className="text-zinc-800 dark:text-zinc-200">
-                  By accessing, downloading, installing, or otherwise using this
-                  product (the &quot;AIBTC.DEV&quot;), you acknowledge that you
-                  have read, understood, and agree to be bound by these terms.
-                  If you do not agree with these terms, you must immediately
-                  cease all use of the Product.
+                  By using the AIBTC application (the &quot;App), you agree and
+                  acknowledge the following:
                 </p>
               </section>
-
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
-                  &quot;As-Is&quot; Provision
+                  AIBTC does not control funds or DAOs
                 </h2>
                 <p className="text-zinc-800 dark:text-zinc-200">
-                  This Product is provided on an &quot;as-is&quot; and
-                  &quot;as-available&quot; basis without any warranties or
-                  representations of any kind, whether express, implied, or
-                  statutory. To the fullest extent permitted by law, we
-                  expressly disclaim any and all warranties, including but not
-                  limited to implied warranties of merchantability, fitness for
-                  a particular purpose, non-infringement, title, reliability,
-                  security, accuracy, or availability.
+                  AIBTC provides software to assist users more easily interact
+                  with blockchain networks. We do not hold user funds, issue
+                  tokens, or exercise ongoing control or governance over any DAO
+                  treasury.
                 </p>
-                <p className="mt-4 text-zinc-800 dark:text-zinc-200">
-                  We make no representations or guarantees that:
-                </p>
-                <ul className="list-disc pl-6 mt-2 text-zinc-800 dark:text-zinc-200">
-                  <li>
-                    The Product will meet your specific needs or expectations;
-                  </li>
-                  <li>
-                    The Product will be uninterrupted, timely, secure, or
-                    error-free;
-                  </li>
-                  <li>
-                    The results, data, or outputs obtained through the Product
-                    will be accurate, complete, reliable, or error-free;
-                  </li>
-                  <li>
-                    Any defects or errors in the Product will be corrected.
-                  </li>
-                </ul>
               </section>
-
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
-                  Assumption of Risk
+                  Users control all Token and DAO activities
                 </h2>
                 <p className="text-zinc-800 dark:text-zinc-200">
-                  You expressly acknowledge and accept that your use of the
-                  Product is at your sole risk. We shall not be liable for any
-                  losses or damages of any kind, including but not limited to:
+                  Users initiate and execute all tokens, purchase seats, and
+                  launch DAOs. AIBTC does not manage or originate such
+                  activities.
                 </p>
-                <ul className="list-disc pl-6 mt-2 text-zinc-800 dark:text-zinc-200">
-                  <li>
-                    Direct, indirect, incidental, consequential, special, or
-                    punitive damages;
-                  </li>
-                  <li>
-                    Financial losses, including but not limited to loss of
-                    income, revenue, or profits;
-                  </li>
-                  <li>
-                    Data breaches, security incidents, unauthorized access to
-                    data, or loss or corruption of data;
-                  </li>
-                  <li>
-                    Errors, inaccuracies, or omissions in the Product&apos;s
-                    outputs or functionalities;
-                  </li>
-                  <li>
-                    Any outcomes or consequences of decisions, transactions, or
-                    actions taken based on the use of the Product.
-                  </li>
-                </ul>
               </section>
-
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
-                  Limitation of Liability
+                  Users are responsible for their own funds and DAO members for
+                  DAO treasuries
                 </h2>
                 <p className="text-zinc-800 dark:text-zinc-200">
-                  To the maximum extent permitted by applicable law, we shall
-                  not be liable for any damages arising out of or related to:
+                  Users are responsible for their own secret keys and control of
+                  your own funds. DAO treasury funds are controlled via the
+                  governance mechanism of the specific DAO.
                 </p>
-                <ol className="list-decimal pl-6 mt-2 text-zinc-800 dark:text-zinc-200">
-                  <li>The use or inability to use the Product;</li>
-                  <li>
-                    Any errors, bugs, vulnerabilities, or interruptions in the
-                    Product;
-                  </li>
-                  <li>
-                    Unauthorized access to your data, transactions, or
-                    communications;
-                  </li>
-                  <li>Any failure of the Product to perform as expected;</li>
-                  <li>Any reliance placed on the Product or its outputs;</li>
-                  <li>
-                    Any losses or damages arising from the actions or inactions
-                    of third parties.
-                  </li>
-                </ol>
               </section>
-
-              <section>
-                <h2 className="text-2xl font-semibold mb-4">Indemnification</h2>
-                <p className="text-zinc-800 dark:text-zinc-200">
-                  You agree to indemnify, defend, and hold harmless us, our
-                  affiliates, officers, directors, employees, agents, licensors,
-                  and suppliers from and against any claims, liabilities,
-                  damages, losses, or expenses (including reasonable legal fees
-                  and costs) arising out of or in any way connected with your:
-                </p>
-                <ul className="list-disc pl-6 mt-2 text-zinc-800 dark:text-zinc-200">
-                  <li>Use or misuse of the Product;</li>
-                  <li>Violation of these terms;</li>
-                  <li>
-                    Violation of any applicable laws, regulations, or
-                    third-party rights;
-                  </li>
-                  <li>
-                    Misrepresentation or reliance on the Product&apos;s outputs.
-                  </li>
-                </ul>
-              </section>
-
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
-                  User Responsibility
+                  Users are using their own funds
                 </h2>
                 <p className="text-zinc-800 dark:text-zinc-200">
-                  The Product is intended solely as a tool to assist users. You
-                  are solely responsible for:
-                </p>
-                <ul className="list-disc pl-6 mt-2 text-zinc-800 dark:text-zinc-200">
-                  <li>
-                    Conducting your own research and due diligence before making
-                    any decisions, transactions, or actions based on the Product
-                    or its outputs;
-                  </li>
-                  <li>
-                    Safeguarding your data, credentials, accounts, and any
-                    sensitive information;
-                  </li>
-                  <li>
-                    Ensuring compliance with applicable laws, regulations, and
-                    industry standards.
-                  </li>
-                </ul>
-                <p className="mt-4 text-zinc-800 dark:text-zinc-200">
-                  We make no recommendations, endorsements, or assurances
-                  regarding the suitability of the Product for any specific use
-                  case. You acknowledge and agree that any reliance on the
-                  Product, its outputs, or related materials is at your own
-                  discretion and risk.
+                  By using the App, you represent that any funds deployed or
+                  tokens purchased are done so using your own funds.
                 </p>
               </section>
-
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
-                  No Professional Advice
+                  Users are responsible for the activities of their AI agents
                 </h2>
                 <p className="text-zinc-800 dark:text-zinc-200">
-                  The Product is not intended to provide professional advice of
-                  any kind, including but not limited to legal, financial,
-                  medical, or technical advice. You are encouraged to consult
-                  with appropriate professionals before relying on or acting
-                  upon any information or outputs from the Product.
+                  Users are responsible for all of the action taken by user
+                  driven script executions or AI agents. AIBTC is not
+                  responsible, nor can it control, the activities of user driven
+                  scripts and AI agents.
                 </p>
               </section>
-
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
-                  Termination and Updates
+                  Users and DAO members are responsible for their own legal
+                  setup and compliance
                 </h2>
                 <p className="text-zinc-800 dark:text-zinc-200">
-                  We reserve the right to modify, suspend, or discontinue the
-                  Product at any time, with or without notice, and without
-                  liability to you. We also reserve the right to update these
-                  terms, and your continued use of the Product constitutes
-                  acceptance of any such updates.
+                  AIBTC does not make any sort of representation towards the
+                  legal status or legal compliance of any DAO launched on the
+                  App. DAO deployers and DAO members are responsible for
+                  coordinating their own legal setup and compliance with various
+                  laws, including taking actions to shield DAO members from
+                  liability that stems from any DAO&apos;s activities.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  Users and DAO members should consult their own advisors
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  Any documents, examples, or demos provided by AIBTC only serve
+                  illustrative purposes and should not be construed as
+                  financial, legal, or tax advice. Users and DAO members are
+                  responsible for obtaining their own financial, legal, and tax
+                  advisors.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  Users must comply with applicable laws
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  By using the App, users agree to comply with all applicable
+                  laws and regulations applicable to their use of the App,
+                  including the activities that DAO members vote for. AIBTC does
+                  not guarantee or determine that any DAO activity proposed on
+                  its platform complies with applicable laws.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  Users are not sanctioned parties
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  You are not a resident, national, or agent of Iran, North
+                  Korea, Syria, Cuba, and the Crimea, Donetsk People&apos;s
+                  Republic and Luhansk People&apos;s Republic regions of Ukraine
+                  or any other country to which the United States or any other
+                  country to which the United States, the United Kingdom or the
+                  European Union embargoes goods or imposes similar sanctions
+                  (&quot;Restricted Territories&quot;). You have not been
+                  identified as a Specially Designated National or placed on any
+                  sanctions lists by the U.S. Treasury Department&apos;s Office
+                  of Foreign Assets Control, the U.S. Commerce Department, or
+                  the U.S. Department of State (&quot;Sanctions Lists
+                  Persons&quot;); and you will not use our App to conduct any
+                  illegal or illicit activity. You do not intend to and will not
+                  transact with any person in a Restricted Territory or a
+                  Sanctions List Person (such transaction, a &quot;Sanctioned
+                  Transaction&quot;).
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  You will not use a VPN to circumvent restrictions
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  You do not, and will not, use VPN software or any other
+                  privacy or anonymization tools or techniques to circumvent, or
+                  attempt to circumvent, any restrictions that apply to the App.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  You will not engage in Prohibited Activities
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  The use of the App to launder funds, violate third party
+                  rights, such as intellectual property infringement, defraud
+                  others, or engage in Sanctioned Transactions is strictly
+                  prohibited (&quot;Prohibited Activities&quot;). By using the
+                  App, you agree that you will not use the App to engage in any
+                  Prohibited Activities.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  Blockchain technology is new and may be untested
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  You understand the inherent risks associated with
+                  cryptographic systems, blockchain-based networks, and digital
+                  assets, including but not limited to the usage and intricacies
+                  of native digital assets, like bitcoin; smart contract-based
+                  tokens, such as those that follow the Stacks Token Standard;
+                  the risk of hardware, software, and Internet connection and
+                  service issues; the risk of malicious software introduction;
+                  and the risk that third parties may obtain unauthorized access
+                  to information stored within your digital wallet. AIBTC does
+                  not own or control any of the underlying software through
+                  which blockchain networks are formed. In general, the software
+                  underlying blockchain networks, including the Bitcoin and
+                  Stacks blockchains, are open source, such that anyone can use,
+                  copy, modify, and distribute it.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  Blockchain transactions are final and irreversible
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  You bear sole responsibility for evaluating transactions
+                  before you execute them, and all transactions on blockchains
+                  are irreversible, final, and without refunds; the App may be
+                  disabled, disrupted, or adversely impacted as a result of
+                  sophisticated cyber-attacks, surges in activity, computer
+                  viruses, and/or other operational or technical challenges,
+                  among other things; We disclaim any ongoing obligation to
+                  notify you of all the potential risks of using and accessing
+                  the App; You agree to accept these risks and agree that you
+                  will not seek to hold us responsible for any consequent
+                  losses.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  We cannot recover funds or engage in DAO governance if a user
+                  loses their secret keys
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  You alone are responsible for securing any of your private
+                  key(s) when you interact with funds using self-custodial
+                  wallet software. We do not have access to your private key(s)
+                  for self-custodial wallet software. Losing control of your
+                  private key(s) will permanently and irreversibly deny you
+                  access to digital assets on blockchain-based networks and the
+                  ability to engage in any DAO&apos;s governance based on tokens
+                  controlled by such keys. Neither AIBTC nor any other person or
+                  entity will be able to retrieve or protect your digital assets
+                  stored with the assistance of self-custodial wallet software.
+                  If your private key(s) are lost, then you will not be able to
+                  transfer your digital assets to any other blockchain address
+                  or wallet. If this occurs, then you will not be able to
+                  realize any value or utility from the digital assets that you
+                  may hold.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  Crypto markets are volatile, tokens may speculative assets and
+                  you may lose the entire value of your tokens
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  Crypto markets tend to experience heavy price volatility and
+                  the value of any tokens acquired through the use of the App
+                  may be a speculative asset and drop considerably. AIBTC makes
+                  no guarantee or determination concerning the value of any
+                  token and you may lose the entire value of your tokens.
+                </p>
+              </section>
+              (Previous code remains the same, with this additional section)
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  AIBTC makes no promises to the value of any token
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  We have no control over, or liability for, the delivery,
+                  quality, safety, legality, or any other aspect of any digital
+                  assets that you may transfer to or from a third party, and we
+                  are not responsible for ensuring that an entity with whom you
+                  transact completes the transaction or is authorized to do so,
+                  and if you experience a problem with any transactions in
+                  digital assets using the App, then you bear the entire risk.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  Bridging activities are carried out by third party service
+                  providers
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  All bridging activities accessible via the App is carried out
+                  by a third party service provider. AIBTC does not manage or
+                  control any of the bridging activities accessible via the App.
+                  AIBTC is not responsible for any disruption of service or loss
+                  of funds that may occur due to such bridging service. We
+                  suggest that You evaluate our third party service providers to
+                  evaluate the risks in engaging in any bridging activity.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
+                  AIBTC is not responsible for indirect, incidental or
+                  consequential damages
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  Under no circumstances shall AIBTC be liable for indirect,
+                  incidental, or consequential damages, including lost profits,
+                  even if advised of such possibilities.
                 </p>
               </section>
             </div>

@@ -76,7 +76,9 @@ export default function DAOs() {
 
   // Helper function to get dex principal and token contract
   const getTokenContract = useCallback((dao: DAO) => {
-    const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
+    const dexExtension = dao.extensions?.find(
+      (ext) => ext.type === "dex" || ext.type === "TOKEN_DEX"
+    );
     const dexPrincipal = dexExtension?.contract_principal;
     return dexPrincipal ? dexPrincipal.replace(/-dex$/, "") : null;
   }, []);
@@ -85,23 +87,22 @@ export default function DAOs() {
   const tradeQueries = useQueries({
     queries: (daos || []).map((dao) => {
       const tokenContract = getTokenContract(dao);
-
       return {
-        queryKey: ["tokenTrades", tokenContract],
+        queryKey: ["tokenTrades", dao.id, tokenContract], // Add dao.id
         queryFn: async () => {
           if (!tokenContract) return [];
-          const trades = await fetchTokenTrades(tokenContract);
-          console.log("Trades for", tokenContract, trades);
-          return trades
-            .map((trade) => ({
-              timestamp: trade.timestamp,
-              price: trade.pricePerToken,
-            }))
-            .sort((a, b) => a.timestamp - b.timestamp);
+          return fetchTokenTrades(tokenContract).then((trades) =>
+            trades
+              .map((trade) => ({
+                timestamp: trade.timestamp,
+                price: trade.pricePerToken,
+              }))
+              .sort((a, b) => a.timestamp - b.timestamp)
+          );
         },
-        enabled: !!tokenContract,
-        staleTime: 300000, // 5 minutes
-        cacheTime: 600000, // 10 minutes
+        enabled: !!tokenContract && !!dao.id, // Add dao.id check
+        staleTime: 300000,
+        cacheTime: 600000,
       };
     }),
   });
