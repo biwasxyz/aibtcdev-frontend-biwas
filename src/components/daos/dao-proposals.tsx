@@ -16,43 +16,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { format } from "date-fns";
+import { Proposal } from "@/types/supabase";
 import {
-  //ThumbsUp,
-  //ThumbsDown,
   Timer,
   CheckCircle2,
   FileEdit,
   XCircle,
   Link as LinkIcon,
-  Code,
-  DollarSign,
-  // ExternalLink,
   Filter,
   Hash,
-  // Building,
   Wallet,
+  UserCircle,
+  Target,
+  Clock,
+  Blocks,
+  ExternalLink,
 } from "lucide-react";
-
-interface Proposal {
-  id: string;
-  created_at: string;
-  title: string;
-  description: string;
-  code: string | null;
-  link: string | null;
-  monetary_ask: null;
-  status: "DRAFT" | "PENDING" | "DEPLOYED" | "FAILED";
-  contract_principal: string;
-  tx_id: string;
-  dao_id: string;
-}
 
 interface DAOProposalsProps {
   proposals: Proposal[];
@@ -97,14 +77,18 @@ const StatusBadge = ({ status }: { status: Proposal["status"] }) => {
 const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const getEstimatedEndDate = (createdAt: string): Date => {
-    const start = new Date(createdAt);
-    return new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  const truncateString = (str: string, length: number) => {
+    if (!str) return "";
+    return str.length <= length ? str : `${str.substring(0, length)}...`;
   };
 
-  const truncateString = (str: string, length: number) => {
-    if (str.length <= length) return str;
-    return `${str.substring(0, length)}...`;
+  const getTxLink = () => {
+    const baseUrl = "http://explorer.hiro.so/txid/";
+    const chainParam =
+      process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
+        ? "?chain=testnet"
+        : "";
+    return `${baseUrl}${proposal.tx_id}${chainParam}`;
   };
 
   return (
@@ -116,9 +100,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
               {proposal.title}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {isExpanded
-                ? proposal.description
-                : truncateString(proposal.description, 100)}
+              {proposal.description}
             </p>
           </div>
           <StatusBadge status={proposal.status} />
@@ -129,52 +111,37 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Timer className="h-4 w-4" />
+                <Clock className="h-4 w-4" />
                 <span>
                   Created: {format(new Date(proposal.created_at), "PPp")}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Timer className="h-4 w-4" />
-                <span>
-                  Ends:{" "}
-                  {format(getEstimatedEndDate(proposal.created_at), "PPp")}
-                </span>
+                <Blocks className="h-4 w-4" />
+                <span>Created at Block: {proposal.created_at_block}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Target className="h-4 w-4" />
+                <span>Start Block: {proposal.start_block}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Target className="h-4 w-4" />
+                <span>End Block: {proposal.end_block}</span>
               </div>
             </div>
             <div className="space-y-2">
-              {proposal.code && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Code className="h-4 w-4" />
-                        <span>Code: {proposal.code}</span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>File: {proposal.code}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-              {proposal.link && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <UserCircle className="h-4 w-4" />
+                <span>Creator: {truncateString(proposal.creator, 20)}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <UserCircle className="h-4 w-4" />
+                <span>Caller: {truncateString(proposal.caller, 20)}</span>
+              </div>
+              {proposal.liquid_tokens !== null && (
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <LinkIcon className="h-4 w-4" />
-                  <a
-                    href={proposal.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary"
-                  >
-                    External reference
-                  </a>
-                </div>
-              )}
-              {proposal.monetary_ask && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <DollarSign className="h-4 w-4" />
-                  <span>Includes funding request</span>
+                  <Wallet className="h-4 w-4" />
+                  <span>Liquid Tokens: {proposal.liquid_tokens}</span>
                 </div>
               )}
             </div>
@@ -183,7 +150,24 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
           <div className="grid grid-cols-1 gap-2 text-sm bg-muted/50 rounded-lg p-4">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Hash className="h-4 w-4" />
-              <span className="font-mono">TX: {proposal.tx_id}</span>
+              <span className="font-mono">
+                Proposal ID: {proposal.proposal_id}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Hash className="h-4 w-4" />
+              <span className="font-mono">
+                TX ID:
+                <a
+                  href={getTxLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-2 hover:text-blue-600 inline-flex items-center"
+                >
+                  {proposal.tx_id}
+                  <ExternalLink className="ml-1 h-3 w-3" />
+                </a>
+              </span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <Wallet className="h-4 w-4" />
@@ -191,18 +175,22 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                 Principal: {proposal.contract_principal}
               </span>
             </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Target className="h-4 w-4" />
+              <span className="font-mono">Action: {proposal.action}</span>
+            </div>
           </div>
+
+          {proposal.parameters && (
+            <div className="bg-muted/50 rounded-lg p-4 text-sm">
+              <h4 className="font-semibold mb-2">Parameters</h4>
+              <p className="overflow-x-auto whitespace-pre-wrap break-words">
+                {proposal.parameters}
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          {isExpanded ? "Show less" : "Show more"}
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
@@ -219,14 +207,22 @@ function DAOProposals({ proposals }: DAOProposalsProps) {
   const stats = {
     active: proposals.filter((p) => p.status === "DEPLOYED").length,
     total: proposals.length,
-    successRate:
-      proposals.length > 1
-        ? Math.round(
-            (proposals.filter((p) => p.status === "DEPLOYED").length /
-              proposals.filter((p) => p.status !== "DEPLOYED").length) *
-              100
-          )
-        : 100,
+    successRate: (() => {
+      const totalNonDeployedProposals = proposals.filter(
+        (p) => p.status !== "DEPLOYED"
+      ).length;
+
+      // If no proposals or no non-deployed proposals, return 0 or 100
+      if (proposals.length === 0) return 0;
+      if (totalNonDeployedProposals === 0) return 100;
+
+      // Calculate success rate
+      return Math.round(
+        (proposals.filter((p) => p.status === "DEPLOYED").length /
+          totalNonDeployedProposals) *
+          100
+      );
+    })(),
   };
 
   return (

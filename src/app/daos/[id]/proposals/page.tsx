@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import DAOProposals from "@/components/daos/dao-proposals";
 import { fetchProposals } from "@/queries/daoQueries";
+import { Proposal } from "@/types/supabase";
 
 export const runtime = "edge";
 
@@ -12,10 +13,10 @@ export default function ProposalsPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const { data: proposals, isLoading } = useQuery({
+  const { data: proposals, isLoading } = useQuery<Proposal[]>({
     queryKey: ["proposals", id],
     queryFn: () => fetchProposals(id),
-    staleTime: 1000000,
+    staleTime: 1000 * 60 * 60, // 1 hour
   });
 
   if (isLoading) {

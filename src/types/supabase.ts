@@ -98,6 +98,15 @@ export interface Proposal {
   contract_principal: string;
   tx_id: string;
   dao_id: string;
+  proposal_id: string;
+  action: string;
+  caller: string;
+  creator: string;
+  created_at_block: number;
+  end_block: number;
+  start_block: number;
+  liquid_tokens: number | null;
+  parameters: string;
 }
 
 export interface CronEntry {
