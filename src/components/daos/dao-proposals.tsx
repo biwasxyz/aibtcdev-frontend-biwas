@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { decodeClarityValueToRepr } from "stacks-encoding-native-js";
+import { deserializeCV, cvToString } from "@stacks/transactions";
 import {
   Card,
   CardHeader,
@@ -23,7 +23,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import type { Proposal } from "@/types/supabase";
 import {
@@ -31,7 +30,6 @@ import {
   CheckCircle2,
   FileEdit,
   XCircle,
-  Code,
   Filter,
   Hash,
   Wallet,
@@ -121,23 +119,26 @@ const CopyButton = ({ text }: { text: string }) => {
   );
 };
 
+const BlockVisual = ({ value }: { value: number | null }) => {
+  if (value === null) return <span>N/A</span>;
+  const blocks = Math.min(Math.floor(value / 1000), 5); // Reduced from 10 to 5 for better mobile display
+  return (
+    <div className="flex items-center gap-1">
+      {[...Array(blocks)].map((_, i) => (
+        <div
+          key={i}
+          className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-sm"
+        />
+      ))}
+      <span className="ml-1 sm:ml-2 text-xs">{value.toLocaleString()}</span>
+    </div>
+  );
+};
+
 const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   const getEstimatedEndDate = (createdAt: string): Date => {
     const start = new Date(createdAt);
     return new Date(start.getTime() + 24 * 60 * 60 * 1000);
-  };
-
-  const BlockVisual = ({ value }: { value: number | null }) => {
-    if (value === null) return <span>N/A</span>;
-    const blocks = Math.min(Math.floor(value / 1000), 10);
-    return (
-      <div className="flex items-center gap-1">
-        {[...Array(blocks)].map((_, i) => (
-          <div key={i} className="w-2 h-2 bg-primary rounded-sm" />
-        ))}
-        <span className="ml-2 text-xs">{value.toLocaleString()}</span>
-      </div>
-    );
   };
 
   return (
@@ -157,115 +158,125 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Overview Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
+        <div className="grid grid-cols-1 gap-4 text-sm">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+              <Calendar className="h-4 w-4 flex-shrink-0" />
               <span>
                 Created: {format(new Date(proposal.created_at), "PPp")}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Timer className="h-4 w-4" />
+            <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+              <Timer className="h-4 w-4 flex-shrink-0" />
               <span>
                 Ends: {format(getEstimatedEndDate(proposal.created_at), "PPp")}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <User className="h-4 w-4" />
-              <span>Creator: {truncateString(proposal.creator, 8, 8)}</span>
+            <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+              <User className="h-4 w-4 flex-shrink-0" />
+              <span className="break-all">
+                Creator: {truncateString(proposal.creator, 8, 8)}
+              </span>
               <CopyButton text={proposal.creator} />
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Activity className="h-4 w-4" />
-              <span>Action: {truncateString(proposal.action, 8, 8)}</span>
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Technical Details Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Hash className="h-4 w-4" />
-              <span className="font-mono">
-                tx_id:{" "}
-                <a
-                  href={`http://explorer.hiro.so/txid/${proposal.tx_id}${
-                    process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
-                      ? "?chain=testnet"
-                      : ""
-                  }`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline "
-                >
-                  {truncateString(proposal.tx_id, 8, 8)}
-                </a>
+            <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+              <Activity className="h-4 w-4 flex-shrink-0" />
+              <span className="break-all">
+                Action: {truncateString(proposal.action, 8, 8)}
               </span>
-              <CopyButton text={proposal.tx_id} />
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Wallet className="h-4 w-4" />
-              <span className="font-mono">
-                Principal: {truncateString(proposal.contract_principal, 8, 8)}
-              </span>
-              <CopyButton text={proposal.contract_principal} />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Layers className="h-4 w-4" />
-              <span>Created block:</span>
-              <BlockVisual value={proposal.created_at_block} />
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <ArrowRight className="h-4 w-4" />
-              <span>Start block:</span>
-              <BlockVisual value={proposal.start_block} />
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Timer className="h-4 w-4" />
-              <span>End block:</span>
-              <BlockVisual value={proposal.end_block} />
-            </div>
-          </div>
-        </div>
-
-        {/* Parameters Section (if available) */}
-        {proposal.parameters && (
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="parameters">
-              <AccordionTrigger className="text-sm font-normal text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Code className="h-4 w-4" />
-                  <span>Parameters</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2">
-                  <pre className="bg-muted/50 p-2 rounded-md text-xs overflow-x-auto">
-                    {proposal.parameters}
-                  </pre>
-                  <div className="bg-muted/50 p-2 rounded-md text-xs overflow-x-auto">
-                    <h4 className="font-medium mb-1">Decoded Parameters:</h4>
-                    <pre>
+            {proposal.parameters && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-normal text-muted-foreground mb-2"></div>
+                <div className="space-y-4">
+                  <div className="bg-muted/50 p-3 rounded-md text-xs">
+                    <div className="whitespace-pre-wrap break-words overflow-x-auto">
                       {(() => {
                         try {
-                          return decodeClarityValueToRepr(proposal.parameters);
+                          if (!proposal.parameters)
+                            return "No parameters to decode";
+                          // Remove "0x" prefix if present
+                          const hexValue = proposal.parameters.startsWith("0x")
+                            ? proposal.parameters.slice(2)
+                            : proposal.parameters;
+                          // Deserialize Clarity value
+                          const clarityValue = deserializeCV(
+                            Buffer.from(hexValue, "hex")
+                          );
+                          // Convert to readable string format
+                          return cvToString(clarityValue);
                         } catch (error) {
-                          return `Error decoding parameters: ${error.message}`;
+                          return `Error decoding: ${
+                            error instanceof Error
+                              ? error.message
+                              : String(error)
+                          }`;
                         }
                       })()}
-                    </pre>
+                    </div>
                   </div>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Technical Details Section */}
+        <Accordion type="single" collapsible className="w-full">
+          <AccordionItem value="technical-details" className="border-none">
+            <AccordionTrigger className="py-2 text-sm font-medium">
+              See More
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="grid grid-cols-1 gap-4 text-sm">
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+                    <Hash className="h-4 w-4 flex-shrink-0" />
+                    <span className="font-mono break-all">
+                      tx_id:{" "}
+                      <a
+                        href={`http://explorer.hiro.so/txid/${proposal.tx_id}${
+                          process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
+                            ? "?chain=testnet"
+                            : ""
+                        }`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline "
+                      >
+                        {truncateString(proposal.tx_id, 8, 8)}
+                      </a>
+                    </span>
+                    <CopyButton text={proposal.tx_id} />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+                    <Wallet className="h-4 w-4 flex-shrink-0" />
+                    <span className="font-mono break-all">
+                      Principal:{" "}
+                      {truncateString(proposal.contract_principal, 8, 8)}
+                    </span>
+                    <CopyButton text={proposal.contract_principal} />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+                    <Layers className="h-4 w-4 flex-shrink-0" />
+                    <span>Created block:</span>
+                    <BlockVisual value={proposal.created_at_block} />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+                    <ArrowRight className="h-4 w-4 flex-shrink-0" />
+                    <span>Start block:</span>
+                    <BlockVisual value={proposal.start_block} />
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+                    <Timer className="h-4 w-4 flex-shrink-0" />
+                    <span>End block:</span>
+                    <BlockVisual value={proposal.end_block} />
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </CardContent>
     </Card>
   );
