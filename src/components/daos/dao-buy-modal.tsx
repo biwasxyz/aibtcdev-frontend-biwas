@@ -11,14 +11,13 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Info, Loader2 } from "lucide-react";
 import { TokenBuyInput } from "./dao-buy-input";
 import AgentWalletSelector from "@/components/chat/agent-selector";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
 import { fetchDAOExtensions, fetchToken } from "@/queries/daoQueries";
 import type { DAO, Token, Extension } from "@/types/supabase";
-import { Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface DAOChatModalProps {
@@ -30,13 +29,11 @@ interface DAOChatModalProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-// Replace the entire DAOBuyModal component with this updated version
 export function DAOBuyModal({
   daoId,
   trigger,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
-  dao,
   token,
 }: DAOChatModalProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
@@ -96,8 +93,6 @@ export function DAOBuyModal({
   }, [accessToken, memoizedConnect, isConnected, open]);
 
   const handleSendMessage = () => {
-    // Implement your send message logic here
-    // After successful send:
     toast({
       title: "Message sent successfully",
       description: "The agent will receive funds shortly.",
@@ -109,6 +104,15 @@ export function DAOBuyModal({
       return (
         <div className="flex items-center justify-center h-full">
           Please sign in to buy tokens
+        </div>
+      );
+    }
+
+    if (isExtensionsLoading || isTokenLoading) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Loading...</span>
         </div>
       );
     }
@@ -133,7 +137,7 @@ export function DAOBuyModal({
           <div className="bg-muted p-3 rounded-md flex items-start mb-4">
             <Info className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
             <p className="text-sm">
-              The selected agent's address will receive the funds from this
+              The selected agent&apos;s address will receive the funds from this
               transaction.
             </p>
           </div>
@@ -149,7 +153,7 @@ export function DAOBuyModal({
             />
           ) : (
             <div className="p-4 text-center text-muted-foreground">
-              No TOKEN_DEX extension found
+              Unavailable to buy tokens
             </div>
           )}
         </div>
