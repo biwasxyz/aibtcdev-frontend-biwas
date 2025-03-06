@@ -37,7 +37,6 @@ export function DAOChatModal({
   trigger,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
-  dao,
   token,
 }: DAOChatModalProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);

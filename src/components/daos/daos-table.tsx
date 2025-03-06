@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { DAOBuyToken } from "./dao-buy-token";
 
 interface DAOTableProps {
   daos: DAO[];
@@ -204,15 +205,7 @@ export const DAOTable = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                disabled
-                className="text-gray-400 cursor-not-allowed"
-              >
-                Quick Buy <br />
-                (available soon)
-              </Button>
+              <DAOBuyToken daoId={dao.id} />
             </div>
           </div>
 
@@ -412,15 +405,7 @@ export const DAOTable = ({
                   </td>
                   <td className="p-3">
                     <div className="flex justify-center">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled
-                        className="text-gray-400 cursor-not-allowed"
-                      >
-                        Quick Buy <br />
-                        (available soon)
-                      </Button>
+                      <DAOBuyToken daoId={dao.id} />
                     </div>
                   </td>
                 </tr>
