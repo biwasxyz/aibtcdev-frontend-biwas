@@ -60,6 +60,7 @@ export function ChatWindow() {
     };
   }, [accessToken, memoizedConnect, isConnected]);
 
+  // Show thread list even when no active thread
   if (!accessToken) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -70,21 +71,9 @@ export function ChatWindow() {
     );
   }
 
-  if (!activeThreadId) {
-    return (
-      <div className="flex items-center justify-center h-[calc(100vh-4rem)] backdrop-blur-sm">
-        <div className="text-center space-y-4 p-4 sm:p-6 lg:p-8 -mt-20">
-          <div className="flex justify-center gap-3">
-            <CreateThreadButton />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative flex h-[94dvh] md:h-[100dvh] w-full">
-      {/* Fixed Sidebar */}
+      {/* Fixed Sidebar - Always visible regardless of active thread */}
       <div
         className={`
         hidden md:block fixed left-0 top-15 h-full
@@ -126,11 +115,13 @@ export function ChatWindow() {
 
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <div>
-                <AgentWalletSelector
-                  selectedAgentId={selectedAgentId}
-                  onSelect={setSelectedAgent}
-                  disabled={isChatLoading || !isConnected}
-                />
+                {activeThreadId && (
+                  <AgentWalletSelector
+                    selectedAgentId={selectedAgentId}
+                    onSelect={setSelectedAgent}
+                    disabled={isChatLoading || !isConnected}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -140,35 +131,51 @@ export function ChatWindow() {
           </div>
         </div>
 
-        {/* Message list */}
-        <div className="flex-1 overflow-hidden w-full min-w-0 max-w-full">
-          <ScrollArea className="h-full w-full pb-4">
-            <div className="flex flex-col justify-end min-h-full w-full max-w-full">
-              {chatError && (
-                <Alert
-                  variant="destructive"
-                  className="mx-2 md:mx-4 my-2 md:my-4"
-                >
-                  <AlertDescription>{chatError}</AlertDescription>
-                </Alert>
-              )}
-              <MessageList messages={threadMessages} />
-            </div>
-          </ScrollArea>
-        </div>
-
-        {/* Input with shadow */}
-        <div className="sticky bottom-0 w-full min-w-0 pb-safe shadow-lg z-20">
-          <div className="px-2 md:px-4">
-            <div className="relative">
-              <ChatInput
-                selectedAgentId={selectedAgentId}
-                onAgentSelect={setSelectedAgent}
-                disabled={isChatLoading || !isConnected}
-              />
+        {!activeThreadId ? (
+          <div className="flex items-center justify-center h-full backdrop-blur-sm">
+            <div className="text-center space-y-4 p-4 sm:p-6 lg:p-8 -mt-20">
+              <div className="flex justify-center gap-3">
+                <p className="text-muted-foreground mb-4">
+                  Select a thread or create a new one
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Message list with increased bottom padding */}
+            <div className="flex-1 overflow-hidden w-full min-w-0 max-w-full">
+              <ScrollArea className="h-full w-full">
+                <div className="flex flex-col justify-end min-h-full w-full max-w-full">
+                  {chatError && (
+                    <Alert
+                      variant="destructive"
+                      className="mx-2 md:mx-4 my-2 md:my-4"
+                    >
+                      <AlertDescription>{chatError}</AlertDescription>
+                    </Alert>
+                  )}
+                  <MessageList messages={threadMessages} />
+                  {/* Add extra padding div at the bottom to ensure content isn't hidden */}
+                  <div className="h-32"></div>
+                </div>
+              </ScrollArea>
+            </div>
+
+            {/* Input with shadow */}
+            <div className="sticky bottom-0 w-full min-w-0 pb-safe shadow-lg z-20 bg-background">
+              <div className="px-2 md:px-4 pt-2">
+                <div className="relative">
+                  <ChatInput
+                    selectedAgentId={selectedAgentId}
+                    onAgentSelect={setSelectedAgent}
+                    disabled={isChatLoading || !isConnected}
+                  />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
