@@ -19,7 +19,7 @@ import AgentWalletSelector from "@/components/chat/agent-selector";
 import { CreateThreadButton } from "@/components/threads/CreateThreadButton";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
-import { fetchDAOExtensions } from "@/queries/daoQueries";
+import { fetchDAOExtensions, fetchToken } from "@/queries/daoQueries";
 import type { DAO, Token, Extension } from "@/types/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -37,6 +37,7 @@ export function DAOChatModal({
   trigger,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
+  token,
 }: DAOChatModalProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
@@ -64,6 +65,13 @@ export function DAOChatModal({
     queryFn: () => fetchDAOExtensions(daoId),
     staleTime: 600000, // 10 minutes
     enabled: open, // Only fetch when modal is open
+  });
+
+  const { data: tokenData, isLoading: isTokenLoading } = useQuery({
+    queryKey: ["token", daoId],
+    queryFn: () => fetchToken(daoId),
+    staleTime: 600000, // 10 minutes
+    enabled: open && !token, // Only fetch when modal is open and token is not provided
   });
 
   const memoizedConnect = useCallback(
@@ -161,46 +169,131 @@ export function DAOChatModal({
     );
   };
 
+  // Get token symbol
+  const tokenName = tokenData?.symbol || "DAO";
+
   const EXTENSION_PROMPTS: Record<string, (extension: Extension) => string> = {
     // NEW TYPES
     TOKEN_DEX: (extension) =>
-      `Buy 1 million satoshis of ${extension.contract_principal}. Ensure you have sufficient balance before proceeding.`,
+      `Buy 5 million of ${tokenName}.\n
+  Token DEX: ${extension.contract_principal}`,
+
     EXTENSIONS_CORE_PROPOSALS: (extension) =>
-      `Submit a new proposal to modify the DAO's governance structure using ${extension.contract_principal}. Provide a clear rationale and expected benefits.`,
+      `Submit a new proposal to modify the ${tokenName} DAO's governance structure.\n
+  Core Proposals extension: ${extension.contract_principal}`,
+
     EXTENSIONS_ACTION_PROPOSALS: (extension) =>
-      `Propose an action to update or upgrade a smart contract using ${extension.contract_principal}. Include the reason and expected impact of this upgrade.`,
+      `Propose an action to update a smart contract in the ${tokenName} DAO.\n
+  Action Proposals extension: ${extension.contract_principal}`,
+
     EXTENSIONS_TREASURY: (extension) =>
-      `Submit a proposal to allocate DAO funds for a specific initiative using ${extension.contract_principal}. Specify the amount and justification.`,
+      `Allocate ${tokenName} DAO funds for a specific initiative.\n
+  Treasury extension: ${extension.contract_principal}`,
+
     ACTIONS_TREASURY_ALLOW_ASSET: (extension) =>
-      `Propose to whitelist a new asset in the DAO treasury through ${extension.contract_principal}. Provide details on why this asset should be allowed.`,
+      `Whitelist a new asset in the ${tokenName} DAO treasury.\n
+  Treasury Allow Asset extension: ${extension.contract_principal}`,
+
     EXTENSIONS_MESSAGING: (extension) =>
-      `Draft and send a proposal to notify DAO members about an upcoming vote through ${extension.contract_principal}. Ensure clarity and completeness of information.`,
+      `Draft a proposal to notify ${tokenName} DAO members about an upcoming vote.\n
+  Messaging extension: ${extension.contract_principal}`,
+
     ACTIONS_MESSAGING_SEND_MESSAGE: (extension) =>
-      `Propose an official DAO-wide announcement via ${extension.contract_principal}. Outline the message content and its importance to members.`,
+      `Announce important information to all ${tokenName} DAO members.\n
+  Messaging Send Message extension: ${extension.contract_principal}`,
+
     EXTENSIONS_PAYMENTS: (extension) =>
-      `Submit a proposal to execute a scheduled payment for DAO operations using ${extension.contract_principal}. Detail the amount and recipient.`,
+      `Schedule a payment for ${tokenName} DAO operations.\n
+  Payments extension: ${extension.contract_principal}`,
+
+    EXTENSIONS_CHARTER: (extension) =>
+      `Show the current charter of the ${tokenName} DAO.\n
+  Charter extension: ${extension.contract_principal}`,
+
+    EXTENSIONS_TOKEN_OWNER: (extension) =>
+      `Execute a token owner action for ${tokenName}.\n
+  Token Owner extension: ${extension.contract_principal}`,
+
+    ACTIONS_BANK_ACCOUNT_SET_WITHDRAWAL_AMOUNT: (extension) =>
+      `Set a withdrawal amount of 1000 ${tokenName} tokens.\n
+  Bank Account Set Withdrawal Amount extension: ${extension.contract_principal}`,
+
+    ACTIONS_BANK_ACCOUNT_SET_WITHDRAWAL_PERIOD: (extension) =>
+      `Update the withdrawal period for the ${tokenName} DAO bank account to 30 days.\n
+  Bank Account Set Withdrawal Period extension: ${extension.contract_principal}`,
+
+    ACTIONS_BANK_ACCOUNT_SET_ACCOUNT_HOLDER: (extension) =>
+      `Change the account holder for the ${tokenName} DAO bank account.\n
+  Bank Account Set Account Holder extension: ${extension.contract_principal}`,
+
+    EXTENSIONS_BANK_ACCOUNT: (extension) =>
+      `Show the current ${tokenName} DAO bank account details.\n
+  Bank Account extension: ${extension.contract_principal}`,
+
+    ACTIONS_PAYMENTS_INVOICES_TOGGLE_RESOURCE: (extension) =>
+      `Toggle payment resource availability for ${tokenName} DAO invoices.\n
+  Payments Invoices Toggle Resource extension: ${extension.contract_principal}`,
+
+    ACTIONS_PAYMENTS_INVOICES_ADD_RESOURCE: (extension) =>
+      `Add a new payment resource for ${tokenName} DAO invoices.\n
+  Payments Invoices Add Resource extension: ${extension.contract_principal}`,
+
+    PROPOSALS_BOOTSTRAP_INIT: (extension) =>
+      `Initialize the bootstrap process for ${tokenName} DAO.\n
+  Proposals Bootstrap Init extension: ${extension.contract_principal}`,
+
+    TOKEN_POOL: (extension) =>
+      `Manage the ${tokenName} token pool parameters.\n
+  Token Pool extension: ${extension.contract_principal}`,
+
+    TOKEN_DAO: (extension) =>
+      `Vote yes on proposal 5 in the ${tokenName} DAO.\n
+  Voting extension: ${extension.contract_principal}`,
+
+    BASE_DAO: (extension) =>
+      `Access base DAO functions for ${tokenName}.\n
+  Base DAO extension: ${extension.contract_principal}`,
 
     // OLD TYPES
     pool: (extension) =>
-      `Manage liquidity pool operations for ${extension.contract_principal}. Provide details on your pooling strategy.`,
+      `Manage liquidity pool operations for ${tokenName}.\n
+  Pool extension: ${extension.contract_principal}`,
+
     "aibtc-token-owner": (extension) =>
-      `Execute token owner actions for ${extension.contract_principal}. Outline the specific management task.`,
+      `Execute token owner actions for ${tokenName}.\n
+  Token Owner extension: ${extension.contract_principal}`,
+
     "aibtc-action-proposals": (extension) =>
-      `Submit an action proposal using ${extension.contract_principal}. Describe the proposed action and its rationale.`,
+      `Submit an action proposal for ${tokenName} DAO.\n
+  Action Proposals extension: ${extension.contract_principal}`,
+
     "aibtc-payments-invoices": (extension) =>
-      `Process a payment invoice through ${extension.contract_principal}. Provide invoice details and justification.`,
+      `Process a payment invoice for ${tokenName} DAO.\n
+  Payments Invoices extension: ${extension.contract_principal}`,
+
     "aibtc-treasury": (extension) =>
-      `Propose a treasury management action for ${extension.contract_principal}. Specify the financial operation.`,
+      `Propose a treasury management action for ${tokenName} DAO.\n
+  Treasury extension: ${extension.contract_principal}`,
+
     "aibtc-bank-account": (extension) =>
-      `Interact with the DAO's bank account using ${extension.contract_principal}. Describe the intended transaction.`,
+      `Interact with the ${tokenName} DAO's bank account.\n
+  Bank Account extension: ${extension.contract_principal}`,
+
     "aibtc-onchain-messaging": (extension) =>
-      `Send an on-chain message via ${extension.contract_principal}. Craft a clear and concise communication.`,
+      `Send an on-chain message to ${tokenName} DAO members.\n
+  Messaging extension: ${extension.contract_principal}`,
+
     "aibtc-base-bootstrap-initialization": (extension) =>
-      `Initialize DAO bootstrap process using ${extension.contract_principal}. Outline the initialization steps.`,
+      `Initialize ${tokenName} DAO bootstrap process.\n
+  Bootstrap extension: ${extension.contract_principal}`,
+
     "aibtc-core-proposals": (extension) =>
-      `Submit a core proposal for DAO governance using ${extension.contract_principal}. Provide comprehensive details.`,
+      `Submit a core proposal for ${tokenName} DAO governance.\n
+  Core Proposals extension: ${extension.contract_principal}`,
+
     "aibtcdev-base-dao": (extension) =>
-      `Interact with the base DAO development framework using ${extension.contract_principal}. Specify your development intent.`,
+      `Interact with the ${tokenName} base DAO development framework.\n
+  Base DAO extension: ${extension.contract_principal}`,
   };
 
   const generatePrompt = (extension: Extension) => {
@@ -221,7 +314,7 @@ export function DAOChatModal({
   };
 
   const renderPromptsSection = () => {
-    if (isExtensionsLoading) {
+    if (isExtensionsLoading || isTokenLoading) {
       return (
         <div className="flex justify-center items-center h-full w-full">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -243,7 +336,7 @@ export function DAOChatModal({
         <div className="flex-shrink-0 h-14 flex items-center justify-between px-4 shadow-md bg-background z-10">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <h2 className="text-lg font-semibold truncate">
-              Sample Prompts To Interact with DAO
+              Sample Prompts To Interact with {tokenName} DAO
             </h2>
           </div>
         </div>
@@ -295,11 +388,11 @@ export function DAOChatModal({
       </DialogTrigger>
       <DialogContent className="max-w-[90vw] w-[90vw] h-[90vh] p-0 rounded-lg">
         <DialogTitle className="sr-only">
-          DAO Chat and Interaction Examples
+          {tokenName} DAO Chat and Interaction Examples
         </DialogTitle>
         <DialogDescription className="sr-only">
           Chat with your agent and see examples of how to interact with your
-          DAO&apos;s extensions
+          {tokenName} DAO&apos;s extensions
         </DialogDescription>
         <div className="h-full overflow-hidden">
           {/* Desktop view */}
