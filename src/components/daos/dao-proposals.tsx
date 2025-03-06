@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { decodeClarityValueToRepr } from "stacks-encoding-native-js";
 import {
   Card,
   CardHeader,
@@ -244,9 +245,23 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                <pre className="bg-muted/50 p-2 rounded-md text-xs overflow-x-auto">
-                  {proposal.parameters}
-                </pre>
+                <div className="space-y-2">
+                  <pre className="bg-muted/50 p-2 rounded-md text-xs overflow-x-auto">
+                    {proposal.parameters}
+                  </pre>
+                  <div className="bg-muted/50 p-2 rounded-md text-xs overflow-x-auto">
+                    <h4 className="font-medium mb-1">Decoded Parameters:</h4>
+                    <pre>
+                      {(() => {
+                        try {
+                          return decodeClarityValueToRepr(proposal.parameters);
+                        } catch (error) {
+                          return `Error decoding parameters: ${error.message}`;
+                        }
+                      })()}
+                    </pre>
+                  </div>
+                </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
