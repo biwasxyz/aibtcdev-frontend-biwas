@@ -21,7 +21,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 import { DAOBuyToken } from "./dao-buy-token";
 
 interface DAOTableProps {
