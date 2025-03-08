@@ -63,6 +63,10 @@ const formatNumber = (num: number) => {
   return num.toFixed(2);
 };
 
+const truncateName = (name: string, maxLength: number = 10) => {
+  return name.length > maxLength ? `${name.slice(0, maxLength)}...` : name;
+};
+
 export const DAOTable = ({
   daos,
   tokens,
@@ -201,12 +205,23 @@ export const DAOTable = ({
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <Link
-                    href={`/daos/${dao.id}`}
-                    className="font-medium hover:underline hover:text-primary text-sm"
-                  >
-                    {dao.name}
-                  </Link>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link
+                          href={`/daos/${dao.id}`}
+                          className="font-medium hover:underline hover:text-primary text-sm"
+                        >
+                          {truncateName(dao.name)}
+                        </Link>
+                      </TooltipTrigger>
+                      {dao.name.length > 10 && (
+                        <TooltipContent>
+                          <p className="text-xs">{dao.name}</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
                   {dao.is_graduated && (
                     <Badge
                       variant="secondary"
@@ -382,12 +397,23 @@ export const DAOTable = ({
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <Link
-                              href={`/daos/${dao.id}`}
-                              className="font-medium hover:underline text-sm"
-                            >
-                              {dao.name}
-                            </Link>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Link
+                                    href={`/daos/${dao.id}`}
+                                    className="font-medium hover:underline text-sm"
+                                  >
+                                    {truncateName(dao.name)}
+                                  </Link>
+                                </TooltipTrigger>
+                                {dao.name.length > 10 && (
+                                  <TooltipContent>
+                                    <p className="text-xs">{dao.name}</p>
+                                  </TooltipContent>
+                                )}
+                              </Tooltip>
+                            </TooltipProvider>
                             {dao.is_graduated && (
                               <Badge
                                 variant="secondary"
