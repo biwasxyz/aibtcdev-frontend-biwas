@@ -5,8 +5,8 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowUpRight, ArrowDownRight, BarChart } from "lucide-react";
-import type { DAO, Token } from "@/types/supabase";
+import { ArrowUpRight, ArrowDownRight, BarChart, Users } from "lucide-react";
+import type { DAO, Token, Holder } from "@/types/supabase";
 import { Loader } from "../reusables/loader";
 import {
   LineChart,
@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DAOBuyToken } from "./dao-buy-token";
+import { Button } from "@/components/ui/button";
 
 interface DAOTableProps {
   daos: DAO[];
@@ -43,6 +44,17 @@ interface DAOTableProps {
       isLoading: boolean;
     }
   >;
+  holders: Record<
+    string,
+    {
+      data: {
+        holders: Holder[];
+        totalSupply: number;
+        holderCount: number;
+      } | null;
+      isLoading: boolean;
+    }
+  >;
 }
 
 const formatNumber = (num: number) => {
@@ -58,6 +70,7 @@ export const DAOTable = ({
   tokenPrices,
   isFetchingPrice,
   trades,
+  holders,
 }: DAOTableProps) => {
   const getChartColor = (data: Array<{ timestamp: number; price: number }>) => {
     if (data.length < 2) return "#8884d8";
@@ -145,6 +158,19 @@ export const DAOTable = ({
         <span>{Math.abs(change).toFixed(2)}%</span>
       </div>
     );
+  };
+
+  const getHolderCount = (daoId: string) => {
+    const holderData = holders[daoId];
+    if (holderData?.isLoading) {
+      return <Loader />;
+    }
+
+    if (holderData?.data?.holderCount) {
+      return holderData.data.holderCount.toLocaleString();
+    }
+
+    return tokenPrices?.[daoId]?.holders?.toLocaleString() || "—";
   };
 
   const renderDAOCard = (dao: DAO) => {
@@ -273,8 +299,8 @@ export const DAOTable = ({
                 </div>
                 <div className="text-center">
                   <div className="text-muted-foreground mb-1">Holders</div>
-                  <div className="font-medium">
-                    {isFetchingPrice ? <Loader /> : tokenPrice?.holders || "—"}
+                  <div className="font-medium flex flex-col items-center">
+                    {getHolderCount(dao.id)}
                   </div>
                 </div>
               </div>
@@ -293,7 +319,7 @@ export const DAOTable = ({
 
   return (
     <div className="space-y-4">
-      <div className="hidden md:block overflow-x-auto w-full">
+      <div className="hidden md:block overflow-x-auto w-full rounded-md border">
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-b bg-muted/50">
@@ -333,7 +359,7 @@ export const DAOTable = ({
                 return (
                   <tr
                     key={dao.id}
-                    className="border-b hover:bg-muted/30 transition-colors cursor-pointer"
+                    className="border-b hover:bg-muted/30 transition-colors"
                     onClick={() => (window.location.href = `/daos/${dao.id}`)}
                   >
                     <td
@@ -447,11 +473,9 @@ export const DAOTable = ({
                       className="p-4 text-center font-medium"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {isFetchingPrice ? (
-                        <Loader />
-                      ) : (
-                        tokenPrice?.holders?.toLocaleString() || "—"
-                      )}
+                      <div className="flex flex-col items-center justify-center">
+                        {getHolderCount(dao.id)}
+                      </div>
                     </td>
                     <td
                       className="p-4 text-center"
@@ -478,7 +502,7 @@ export const DAOTable = ({
         </table>
       </div>
 
-      <div className="md:hidden grid gap-4">
+      <div className="md:hidden grid grid-cols-1 gap-4">
         {daos.length > 0 ? (
           daos.map(renderDAOCard)
         ) : (

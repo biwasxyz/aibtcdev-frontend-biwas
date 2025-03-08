@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DAOTable } from "./daos-table";
-import type { DAO, SortField } from "@/types/supabase";
+import type { DAO, SortField, Holder } from "@/types/supabase";
 import { createDaoAgent } from "../agents/dao-agent";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -20,6 +20,7 @@ import {
   fetchTokens,
   fetchTokenPrices,
   fetchTokenTrades,
+  fetchHolders,
 } from "@/queries/daoQueries";
 
 export default function DAOs() {
@@ -107,6 +108,42 @@ export default function DAOs() {
     }),
   });
 
+  // Fetch detailed holders data for all DAOs
+  const holdersQueries = useQueries({
+    queries: (daos || []).map((dao) => {
+      const token = tokens?.find((t) => t.dao_id === dao.id);
+      return {
+        queryKey: ["holders", token?.contract_principal, token?.symbol, dao.id],
+        queryFn: async () => {
+          if (!token?.contract_principal || !token?.symbol) return null;
+          try {
+            const holdersData = await fetchHolders(
+              token.contract_principal,
+              token.symbol
+            );
+            return holdersData;
+          } catch (error) {
+            console.error(`Error fetching holders for DAO ${dao.id}:`, error);
+            return null;
+          }
+        },
+        enabled: !!token?.contract_principal && !!token?.symbol,
+        staleTime: 600000, // 10 minutes
+      };
+    }),
+  });
+
+  // Create a map of holders data for each DAO
+  const holdersMap = Object.fromEntries(
+    holdersQueries.map((query, index) => [
+      daos?.[index]?.id,
+      {
+        data: query.data,
+        isLoading: query.isLoading,
+      },
+    ])
+  );
+
   // Filter and sort DAOs
   const filteredAndSortedDAOs = (() => {
     const filtered =
@@ -128,6 +165,18 @@ export default function DAOs() {
         );
       }
 
+      if (sortField === "holders") {
+        const holdersA =
+          holdersMap[a.id]?.data?.holderCount ||
+          tokenPrices?.[a.id]?.holders ||
+          0;
+        const holdersB =
+          holdersMap[b.id]?.data?.holderCount ||
+          tokenPrices?.[b.id]?.holders ||
+          0;
+        return holdersB - holdersA;
+      }
+
       const valueA = tokenPrices?.[a.id]?.[sortField] ?? 0;
       const valueB = tokenPrices?.[b.id]?.[sortField] ?? 0;
       return valueB - valueA;
@@ -147,17 +196,20 @@ export default function DAOs() {
 
   return (
     <div className="w-full">
-      <div className="px-4 sm:px-6 lg:px-0 mx-auto space-y-6 py-6">
+      <div className="px-4 sm:px-6 lg:px-8 mx-auto space-y-6 py-6">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="w-full sm:w-auto">
+            <Heading className="text-2xl font-bold sm:text-3xl mb-2">
+              AI DAOs
+            </Heading>
             {!isLoadingDAOs && (
-              <Heading className="text-2xl font-bold sm:text-3xl mb-2 px-2">
-                AI DAOs: {filteredAndSortedDAOs.length}
-              </Heading>
+              <p className="text-sm text-muted-foreground">
+                Total: {filteredAndSortedDAOs.length}
+              </p>
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 px-2">
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
             <div className="relative w-full sm:w-[220px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
               <Input
@@ -172,7 +224,7 @@ export default function DAOs() {
               value={sortField}
               onValueChange={(value) => setSortField(value as SortField)}
             >
-              <SelectTrigger className="w-full sm:w-[180px] px-2">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -198,6 +250,7 @@ export default function DAOs() {
             tokenPrices={tokenPrices}
             isFetchingPrice={isFetchingTokenPrices}
             trades={tradesMap}
+            holders={holdersMap}
           />
         )}
 
