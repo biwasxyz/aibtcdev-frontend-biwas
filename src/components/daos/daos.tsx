@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DAOTable } from "./daos-table";
-import type { DAO, SortField, Holder } from "@/types/supabase";
+import type { DAO, SortField } from "@/types/supabase";
 import { createDaoAgent } from "../agents/dao-agent";
 import { useToast } from "@/hooks/use-toast";
 import {

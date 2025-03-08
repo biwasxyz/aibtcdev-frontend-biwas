@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowUpRight, ArrowDownRight, BarChart, Users } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, BarChart } from "lucide-react";
 import type { DAO, Token, Holder } from "@/types/supabase";
 import { Loader } from "../reusables/loader";
 import {
@@ -22,7 +22,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DAOBuyToken } from "./dao-buy-token";
-import { Button } from "@/components/ui/button";
 
 interface DAOTableProps {
   daos: DAO[];
