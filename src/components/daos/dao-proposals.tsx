@@ -46,7 +46,6 @@ import {
   ArrowRight,
   Copy,
   CheckIcon,
-  ChevronDown,
   MessageSquare,
   Info,
 } from "lucide-react";
