@@ -23,6 +23,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import type { Proposal } from "@/types/supabase";
 import {
@@ -40,6 +46,9 @@ import {
   ArrowRight,
   Copy,
   CheckIcon,
+  ChevronDown,
+  MessageSquare,
+  Info,
 } from "lucide-react";
 
 interface DAOProposalsProps {
@@ -52,33 +61,46 @@ const StatusBadge = ({ status }: { status: Proposal["status"] }) => {
       color: "bg-gray-500/10 text-gray-500",
       icon: FileEdit,
       label: "Draft",
+      tooltip: "This proposal is in draft state and not yet active",
     },
     PENDING: {
       color: "bg-blue-500/10 text-blue-500",
       icon: Timer,
       label: "Pending",
+      tooltip: "This proposal is waiting for AI agents to vote",
     },
     DEPLOYED: {
       color: "bg-green-500/10 text-green-500",
       icon: CheckCircle2,
       label: "Deployed",
+      tooltip: "This proposal has been approved and deployed by AI agents",
     },
     FAILED: {
       color: "bg-red-500/10 text-red-500",
       icon: XCircle,
       label: "Failed",
+      tooltip: "This proposal failed to receive enough support from AI agents",
     },
   };
 
-  const { color, icon: Icon, label } = config[status];
+  const { color, icon: Icon, label, tooltip } = config[status];
 
   return (
-    <Badge variant="secondary" className={`${color} text-xs sm:text-sm`}>
-      <span className="flex items-center gap-1.5">
-        <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
-        {label}
-      </span>
-    </Badge>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="secondary" className={`${color} text-xs sm:text-sm`}>
+            <span className="flex items-center gap-1.5">
+              <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
+              {label}
+            </span>
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
@@ -90,6 +112,35 @@ const truncateString = (
   if (!str) return "";
   if (str.length <= startLength + endLength) return str;
   return `${str.slice(0, startLength)}...${str.slice(-endLength)}`;
+};
+
+// Function to format action string: extract part after period and convert to uppercase
+const formatAction = (action: string) => {
+  if (!action) return "";
+
+  // Find the last occurrence of a period and extract everything after it
+  const parts = action.split(".");
+  if (parts.length <= 1) return action.toUpperCase();
+
+  // Return only the part after the last period in uppercase
+  return parts[parts.length - 1].toUpperCase();
+};
+
+// Function to get explorer link based on type and value
+const getExplorerLink = (type: string, value: string) => {
+  const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet";
+  const testnetParam = isTestnet ? "?chain=testnet" : "";
+
+  switch (type) {
+    case "tx":
+      return `http://explorer.hiro.so/txid/${value}${testnetParam}`;
+    case "address":
+      return `http://explorer.hiro.so/address/${value}${testnetParam}`;
+    case "contract":
+      return `http://explorer.hiro.so/txid/${value}${testnetParam}`;
+    default:
+      return "";
+  }
 };
 
 const CopyButton = ({ text }: { text: string }) => {
@@ -105,7 +156,7 @@ const CopyButton = ({ text }: { text: string }) => {
     <Button
       variant="ghost"
       size="icon"
-      className="h-6 w-6"
+      className="h-6 w-6 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
       onClick={handleCopy}
       title="Copy to clipboard"
     >
@@ -139,14 +190,122 @@ const BlockVisual = ({
     );
 
   const label = type === "stacks" ? "STX" : "BTC";
+  const tooltip =
+    type === "stacks"
+      ? "Block height on the Stacks blockchain"
+      : "Block height on the Bitcoin blockchain";
 
   return (
-    <div className="flex items-center">
-      {icon}
-      <span className="text-xs">{value.toLocaleString()}</span>
-      <span className="text-xs text-muted-foreground ml-1">{label}</span>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center">
+            {icon}
+            <span className="text-xs">{value.toLocaleString()}</span>
+            <span className="text-xs text-muted-foreground ml-1">{label}</span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{tooltip}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
+const LabeledField = ({
+  icon: Icon,
+  label,
+  value,
+  copy,
+  tooltip,
+  link,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string | React.ReactNode;
+  copy?: string;
+  tooltip?: string;
+  link?: string;
+}) => {
+  const content = (
+    <div className="flex flex-wrap items-center gap-2 text-muted-foreground my-2">
+      <Icon className="h-4 w-4 flex-shrink-0" />
+      <span className="font-medium text-xs text-muted-foreground">
+        {label}:
+      </span>
+      <span className="break-all">
+        {link ? (
+          <a
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline text-blue-500 dark:text-blue-400"
+          >
+            {value}
+          </a>
+        ) : (
+          value
+        )}
+      </span>
+      {copy && <CopyButton text={copy} />}
+      {tooltip && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-xs">{tooltip}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
     </div>
   );
+
+  return content;
+};
+
+const MessageDisplay = ({ message }: { message: string }) => {
+  try {
+    if (!message)
+      return (
+        <p className="text-center text-muted-foreground">
+          No message available
+        </p>
+      );
+
+    // Remove "0x" prefix if present
+    const hexValue = message.startsWith("0x") ? message.slice(2) : message;
+
+    // Deserialize Clarity value
+    const clarityValue = deserializeCV(Buffer.from(hexValue, "hex"));
+
+    // Convert to readable string format
+    const decodedMessage = cvToString(clarityValue);
+
+    return (
+      <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-900">
+        <div className="flex items-center gap-2 mb-2">
+          <MessageSquare className="h-4 w-4 text-blue-500" />
+          <h4 className="font-medium text-blue-700 dark:text-blue-400">
+            Message
+          </h4>
+        </div>
+        <p className="text-base">{decodedMessage}</p>
+      </div>
+    );
+  } catch (error) {
+    return (
+      <div className="p-4 bg-gray-50 dark:bg-gray-900/30 rounded-lg border border-gray-200 dark:border-gray-800">
+        <p className="text-muted-foreground">
+          Unable to decode message:{" "}
+          {error instanceof Error ? error.message : String(error)}
+        </p>
+      </div>
+    );
+  }
 };
 
 const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
@@ -156,139 +315,127 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   };
 
   return (
-    <Card className="transition-all duration-200 hover:shadow-md">
-      <CardHeader className="space-y-3">
+    <Card className="transition-all duration-200 hover:shadow-md overflow-hidden">
+      <CardHeader className="space-y-3 pb-2">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold leading-none tracking-tight">
-              {proposal.title}
-            </h3>
-            <p className="text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold leading-none tracking-tight">
+                {proposal.title}
+              </h3>
+              <StatusBadge status={proposal.status} />
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
               {proposal.description}
             </p>
           </div>
-          <StatusBadge status={proposal.status} />
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Overview Section */}
+
+      <CardContent className="space-y-4 pt-0">
+        {/* Message Display - Prominently featured */}
+        {proposal.parameters && (
+          <MessageDisplay message={proposal.parameters} />
+        )}
+
+        {/* Overview Section with improved spacing and hierarchy */}
         <div className="grid grid-cols-1 gap-4 text-sm">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-              <Calendar className="h-4 w-4 flex-shrink-0" />
-              <span>
-                Created: {format(new Date(proposal.created_at), "PPp")}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-              <Timer className="h-4 w-4 flex-shrink-0" />
-              <span>
-                Ends: {format(getEstimatedEndDate(proposal.created_at), "PPp")}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-              <User className="h-4 w-4 flex-shrink-0" />
-              <span className="break-all">
-                Creator: {truncateString(proposal.creator, 8, 8)}
-              </span>
-              <CopyButton text={proposal.creator} />
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-              <Activity className="h-4 w-4 flex-shrink-0" />
-              <span className="break-all">
-                Action: {truncateString(proposal.action, 8, 8)}
-              </span>
-            </div>
-            {proposal.parameters && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-normal text-muted-foreground mb-2"></div>
-                <div className="space-y-4">
-                  <div className="bg-muted/50 p-3 rounded-md text-xs">
-                    <div className="whitespace-pre-wrap break-words overflow-x-auto">
-                      {(() => {
-                        try {
-                          if (!proposal.parameters)
-                            return "No parameters to decode";
-                          // Remove "0x" prefix if present
-                          const hexValue = proposal.parameters.startsWith("0x")
-                            ? proposal.parameters.slice(2)
-                            : proposal.parameters;
-                          // Deserialize Clarity value
-                          const clarityValue = deserializeCV(
-                            Buffer.from(hexValue, "hex")
-                          );
-                          // Convert to readable string format
-                          return cvToString(clarityValue);
-                        } catch (error) {
-                          return `Error decoding: ${
-                            error instanceof Error
-                              ? error.message
-                              : String(error)
-                          }`;
-                        }
-                      })()}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+          <div className="space-y-2">
+            <LabeledField
+              icon={Calendar}
+              label="Created"
+              value={format(new Date(proposal.created_at), "PPp")}
+            />
+            <LabeledField
+              icon={Timer}
+              label="Ends"
+              value={format(getEstimatedEndDate(proposal.created_at), "PPp")}
+            />
+            <LabeledField
+              icon={User}
+              label="Creator"
+              value={truncateString(proposal.creator, 8, 8)}
+              copy={proposal.creator}
+              tooltip="The blockchain address that created this proposal"
+              link={getExplorerLink("address", proposal.creator)}
+            />
+            <LabeledField
+              icon={Activity}
+              label="Action"
+              value={formatAction(proposal.action)}
+              copy={proposal.action}
+              tooltip="The action this proposal will execute if approved"
+              link={
+                proposal.action
+                  ? getExplorerLink("contract", proposal.action)
+                  : undefined
+              }
+            />
           </div>
         </div>
 
-        {/* Technical Details Section */}
+        {/* Technical Details Section with improved accordion */}
         <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="technical-details" className="border-none">
-            <AccordionTrigger className="py-2 text-sm font-medium">
-              See More
+          <AccordionItem value="technical-details" className="border-t pt-2">
+            <AccordionTrigger className="py-2 text-sm font-medium hover:bg-muted/50 px-2 rounded-md transition-colors">
+              <span className="flex items-center gap-2">See More</span>
             </AccordionTrigger>
-            <AccordionContent>
+            <AccordionContent className="pt-2">
               <div className="grid grid-cols-1 gap-4 text-sm">
                 <div className="space-y-3">
-                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-                    <Hash className="h-4 w-4 flex-shrink-0" />
-                    <span className="font-mono break-all">
-                      tx_id:{" "}
-                      <a
-                        href={`http://explorer.hiro.so/txid/${proposal.tx_id}${
-                          process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
-                            ? "?chain=testnet"
-                            : ""
-                        }`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline "
-                      >
-                        {truncateString(proposal.tx_id, 8, 8)}
-                      </a>
-                    </span>
-                    <CopyButton text={proposal.tx_id} />
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-                    <Wallet className="h-4 w-4 flex-shrink-0" />
-                    <span className="font-mono break-all">
-                      Principal:{" "}
-                      {truncateString(proposal.contract_principal, 8, 8)}
-                    </span>
-                    <CopyButton text={proposal.contract_principal} />
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-                    <Layers className="h-4 w-4 flex-shrink-0" />
-                    <span>Snapshot block:</span>
-                    <BlockVisual
-                      value={proposal.created_at_block}
-                      type="stacks"
-                    />
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-                    <ArrowRight className="h-4 w-4 flex-shrink-0" />
-                    <span>Start block:</span>
-                    <BlockVisual value={proposal.start_block} type="bitcoin" />
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-                    <Timer className="h-4 w-4 flex-shrink-0" />
-                    <span>End block:</span>
-                    <BlockVisual value={proposal.end_block} type="bitcoin" />
-                  </div>
+                  <LabeledField
+                    icon={Hash}
+                    label="Transaction ID"
+                    value={truncateString(proposal.tx_id, 8, 8)}
+                    copy={proposal.tx_id}
+                    tooltip="The blockchain transaction ID for this proposal"
+                    link={getExplorerLink("tx", proposal.tx_id)}
+                  />
+
+                  <LabeledField
+                    icon={Wallet}
+                    label="Principal"
+                    value={formatAction(proposal.contract_principal)}
+                    copy={proposal.contract_principal}
+                    tooltip="The smart contract that controls this proposal"
+                    link={getExplorerLink(
+                      "contract",
+                      proposal.contract_principal
+                    )}
+                  />
+
+                  <LabeledField
+                    icon={Layers}
+                    label="Snapshot block"
+                    value={
+                      <BlockVisual
+                        value={proposal.created_at_block}
+                        type="stacks"
+                      />
+                    }
+                    tooltip="The Stacks block at which this proposal was created"
+                  />
+
+                  <LabeledField
+                    icon={ArrowRight}
+                    label="Start block"
+                    value={
+                      <BlockVisual
+                        value={proposal.start_block}
+                        type="bitcoin"
+                      />
+                    }
+                    tooltip="The Bitcoin block at which this proposal became active"
+                  />
+
+                  <LabeledField
+                    icon={Timer}
+                    label="End block"
+                    value={
+                      <BlockVisual value={proposal.end_block} type="bitcoin" />
+                    }
+                    tooltip="The Bitcoin block at which this proposal will end"
+                  />
                 </div>
               </div>
             </AccordionContent>
@@ -334,7 +481,7 @@ function DAOProposals({ proposals }: DAOProposalsProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-4">
+        <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="p-0 pb-2">
             <h3 className="text-sm font-medium text-muted-foreground">
               Active Proposals
@@ -354,7 +501,7 @@ function DAOProposals({ proposals }: DAOProposalsProps) {
           </CardContent>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="p-0 pb-2">
             <h3 className="text-sm font-medium text-muted-foreground">
               Pending Proposals
@@ -374,7 +521,7 @@ function DAOProposals({ proposals }: DAOProposalsProps) {
           </CardContent>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="p-0 pb-2">
             <h3 className="text-sm font-medium text-muted-foreground">
               Success Rate
@@ -388,7 +535,7 @@ function DAOProposals({ proposals }: DAOProposalsProps) {
           </CardContent>
         </Card>
 
-        <Card className="p-4">
+        <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="p-0 pb-2">
             <h3 className="text-sm font-medium text-muted-foreground">
               Total Proposals
