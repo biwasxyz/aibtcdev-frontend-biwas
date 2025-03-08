@@ -119,18 +119,32 @@ const CopyButton = ({ text }: { text: string }) => {
   );
 };
 
-const BlockVisual = ({ value }: { value: number | null }) => {
+const BlockVisual = ({
+  value,
+  type = "stacks",
+}: {
+  value: number | null;
+  type?: "stacks" | "bitcoin";
+}) => {
   if (value === null) return <span>N/A</span>;
-  const blocks = Math.min(Math.floor(value / 1000), 5); // Reduced from 10 to 5 for better mobile display
+
+  // Define colors based on block type
+  const color = type === "stacks" ? "bg-orange-500" : "bg-yellow-500";
+
+  const icon =
+    type === "stacks" ? (
+      <div className={`w-2 h-2 rounded-sm ${color} mr-1.5`} />
+    ) : (
+      <div className={`w-2 h-2 rounded-full ${color} mr-1.5`} />
+    );
+
+  const label = type === "stacks" ? "STX" : "BTC";
+
   return (
-    <div className="flex items-center gap-1">
-      {[...Array(blocks)].map((_, i) => (
-        <div
-          key={i}
-          className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-primary rounded-sm"
-        />
-      ))}
-      <span className="ml-1 sm:ml-2 text-xs">{value.toLocaleString()}</span>
+    <div className="flex items-center">
+      {icon}
+      <span className="text-xs">{value.toLocaleString()}</span>
+      <span className="text-xs text-muted-foreground ml-1">{label}</span>
     </div>
   );
 };
@@ -259,18 +273,21 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
                     <Layers className="h-4 w-4 flex-shrink-0" />
-                    <span>Created block:</span>
-                    <BlockVisual value={proposal.created_at_block} />
+                    <span>Snapshot block:</span>
+                    <BlockVisual
+                      value={proposal.created_at_block}
+                      type="stacks"
+                    />
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
                     <ArrowRight className="h-4 w-4 flex-shrink-0" />
                     <span>Start block:</span>
-                    <BlockVisual value={proposal.start_block} />
+                    <BlockVisual value={proposal.start_block} type="bitcoin" />
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
                     <Timer className="h-4 w-4 flex-shrink-0" />
                     <span>End block:</span>
-                    <BlockVisual value={proposal.end_block} />
+                    <BlockVisual value={proposal.end_block} type="bitcoin" />
                   </div>
                 </div>
               </div>
