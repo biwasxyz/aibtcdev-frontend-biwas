@@ -318,7 +318,7 @@ export const DAOTable = ({
 
   return (
     <div className="space-y-4">
-      <div className="hidden md:block overflow-x-auto w-full rounded-md border">
+      <div className="hidden md:block overflow-x-auto w-full">
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="border-b bg-muted/50">

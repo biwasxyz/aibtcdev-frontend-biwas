@@ -196,20 +196,17 @@ export default function DAOs() {
 
   return (
     <div className="w-full">
-      <div className="px-4 sm:px-6 lg:px-8 mx-auto space-y-6 py-6">
+      <div className="px-4 sm:px-6 lg:px-0 mx-auto space-y-6 py-6">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="w-full sm:w-auto">
-            <Heading className="text-2xl font-bold sm:text-3xl mb-2">
-              AI DAOs
-            </Heading>
             {!isLoadingDAOs && (
-              <p className="text-sm text-muted-foreground">
-                Total: {filteredAndSortedDAOs.length}
-              </p>
+              <Heading className="text-2xl font-bold sm:text-3xl px-2">
+                AI DAOs: {filteredAndSortedDAOs.length}
+              </Heading>
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 px-2">
             <div className="relative w-full sm:w-[220px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
               <Input
@@ -224,7 +221,7 @@ export default function DAOs() {
               value={sortField}
               onValueChange={(value) => setSortField(value as SortField)}
             >
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] px-2">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
