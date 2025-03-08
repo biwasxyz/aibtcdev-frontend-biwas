@@ -11,6 +11,7 @@ import {
   fetchMarketStats,
   fetchTreasuryTokens,
   fetchTokenPrice,
+  fetchHolders,
 } from "@/queries/daoQueries";
 
 export const runtime = "edge";
@@ -50,6 +51,14 @@ export default function DAOPage() {
     enabled: !!dex,
   });
 
+  // Fetch holders data directly from Hiro API
+  const { data: holdersData, isLoading: isLoadingHolders } = useQuery({
+    queryKey: ["holders", token?.contract_principal, token?.symbol],
+    queryFn: () => fetchHolders(token!.contract_principal, token!.symbol),
+    enabled: !!token?.contract_principal && !!token?.symbol,
+    staleTime: 600000, // 10 minutes
+  });
+
   const { data: marketStats, isLoading: isLoadingMarketStats } = useQuery({
     queryKey: [
       "marketStats",
@@ -83,7 +92,8 @@ export default function DAOPage() {
     isLoadingExtensions ||
     isLoadingTokenPrice ||
     isLoadingMarketStats ||
-    isLoadingTreasuryTokens;
+    isLoadingTreasuryTokens ||
+    isLoadingHolders;
 
   if (isLoading) {
     return (
@@ -120,12 +130,28 @@ export default function DAOPage() {
     );
   }
 
+  // Create an enhanced marketStats object that uses the holders count from Hiro API
+  const enhancedMarketStats = marketStats
+    ? {
+        ...marketStats,
+        // Prioritize holders count from Hiro API, fall back to marketStats
+        holderCount: holdersData?.holderCount || marketStats.holderCount,
+      }
+    : {
+        price: tokenPrice?.price || 0,
+        marketCap: tokenPrice?.marketCap || 0,
+        treasuryBalance: token?.max_supply
+          ? token.max_supply * 0.8 * (tokenPrice?.price || 0)
+          : 0,
+        holderCount: holdersData?.holderCount || 0,
+      };
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 h-full">
       <DAOOverview
         dao={dao}
         token={token}
-        marketStats={marketStats}
+        marketStats={enhancedMarketStats}
         treasuryTokens={treasuryTokens}
       />
     </div>
