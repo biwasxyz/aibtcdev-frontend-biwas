@@ -11,7 +11,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://app.aibtc.dev"),
+  metadataBase: new URL("https://aibtc.com"),
   title: {
     default: "AIBTC",
     template: "%s | AIBTC",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://app.aibtc.dev/logos/aibtcdev-avatar-1000px.png",
+        url: "https://aibtc.com/logos/aibtcdev-avatar-1000px.png",
         width: 1000,
         height: 1000,
         alt: "AIBTC",
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: [
       {
-        url: "https://app.aibtc.dev/logos/aibtcdev-pattern-1-with-text-social-new.png",
+        url: "https://aibtc.com/logos/aibtcdev-pattern-1-with-text-social-new.png",
         alt: "AIBTC",
         width: 1200,
         height: 630,
