@@ -499,7 +499,7 @@ function DAOProposals({ proposals }: DAOProposalsProps) {
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Proposals</h2>
           <p className="text-muted-foreground mt-2">
-            View and manage your DAO's governance proposals
+            View and manage your DAO&apos;s governance proposals
           </p>
         </div>
 

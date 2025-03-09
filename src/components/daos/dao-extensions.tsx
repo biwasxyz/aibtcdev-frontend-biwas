@@ -85,7 +85,8 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Extensions</h2>
           <p className="text-muted-foreground mt-2">
-            Manage and monitor your DAO's active extensions and capabilities
+            Manage and monitor your DAO&apos;s active extensions and
+            capabilities
           </p>
         </div>
 
