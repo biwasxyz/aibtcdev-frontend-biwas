@@ -490,119 +490,130 @@ function DAOProposals({ proposals }: DAOProposalsProps) {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="p-0 pb-2">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Active Proposals
-            </h3>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="flex items-center">
-              <div className="text-2xl font-bold">{stats.active}</div>
-              <Badge
-                variant="secondary"
-                className="ml-2 bg-green-500/10 text-green-500"
+    <div className="container mx-auto px-4 py-8">
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Proposals</h2>
+          <p className="text-muted-foreground mt-2">
+            View and manage your DAO's governance proposals
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="p-0 pb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Active Proposals
+              </h3>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="flex items-center">
+                <div className="text-2xl font-bold">{stats.active}</div>
+                <Badge
+                  variant="secondary"
+                  className="ml-2 bg-green-500/10 text-green-500"
+                >
+                  <CheckCircle2 className="h-4 w-4 mr-1" />
+                  Deployed
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="p-0 pb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Pending Proposals
+              </h3>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="flex items-center">
+                <div className="text-2xl font-bold">{stats.pending}</div>
+                <Badge
+                  variant="secondary"
+                  className="ml-2 bg-blue-500/10 text-blue-500"
+                >
+                  <Timer className="h-4 w-4 mr-1" />
+                  Pending
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="p-0 pb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Success Rate
+              </h3>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="text-2xl font-bold">{stats.successRate}%</div>
+              <p className="text-sm text-muted-foreground">
+                Of completed proposals
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="p-0 pb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Total Proposals
+              </h3>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="text-2xl font-bold">{stats.total}</div>
+              <div className="flex gap-1 mt-1">
+                <Badge variant="outline" className="text-sm">
+                  {stats.draft} drafts
+                </Badge>
+                <Badge variant="outline" className="text-sm">
+                  {stats.failed} failed
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">All Proposals</h3>
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select
+                value={statusFilter}
+                onValueChange={(value) =>
+                  setStatusFilter(value as Proposal["status"] | "all")
+                }
               >
-                <CheckCircle2 className="h-4 w-4 mr-1" />
-                Deployed
-              </Badge>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Proposals</SelectItem>
+                  <SelectItem value="DRAFT">Draft</SelectItem>
+                  <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="DEPLOYED">Deployed</SelectItem>
+                  <SelectItem value="FAILED">Failed</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="p-0 pb-2">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Pending Proposals
-            </h3>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="flex items-center">
-              <div className="text-2xl font-bold">{stats.pending}</div>
-              <Badge
-                variant="secondary"
-                className="ml-2 bg-blue-500/10 text-blue-500"
-              >
-                <Timer className="h-4 w-4 mr-1" />
-                Pending
-              </Badge>
+          {filteredProposals.length === 0 ? (
+            <Card className="p-8 text-center">
+              <CardDescription>
+                No proposals found with the selected filter.
+              </CardDescription>
+            </Card>
+          ) : (
+            <div className="grid gap-6">
+              {filteredProposals.map((proposal) => (
+                <ProposalCard key={proposal.id} proposal={proposal} />
+              ))}
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="p-0 pb-2">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Success Rate
-            </h3>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="text-2xl font-bold">{stats.successRate}%</div>
-            <p className="text-sm text-muted-foreground">
-              Of completed proposals
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="p-0 pb-2">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Total Proposals
-            </h3>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <div className="flex gap-1 mt-1">
-              <Badge variant="outline" className="text-sm">
-                {stats.draft} drafts
-              </Badge>
-              <Badge variant="outline" className="text-sm">
-                {stats.failed} failed
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Proposals</h2>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <Select
-            value={statusFilter}
-            onValueChange={(value) =>
-              setStatusFilter(value as Proposal["status"] | "all")
-            }
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Proposals</SelectItem>
-              <SelectItem value="DRAFT">Draft</SelectItem>
-              <SelectItem value="PENDING">Pending</SelectItem>
-              <SelectItem value="DEPLOYED">Deployed</SelectItem>
-              <SelectItem value="FAILED">Failed</SelectItem>
-            </SelectContent>
-          </Select>
+          )}
         </div>
       </div>
-
-      {filteredProposals.length === 0 ? (
-        <Card className="p-8 text-center">
-          <CardDescription className="text-sm">
-            No proposals found with the selected filter.
-          </CardDescription>
-        </Card>
-      ) : (
-        <div className="grid gap-6">
-          {filteredProposals.map((proposal) => (
-            <ProposalCard key={proposal.id} proposal={proposal} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
