@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Info, Loader2 } from "lucide-react";
+import { Info, Loader2 } from "lucide-react";
 import { TokenBuyInput } from "./dao-buy-input";
 import AgentWalletSelector from "@/components/chat/agent-selector";
 import { useChatStore } from "@/store/chat";
@@ -168,7 +168,6 @@ export function DAOBuyModal({
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" className="gap-2">
-            <MessageSquare className="h-4 w-4" />
             <span>Buy {tokenName}</span>
           </Button>
         )}

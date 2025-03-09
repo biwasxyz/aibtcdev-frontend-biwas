@@ -283,7 +283,8 @@ export const fetchProposals = async (daoId: string): Promise<Proposal[]> => {
     const { data, error } = await supabase
         .from("proposals")
         .select("*")
-        .eq("dao_id", daoId);
+        .eq("dao_id", daoId)
+        .order("created_at", { ascending: false }); //newest first
 
     if (error) throw error;
     return data || [];

@@ -20,7 +20,9 @@ import {
   fetchTokens,
   fetchTokenPrices,
   fetchTokenTrades,
+  fetchHolders,
 } from "@/queries/daoQueries";
+import { NetworkIndicator } from "../reusables/network-indicator";
 
 export default function DAOs() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -107,6 +109,42 @@ export default function DAOs() {
     }),
   });
 
+  // Fetch detailed holders data for all DAOs
+  const holdersQueries = useQueries({
+    queries: (daos || []).map((dao) => {
+      const token = tokens?.find((t) => t.dao_id === dao.id);
+      return {
+        queryKey: ["holders", token?.contract_principal, token?.symbol, dao.id],
+        queryFn: async () => {
+          if (!token?.contract_principal || !token?.symbol) return null;
+          try {
+            const holdersData = await fetchHolders(
+              token.contract_principal,
+              token.symbol
+            );
+            return holdersData;
+          } catch (error) {
+            console.error(`Error fetching holders for DAO ${dao.id}:`, error);
+            return null;
+          }
+        },
+        enabled: !!token?.contract_principal && !!token?.symbol,
+        staleTime: 600000, // 10 minutes
+      };
+    }),
+  });
+
+  // Create a map of holders data for each DAO
+  const holdersMap = Object.fromEntries(
+    holdersQueries.map((query, index) => [
+      daos?.[index]?.id,
+      {
+        data: query.data,
+        isLoading: query.isLoading,
+      },
+    ])
+  );
+
   // Filter and sort DAOs
   const filteredAndSortedDAOs = (() => {
     const filtered =
@@ -128,6 +166,18 @@ export default function DAOs() {
         );
       }
 
+      if (sortField === "holders") {
+        const holdersA =
+          holdersMap[a.id]?.data?.holderCount ||
+          tokenPrices?.[a.id]?.holders ||
+          0;
+        const holdersB =
+          holdersMap[b.id]?.data?.holderCount ||
+          tokenPrices?.[b.id]?.holders ||
+          0;
+        return holdersB - holdersA;
+      }
+
       const valueA = tokenPrices?.[a.id]?.[sortField] ?? 0;
       const valueB = tokenPrices?.[b.id]?.[sortField] ?? 0;
       return valueB - valueA;
@@ -146,24 +196,34 @@ export default function DAOs() {
   );
 
   return (
-    <div className="container mx-auto space-y-6 px-4 py-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="space-y-2">
-            <Heading className="text-3xl font-bold sm:text-4xl">
-              {!isLoadingDAOs && (
-                <p className="text-sm text-muted-foreground">
-                  Total AI DAOs: {filteredAndSortedDAOs.length}
-                </p>
-              )}
-            </Heading>
+    <div className="w-full">
+      <div className="px-4 sm:px-6 lg:px-0 mx-auto space-y-6 py-6">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="w-full sm:w-auto">
+            {!isLoadingDAOs && (
+              <Heading className="text-2xl font-bold sm:text-3xl px-2">
+                AI DAOs: {filteredAndSortedDAOs.length}
+                <NetworkIndicator />
+              </Heading>
+            )}
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 px-2">
+            <div className="relative w-full sm:w-[220px]">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+              <Input
+                placeholder="Search DAOs..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 w-full"
+              />
+            </div>
+
             <Select
               value={sortField}
               onValueChange={(value) => setSortField(value as SortField)}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] px-2">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -177,38 +237,30 @@ export default function DAOs() {
             </Select>
           </div>
         </div>
-        <div className="relative w-full sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
-          <Input
-            placeholder="Search DAOs..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
+
+        {isLoadingDAOs ? (
+          <div className="flex min-h-[50vh] items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <DAOTable
+            daos={filteredAndSortedDAOs}
+            tokens={tokens}
+            tokenPrices={tokenPrices}
+            isFetchingPrice={isFetchingTokenPrices}
+            trades={tradesMap}
+            holders={holdersMap}
           />
-        </div>
+        )}
+
+        {filteredAndSortedDAOs.length === 0 && !isLoadingDAOs && (
+          <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed">
+            <p className="text-center text-muted-foreground">
+              No DAOs found matching your search.
+            </p>
+          </div>
+        )}
       </div>
-
-      {isLoadingDAOs ? (
-        <div className="flex min-h-[50vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <DAOTable
-          daos={filteredAndSortedDAOs}
-          tokens={tokens}
-          tokenPrices={tokenPrices}
-          isFetchingPrice={isFetchingTokenPrices}
-          trades={tradesMap}
-        />
-      )}
-
-      {filteredAndSortedDAOs.length === 0 && !isLoadingDAOs && (
-        <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed">
-          <p className="text-center text-muted-foreground">
-            No DAOs found matching your search.
-          </p>
-        </div>
-      )}
     </div>
   );
 }
