@@ -134,33 +134,6 @@ const getExplorerLink = (type: string, value: string) => {
   }
 };
 
-const CopyButton = ({ text }: { text: string }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-6 w-6 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-      onClick={handleCopy}
-      title="Copy to clipboard"
-    >
-      {copied ? (
-        <CheckIcon className="h-3 w-3 text-green-500" />
-      ) : (
-        <Copy className="h-3 w-3" />
-      )}
-      <span className="sr-only">Copy to clipboard</span>
-    </Button>
-  );
-};
-
 const BlockVisual = ({
   value,
   type = "stacks",
@@ -209,6 +182,8 @@ const LabeledField = ({
   copy,
   tooltip,
   link,
+  showTooltip = true,
+  showCopy = true,
 }: {
   icon: React.ElementType;
   label: string;
@@ -216,6 +191,8 @@ const LabeledField = ({
   copy?: string;
   tooltip?: string;
   link?: string;
+  showTooltip?: boolean;
+  showCopy?: boolean;
 }) => {
   const content = (
     <div className="flex flex-wrap items-center gap-2 text-muted-foreground my-3">
@@ -237,8 +214,8 @@ const LabeledField = ({
           value
         )}
       </span>
-      {copy && <CopyButton text={copy} />}
-      {tooltip && (
+      {copy && showCopy && <CopyButton text={copy} />}
+      {tooltip && showTooltip && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -254,6 +231,33 @@ const LabeledField = ({
   );
 
   return content;
+};
+
+const CopyButton = ({ text }: { text: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="h-6 w-6 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      onClick={handleCopy}
+      title="Copy to clipboard"
+    >
+      {copied ? (
+        <CheckIcon className="h-3 w-3 text-green-500" />
+      ) : (
+        <Copy className="h-3 w-3" />
+      )}
+      <span className="sr-only">Copy to clipboard</span>
+    </Button>
+  );
 };
 
 const MessageDisplay = ({ message }: { message: string }) => {
@@ -374,40 +378,40 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                         icon={User}
                         label="Creator"
                         value={truncateString(proposal.creator, 8, 8)}
-                        copy={proposal.creator}
-                        tooltip="The blockchain address that created this proposal"
                         link={getExplorerLink("address", proposal.creator)}
+                        showTooltip={false}
+                        showCopy={false}
                       />
                       <LabeledField
                         icon={Activity}
                         label="Action"
                         value={formatAction(proposal.action)}
-                        copy={proposal.action}
-                        tooltip="The action this proposal will execute if approved"
                         link={
                           proposal.action
                             ? getExplorerLink("contract", proposal.action)
                             : undefined
                         }
+                        showTooltip={false}
+                        showCopy={false}
                       />
                       <LabeledField
                         icon={Hash}
                         label="Transaction ID"
                         value={truncateString(proposal.tx_id, 8, 8)}
-                        copy={proposal.tx_id}
-                        tooltip="The blockchain transaction ID for this proposal"
                         link={getExplorerLink("tx", proposal.tx_id)}
+                        showTooltip={false}
+                        showCopy={false}
                       />
                       <LabeledField
                         icon={Wallet}
                         label="Principal"
                         value={formatAction(proposal.contract_principal)}
-                        copy={proposal.contract_principal}
-                        tooltip="The smart contract that controls this proposal"
                         link={getExplorerLink(
                           "contract",
                           proposal.contract_principal
                         )}
+                        showTooltip={false}
+                        showCopy={false}
                       />
                     </div>
                   </AccordionContent>
@@ -421,37 +425,37 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                 icon={User}
                 label="Creator"
                 value={truncateString(proposal.creator, 8, 8)}
-                copy={proposal.creator}
-                tooltip="The blockchain address that created this proposal"
                 link={getExplorerLink("address", proposal.creator)}
+                showTooltip={false}
+                showCopy={false}
               />
               <LabeledField
                 icon={Activity}
                 label="Action"
                 value={formatAction(proposal.action)}
-                copy={proposal.action}
-                tooltip="The action this proposal will execute if approved"
                 link={
                   proposal.action
                     ? getExplorerLink("contract", proposal.action)
                     : undefined
                 }
+                showTooltip={false}
+                showCopy={false}
               />
               <LabeledField
                 icon={Hash}
                 label="Transaction ID"
                 value={truncateString(proposal.tx_id, 8, 8)}
-                copy={proposal.tx_id}
-                tooltip="The blockchain transaction ID for this proposal"
                 link={getExplorerLink("tx", proposal.tx_id)}
+                showTooltip={false}
+                showCopy={false}
               />
               <LabeledField
                 icon={Wallet}
                 label="Principal"
                 value={formatAction(proposal.contract_principal)}
-                copy={proposal.contract_principal}
-                tooltip="The smart contract that controls this proposal"
                 link={getExplorerLink("contract", proposal.contract_principal)}
+                showTooltip={false}
+                showCopy={false}
               />
             </div>
           </div>
