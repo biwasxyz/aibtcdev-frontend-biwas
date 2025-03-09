@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: [
       {
-        url: "https://app.aibtc.dev/logos/aibtcdev-pattern-1-with-text-social.png",
+        url: "https://app.aibtc.dev/logos/aibtcdev-pattern-1-with-text-social-new.png",
         alt: "AIBTC",
         width: 1200,
         height: 630,
