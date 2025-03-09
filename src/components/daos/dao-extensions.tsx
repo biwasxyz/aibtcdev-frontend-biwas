@@ -13,6 +13,19 @@ function truncateString(str: string): string {
   return `${str.slice(0, 5)}...${str.slice(-30)}`;
 }
 
+// Function to format extension type for display
+function formatExtensionType(type: string): string {
+  // Replace hyphens with spaces and limit length
+  const formattedType = type.replace(/-/g, " ");
+
+  // If type is too long, truncate it for mobile displays
+  if (formattedType.length > 15) {
+    return formattedType.slice(0, 15) + "...";
+  }
+
+  return formattedType;
+}
+
 const getStatusColor = (status: Extension["status"]) => {
   switch (status) {
     case "DEPLOYED":
@@ -101,21 +114,21 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                 <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-3 mb-2">
-                      <h3 className="text-base font-medium capitalize">
-                        {extension.type.replace("-", " ")}
+                      <h3 className="text-base font-medium capitalize break-all sm:break-normal">
+                        {formatExtensionType(extension.type)}
                       </h3>
                       <Badge
                         variant="secondary"
                         className={`${getStatusColor(
                           extension.status
-                        )} border capitalize`}
+                        )} border capitalize shrink-0`}
                       >
                         {extension.status}
                       </Badge>
                     </div>
                     {extension.contract_principal && (
                       <div className="flex items-center gap-2 mb-2">
-                        <code className="text-xs bg-muted px-2 py-1 rounded">
+                        <code className="text-xs bg-muted px-2 py-1 rounded overflow-hidden text-ellipsis">
                           {truncateString(extension.contract_principal)}
                         </code>
                       </div>
@@ -125,14 +138,14 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                         href={getExplorerUrl(extension.tx_id)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors break-all"
                       >
                         <span>TX: {truncateString(extension.tx_id)}</span>
-                        <ArrowUpRight className="h-3 w-3" />
+                        <ArrowUpRight className="h-3 w-3 shrink-0" />
                       </a>
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground whitespace-nowrap">
+                  <div className="text-xs text-muted-foreground whitespace-nowrap mt-2 sm:mt-0">
                     {new Date(extension.created_at).toLocaleDateString()}
                   </div>
                 </div>
