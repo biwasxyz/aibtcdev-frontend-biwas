@@ -172,139 +172,122 @@ export function DAOChatModal({
   // Get token symbol
   const tokenName = tokenData?.symbol || "DAO";
 
-  const EXTENSION_PROMPTS: Record<string, (extension: Extension) => string> = {
-    // NEW TYPES
-    TOKEN_DEX: (extension) =>
-      `Buy 5 million of ${tokenName}.\n
-  Token DEX: ${extension.contract_principal}`,
+  // Updated structured prompts
+  const STRUCTURED_PROMPTS = [
+    {
+      step: 1,
+      title: "Check your wallet balance for STX and sBTC",
+      prompt: `Check my wallet balance for STX and sBTC.`,
+      description:
+        "View your current wallet balances to ensure you have necessary tokens.",
+    },
+    {
+      step: 2,
+      title: "Get STX from the testnet faucet (testnet only)",
+      prompt: `Fund my wallet with STX from the testnet faucet.`,
+      description:
+        "Request STX tokens from the Stacks testnet faucet for testing.",
+    },
+    {
+      step: 3,
+      title: "Get sBTC from Faktory testnet faucet (testnet only)",
+      prompt: `Request testnet sBTC from the Faktory faucet.`,
+      description:
+        "Request sBTC tokens from the Faktory testnet faucet for testing.",
+    },
+    {
+      step: 4,
+      title: "Buy DAO tokens to participate",
+      prompt: (extensions: Extension[]) => {
+        const extensionsList = extensions
+          .map((ext) => `${ext.type}: ${ext.contract_principal}`)
+          .join("\n");
 
-    EXTENSIONS_CORE_PROPOSALS: (extension) =>
-      `Submit a new proposal to modify the ${tokenName} DAO's governance structure.\n
-  Core Proposals extension: ${extension.contract_principal}`,
+        return `Buy some ${tokenName} tokens so I can participate in the DAO.\n\n${extensionsList}`;
+      },
+      description:
+        "Purchase DAO tokens to gain voting rights and participate in governance.",
+      extensionTypes: ["TOKEN_DAO", "TOKEN_DEX"],
+    },
+    {
+      step: 5,
+      title: "Create an action proposal",
+      prompt: (extensions: Extension[]) => {
+        const extensionsList = extensions
+          .map((ext) => `${ext.type}: ${ext.contract_principal}`)
+          .join("\n");
 
-    EXTENSIONS_ACTION_PROPOSALS: (extension) =>
-      `Propose an action to update a smart contract in the ${tokenName} DAO.\n
-  Action Proposals extension: ${extension.contract_principal}`,
+        return `Create an action proposal to send a message to all DAO members about our progress.\n\n${extensionsList}`;
+      },
+      description: "Submit a new action proposal to the DAO for voting.",
+      extensionTypes: [
+        "EXTENSIONS_ACTION_PROPOSALS",
+        "ACTIONS_MESSAGING_SEND_MESSAGE",
+      ],
+    },
+    {
+      step: 6,
+      title: "Create proposal to allow sBTC asset in treasury",
+      prompt: (extensions: Extension[]) => {
+        const extensionsList = extensions
+          .map((ext) => `${ext.type}: ${ext.contract_principal}`)
+          .join("\n");
 
-    EXTENSIONS_TREASURY: (extension) =>
-      `Allocate ${tokenName} DAO funds for a specific initiative.\n
-  Treasury extension: ${extension.contract_principal}`,
+        return `Create an action proposal to allow the sBTC asset in our treasury.\n\n${extensionsList}`;
+      },
+      description:
+        "Submit a proposal to add sBTC as an allowable asset in the DAO treasury.",
+      extensionTypes: [
+        "EXTENSIONS_ACTION_PROPOSALS",
+        "ACTIONS_TREASURY_ALLOW_ASSET",
+      ],
+    },
+    {
+      step: 7,
+      title: "Check proposal information using ID",
+      prompt: (extensions: Extension[]) => {
+        const extensionsList = extensions
+          .map((ext) => `${ext.type}: ${ext.contract_principal}`)
+          .join("\n");
 
-    ACTIONS_TREASURY_ALLOW_ASSET: (extension) =>
-      `Whitelist a new asset in the ${tokenName} DAO treasury.\n
-  Treasury Allow Asset extension: ${extension.contract_principal}`,
+        return `Check proposal information for proposal 11.\n\n${extensionsList}`;
+      },
+      description:
+        "View detailed information about a specific proposal using its ID.",
+      extensionTypes: ["EXTENSIONS_ACTION_PROPOSALS"],
+    },
+    {
+      step: 8,
+      title: "Cast a vote on a proposal",
+      prompt: (extensions: Extension[]) => {
+        const extensionsList = extensions
+          .map((ext) => `${ext.type}: ${ext.contract_principal}`)
+          .join("\n");
 
-    EXTENSIONS_MESSAGING: (extension) =>
-      `Draft a proposal to notify ${tokenName} DAO members about an upcoming vote.\n
-  Messaging extension: ${extension.contract_principal}`,
+        return `Cast a 'yes' vote on proposal 11.\n\n${extensionsList}`;
+      },
+      description: "Vote on an active proposal to approve or reject it.",
+      extensionTypes: ["EXTENSIONS_ACTION_PROPOSALS"],
+    },
+    {
+      step: 9,
+      title: "Conclude a proposal",
+      prompt: (extensions: Extension[]) => {
+        const extensionsList = extensions
+          .map((ext) => `${ext.type}: ${ext.contract_principal}`)
+          .join("\n");
 
-    ACTIONS_MESSAGING_SEND_MESSAGE: (extension) =>
-      `Announce important information to all ${tokenName} DAO members.\n
-  Messaging Send Message extension: ${extension.contract_principal}`,
-
-    EXTENSIONS_PAYMENTS: (extension) =>
-      `Schedule a payment for ${tokenName} DAO operations.\n
-  Payments extension: ${extension.contract_principal}`,
-
-    EXTENSIONS_CHARTER: (extension) =>
-      `Show the current charter of the ${tokenName} DAO.\n
-  Charter extension: ${extension.contract_principal}`,
-
-    EXTENSIONS_TOKEN_OWNER: (extension) =>
-      `Execute a token owner action for ${tokenName}.\n
-  Token Owner extension: ${extension.contract_principal}`,
-
-    ACTIONS_BANK_ACCOUNT_SET_WITHDRAWAL_AMOUNT: (extension) =>
-      `Set a withdrawal amount of 1000 ${tokenName} tokens.\n
-  Bank Account Set Withdrawal Amount extension: ${extension.contract_principal}`,
-
-    ACTIONS_BANK_ACCOUNT_SET_WITHDRAWAL_PERIOD: (extension) =>
-      `Update the withdrawal period for the ${tokenName} DAO bank account to 30 days.\n
-  Bank Account Set Withdrawal Period extension: ${extension.contract_principal}`,
-
-    ACTIONS_BANK_ACCOUNT_SET_ACCOUNT_HOLDER: (extension) =>
-      `Change the account holder for the ${tokenName} DAO bank account.\n
-  Bank Account Set Account Holder extension: ${extension.contract_principal}`,
-
-    EXTENSIONS_BANK_ACCOUNT: (extension) =>
-      `Show the current ${tokenName} DAO bank account details.\n
-  Bank Account extension: ${extension.contract_principal}`,
-
-    ACTIONS_PAYMENTS_INVOICES_TOGGLE_RESOURCE: (extension) =>
-      `Toggle payment resource availability for ${tokenName} DAO invoices.\n
-  Payments Invoices Toggle Resource extension: ${extension.contract_principal}`,
-
-    ACTIONS_PAYMENTS_INVOICES_ADD_RESOURCE: (extension) =>
-      `Add a new payment resource for ${tokenName} DAO invoices.\n
-  Payments Invoices Add Resource extension: ${extension.contract_principal}`,
-
-    PROPOSALS_BOOTSTRAP_INIT: (extension) =>
-      `Initialize the bootstrap process for ${tokenName} DAO.\n
-  Proposals Bootstrap Init extension: ${extension.contract_principal}`,
-
-    TOKEN_POOL: (extension) =>
-      `Manage the ${tokenName} token pool parameters.\n
-  Token Pool extension: ${extension.contract_principal}`,
-
-    TOKEN_DAO: (extension) =>
-      `Vote yes on proposal 5 in the ${tokenName} DAO.\n
-  Voting extension: ${extension.contract_principal}`,
-
-    BASE_DAO: (extension) =>
-      `Access base DAO functions for ${tokenName}.\n
-  Base DAO extension: ${extension.contract_principal}`,
-
-    // OLD TYPES
-    pool: (extension) =>
-      `Manage liquidity pool operations for ${tokenName}.\n
-  Pool extension: ${extension.contract_principal}`,
-
-    "aibtc-token-owner": (extension) =>
-      `Execute token owner actions for ${tokenName}.\n
-  Token Owner extension: ${extension.contract_principal}`,
-
-    "aibtc-action-proposals": (extension) =>
-      `Submit an action proposal for ${tokenName} DAO.\n
-  Action Proposals extension: ${extension.contract_principal}`,
-
-    "aibtc-payments-invoices": (extension) =>
-      `Process a payment invoice for ${tokenName} DAO.\n
-  Payments Invoices extension: ${extension.contract_principal}`,
-
-    "aibtc-treasury": (extension) =>
-      `Propose a treasury management action for ${tokenName} DAO.\n
-  Treasury extension: ${extension.contract_principal}`,
-
-    "aibtc-bank-account": (extension) =>
-      `Interact with the ${tokenName} DAO's bank account.\n
-  Bank Account extension: ${extension.contract_principal}`,
-
-    "aibtc-onchain-messaging": (extension) =>
-      `Send an on-chain message to ${tokenName} DAO members.\n
-  Messaging extension: ${extension.contract_principal}`,
-
-    "aibtc-base-bootstrap-initialization": (extension) =>
-      `Initialize ${tokenName} DAO bootstrap process.\n
-  Bootstrap extension: ${extension.contract_principal}`,
-
-    "aibtc-core-proposals": (extension) =>
-      `Submit a core proposal for ${tokenName} DAO governance.\n
-  Core Proposals extension: ${extension.contract_principal}`,
-
-    "aibtcdev-base-dao": (extension) =>
-      `Interact with the ${tokenName} base DAO development framework.\n
-  Base DAO extension: ${extension.contract_principal}`,
-  };
-
-  const generatePrompt = (extension: Extension) => {
-    // Check for exact match or variations of the type
-    const promptGenerator =
-      EXTENSION_PROMPTS[extension.type] ||
-      EXTENSION_PROMPTS[extension.type.toUpperCase()] ||
-      EXTENSION_PROMPTS[extension.type.toLowerCase()];
-
-    return promptGenerator ? promptGenerator(extension) : "";
-  };
+        return `Conclude proposal ID #42 now that voting has ended.\n\n${extensionsList}`;
+      },
+      description:
+        "Finalize a proposal after the voting period to execute its actions if approved.",
+      extensionTypes: [
+        "EXTENSIONS_ACTION_PROPOSALS",
+        "ACTIONS_MESSAGING_SEND_MESSAGE",
+        "ACTIONS_TREASURY_ALLOW_ASSET",
+      ],
+    },
+  ];
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -322,21 +305,13 @@ export function DAOChatModal({
       );
     }
 
-    // Filter out extensions that would generate empty prompts
-    const validExtensions = daoExtensions
-      ? daoExtensions.filter((extension: Extension) => {
-          const prompt = generatePrompt(extension);
-          return prompt.trim() !== "";
-        })
-      : [];
-
     return (
       <div className="flex flex-col h-full">
         {/* Header - fixed height */}
         <div className="flex-shrink-0 h-14 flex items-center justify-between px-4 shadow-md bg-background z-10">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <h2 className="text-lg font-semibold truncate">
-              Sample Prompts To Interact with {tokenName} DAO
+              Step-by-Step Guide to Interact with {tokenName} DAO
             </h2>
           </div>
         </div>
@@ -344,32 +319,70 @@ export function DAOChatModal({
         {/* Middle scrollable area - takes remaining space */}
         <div className="flex-1 overflow-auto">
           <div className="p-4 space-y-4">
-            {validExtensions.length > 0 ? (
-              validExtensions.map((extension: Extension) => (
+            {STRUCTURED_PROMPTS.map((promptItem) => {
+              // For prompts that require extensions
+              let promptText = "";
+
+              if (
+                typeof promptItem.prompt === "function" &&
+                promptItem.extensionTypes
+              ) {
+                // Find all relevant extensions for this prompt
+                const relevantExtensions =
+                  daoExtensions?.filter((ext) =>
+                    promptItem.extensionTypes?.includes(ext.type)
+                  ) || [];
+
+                // If we have matching extensions, generate the prompt with all of them
+                if (relevantExtensions.length > 0) {
+                  promptText = promptItem.prompt(relevantExtensions);
+                } else {
+                  // Fallback if no matching extensions found
+                  promptText = `${promptItem.title}\n(No matching extensions found)`;
+                }
+              } else {
+                // For static prompts
+                promptText =
+                  typeof promptItem.prompt === "string"
+                    ? promptItem.prompt
+                    : "";
+              }
+
+              return (
                 <div
-                  key={extension.id}
+                  key={promptItem.step}
                   className="bg-background/50 backdrop-blur-sm p-3 rounded-lg border relative group"
                 >
-                  <p className="text-sm text-muted-foreground pr-8">
-                    {generatePrompt(extension)}
+                  <div className="flex items-center mb-2">
+                    <span className="flex items-center justify-center bg-primary/10 text-primary rounded-full w-6 h-6 text-sm font-medium mr-2">
+                      {promptItem.step}
+                    </span>
+                    <h3 className="font-medium">{promptItem.title}</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {promptItem.description}
                   </p>
-                  <button
-                    onClick={() => copyToClipboard(generatePrompt(extension))}
-                    className="absolute top-2 right-2 p-1 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    {copiedPrompt === generatePrompt(extension) ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </button>
+
+                  {/* Updated prompt container with copy button inside */}
+                  <div className="bg-muted/50 p-2 rounded-md text-sm flex items-start">
+                    <div className="flex-grow whitespace-pre-line">
+                      {promptText}
+                    </div>
+                    <button
+                      onClick={() => copyToClipboard(promptText)}
+                      className="ml-2 p-1 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex-shrink-0 self-start"
+                      title="Copy to clipboard"
+                    >
+                      {copiedPrompt === promptText ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No active extensions found.
-              </p>
-            )}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -413,7 +426,7 @@ export function DAOChatModal({
             <Tabs defaultValue="chat" className="h-full flex flex-col">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="chat">Chat</TabsTrigger>
-                <TabsTrigger value="prompts">Examples</TabsTrigger>
+                <TabsTrigger value="prompts">Guide</TabsTrigger>
               </TabsList>
               <TabsContent value="chat" className="flex-1 overflow-auto">
                 {renderChatSection()}
