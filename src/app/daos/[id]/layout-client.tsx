@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { fetchDAO, fetchToken } from "@/queries/daoQueries";
 import { DAOChatButton } from "@/components/daos/dao-chat-button";
+import { Button } from "@/components/ui/button";
 
 interface DAO {
   id: string;
@@ -110,7 +111,14 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               </p>
             )}
             <div className="mt-3">
-              <DAOChatButton daoId={id} />
+              {/* WE NEED TO CHANGE IT BASED ON WHAT THE NAME WILL BE ON MAINNET. AS OF NOW SINCE WE ARE TESTING ON THESE TWO ON STAGING I HAVE ENABLED PARTICIPATION FOR THESE TWO ONLY */}
+              {dao?.name === "FACES" || dao?.name === "CARA5" ? (
+                <DAOChatButton daoId={id} />
+              ) : (
+                <Button className="cursor-not-allowed" disabled>
+                  Not available for participation yet.
+                </Button>
+              )}
             </div>
           </div>
         </div>

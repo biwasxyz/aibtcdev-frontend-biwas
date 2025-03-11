@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DAOBuyToken } from "./dao-buy-token";
+import { Button } from "../ui/button";
 
 interface DAOTableProps {
   daos: DAO[];
@@ -239,7 +240,14 @@ export const DAOTable = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <DAOBuyToken daoId={dao.id} />
+              {/* WE NEED TO CHANGE IT BASED ON WHAT THE NAME WILL BE ON MAINNET. AS OF NOW SINCE WE ARE TESTING ON THESE TWO ON STAGING I HAVE ENABLED PARTICIPATION FOR THESE TWO ONLY */}
+              {dao?.name === "FACES" || dao?.name === "CARA5" ? (
+                <DAOBuyToken daoId={dao.id} />
+              ) : (
+                <Button className="cursor-not-allowed" disabled>
+                  Not available for participation yet.
+                </Button>
+              )}
             </div>
           </div>
 
@@ -507,7 +515,14 @@ export const DAOTable = ({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex justify-center">
-                        <DAOBuyToken daoId={dao.id} />
+                        {/* WE NEED TO CHANGE IT BASED ON WHAT THE NAME WILL BE ON MAINNET. AS OF NOW SINCE WE ARE TESTING ON THESE TWO ON STAGING I HAVE ENABLED PARTICIPATION FOR THESE TWO ONLY */}
+                        {dao?.name === "FACES" || dao?.name === "CARA5" ? (
+                          <DAOBuyToken daoId={dao.id} />
+                        ) : (
+                          <Button className="cursor-not-allowed" disabled>
+                            Buy
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
