@@ -26,7 +26,7 @@ import { NetworkIndicator } from "../reusables/network-indicator";
 
 export default function DAOs() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<SortField>("price");
+  const [sortField, setSortField] = useState<SortField>("newest");
   const { toast } = useToast();
   const agentInitialized = useRef(false);
 
