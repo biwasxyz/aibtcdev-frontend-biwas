@@ -73,7 +73,7 @@ export default function DAOs() {
     queryFn: () => fetchTokenPrices(daos || [], tokens || []),
     enabled: !!daos && !!tokens,
     staleTime: 600000, // 10 minutes
-    refetchInterval: 300000, // Refetch every 5 minutes for price updates
+    refetchInterval: 600000, // Refetch every 10 minutes for price updates
   });
 
   // Helper function to get dex principal and token contract
