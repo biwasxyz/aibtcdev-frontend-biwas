@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Wallet } from "lucide-react";
@@ -15,6 +15,7 @@ interface TokenBuyInputProps {
   contractPrincipal: string;
   disabled?: boolean;
   onSend: () => void;
+  initialAmount?: string;
 }
 
 export function TokenBuyInput({
@@ -22,12 +23,20 @@ export function TokenBuyInput({
   contractPrincipal,
   disabled = false,
   onSend,
+  initialAmount = "",
 }: TokenBuyInputProps) {
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(initialAmount);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { sendMessage, activeThreadId } = useChatStore();
   const { accessToken } = useSessionStore();
+
+  useEffect(() => {
+    // Update amount when initialAmount prop changes
+    if (initialAmount) {
+      setAmount(initialAmount);
+    }
+  }, [initialAmount]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -83,7 +92,7 @@ export function TokenBuyInput({
                 onChange={handleChange}
                 onClick={handleFocus}
                 onFocus={handleFocus}
-                placeholder={`Enter amount of ${tokenName} to buy...`}
+                placeholder={`Enter amount of sats to buy ${tokenName}...`}
                 disabled={disabled}
                 className={cn(
                   "h-11",
@@ -97,7 +106,7 @@ export function TokenBuyInput({
             </div>
             <Button type="submit" disabled={disabled || !amount.trim()}>
               Buy
-              <Wallet className="h-4 w-4" />
+              <Wallet className="h-4 w-4 ml-2" />
             </Button>
           </div>
         </form>

@@ -367,7 +367,7 @@ export const DAOTable = ({
                 Holders
               </th>
               <th className="p-4 text-center font-medium text-muted-foreground">
-                Action
+                Quick Buy
               </th>
             </tr>
           </thead>
@@ -520,7 +520,7 @@ export const DAOTable = ({
                           <DAOBuyToken daoId={dao.id} />
                         ) : (
                           <Button className="cursor-not-allowed" disabled>
-                            Buy
+                            20k sats
                           </Button>
                         )}
                       </div>

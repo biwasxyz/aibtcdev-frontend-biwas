@@ -27,6 +27,7 @@ interface DAOChatModalProps {
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  presetAmount?: string;
 }
 
 export function DAOBuyModal({
@@ -35,6 +36,7 @@ export function DAOBuyModal({
   open: controlledOpen,
   onOpenChange: setControlledOpen,
   token,
+  presetAmount = "",
 }: DAOChatModalProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
@@ -97,6 +99,7 @@ export function DAOBuyModal({
       title: "Message sent successfully",
       description: "The agent will receive funds shortly.",
     });
+    setOpen(false);
   };
 
   const renderBuySection = () => {
@@ -150,6 +153,7 @@ export function DAOBuyModal({
               contractPrincipal={tokenDexExtension.contract_principal}
               disabled={isChatLoading || !isConnected}
               onSend={handleSendMessage}
+              initialAmount={presetAmount}
             />
           ) : (
             <div className="p-4 text-center text-muted-foreground">
@@ -165,13 +169,7 @@ export function DAOBuyModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button variant="outline" className="gap-2">
-            <span>Buy {tokenName}</span>
-          </Button>
-        )}
-      </DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-w-[400px] h-[400px] p-0 rounded-lg">
         <DialogTitle className="sr-only">Buy {tokenName} Tokens</DialogTitle>
         <DialogDescription className="sr-only">
