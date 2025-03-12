@@ -4,7 +4,6 @@ import type React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DAOBuyModal } from "./dao-buy-modal";
-import { Bitcoin } from "lucide-react";
 
 interface DAOBuyTokenProps {
   daoId: string;
@@ -26,8 +25,7 @@ export function DAOBuyToken({ daoId }: DAOBuyTokenProps) {
         className="flex-1"
         onClick={() => handleQuickBuy("20000")}
       >
-        20k sats
-        <Bitcoin />
+        20k Sats
       </Button>
       <DAOBuyModal
         daoId={daoId}

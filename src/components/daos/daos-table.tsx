@@ -520,7 +520,7 @@ export const DAOTable = ({
                           <DAOBuyToken daoId={dao.id} />
                         ) : (
                           <Button className="cursor-not-allowed" disabled>
-                            20k sats
+                            20k Sats
                           </Button>
                         )}
                       </div>

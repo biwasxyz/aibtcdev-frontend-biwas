@@ -10,15 +10,17 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Info, Loader2 } from "lucide-react";
+import { Info, Loader2, Wallet } from "lucide-react";
 import { TokenBuyInput } from "./dao-buy-input";
 import AgentWalletSelector from "@/components/chat/agent-selector";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
+import { useWalletStore } from "@/store/wallet";
 import { fetchDAOExtensions, fetchToken } from "@/queries/daoQueries";
 import type { DAO, Token, Extension } from "@/types/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { WalletBalance, WalletWithAgent } from "@/store/wallet";
 
 interface DAOChatModalProps {
   daoId: string;
@@ -39,6 +41,7 @@ export function DAOBuyModal({
   presetAmount = "",
 }: DAOChatModalProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const [currentAmount, setCurrentAmount] = useState(presetAmount);
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
   const setOpen = setControlledOpen || setUncontrolledOpen;
 
@@ -53,6 +56,14 @@ export function DAOBuyModal({
   } = useChatStore();
 
   const { accessToken } = useSessionStore();
+  const { balances, userWallet, agentWallets } = useWalletStore();
+
+  useEffect(() => {
+    // Update current amount when presetAmount changes
+    if (presetAmount) {
+      setCurrentAmount(presetAmount);
+    }
+  }, [presetAmount]);
 
   const { data: daoExtensions, isLoading: isExtensionsLoading } = useQuery({
     queryKey: ["daoExtensions", daoId],
@@ -94,6 +105,10 @@ export function DAOBuyModal({
     };
   }, [accessToken, memoizedConnect, isConnected, open]);
 
+  const handleAmountChange = (newAmount: string) => {
+    setCurrentAmount(newAmount);
+  };
+
   const handleSendMessage = () => {
     toast({
       title: "Message sent successfully",
@@ -102,11 +117,69 @@ export function DAOBuyModal({
     setOpen(false);
   };
 
+  // Get the wallet address for the current environment
+  const getWalletAddress = (wallet: any): string | null => {
+    if (!wallet) return null;
+    return process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
+      ? wallet.mainnet_address
+      : wallet.testnet_address;
+  };
+
+  // Format the balance from microSTX to STX with 6 decimal places
+  const formatBalance = (balance: string) => {
+    if (!balance) return "0.000000";
+    return (Number(balance) / 1_000_000).toFixed(6);
+  };
+
+  // Convert satoshis to BTC
+  const satoshiToBTC = (satoshis: string) => {
+    if (!satoshis || isNaN(Number(satoshis))) return "0.00000000";
+    return (Number(satoshis) / 100000000).toFixed(8);
+  };
+
+  // Get the current agent's wallet and balance
+  const getCurrentAgentWallet = () => {
+    if (!selectedAgentId && !userWallet) return null;
+
+    if (!selectedAgentId) {
+      // User wallet selected
+      const address = getWalletAddress(userWallet);
+      if (!address) return null;
+
+      return {
+        address,
+        walletBalance: balances[address] as WalletBalance | undefined,
+      };
+    } else {
+      // Agent wallet selected
+      const agentWallet = agentWallets.find(
+        (w) => w.agent_id === selectedAgentId
+      ) as WalletWithAgent | undefined;
+      if (!agentWallet) return null;
+
+      const address = getWalletAddress(agentWallet);
+      if (!address) return null;
+
+      return {
+        address,
+        walletBalance: balances[address] as WalletBalance | undefined,
+      };
+    }
+  };
+
+  const agentWalletData = getCurrentAgentWallet();
+  const btcValue = satoshiToBTC(currentAmount);
+
   const renderBuySection = () => {
     if (!accessToken) {
       return (
-        <div className="flex items-center justify-center h-full">
-          Please sign in to buy tokens
+        <div className="flex items-center justify-center h-full p-6">
+          <div className="text-center">
+            <p className="text-lg mb-6">Please sign in to buy tokens</p>
+            <Button variant="outline" size="lg" onClick={() => setOpen(false)}>
+              Close
+            </Button>
+          </div>
         </div>
       );
     }
@@ -114,8 +187,8 @@ export function DAOBuyModal({
     if (isExtensionsLoading || isTokenLoading) {
       return (
         <div className="flex items-center justify-center h-full">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">Loading...</span>
+          <Loader2 className="h-10 w-10 animate-spin" />
+          <span className="ml-3 text-lg">Loading...</span>
         </div>
       );
     }
@@ -123,10 +196,11 @@ export function DAOBuyModal({
     const tokenDexExtension = daoExtensions?.find(
       (ext: Extension) => ext.type === "TOKEN_DEX"
     );
+    const tokenName = tokenData?.symbol || "DAO";
 
     return (
       <div className="flex flex-col h-full">
-        <div className="flex-shrink-0 h-14 flex items-center justify-between px-4 shadow-md bg-background z-10">
+        <div className="flex-shrink-0 h-16 flex items-center justify-between px-6 shadow-md bg-background z-10">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <AgentWalletSelector
               selectedAgentId={selectedAgentId}
@@ -136,27 +210,90 @@ export function DAOBuyModal({
           </div>
         </div>
 
-        <div className="flex-1 p-4">
-          <div className="bg-muted p-3 rounded-md flex items-start mb-4">
-            <Info className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
-            <p className="text-sm">
-              The selected agent&apos;s address will receive the funds from this
-              transaction.
-            </p>
+        <div className="flex-1 p-6 overflow-y-auto">
+          <div className="bg-muted p-4 rounded-lg flex items-start mb-6">
+            <Info className="w-6 h-6 mr-3 mt-0.5 flex-shrink-0 text-primary" />
+            <div className="text-base">
+              <p>
+                The selected agent will receive{" "}
+                <strong>{tokenName} tokens</strong> worth:
+              </p>
+              <div className="flex items-center mt-3">
+                <div className="text-muted-foreground text-base text-orange-500">
+                  <strong>{btcValue} BTC</strong>
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* Agent Wallet Balance Display - Simplified */}
+          {agentWalletData && agentWalletData.walletBalance && (
+            <div className="mb-6">
+              <h3 className="font-medium text-lg mb-4 flex items-center">
+                <Wallet className="w-5 h-5 mr-2" />
+                Available Balance
+              </h3>
+
+              <div className="space-y-3">
+                {/* STX Balance */}
+                {agentWalletData.walletBalance.stx && (
+                  <div className="flex justify-between items-center border-b pb-3">
+                    <span className="text-base">STX Balance</span>
+                    <span className="font-medium text-base">
+                      {formatBalance(agentWalletData.walletBalance.stx.balance)}{" "}
+                      STX
+                    </span>
+                  </div>
+                )}
+
+                {/* Fungible tokens - simplified display */}
+                {agentWalletData.walletBalance.fungible_tokens &&
+                  Object.entries(
+                    agentWalletData.walletBalance.fungible_tokens
+                  ).map(([tokenId, token], index, arr) => {
+                    const tokenSymbol = tokenId.split("::")[1] || "Token";
+                    const isLast = index === arr.length - 1;
+                    return (
+                      <div
+                        key={tokenId}
+                        className={`flex justify-between items-center ${
+                          !isLast ? "border-b pb-3" : ""
+                        }`}
+                      >
+                        <span className="text-base">{tokenSymbol}</span>
+                        <span className="font-medium text-base">
+                          {formatBalance(token.balance)}
+                        </span>
+                      </div>
+                    );
+                  })}
+
+                {/* Show message if no tokens found */}
+                {(!agentWalletData.walletBalance.stx ||
+                  Object.keys(
+                    agentWalletData.walletBalance.fungible_tokens || {}
+                  ).length === 0) && (
+                  <div className="text-center py-2 text-base text-muted-foreground">
+                    No tokens found
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="sticky bottom-0 w-full min-w-0 pb-safe shadow-lg z-20">
+        <div className="sticky bottom-0 w-full min-w-0 pb-safe shadow-lg z-20 bg-background border-t">
           {tokenDexExtension ? (
             <TokenBuyInput
-              tokenName={tokenData?.symbol || "DAO"}
+              tokenName={tokenName}
               contractPrincipal={tokenDexExtension.contract_principal}
               disabled={isChatLoading || !isConnected}
               onSend={handleSendMessage}
-              initialAmount={presetAmount}
+              initialAmount={currentAmount}
+              onAmountChange={handleAmountChange}
             />
           ) : (
-            <div className="p-4 text-center text-muted-foreground">
+            <div className="p-6 text-center text-lg text-muted-foreground">
               Unavailable to buy tokens
             </div>
           )}
@@ -170,10 +307,11 @@ export function DAOBuyModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="max-w-[400px] h-[400px] p-0 rounded-lg">
+      <DialogContent className="sm:max-w-[600px] max-h-[85vh] h-[650px] p-0 rounded-lg">
         <DialogTitle className="sr-only">Buy {tokenName} Tokens</DialogTitle>
         <DialogDescription className="sr-only">
-          Purchase {tokenName} tokens through your selected agent
+          Purchase {tokenName} tokens with LucideBitcoin through your selected
+          agent
         </DialogDescription>
         <div className="h-full overflow-hidden">{renderBuySection()}</div>
       </DialogContent>
