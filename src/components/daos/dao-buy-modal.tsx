@@ -117,14 +117,6 @@ export function DAOBuyModal({
     setOpen(false);
   };
 
-  // Get the wallet address for the current environment
-  const getWalletAddress = (wallet: any): string | null => {
-    if (!wallet) return null;
-    return process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
-      ? wallet.mainnet_address
-      : wallet.testnet_address;
-  };
-
   // Format the balance from microSTX to STX with 6 decimal places
   const formatBalance = (balance: string) => {
     if (!balance) return "0.000000";
@@ -141,9 +133,15 @@ export function DAOBuyModal({
   const getCurrentAgentWallet = () => {
     if (!selectedAgentId && !userWallet) return null;
 
+    const isMainnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet";
+
     if (!selectedAgentId) {
       // User wallet selected
-      const address = getWalletAddress(userWallet);
+      if (!userWallet) return null;
+
+      const address = isMainnet
+        ? userWallet.mainnet_address
+        : userWallet.testnet_address;
       if (!address) return null;
 
       return {
@@ -157,7 +155,9 @@ export function DAOBuyModal({
       ) as WalletWithAgent | undefined;
       if (!agentWallet) return null;
 
-      const address = getWalletAddress(agentWallet);
+      const address = isMainnet
+        ? agentWallet.mainnet_address
+        : agentWallet.testnet_address;
       if (!address) return null;
 
       return {
