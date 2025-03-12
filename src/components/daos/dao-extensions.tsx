@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpRight } from "lucide-react";
 import type { Extension } from "@/types/supabase";
 import { CopyButton } from "./dao-proposals";
 
@@ -36,11 +35,11 @@ const getStatusColor = (status: Extension["status"]) => {
   }
 };
 
-const getExplorerUrl = (txId: string) => {
-  const baseUrl = "https://explorer.hiro.so/txid";
-  const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet";
-  return `${baseUrl}/${txId}${isTestnet ? "?chain=testnet" : ""}`;
-};
+// const getExplorerUrl = (txId: string) => {
+//   const baseUrl = "https://explorer.hiro.so/txid";
+//   const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet";
+//   return `${baseUrl}/${txId}${isTestnet ? "?chain=testnet" : ""}`;
+// };
 
 function StatusButton({
   status,
