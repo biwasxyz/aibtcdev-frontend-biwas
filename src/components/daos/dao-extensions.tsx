@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpRight } from "lucide-react";
 import type { Extension } from "@/types/supabase";
+import { CopyButton } from "./dao-proposals";
 
 interface DAOExtensionsProps {
   extensions: Extension[];
@@ -135,15 +136,15 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                       </div>
                     )}
                     {extension.tx_id && (
-                      <a
-                        href={getExplorerUrl(extension.tx_id)}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <p
+                        // href={getExplorerUrl(extension.tx_id)}
+                        // target="_blank"
+                        // rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors break-all"
                       >
                         <span>TX: {truncateString(extension.tx_id)}</span>
-                        <ArrowUpRight className="h-3 w-3 shrink-0" />
-                      </a>
+                        <CopyButton text={extension.tx_id} />
+                      </p>
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground whitespace-nowrap mt-2 sm:mt-0">

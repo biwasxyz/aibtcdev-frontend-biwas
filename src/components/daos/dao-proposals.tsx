@@ -233,7 +233,7 @@ const LabeledField = ({
   return content;
 };
 
-const CopyButton = ({ text }: { text: string }) => {
+export const CopyButton = ({ text }: { text: string }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
