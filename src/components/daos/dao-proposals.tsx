@@ -341,8 +341,8 @@ const VoteProgress = ({
       <div className="p-4 my-4 text-center">No voting data available.</div>
     );
   }
-  const yesVotes = (Number.parseFloat(votesFor) || 0) / 1e6;
-  const noVotes = (Number.parseFloat(votesAgainst) || 0) / 1e6;
+  const yesVotes = (Number.parseFloat(votesFor) || 0) / 1e8;
+  const noVotes = (Number.parseFloat(votesAgainst) || 0) / 1e8;
   const totalVotes = yesVotes + noVotes;
   let yesPercent = totalVotes > 0 ? (yesVotes / totalVotes) * 100 : 50;
   let noPercent = totalVotes > 0 ? (noVotes / totalVotes) * 100 : 50;
@@ -383,15 +383,15 @@ const VoteProgress = ({
 };
 
 /** ProposalMetrics shows key voting details using badges.
- * Liquid tokens are displayed (divided by 1e6).
+ * Liquid tokens are displayed (divided by 1e8).
  */
 const ProposalMetrics = ({ proposal }: { proposal: Proposal }) => {
-  const yesVotes = (Number.parseFloat(proposal.votes_for) || 0) / 1e6;
-  const noVotes = (Number.parseFloat(proposal.votes_against) || 0) / 1e6;
+  const yesVotes = (Number.parseFloat(proposal.votes_for) || 0) / 1e8;
+  const noVotes = (Number.parseFloat(proposal.votes_against) || 0) / 1e8;
   const totalVotes = yesVotes + noVotes;
   const liquidTokens =
     proposal.liquid_tokens !== null
-      ? (proposal.liquid_tokens / 1e6).toFixed(2)
+      ? (proposal.liquid_tokens / 1e8).toFixed(2)
       : "No data available";
   return (
     <div className="p-4 bg-secondary/10 rounded-lg my-4">
@@ -569,7 +569,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
               label="Liquid Tokens"
               value={
                 proposal.liquid_tokens !== null
-                  ? (proposal.liquid_tokens / 1e6).toFixed(2)
+                  ? (proposal.liquid_tokens / 1e8).toFixed(2)
                   : "No data available"
               }
             />
