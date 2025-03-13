@@ -32,14 +32,16 @@ const getStatusColor = (status: Extension["status"]) => {
       return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
     case "pending":
       return "bg-amber-500/10 text-amber-500 border-amber-500/20";
+    default:
+      return "";
   }
 };
 
-// const getExplorerUrl = (txId: string) => {
-//   const baseUrl = "https://explorer.hiro.so/txid";
-//   const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet";
-//   return `${baseUrl}/${txId}${isTestnet ? "?chain=testnet" : ""}`;
-// };
+const getExplorerUrl = (txId: string) => {
+  const baseUrl = "https://explorer.hiro.so/txid";
+  const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet";
+  return `${baseUrl}/${txId}${isTestnet ? "?chain=testnet" : ""}`;
+};
 
 function StatusButton({
   status,
@@ -135,15 +137,17 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                       </div>
                     )}
                     {extension.tx_id && (
-                      <p
-                        // href={getExplorerUrl(extension.tx_id)}
-                        // target="_blank"
-                        // rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors break-all"
-                      >
-                        <span>TX: {truncateString(extension.tx_id)}</span>
+                      <div className="flex items-center gap-1 mb-2">
+                        <a
+                          href={getExplorerUrl(extension.tx_id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors break-all"
+                        >
+                          <span>TX: {truncateString(extension.tx_id)}</span>
+                        </a>
                         <CopyButton text={extension.tx_id} />
-                      </p>
+                      </div>
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground whitespace-nowrap mt-2 sm:mt-0">
