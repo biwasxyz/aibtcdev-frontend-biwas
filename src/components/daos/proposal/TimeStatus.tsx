@@ -17,7 +17,6 @@ interface TimeStatusProps {
 }
 
 const TimeStatus: React.FC<TimeStatusProps> = ({
-  createdAt,
   status,
   concludedBy,
   start_block,
