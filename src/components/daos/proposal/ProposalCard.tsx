@@ -53,7 +53,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
         />
         <div className="lg:grid lg:grid-cols-2 lg:gap-8">
           <div className="space-y-1 mb-4 lg:mb-0">
-            <h4 className="font-medium text-sm mb-2">Timing & Blocks</h4>
+            <h4 className="font-medium text-sm mb-2"> Blocks</h4>
             <LabeledField
               icon={Layers}
               label="Snapshot block"
@@ -86,7 +86,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
           <div className="space-y-1">
             {/* For mobile, you might wrap blockchain details in an Accordion */}
             <div className="hidden lg:block space-y-1">
-              <h4 className="font-medium text-sm mb-2">Blockchain Details</h4>
+              <h4 className="font-medium text-sm mb-2"> Details</h4>
               <LabeledField
                 icon={User}
                 label="Creator"

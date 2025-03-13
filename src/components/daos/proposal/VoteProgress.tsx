@@ -16,9 +16,7 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
     (!votesFor || votesFor.trim() === "") &&
     (!votesAgainst || votesAgainst.trim() === "")
   ) {
-    return (
-      <div className="p-4 my-4 text-center">No voting data available.</div>
-    );
+    return <div className="p-4 my-4">No voting data available.</div>;
   }
   const yesVotes = (Number.parseFloat(votesFor) || 0) / 1e8;
   const noVotes = (Number.parseFloat(votesAgainst) || 0) / 1e8;
