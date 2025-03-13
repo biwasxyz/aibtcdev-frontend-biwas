@@ -1,4 +1,3 @@
-// File: src/components/TimeStatus.tsx
 "use client";
 import React from "react";
 import { Timer } from "lucide-react";
@@ -49,7 +48,7 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
     status !== "FAILED";
 
   return (
-    <div className="flex flex-col gap-1 mt-2">
+    <div className="bg-zinc-900 p-4 rounded-md shadow-md mx-auto w-full md:max-w-md mt-2">
       <div className="flex items-center gap-2">
         <Timer className="h-4 w-4" />
         {isActive ? (
@@ -65,9 +64,11 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
           </Badge>
         )}
       </div>
-      <div className="text-sm">{`Started: ${formattedStart} | Ends: ${formattedEnd}`}</div>
+      <div className="text-sm mt-1">{`Started: ${formattedStart}`}</div>
+      <div className="text-sm mt-1"> {` Ends: ${formattedEnd}`}</div>
+
       {concludedBy && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-1">
           <span className="text-sm">
             Concluded by: {truncateString(concludedBy, 6, 4)}
           </span>
