@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { supabase } from '@/utils/supabase/client';
 import { Wallet, Agent } from '@/types/supabase';
 
-interface TokenBalance {
+export interface TokenBalance {
     balance: string;
     total_sent: string;
     total_received: string;
@@ -24,7 +24,7 @@ export interface WalletBalance {
     };
 }
 
-interface WalletWithAgent extends Wallet {
+export interface WalletWithAgent extends Wallet {
     agent?: Agent;
 }
 
