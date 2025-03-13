@@ -1,4 +1,3 @@
-// File: src/components/MessageDisplay.tsx
 "use client";
 import React from "react";
 import {
@@ -17,9 +16,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
   let decodedMessage = "";
   try {
     if (!message)
-      return (
-        <p className="text-center text-lg">Message: No message available</p>
-      );
+      return <p className="p-4 text-lg">Message: No message available</p>;
     const hexValue = message.startsWith("0x") ? message.slice(2) : message;
     const clarityValue = deserializeCV(Buffer.from(hexValue, "hex"));
     decodedMessage = cvToString(clarityValue);
@@ -30,17 +27,22 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
   }
   return (
     <>
-      <div className="hidden md:block p-4 text-center text-lg font-medium">
-        Message: {decodedMessage}
+      {/* Desktop view */}
+      <div className="hidden md:block p-4 text-lg font-medium bg-zinc-800 rounded-md">
+        <span className="font-bold">Message: </span>
+        {decodedMessage}
       </div>
+
+      {/* Mobile view */}
       <div className="block md:hidden">
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="message">
-            <AccordionTrigger className="py-2 text-lg font-bold text-center">
+            <AccordionTrigger className="py-2 text-lg font-bold">
               View Message
             </AccordionTrigger>
-            <AccordionContent className="p-4 text-center">
-              Message: {decodedMessage}
+            <AccordionContent className="p-4 bg-zinc-200 rounded-md">
+              <span className="font-bold">Message: </span>
+              {decodedMessage}
             </AccordionContent>
           </AccordionItem>
         </Accordion>

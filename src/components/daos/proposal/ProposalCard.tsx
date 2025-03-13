@@ -1,8 +1,6 @@
-// File: src/components/ProposalCard.tsx
 "use client";
 import React from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { format } from "date-fns";
 import StatusBadge from "./StatusBadge";
 import MessageDisplay from "./MessageDisplay";
 import VoteProgress from "./VoteProgress";
@@ -12,7 +10,6 @@ import ProposalMetrics from "./ProposalMetrics";
 import BlockVisual from "./BlockVisual";
 import {
   ArrowRight,
-  Calendar,
   Timer,
   Layers,
   Wallet,
@@ -21,16 +18,9 @@ import {
   Hash,
 } from "lucide-react";
 import { truncateString, formatAction, getExplorerLink } from "./helper";
-import useBlockTime from "@/hooks/use-block-time";
 import { Proposal } from "@/types/supabase";
 
 const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
-  // Compute end time using the custom hook with fallback from the start block.
-  const proposalEndTime = useBlockTime(proposal.end_block, {
-    referenceTime: useBlockTime(proposal.start_block) || new Date(),
-    referenceBlock: proposal.start_block,
-  });
-
   return (
     <Card className="transition-all duration-200 hover:shadow-md overflow-hidden">
       <CardHeader className="space-y-3 pb-3">
@@ -64,23 +54,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
         <div className="lg:grid lg:grid-cols-2 lg:gap-8">
           <div className="space-y-1 mb-4 lg:mb-0">
             <h4 className="font-medium text-sm mb-2">Timing & Blocks</h4>
-            <LabeledField
-              icon={Calendar}
-              label="Created"
-              value={format(
-                new Date(proposal.created_at),
-                "MMM d, yyyy 'at' h:mm a"
-              )}
-            />
-            <LabeledField
-              icon={Timer}
-              label="Ends"
-              value={
-                proposalEndTime
-                  ? format(proposalEndTime, "MMM d, yyyy 'at' h:mm a")
-                  : "Loading..."
-              }
-            />
             <LabeledField
               icon={Layers}
               label="Snapshot block"
