@@ -210,7 +210,7 @@ export const DAOTable = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Link
-                          href={`/daos/${dao.id}`}
+                          href={`/daos/${dao.id}/proposals`}
                           className="font-medium hover:underline hover:text-primary text-sm"
                         >
                           {truncateName(dao.name)}
@@ -367,7 +367,7 @@ export const DAOTable = ({
                 Holders
               </th>
               <th className="p-4 text-center font-medium text-muted-foreground">
-                Action
+                Quick Buy
               </th>
             </tr>
           </thead>
@@ -409,7 +409,7 @@ export const DAOTable = ({
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Link
-                                    href={`/daos/${dao.id}`}
+                                    href={`/daos/${dao.id}/proposals`}
                                     className="font-medium hover:underline text-sm"
                                   >
                                     {truncateName(dao.name)}
@@ -520,7 +520,7 @@ export const DAOTable = ({
                           <DAOBuyToken daoId={dao.id} />
                         ) : (
                           <Button className="cursor-not-allowed" disabled>
-                            Buy
+                            20k Sats
                           </Button>
                         )}
                       </div>

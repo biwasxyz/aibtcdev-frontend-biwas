@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpRight } from "lucide-react";
 import type { Extension } from "@/types/supabase";
+import { CopyButton } from "./dao-proposals";
 
 interface DAOExtensionsProps {
   extensions: Extension[];
@@ -32,6 +32,8 @@ const getStatusColor = (status: Extension["status"]) => {
       return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
     case "pending":
       return "bg-amber-500/10 text-amber-500 border-amber-500/20";
+    default:
+      return "";
   }
 };
 
@@ -135,15 +137,17 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                       </div>
                     )}
                     {extension.tx_id && (
-                      <a
-                        href={getExplorerUrl(extension.tx_id)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors break-all"
-                      >
-                        <span>TX: {truncateString(extension.tx_id)}</span>
-                        <ArrowUpRight className="h-3 w-3 shrink-0" />
-                      </a>
+                      <div className="flex items-center gap-1 mb-2">
+                        <a
+                          href={getExplorerUrl(extension.tx_id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors break-all"
+                        >
+                          <span>TX: {truncateString(extension.tx_id)}</span>
+                        </a>
+                        <CopyButton text={extension.tx_id} />
+                      </div>
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground whitespace-nowrap mt-2 sm:mt-0">
