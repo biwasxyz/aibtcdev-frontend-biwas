@@ -91,8 +91,6 @@ export interface Proposal {
   created_at: string;
   title: string;
   description: string;
-  link: string | null;
-  monetary_ask: null;
   status: "DRAFT" | "PENDING" | "DEPLOYED" | "FAILED";
   contract_principal: string;
   tx_id: string;
@@ -106,6 +104,13 @@ export interface Proposal {
   start_block: number;
   liquid_tokens: number | null;
   parameters: string;
+  concluded_by: string;
+  executed: boolean;
+  met_quorum: boolean;
+  met_threshold: boolean;
+  passed: boolean;
+  votes_against: string;
+  votes_for: string;
 }
 
 export interface CronEntry {
