@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { deserializeCV, cvToString } from "@stacks/transactions";
 import { format } from "date-fns";
 import {
@@ -46,7 +46,6 @@ import {
   ArrowRight,
   Copy,
   CheckIcon,
-  MessageSquare,
   Info,
 } from "lucide-react";
 
@@ -131,7 +130,7 @@ const StatusBadge = ({ status }: { status: Proposal["status"] }) => {
   );
 };
 
-/** Utility: Truncate string or return fallback text */
+/** Utility: Truncate a string with fallback text */
 const truncateString = (
   str: string,
   startLength: number,
@@ -142,7 +141,7 @@ const truncateString = (
   return `${str.slice(0, startLength)}...${str.slice(-endLength)}`;
 };
 
-/** Format an action string */
+/** Format the action string */
 const formatAction = (action: string) => {
   if (!action) return "No data available";
   const parts = action.split(".");
@@ -167,7 +166,7 @@ const getExplorerLink = (type: string, value: string) => {
   }
 };
 
-/** BlockVisual displays block info */
+/** BlockVisual displays block information */
 const BlockVisual = ({
   value,
   type = "stacks",
@@ -285,8 +284,8 @@ export const CopyButton = ({ text }: { text: string }) => {
   );
 };
 
-/** MessageDisplay shows the decoded message prefixed with "Message:" and centered.
- * On mobile screens, the message is wrapped in an accordion.
+/** MessageDisplay shows the decoded message with a "Message:" prefix and centered.
+ * On mobile, the message is wrapped in an accordion.
  */
 const MessageDisplay = ({ message }: { message: string }) => {
   let decodedMessage = "";
@@ -324,8 +323,7 @@ const MessageDisplay = ({ message }: { message: string }) => {
   );
 };
 
-/** VoteProgress displays a single bar with both Yes and No segments.
- * The Yes segment is green; the No segment is red.
+/** VoteProgress displays a single bar with Yes (green) and No (red) segments.
  * If vote data is missing, it shows "No voting data available."
  */
 const VoteProgress = ({
@@ -343,7 +341,6 @@ const VoteProgress = ({
       <div className="p-4 my-4 text-center">No voting data available.</div>
     );
   }
-  // Convert votes (divide by 1e6)
   const yesVotes = (Number.parseFloat(votesFor) || 0) / 1e6;
   const noVotes = (Number.parseFloat(votesAgainst) || 0) / 1e6;
   const totalVotes = yesVotes + noVotes;
@@ -365,14 +362,12 @@ const VoteProgress = ({
         <h4 className="font-medium text-sm">Voting Progress</h4>
       </div>
       <div className="relative h-8 w-full rounded-full bg-secondary/10 overflow-hidden">
-        {/* Yes Segment */}
         <div
           className="absolute left-0 h-full bg-green-500 flex items-center justify-center text-white text-xs font-bold"
           style={{ width: `${yesPercent}%` }}
         >
           {yesVotes.toFixed(2)} Yes
         </div>
-        {/* No Segment */}
         <div
           className="absolute right-0 h-full bg-red-500 flex items-center justify-center text-white text-xs font-bold"
           style={{ width: `${noPercent}%` }}
@@ -388,7 +383,7 @@ const VoteProgress = ({
 };
 
 /** ProposalMetrics shows key voting details using badges.
- * Liquid tokens are added (dividing by 1e6) to the metrics.
+ * Liquid tokens are displayed (divided by 1e6).
  */
 const ProposalMetrics = ({ proposal }: { proposal: Proposal }) => {
   const yesVotes = (Number.parseFloat(proposal.votes_for) || 0) / 1e6;
@@ -437,7 +432,9 @@ const ProposalMetrics = ({ proposal }: { proposal: Proposal }) => {
   );
 };
 
-/** TimeStatus shows a countdown for active proposals or indicates that voting has ended */
+/** TimeStatus shows a countdown for active proposals or indicates that voting has ended.
+ * If concludedBy is present, it is displayed.
+ */
 const TimeStatus = ({
   createdAt,
   status,
@@ -459,9 +456,18 @@ const TimeStatus = ({
   };
   if (status === "DEPLOYED" || status === "FAILED") {
     return (
-      <div className="flex items-center gap-2 mt-2">
-        <Timer className="h-4 w-4" />
-        <span className="text-sm">Voting ended</span>
+      <div className="flex flex-col gap-1 mt-2">
+        <div className="flex items-center gap-2">
+          <Timer className="h-4 w-4" />
+          <span className="text-sm">Voting ended</span>
+        </div>
+        {concludedBy && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm">
+              Concluded by: {truncateString(concludedBy, 6, 4)}
+            </span>
+          </div>
+        )}
       </div>
     );
   }
