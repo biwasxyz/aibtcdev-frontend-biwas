@@ -3,7 +3,7 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
-import DAOProposals from "@/components/daos/dao-proposals";
+import DAOProposals from "@/components/daos/proposal/DAOProposal";
 import { fetchProposals } from "@/queries/daoQueries";
 
 export const runtime = "edge";
