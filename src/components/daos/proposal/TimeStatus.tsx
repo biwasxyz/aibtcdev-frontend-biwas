@@ -141,11 +141,7 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
         ) : (
           <span className="text-sm font-medium">Voting period</span>
         )}
-        {!isActive && (
-          <Badge variant="destructive" className="text-xs ml-2">
-            Ended
-          </Badge>
-        )}
+        {!isActive && <Badge className="text-xs ml-2">Ended</Badge>}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-2">
