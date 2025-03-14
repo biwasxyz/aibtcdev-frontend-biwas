@@ -12,7 +12,7 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
   try {
     if (!message)
       return (
-        <div className="p-3 rounded-md border border-secondary flex items-center">
+        <div className="p-3 rounded-md  flex items-center">
           <MessageSquare className="h-4 w-4 mr-2 text-muted-foreground" />
           <p className="text-sm sm:text-base">No message available</p>
         </div>
@@ -28,8 +28,8 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
   }
 
   return (
-    <div className="rounded-md border border-secondary overflow-hidden">
-      <div className="flex items-center px-3 py-2 border-b border-secondary">
+    <div className="rounded-md bg-zinc-800 overflow-hidden">
+      <div className="flex items-center px-3 py-2">
         <MessageSquare className="h-4 w-4 mr-2" />
         <h3 className="text-sm sm:text-base font-medium">Message</h3>
       </div>

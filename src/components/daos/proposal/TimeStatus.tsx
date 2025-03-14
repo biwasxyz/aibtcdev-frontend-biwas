@@ -131,7 +131,7 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
     status !== "FAILED";
 
   return (
-    <div className="border border-secondary rounded-md p-3 sm:p-4 w-full mt-2">
+    <div className="border rounded-md p-3 sm:p-4 w-full mt-2">
       <div className="flex items-center gap-2">
         <Timer className="h-4 w-4" />
         {isActive ? (

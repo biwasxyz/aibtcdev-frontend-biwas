@@ -17,7 +17,7 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
     (!votesAgainst || votesAgainst.trim() === "")
   ) {
     return (
-      <div className="p-4 my-4 rounded-lg border border-secondary flex items-center justify-center text-sm text-muted-foreground">
+      <div className="p-4 my-4 rounded-lg  flex items-center justify-center text-sm text-muted-foreground">
         <Activity className="h-4 w-4 mr-2" />
         No voting data available
       </div>
@@ -51,7 +51,7 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   };
 
   return (
-    <div className="rounded-lg border border-secondary p-3 sm:p-4 my-4">
+    <div className="rounded-lg p-3 sm:p-4 my-4">
       <div className="flex items-center gap-2 mb-2 sm:mb-3">
         <Activity className="h-4 w-4" />
         <h4 className="font-medium text-sm">Voting Progress</h4>
