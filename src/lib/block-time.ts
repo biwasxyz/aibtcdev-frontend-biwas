@@ -50,7 +50,7 @@ export const fetchBlockTimes = cache(async (startBlock: number, endBlock: number
 
         return result;
     } catch (error) {
-
+        console.error("Error fetching block times:", error);
         return {
             startBlockTime: null,
             endBlockTime: null,
