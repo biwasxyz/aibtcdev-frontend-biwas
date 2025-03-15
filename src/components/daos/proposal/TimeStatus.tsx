@@ -1,11 +1,13 @@
 "use client";
-import React from "react";
+
+import type React from "react";
+import { useEffect, useState } from "react";
 import { Timer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { Proposal } from "@/types/supabase";
+import type { Proposal } from "@/types/supabase";
 import { truncateString } from "./helper";
-import { useQueries } from "@tanstack/react-query";
+import { fetchBlockTimes } from "@/lib/block-time";
 
 interface TimeStatusProps {
   createdAt: string;
@@ -15,26 +17,7 @@ interface TimeStatusProps {
   end_block: number;
 }
 
-// Function to fetch block time
-const fetchBlockTime = async (blockHeight: number) => {
-  const baseURL =
-    process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
-      ? "https://api.testnet.hiro.so"
-      : "https://api.hiro.so";
-
-  const response = await fetch(
-    `${baseURL}/extended/v2/burn-blocks/${blockHeight}`
-  );
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch block time for block ${blockHeight}`);
-  }
-
-  const data = await response.json();
-  return data.burn_block_time_iso ? new Date(data.burn_block_time_iso) : null;
-};
-
-// Function to estimate block time if API call fails
+// Function to estimate block time if API data is not available
 const estimateBlockTime = (
   blockHeight: number,
   referenceBlock: number,
@@ -55,32 +38,72 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
   start_block,
   end_block,
 }) => {
-  // 12 minutes in milliseconds
-  const TWELVE_MINUTES_MS = 12 * 60 * 1000;
-
-  // Using TanStack Query to fetch both block times
-  const results = useQueries({
-    queries: [
-      {
-        queryKey: ["blockTime", start_block],
-        queryFn: () => fetchBlockTime(start_block),
-        retry: 2,
-        staleTime: TWELVE_MINUTES_MS, // 12 minutes stale time
-      },
-      {
-        queryKey: ["blockTime", end_block],
-        queryFn: () => fetchBlockTime(end_block),
-        retry: 2,
-        staleTime: TWELVE_MINUTES_MS, // 12 minutes stale time
-        enabled: true, // Always enabled, we'll handle the fallback in the component
-      },
-    ],
+  const [blockTimes, setBlockTimes] = useState<{
+    startBlockTime: Date | null;
+    endBlockTime: Date | null;
+    isEndTimeEstimated: boolean;
+    isLoading: boolean;
+  }>({
+    startBlockTime: null,
+    endBlockTime: null,
+    isEndTimeEstimated: false,
+    isLoading: true,
   });
 
-  const [startBlockQuery, endBlockQuery] = results;
+  useEffect(() => {
+    const loadBlockTimes = async () => {
+      try {
+        const { startBlockTime, endBlockTime } = await fetchBlockTimes(
+          start_block,
+          end_block
+        );
+
+        let startDate = startBlockTime ? new Date(startBlockTime) : null;
+        let endDate = endBlockTime ? new Date(endBlockTime) : null;
+        let isEndTimeEstimated = false;
+
+        // Assuming start time will always exist as mentioned
+        if (!startDate) {
+          console.error("Start block time not found - this shouldn't happen");
+          // Fallback in case it does happen anyway
+          const now = new Date();
+          const avgBlockTime =
+            process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
+              ? 4 * 60 * 1000 // 4 minutes for testnet
+              : 12 * 60 * 1000; // 12 minutes for mainnet
+
+          startDate = new Date(now.getTime() - avgBlockTime); // Assume recent
+        }
+
+        // Handle the case where end block hasn't been created yet
+        if (startDate && !endDate) {
+          // We have start time but not end time - estimate end time
+          endDate = estimateBlockTime(end_block, start_block, startDate);
+          isEndTimeEstimated = true;
+        }
+
+        setBlockTimes({
+          startBlockTime: startDate,
+          endBlockTime: endDate,
+          isEndTimeEstimated,
+          isLoading: false,
+        });
+      } catch (error) {
+        console.error("Error loading block times:", error);
+        setBlockTimes({
+          startBlockTime: null,
+          endBlockTime: null,
+          isEndTimeEstimated: false,
+          isLoading: false,
+        });
+      }
+    };
+
+    loadBlockTimes();
+  }, [start_block, end_block]);
 
   // Loading state
-  if (startBlockQuery.isLoading) {
+  if (blockTimes.isLoading) {
     return (
       <div className="flex items-center gap-2 mt-2">
         <Timer className="h-4 w-4" />
@@ -89,30 +112,10 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
     );
   }
 
-  // Error handling for start block
-  if (startBlockQuery.isError) {
-    return (
-      <div className="flex items-center gap-2 mt-2 text-red-500">
-        <Timer className="h-4 w-4" />
-        <span className="text-sm">Error loading start block time</span>
-      </div>
-    );
-  }
+  const { startBlockTime, endBlockTime, isEndTimeEstimated } = blockTimes;
 
-  const startBlockTime = startBlockQuery.data;
-
-  // Handle end block time (either from query or estimate)
-  let endBlockTime: Date | null = null;
-
-  if (endBlockQuery.data) {
-    endBlockTime = endBlockQuery.data;
-  } else if (startBlockTime && endBlockQuery.isError) {
-    // Fallback to estimation if API call fails
-    endBlockTime = estimateBlockTime(end_block, start_block, startBlockTime);
-  }
-
-  // If we still don't have end block time after fallback
-  if (!startBlockTime || !endBlockTime) {
+  // If we still don't have start time after all attempts
+  if (!startBlockTime) {
     return (
       <div className="flex items-center gap-2 mt-2">
         <Timer className="h-4 w-4" />
@@ -122,10 +125,17 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
   }
 
   const formattedStart = format(startBlockTime, "MMM d, yyyy 'at' h:mm a");
-  const formattedEnd = format(endBlockTime, "MMM d, yyyy 'at' h:mm a");
+  // Only format end time if we have it
+  const formattedEnd = endBlockTime
+    ? format(endBlockTime, "MMM d, yyyy 'at' h:mm a")
+    : null;
 
   const now = new Date();
+  const isEnded = endBlockTime && now.getTime() > endBlockTime.getTime();
+
+  // For the "Voting in progress" text, we still need to consider both time and status
   const isActive =
+    endBlockTime &&
     now.getTime() < endBlockTime.getTime() &&
     status !== "DEPLOYED" &&
     status !== "FAILED";
@@ -141,7 +151,7 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
         ) : (
           <span className="text-sm font-medium">Voting period</span>
         )}
-        {!isActive && <Badge className="text-xs ml-2">Ended</Badge>}
+        {isEnded && <Badge className="text-xs ml-2">Ended</Badge>}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-2">
@@ -150,9 +160,26 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
           {formattedStart}
         </div>
         <div className="text-xs sm:text-sm">
-          <span className="text-muted-foreground">Ends:</span> {formattedEnd}
+          <span className="text-muted-foreground">Ends:</span>{" "}
+          {isEndTimeEstimated ? (
+            <span>
+              {formattedEnd}{" "}
+              <Badge variant="outline" className="text-xs font-normal ml-1">
+                Estimated
+              </Badge>
+            </span>
+          ) : (
+            formattedEnd || "Block not created yet"
+          )}
         </div>
       </div>
+
+      {isEndTimeEstimated && (
+        <div className="mt-2 text-xs text-muted-foreground">
+          End block #{end_block} has not been created yet. Time is estimated
+          based on average block time.
+        </div>
+      )}
 
       {concludedBy && (
         <div className="flex items-center gap-2 mt-2 text-xs sm:text-sm">
