@@ -59,7 +59,7 @@ export function MessageList({ messages }: MessageListProps) {
   return (
     <div
       ref={containerRef}
-      className="flex-1 overflow-y-auto custom-scrollbar space-y-3 p-2 w-full md:w-[90%] md:mx-auto min-w-0"
+      className="flex-1 overflow-y-auto space-y-3 p-2 w-full md:w-[90%] md:mx-auto min-w-0"
     >
       {groupedMessages.map((message, index) => (
         <div
