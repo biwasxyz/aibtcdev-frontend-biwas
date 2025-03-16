@@ -6,6 +6,33 @@ body {
   font-family: var(--font-roc-grotesk-regular), Arial, Helvetica, sans-serif;
 }
 
+/* Custom Scrollbar Styles */
+/* For WebKit-based browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+  border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary));
+  border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+
+/* For Firefox */
+body {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary)) hsl(var(--background)); /* Now using primary orange */
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -122,7 +149,7 @@ body {
   }
 }
 
-/* Add gradient utilities to match Chakra gradients */
+/* Gradient Utilities to match Chakra gradients */
 @layer utilities {
   .bg-gradient-up {
     background: linear-gradient(
