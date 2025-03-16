@@ -70,7 +70,7 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
           const avgBlockTime =
             process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
               ? 4 * 60 * 1000 // 4 minutes for testnet
-              : 12 * 60 * 1000; // 12 minutes for mainnet
+              : 10 * 60 * 1000; // 10 minutes for mainnet
 
           startDate = new Date(now.getTime() - avgBlockTime); // Assume recent
         }
