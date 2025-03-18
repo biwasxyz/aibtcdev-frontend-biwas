@@ -33,10 +33,8 @@ const estimateBlockTime = (
 
 const TimeStatus: React.FC<TimeStatusProps> = ({
   status,
-  concludedBy,
   start_block,
   end_block,
-  createdAt,
 }) => {
   const [blockTimes, setBlockTimes] = useState<{
     startBlockTime: Date | null;

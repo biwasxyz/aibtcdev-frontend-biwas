@@ -20,7 +20,6 @@ const LabeledField: React.FC<LabeledFieldProps> = ({
   icon: Icon,
   label,
   value,
-  copy,
   link,
 }) => {
   const displayValue =
