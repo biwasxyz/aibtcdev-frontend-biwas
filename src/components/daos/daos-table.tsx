@@ -241,7 +241,7 @@ export const DAOTable = ({
             </div>
             <div className="flex items-center gap-2">
               {/* WE NEED TO CHANGE IT BASED ON WHAT THE NAME WILL BE ON MAINNET. AS OF NOW SINCE WE ARE TESTING ON THESE TWO ON STAGING I HAVE ENABLED PARTICIPATION FOR THESE TWO ONLY */}
-              {dao?.name === "FACES" || dao?.name === "CARA5" ? (
+              {dao?.name === "FACES" || dao?.name === "MEDIA2" ? (
                 <DAOBuyToken daoId={dao.id} />
               ) : (
                 <Button className="cursor-not-allowed" disabled>

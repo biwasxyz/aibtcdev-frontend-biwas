@@ -112,7 +112,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
             )}
             <div className="mt-3">
               {/* WE NEED TO CHANGE IT BASED ON WHAT THE NAME WILL BE ON MAINNET. AS OF NOW SINCE WE ARE TESTING ON THESE TWO ON STAGING I HAVE ENABLED PARTICIPATION FOR THESE TWO ONLY */}
-              {dao?.name === "FACES" || dao?.name === "CARA5" ? (
+              {dao?.name === "FACES" || dao?.name === "MEDIA2" ? (
                 <DAOChatButton daoId={id} />
               ) : (
                 <Button className="cursor-not-allowed" disabled>
