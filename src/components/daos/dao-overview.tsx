@@ -77,22 +77,10 @@ function DAOOverview({
     deployed: proposals.filter((p) => p.status === "DEPLOYED").length,
     pending: proposals.filter((p) => p.status === "PENDING").length,
     total: proposals.length,
-    successRate: (() => {
-      const completed = proposals.filter(
-        (p) => p.status === "DEPLOYED" || p.status === "FAILED"
-      );
-      if (completed.length === 0) return 0;
-      return Math.round(
-        (proposals.filter((p) => p.status === "DEPLOYED").length /
-          completed.length) *
-          100
-      );
-    })(),
   };
 
   // Holder statistics
   const holderStats = {
-    totalHolders: holders.length,
     top10Holdings: holders
       .slice(0, 10)
       .reduce((acc, holder) => acc + holder.percentage, 0)
@@ -111,7 +99,7 @@ function DAOOverview({
         </div>
 
         {/* Social links */}
-        <div className="flex gap-3 mb-4">
+        <div className="flex gap-3">
           {dao.website_url && (
             <a
               href={dao.website_url}
@@ -145,125 +133,54 @@ function DAOOverview({
         </div>
 
         {/* Market Stats cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Token Price</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatNumber(marketStats.price, true)}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Market Cap</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatNumber(marketStats.marketCap)}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Treasury</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatNumber(marketStats.treasuryBalance)}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Holders</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {marketStats.holderCount.toLocaleString()}
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+          <CardWithBadge
+            title="Token Price"
+            value={formatNumber(marketStats.price, true)}
+          />
+          <CardWithBadge
+            title="Market Cap"
+            value={formatNumber(marketStats.marketCap)}
+          />
+          <CardWithBadge
+            title="Treasury"
+            value={formatNumber(marketStats.treasuryBalance)}
+          />
+          <CardWithBadge
+            title="Total Holders"
+            value={marketStats.holderCount.toLocaleString()}
+          />
         </div>
 
-        {/* Proposal & Holder Stats Section */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Proposal Stats */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              <h3 className="text-lg font-medium">Proposal Stats</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-2">
-                  <h3 className="text-sm font-medium">Active Proposals</h3>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center">
-                    <div className="text-2xl font-bold">
-                      {proposalStats.deployed}
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className="ml-2 bg-primary/10 text-primary"
-                    >
-                      Deployed
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-2">
-                  <h3 className="text-sm font-medium">Success Rate</h3>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <div className="text-2xl font-bold">
-                      {proposalStats.successRate}%
-                    </div>
-                  </div>
-                  <div className="w-full h-2 bg-secondary/10 rounded-full mt-2 overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full"
-                      style={{ width: `${proposalStats.successRate}%` }}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+        {/* Proposal Stats Section */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            <h3 className="text-lg font-medium">Proposal Stats</h3>
           </div>
-
-          {/* Holder Stats */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              <h3 className="text-lg font-medium">Holder Stats</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-2">
-                  <h3 className="text-sm font-medium">Total Holders</h3>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {holderStats.totalHolders}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-2">
-                  <h3 className="text-sm font-medium">Top 10 Holdings</h3>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {holderStats.top10Holdings}%
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <CardWithBadge
+              title="Total Proposals"
+              value={proposalStats.total.toString()}
+            />
+            <CardWithBadge
+              title="Deployed Proposals"
+              value={proposalStats.deployed.toString()}
+              badge={{
+                text: "Deployed",
+                variant: "secondary",
+                className: "bg-primary/10 text-primary",
+              }}
+            />
+            <CardWithBadge
+              title="Pending Proposals"
+              value={proposalStats.pending.toString()}
+              badge={{
+                text: "Pending",
+                variant: "secondary",
+                className: "bg-amber-500/10 text-amber-500",
+              }}
+            />
           </div>
         </div>
 
@@ -358,6 +275,37 @@ function DAOOverview({
         </div>
       </div>
     </div>
+  );
+}
+
+// Single, unified card component that can optionally display a badge
+interface CardWithBadgeProps {
+  title: string;
+  value: string;
+  badge?: {
+    text: string;
+    variant: "default" | "secondary" | "destructive" | "outline";
+    className?: string;
+  };
+}
+
+function CardWithBadge({ title, value, badge }: CardWithBadgeProps) {
+  return (
+    <Card className="shadow-sm hover:shadow-md transition-shadow">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center gap-2">
+          <div className="text-2xl font-bold">{value}</div>
+          {badge && (
+            <Badge variant={badge.variant} className={badge.className}>
+              {badge.text}
+            </Badge>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
