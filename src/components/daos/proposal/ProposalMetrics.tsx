@@ -90,8 +90,9 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>
-                    Minimum proportion of 'Yes' votes required, excluding
-                    'Abstain' votes, for the proposal to pass.
+                    Minimum proportion of &apos;Yes&apos; votes required,
+                    excluding &apos;Abstain&apos; votes, for the proposal to
+                    pass.
                   </p>
                 </TooltipContent>
               </Tooltip>
