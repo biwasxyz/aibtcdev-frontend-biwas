@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, FileText, Users } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText } from "lucide-react";
 import { BsGlobe, BsTwitterX, BsTelegram } from "react-icons/bs";
 import type { DAO, Token, Proposal } from "@/types/supabase";
 import {
@@ -55,7 +55,6 @@ function DAOOverview({
     holderCount: 0,
   },
   proposals = [],
-  holders = [],
 }: DAOOverviewProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
@@ -77,14 +76,6 @@ function DAOOverview({
     deployed: proposals.filter((p) => p.status === "DEPLOYED").length,
     pending: proposals.filter((p) => p.status === "PENDING").length,
     total: proposals.length,
-  };
-
-  // Holder statistics
-  const holderStats = {
-    top10Holdings: holders
-      .slice(0, 10)
-      .reduce((acc, holder) => acc + holder.percentage, 0)
-      .toFixed(2),
   };
 
   return (
