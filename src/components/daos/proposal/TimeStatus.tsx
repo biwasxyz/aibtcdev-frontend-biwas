@@ -16,6 +16,15 @@ interface TimeStatusProps {
   end_block: number;
 }
 
+export interface VotingStatusInfo {
+  isActive: boolean;
+  isEnded: boolean;
+  endBlockTime: Date | null;
+  startBlockTime: Date | null;
+  isEndTimeEstimated: boolean;
+  isLoading: boolean;
+}
+
 // Function to estimate block time if API data is not available
 const estimateBlockTime = (
   blockHeight: number,
@@ -31,21 +40,18 @@ const estimateBlockTime = (
   return new Date(referenceTime.getTime() + blockDiff * avgBlockTime);
 };
 
-const TimeStatus: React.FC<TimeStatusProps> = ({
-  status,
-  start_block,
-  end_block,
-}) => {
-  const [blockTimes, setBlockTimes] = useState<{
-    startBlockTime: Date | null;
-    endBlockTime: Date | null;
-    isEndTimeEstimated: boolean;
-    isLoading: boolean;
-  }>({
+export const useVotingStatus = (
+  status: Proposal["status"],
+  start_block: number,
+  end_block: number
+): VotingStatusInfo => {
+  const [votingStatus, setVotingStatus] = useState<VotingStatusInfo>({
     startBlockTime: null,
     endBlockTime: null,
     isEndTimeEstimated: false,
     isLoading: true,
+    isActive: false,
+    isEnded: false,
   });
 
   useEffect(() => {
@@ -80,28 +86,59 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
           isEndTimeEstimated = true;
         }
 
-        setBlockTimes({
+        const now = new Date();
+        // Make sure these are always boolean values
+        const isEnded = Boolean(endDate && now.getTime() > endDate.getTime());
+        const isActive = Boolean(
+          endDate &&
+            now.getTime() < endDate.getTime() &&
+            status !== "DEPLOYED" &&
+            status !== "FAILED"
+        );
+
+        setVotingStatus({
           startBlockTime: startDate,
           endBlockTime: endDate,
           isEndTimeEstimated,
           isLoading: false,
+          isActive,
+          isEnded,
         });
       } catch (error) {
         console.error("Error loading block times:", error);
-        setBlockTimes({
+        setVotingStatus({
           startBlockTime: null,
           endBlockTime: null,
           isEndTimeEstimated: false,
           isLoading: false,
+          isActive: false,
+          isEnded: false,
         });
       }
     };
 
     loadBlockTimes();
-  }, [start_block, end_block]);
+  }, [start_block, end_block, status]);
+
+  return votingStatus;
+};
+
+const TimeStatus: React.FC<TimeStatusProps> = ({
+  status,
+  start_block,
+  end_block,
+}) => {
+  const {
+    startBlockTime,
+    endBlockTime,
+    isEndTimeEstimated,
+    isLoading,
+    isActive,
+    isEnded,
+  } = useVotingStatus(status, start_block, end_block);
 
   // Loading state
-  if (blockTimes.isLoading) {
+  if (isLoading) {
     return (
       <div className="border border-zinc-800 rounded-md p-3 w-full">
         <div className="flex items-center gap-2">
@@ -111,8 +148,6 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
       </div>
     );
   }
-
-  const { startBlockTime, endBlockTime, isEndTimeEstimated } = blockTimes;
 
   // If we still don't have start time after all attempts
   if (!startBlockTime) {
@@ -131,16 +166,6 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
   const formattedEnd = endBlockTime
     ? format(endBlockTime, "MMM d, yyyy 'at' h:mm a")
     : null;
-
-  const now = new Date();
-  const isEnded = endBlockTime && now.getTime() > endBlockTime.getTime();
-
-  // For the "Voting in progress" text, we still need to consider both time and status
-  const isActive =
-    endBlockTime &&
-    now.getTime() < endBlockTime.getTime() &&
-    status !== "DEPLOYED" &&
-    status !== "FAILED";
 
   return (
     <div className="border border-zinc-800 rounded-md p-3 w-full">

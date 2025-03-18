@@ -13,7 +13,7 @@ import StatusBadge from "./StatusBadge";
 import MessageDisplay from "./MessageDisplay";
 import VoteProgress from "./VoteProgress";
 import LabeledField from "./LabeledField";
-import TimeStatus from "./TimeStatus";
+import TimeStatus, { useVotingStatus } from "./TimeStatus";
 import ProposalMetrics from "./ProposalMetrics";
 import BlockVisual from "./BlockVisual";
 import {
@@ -32,16 +32,40 @@ import {
 import { truncateString, formatAction, getExplorerLink } from "./helper";
 import type { Proposal } from "@/types/supabase";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   const [expanded, setExpanded] = useState(false);
+
+  // Get voting status to display in header
+  const { isActive, isEnded, isLoading } = useVotingStatus(
+    proposal.status,
+    proposal.start_block,
+    proposal.end_block
+  );
 
   return (
     <Card className="transition-all duration-200 hover:shadow-md overflow-hidden bg-zinc-900 border-zinc-800 mb-6 w-full max-w-full">
       <CardHeader className="space-y-3 pb-3 px-4 sm:px-6">
         <div className="flex flex-col items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2 w-full justify-between">
-            <StatusBadge status={proposal.status} />
+            <div className="flex items-center gap-2">
+              <StatusBadge status={proposal.status} />
+              {!isLoading && (
+                <>
+                  {isActive && (
+                    <Badge className="bg-blue-500 text-white hover:bg-blue-600">
+                      Active
+                    </Badge>
+                  )}
+                  {isEnded && (
+                    <Badge variant="destructive" className="text-xs">
+                      Voting Period has Ended
+                    </Badge>
+                  )}
+                </>
+              )}
+            </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <User className="h-3.5 w-3.5" />
               <span>Created by:</span>
@@ -63,6 +87,15 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             <span>
               Created: {format(new Date(proposal.created_at), "MMM d, yyyy")}
             </span>
+
+            {isActive && (
+              <span className="ml-2 flex items-center gap-1">
+                <Timer className="h-3.5 w-3.5 text-blue-500" />
+                <span className="text-blue-500 font-medium">
+                  Voting in progress
+                </span>
+              </span>
+            )}
           </div>
 
           <p className="text-sm text-muted-foreground">
