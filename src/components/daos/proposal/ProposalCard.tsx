@@ -1,6 +1,11 @@
 "use client";
-import React from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import type React from "react";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import StatusBadge from "./StatusBadge";
 import MessageDisplay from "./MessageDisplay";
 import VoteProgress from "./VoteProgress";
@@ -16,84 +21,117 @@ import {
   User,
   Activity,
   Hash,
+  FileText,
+  Calendar,
 } from "lucide-react";
 import { truncateString, formatAction, getExplorerLink } from "./helper";
-import { Proposal } from "@/types/supabase";
+import type { Proposal } from "@/types/supabase";
+import { format } from "date-fns";
 
 const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   return (
-    <Card className="transition-all duration-200 hover:shadow-md overflow-hidden bg-zinc-900">
-      <CardHeader className="space-y-3 pb-3">
-        <div className="flex flex-col md:flex-row items-start justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-bold">{proposal.title}</h3>
-              <StatusBadge status={proposal.status} />
+    <Card className="transition-all duration-200 hover:shadow-md overflow-hidden bg-zinc-900 border-zinc-800 mb-6 w-full max-w-full">
+      <CardHeader className="space-y-3 pb-3 px-4 sm:px-6">
+        <div className="flex flex-col items-start justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 w-full justify-between">
+            <StatusBadge status={proposal.status} />
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <User className="h-3.5 w-3.5" />
+              <span>Created by:</span>
+              <a
+                href={getExplorerLink("address", proposal.creator)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline text-foreground"
+              >
+                {truncateString(proposal.creator, 4, 4)}
+              </a>
             </div>
-            <p className="text-sm">
-              {proposal.description || "No description available"}
-            </p>
-            <TimeStatus
-              createdAt={proposal.created_at}
-              concludedBy={proposal.concluded_by}
-              status={proposal.status}
-              start_block={proposal.start_block}
-              end_block={proposal.end_block}
-            />
           </div>
+
+          <h3 className="text-lg sm:text-xl font-bold">{proposal.title}</h3>
+
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground w-full">
+            <Calendar className="h-3.5 w-3.5" />
+            <span>
+              Created: {format(new Date(proposal.created_at), "MMM d, yyyy")}
+            </span>
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            {proposal.description || "No description available"}
+          </p>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6 pt-1">
+
+      <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6 pt-1">
+        {/* Message section - highlighted as important */}
         {proposal.parameters && (
-          <MessageDisplay message={proposal.parameters} />
-        )}
-        <VoteProgress
-          votesFor={proposal.votes_for}
-          votesAgainst={proposal.votes_against}
-        />
-        <ProposalMetrics proposal={proposal} />
-        <div className="lg:grid lg:grid-cols-2 lg:gap-8">
-          <div className="space-y-1 mb-4 lg:mb-0">
-            <h4 className="font-medium text-sm mb-2"> Blocks</h4>
-            <LabeledField
-              icon={Layers}
-              label="Snapshot block"
-              value={
-                <BlockVisual value={proposal.created_at_block} type="stacks" />
-              }
-            />
-            <LabeledField
-              icon={ArrowRight}
-              label="Start block"
-              value={
-                <BlockVisual value={proposal.start_block} type="bitcoin" />
-              }
-            />
-            <LabeledField
-              icon={Timer}
-              label="End block"
-              value={<BlockVisual value={proposal.end_block} type="bitcoin" />}
-            />
-            <LabeledField
-              icon={Wallet}
-              label="Liquid Tokens"
-              value={
-                proposal.liquid_tokens !== null
-                  ? (proposal.liquid_tokens / 1e8).toFixed(2)
-                  : "No data available"
-              }
-            />
+          <div className="rounded-lg border-2 border-blue-500/30 p-3 sm:p-4 bg-blue-500/5">
+            <MessageDisplay message={proposal.parameters} />
           </div>
-          <div className="space-y-1">
-            {/* For mobile, you might wrap blockchain details in an Accordion */}
-            <div className="hidden lg:block space-y-1">
-              <h4 className="font-medium text-sm mb-2"> Details</h4>
+        )}
+
+        {/* Voting section - highlighted as important */}
+        <div className="rounded-lg border-2 border-green-500/30 p-3 sm:p-4 bg-green-500/5">
+          <VoteProgress
+            votesFor={proposal.votes_for}
+            votesAgainst={proposal.votes_against}
+          />
+        </div>
+
+        <TimeStatus
+          createdAt={proposal.created_at}
+          concludedBy={proposal.concluded_by}
+          status={proposal.status}
+          start_block={proposal.start_block}
+          end_block={proposal.end_block}
+        />
+
+        <ProposalMetrics proposal={proposal} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <div className="space-y-1 rounded-lg border border-zinc-800 p-3 sm:p-4 bg-zinc-900/50">
+            <h4 className="font-medium text-sm mb-2 sm:mb-3 flex items-center gap-2">
+              <Layers className="h-4 w-4 text-muted-foreground" />
+              <span>Block Information</span>
+            </h4>
+
+            <div className="space-y-3">
               <LabeledField
-                icon={User}
-                label="Creator"
-                value={truncateString(proposal.creator, 8, 8)}
-                link={getExplorerLink("address", proposal.creator)}
+                icon={Layers}
+                label="Snapshot block"
+                value={
+                  <BlockVisual
+                    value={proposal.created_at_block}
+                    type="stacks"
+                  />
+                }
               />
+              <LabeledField
+                icon={ArrowRight}
+                label="Start block"
+                value={
+                  <BlockVisual value={proposal.start_block} type="bitcoin" />
+                }
+              />
+              <LabeledField
+                icon={Timer}
+                label="End block"
+                value={
+                  <BlockVisual value={proposal.end_block} type="bitcoin" />
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1 rounded-lg border border-zinc-800 p-3 sm:p-4 bg-zinc-900/50">
+            <h4 className="font-medium text-sm mb-2 sm:mb-3 flex items-center gap-2">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              <span>Blockchain Details</span>
+            </h4>
+
+            <div className="space-y-3">
               <LabeledField
                 icon={Activity}
                 label="Action"
@@ -120,6 +158,23 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
           </div>
         </div>
       </CardContent>
+
+      {proposal.concluded_by && (
+        <CardFooter className="px-4 sm:px-6 py-3 border-t border-zinc-800 mt-2">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <User className="h-3.5 w-3.5" />
+            <span>Concluded by:</span>
+            <a
+              href={getExplorerLink("address", proposal.concluded_by)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline text-foreground"
+            >
+              {truncateString(proposal.concluded_by, 4, 4)}
+            </a>
+          </div>
+        </CardFooter>
+      )}
     </Card>
   );
 };
