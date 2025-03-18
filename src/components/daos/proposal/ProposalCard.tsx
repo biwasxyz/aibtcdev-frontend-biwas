@@ -1,11 +1,14 @@
 "use client";
+
 import type React from "react";
+import { useState } from "react";
 import {
   Card,
   CardHeader,
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import StatusBadge from "./StatusBadge";
 import MessageDisplay from "./MessageDisplay";
 import VoteProgress from "./VoteProgress";
@@ -23,12 +26,16 @@ import {
   Hash,
   FileText,
   Calendar,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { truncateString, formatAction, getExplorerLink } from "./helper";
 import type { Proposal } from "@/types/supabase";
 import { format } from "date-fns";
 
 const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <Card className="transition-all duration-200 hover:shadow-md overflow-hidden bg-zinc-900 border-zinc-800 mb-6 w-full max-w-full">
       <CardHeader className="space-y-3 pb-3 px-4 sm:px-6">
@@ -88,75 +95,99 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
           end_block={proposal.end_block}
         />
 
-        <ProposalMetrics proposal={proposal} />
+        {expanded && (
+          <>
+            <ProposalMetrics proposal={proposal} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-          <div className="space-y-1 rounded-lg border border-zinc-800 p-3 sm:p-4 bg-zinc-900/50">
-            <h4 className="font-medium text-sm mb-2 sm:mb-3 flex items-center gap-2">
-              <Layers className="h-4 w-4 text-muted-foreground" />
-              <span>Block Information</span>
-            </h4>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-1 rounded-lg border border-zinc-800 p-3 sm:p-4 bg-zinc-900/50">
+                <h4 className="font-medium text-sm mb-2 sm:mb-3 flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-muted-foreground" />
+                  <span>Block Information</span>
+                </h4>
 
-            <div className="space-y-3">
-              <LabeledField
-                icon={Layers}
-                label="Snapshot block"
-                value={
-                  <BlockVisual
-                    value={proposal.created_at_block}
-                    type="stacks"
+                <div className="space-y-3">
+                  <LabeledField
+                    icon={Layers}
+                    label="Snapshot block"
+                    value={
+                      <BlockVisual
+                        value={proposal.created_at_block}
+                        type="stacks"
+                      />
+                    }
                   />
-                }
-              />
-              <LabeledField
-                icon={ArrowRight}
-                label="Start block"
-                value={
-                  <BlockVisual value={proposal.start_block} type="bitcoin" />
-                }
-              />
-              <LabeledField
-                icon={Timer}
-                label="End block"
-                value={
-                  <BlockVisual value={proposal.end_block} type="bitcoin" />
-                }
-              />
-            </div>
-          </div>
+                  <LabeledField
+                    icon={ArrowRight}
+                    label="Start block"
+                    value={
+                      <BlockVisual
+                        value={proposal.start_block}
+                        type="bitcoin"
+                      />
+                    }
+                  />
+                  <LabeledField
+                    icon={Timer}
+                    label="End block"
+                    value={
+                      <BlockVisual value={proposal.end_block} type="bitcoin" />
+                    }
+                  />
+                </div>
+              </div>
 
-          <div className="space-y-1 rounded-lg border border-zinc-800 p-3 sm:p-4 bg-zinc-900/50">
-            <h4 className="font-medium text-sm mb-2 sm:mb-3 flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span>Blockchain Details</span>
-            </h4>
+              <div className="space-y-1 rounded-lg border border-zinc-800 p-3 sm:p-4 bg-zinc-900/50">
+                <h4 className="font-medium text-sm mb-2 sm:mb-3 flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span>Blockchain Details</span>
+                </h4>
 
-            <div className="space-y-3">
-              <LabeledField
-                icon={Activity}
-                label="Action"
-                value={formatAction(proposal.action)}
-                link={
-                  proposal.action
-                    ? getExplorerLink("contract", proposal.action)
-                    : undefined
-                }
-              />
-              <LabeledField
-                icon={Hash}
-                label="Transaction ID"
-                value={truncateString(proposal.tx_id, 8, 8)}
-                link={getExplorerLink("tx", proposal.tx_id)}
-              />
-              <LabeledField
-                icon={Wallet}
-                label="Principal"
-                value={formatAction(proposal.contract_principal)}
-                link={getExplorerLink("contract", proposal.contract_principal)}
-              />
+                <div className="space-y-3">
+                  <LabeledField
+                    icon={Activity}
+                    label="Action"
+                    value={formatAction(proposal.action)}
+                    link={
+                      proposal.action
+                        ? getExplorerLink("contract", proposal.action)
+                        : undefined
+                    }
+                  />
+                  <LabeledField
+                    icon={Hash}
+                    label="Transaction ID"
+                    value={truncateString(proposal.tx_id, 8, 8)}
+                    link={getExplorerLink("tx", proposal.tx_id)}
+                  />
+                  <LabeledField
+                    icon={Wallet}
+                    label="Principal"
+                    value={formatAction(proposal.contract_principal)}
+                    link={getExplorerLink(
+                      "contract",
+                      proposal.contract_principal
+                    )}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
+
+        <Button onClick={() => setExpanded(!expanded)} className="w-full">
+          {expanded ? (
+            <>
+              <ChevronUp className="mr-2 h-4 w-4" />
+              See less
+            </>
+          ) : (
+            <>
+              <ChevronDown className="mr-2 h-4 w-4" />
+              See more
+            </>
+          )}
+        </Button>
       </CardContent>
 
       {proposal.concluded_by && (
