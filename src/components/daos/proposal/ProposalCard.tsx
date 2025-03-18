@@ -63,6 +63,18 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                       Voting Period has Ended
                     </Badge>
                   )}
+                  {/* New badge for execution status */}
+                  {isEnded && (
+                    <Badge
+                      className={`text-xs ${
+                        proposal.passed
+                          ? "bg-green-500 text-white hover:bg-green-600"
+                          : "bg-red-500 text-white hover:bg-red-600"
+                      }`}
+                    >
+                      {proposal.passed ? "Executed" : "Not Executed"}
+                    </Badge>
+                  )}
                 </>
               )}
             </div>
