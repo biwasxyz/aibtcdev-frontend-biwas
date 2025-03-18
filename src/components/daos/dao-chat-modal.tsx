@@ -223,27 +223,11 @@ export function DAOChatModal({
       extensionTypes: [
         "EXTENSIONS_ACTION_PROPOSALS",
         "ACTIONS_MESSAGING_SEND_MESSAGE",
+        "TOKEN_DAO",
       ],
     },
     {
       step: 6,
-      title: "Create proposal to allow sBTC asset in treasury",
-      prompt: (extensions: Extension[]) => {
-        const extensionsList = extensions
-          .map((ext) => `${ext.type}: ${ext.contract_principal}`)
-          .join("\n");
-
-        return `Create an action proposal to allow the sBTC asset in our treasury.\n\n${extensionsList}`;
-      },
-      description:
-        "Submit a proposal to add sBTC as an allowable asset in the DAO treasury.",
-      extensionTypes: [
-        "EXTENSIONS_ACTION_PROPOSALS",
-        "ACTIONS_TREASURY_ALLOW_ASSET",
-      ],
-    },
-    {
-      step: 7,
       title: "Check proposal information using ID",
       prompt: (extensions: Extension[]) => {
         const extensionsList = extensions
@@ -257,7 +241,7 @@ export function DAOChatModal({
       extensionTypes: ["EXTENSIONS_ACTION_PROPOSALS"],
     },
     {
-      step: 8,
+      step: 7,
       title: "Cast a vote on a proposal",
       prompt: (extensions: Extension[]) => {
         const extensionsList = extensions
@@ -270,7 +254,7 @@ export function DAOChatModal({
       extensionTypes: ["EXTENSIONS_ACTION_PROPOSALS"],
     },
     {
-      step: 9,
+      step: 8,
       title: "Conclude a proposal",
       prompt: (extensions: Extension[]) => {
         const extensionsList = extensions
