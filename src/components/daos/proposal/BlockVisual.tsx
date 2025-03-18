@@ -1,6 +1,6 @@
 "use client";
 import type React from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -16,11 +16,9 @@ interface BlockVisualProps {
 
 const BlockVisual: React.FC<BlockVisualProps> = ({ value, type }) => {
   const getExplorerUrl = () => {
-    if (type === "bitcoin") {
-      return `https://mempool.space/block/${value}`;
-    } else {
-      return `https://explorer.stacks.co/block/${value}`;
-    }
+    return type === "bitcoin"
+      ? `https://mempool.space/block/${value}`
+      : `https://explorer.stacks.co/block/${value}`;
   };
 
   const getTypeColor = () => {
@@ -30,15 +28,30 @@ const BlockVisual: React.FC<BlockVisualProps> = ({ value, type }) => {
   };
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <Badge
-        variant="outline"
-        className={`${getTypeColor()} font-medium text-xs`}
-      >
-        {type === "bitcoin" ? "BTC" : "STX"}
-      </Badge>
-      <code className="bg-zinc-800 px-2 py-0.5 rounded text-xs">{value}</code>
-      <TooltipProvider>
+    <TooltipProvider delayDuration={0}>
+      <div className="flex items-center gap-2 flex-wrap">
+        <Badge
+          variant="outline"
+          className={`${getTypeColor()} font-medium text-xs`}
+        >
+          {type === "bitcoin" ? "BTC" : "STX"}
+        </Badge>
+        <code className="bg-zinc-800 px-2 py-0.5 rounded text-xs">{value}</code>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="cursor-pointer">
+              <Info className="h-4 w-4 text-muted-foreground" />
+              <span className="sr-only">Block explanation</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p className="text-xs">
+              {type === "bitcoin"
+                ? "BTC block marks the start and end of a voting period."
+                : "Stacks block records the snapshot for governance."}
+            </p>
+          </TooltipContent>
+        </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
             <a
@@ -51,12 +64,14 @@ const BlockVisual: React.FC<BlockVisualProps> = ({ value, type }) => {
               <span className="sr-only">View on explorer</span>
             </a>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>View on {type === "bitcoin" ? "Bitcoin" : "Stacks"} explorer</p>
+          <TooltipContent side="top">
+            <p className="text-xs">
+              View on {type === "bitcoin" ? "Bitcoin" : "Stacks"} explorer
+            </p>
           </TooltipContent>
         </Tooltip>
-      </TooltipProvider>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 };
 
