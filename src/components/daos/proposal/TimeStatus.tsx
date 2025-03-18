@@ -2,11 +2,10 @@
 
 import type React from "react";
 import { useEffect, useState } from "react";
-import { Timer } from "lucide-react";
+import { Timer, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import type { Proposal } from "@/types/supabase";
-import { truncateString } from "./helper";
 import { fetchBlockTimes } from "@/lib/block-time";
 
 interface TimeStatusProps {
@@ -26,7 +25,7 @@ const estimateBlockTime = (
   const avgBlockTime =
     process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
       ? 4 * 60 * 1000 // 4 minutes for testnet
-      : 12 * 60 * 1000; // 12 minutes for mainnet
+      : 10 * 60 * 1000; // 10 minutes for mainnet
 
   const blockDiff = blockHeight - referenceBlock;
   return new Date(referenceTime.getTime() + blockDiff * avgBlockTime);
@@ -37,6 +36,7 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
   concludedBy,
   start_block,
   end_block,
+  createdAt,
 }) => {
   const [blockTimes, setBlockTimes] = useState<{
     startBlockTime: Date | null;
@@ -105,9 +105,11 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
   // Loading state
   if (blockTimes.isLoading) {
     return (
-      <div className="flex items-center gap-2 mt-2">
-        <Timer className="h-4 w-4" />
-        <span className="text-sm">Loading block times...</span>
+      <div className="border border-zinc-800 rounded-md p-3 w-full">
+        <div className="flex items-center gap-2">
+          <Timer className="h-4 w-4 text-muted-foreground animate-pulse" />
+          <span className="text-sm">Loading block times...</span>
+        </div>
       </div>
     );
   }
@@ -117,9 +119,11 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
   // If we still don't have start time after all attempts
   if (!startBlockTime) {
     return (
-      <div className="flex items-center gap-2 mt-2">
-        <Timer className="h-4 w-4" />
-        <span className="text-sm">Unable to determine block times</span>
+      <div className="border border-zinc-800 rounded-md p-3 w-full">
+        <div className="flex items-center gap-2">
+          <Timer className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">Unable to determine block times</span>
+        </div>
       </div>
     );
   }
@@ -141,52 +145,59 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
     status !== "FAILED";
 
   return (
-    <div className="border rounded-md p-3 sm:p-4 w-full mt-2">
-      <div className="flex items-center gap-2">
-        <Timer className="h-4 w-4" />
+    <div className="border border-zinc-800 rounded-md p-3 w-full">
+      <div className="flex items-center gap-2 mb-3">
+        <Timer className="h-4 w-4 text-muted-foreground" />
         {isActive ? (
-          <span className="text-sm font-medium text-primary">
+          <span className="text-sm font-medium text-blue-500">
             Voting in progress
           </span>
         ) : (
           <span className="text-sm font-medium">Voting period</span>
         )}
-        {isEnded && <Badge className="text-xs ml-2">Ended</Badge>}
+        {isEnded && (
+          <Badge variant="outline" className="text-xs ml-2 bg-zinc-800/50">
+            Ended
+          </Badge>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 mt-2">
-        <div className="text-xs sm:text-sm">
-          <span className="text-muted-foreground">Started:</span>{" "}
-          {formattedStart}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="flex items-start gap-2">
+          <Calendar className="h-4 w-4 text-muted-foreground mt-0.5" />
+          <div>
+            <div className="text-xs text-muted-foreground">Started</div>
+            <div className="text-sm">{formattedStart}</div>
+          </div>
         </div>
-        <div className="text-xs sm:text-sm">
-          <span className="text-muted-foreground">Ends:</span>{" "}
-          {isEndTimeEstimated ? (
-            <span>
-              {formattedEnd}{" "}
-              <Badge variant="outline" className="text-xs font-normal ml-1">
-                Estimated
-              </Badge>
-            </span>
-          ) : (
-            formattedEnd || "Block not created yet"
-          )}
+
+        <div className="flex items-start gap-2">
+          <Clock className="h-4 w-4 text-muted-foreground mt-0.5" />
+          <div>
+            <div className="text-xs text-muted-foreground">Ends</div>
+            <div className="text-sm">
+              {isEndTimeEstimated ? (
+                <span className="flex items-center flex-wrap gap-1">
+                  {formattedEnd}
+                  <Badge
+                    variant="outline"
+                    className="text-xs font-normal bg-zinc-800/50"
+                  >
+                    Estimated
+                  </Badge>
+                </span>
+              ) : (
+                formattedEnd || "Block not created yet"
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
       {isEndTimeEstimated && (
-        <div className="mt-2 text-xs text-muted-foreground">
+        <div className="mt-3 text-xs text-muted-foreground">
           End block #{end_block} has not been created yet. Time is estimated
           based on average block time.
-        </div>
-      )}
-
-      {concludedBy && (
-        <div className="flex items-center gap-2 mt-2 text-xs sm:text-sm">
-          <span className="text-muted-foreground">Concluded by:</span>
-          <code className="bg-secondary/20 px-1 py-0.5 rounded text-xs">
-            {truncateString(concludedBy, 6, 4)}
-          </code>
         </div>
       )}
     </div>

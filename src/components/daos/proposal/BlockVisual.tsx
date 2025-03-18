@@ -1,51 +1,62 @@
-// File: src/components/BlockVisual.tsx
 "use client";
-import React from "react";
+import type React from "react";
+import { ExternalLink } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 interface BlockVisualProps {
-  value: number | null;
-  type?: "stacks" | "bitcoin";
+  value: number;
+  type: "bitcoin" | "stacks";
 }
 
-const BlockVisual: React.FC<BlockVisualProps> = ({
-  value,
-  type = "stacks",
-}) => {
-  if (value === null) return <span className="text-sm">No data available</span>;
-  const color = type === "stacks" ? "bg-primary" : "bg-secondary";
-  const icon =
-    type === "stacks" ? (
-      <div className={`w-2 h-2 rounded-sm ${color} mr-1.5`} />
-    ) : (
-      <div className={`w-2 h-2 rounded-full ${color} mr-1.5`} />
-    );
-  const label = type === "stacks" ? "STX" : "BTC";
-  const tooltip =
-    type === "stacks"
-      ? "Block height on the Stacks blockchain"
-      : "Block height on the Bitcoin blockchain";
+const BlockVisual: React.FC<BlockVisualProps> = ({ value, type }) => {
+  const getExplorerUrl = () => {
+    if (type === "bitcoin") {
+      return `https://mempool.space/block/${value}`;
+    } else {
+      return `https://explorer.stacks.co/block/${value}`;
+    }
+  };
+
+  const getTypeColor = () => {
+    return type === "bitcoin"
+      ? "bg-orange-500/20 text-orange-500 border-orange-500/30"
+      : "bg-blue-500/20 text-blue-500 border-blue-500/30";
+  };
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center">
-            {icon}
-            <span className="text-sm">{value.toLocaleString()}</span>
-            <span className="ml-1">{label}</span>
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p className="text-sm">{tooltip}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <div className="flex items-center gap-2 flex-wrap">
+      <Badge
+        variant="outline"
+        className={`${getTypeColor()} font-medium text-xs`}
+      >
+        {type === "bitcoin" ? "BTC" : "STX"}
+      </Badge>
+      <code className="bg-zinc-800 px-2 py-0.5 rounded text-xs">{value}</code>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <a
+              href={getExplorerUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              <span className="sr-only">View on explorer</span>
+            </a>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>View on {type === "bitcoin" ? "Bitcoin" : "Stacks"} explorer</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
   );
 };
 
