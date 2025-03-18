@@ -12,6 +12,7 @@ import {
   fetchTreasuryTokens,
   fetchTokenPrice,
   fetchHolders,
+  fetchProposals,
 } from "@/queries/daoQueries";
 
 export const runtime = "edge";
@@ -59,6 +60,14 @@ export default function DAOPage() {
     staleTime: 600000, // 10 minutes
   });
 
+  // New query to fetch proposals
+  const { data: proposals, isLoading: isLoadingProposals } = useQuery({
+    queryKey: ["proposals", id],
+    queryFn: () => fetchProposals(id),
+    enabled: !!dao,
+    staleTime: 600000, // 10 minutes
+  });
+
   const { data: marketStats, isLoading: isLoadingMarketStats } = useQuery({
     queryKey: [
       "marketStats",
@@ -93,7 +102,8 @@ export default function DAOPage() {
     isLoadingTokenPrice ||
     isLoadingMarketStats ||
     isLoadingTreasuryTokens ||
-    isLoadingHolders;
+    isLoadingHolders ||
+    isLoadingProposals; // Add this to loading check
 
   if (isLoading) {
     return (
@@ -153,6 +163,8 @@ export default function DAOPage() {
         token={token}
         marketStats={enhancedMarketStats}
         treasuryTokens={treasuryTokens}
+        proposals={proposals} // Pass proposals to overview
+        holders={holdersData?.holders} // Pass holders to overview
       />
     </div>
   );

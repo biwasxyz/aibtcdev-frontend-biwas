@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText, Users } from "lucide-react";
 import { BsGlobe, BsTwitterX, BsTelegram } from "react-icons/bs";
-import type { DAO, Token } from "@/types/supabase";
+import type { DAO, Token, Proposal } from "@/types/supabase";
 import {
   Table,
   TableBody,
@@ -15,6 +15,15 @@ import {
 } from "@/components/ui/table";
 import { DAOCreationDate } from "./dao-creation-date";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
+import { Badge } from "@/components/ui/badge";
+
+interface Holder {
+  address: string;
+  balance: string;
+  percentage: number;
+  value_usd?: string;
+  last_transaction?: string;
+}
 
 interface DAOOverviewProps {
   dao: DAO;
@@ -32,6 +41,8 @@ interface DAOOverviewProps {
     treasuryBalance: number;
     holderCount: number;
   };
+  proposals?: Proposal[];
+  holders?: Holder[];
 }
 
 function DAOOverview({
@@ -43,6 +54,8 @@ function DAOOverview({
     treasuryBalance: 0,
     holderCount: 0,
   },
+  proposals = [],
+  holders = [],
 }: DAOOverviewProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
@@ -57,6 +70,33 @@ function DAOOverview({
     if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
     if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}K`;
     return `$${num.toFixed(2)}`;
+  };
+
+  // Proposal statistics
+  const proposalStats = {
+    deployed: proposals.filter((p) => p.status === "DEPLOYED").length,
+    pending: proposals.filter((p) => p.status === "PENDING").length,
+    total: proposals.length,
+    successRate: (() => {
+      const completed = proposals.filter(
+        (p) => p.status === "DEPLOYED" || p.status === "FAILED"
+      );
+      if (completed.length === 0) return 0;
+      return Math.round(
+        (proposals.filter((p) => p.status === "DEPLOYED").length /
+          completed.length) *
+          100
+      );
+    })(),
+  };
+
+  // Holder statistics
+  const holderStats = {
+    totalHolders: holders.length,
+    top10Holdings: holders
+      .slice(0, 10)
+      .reduce((acc, holder) => acc + holder.percentage, 0)
+      .toFixed(2),
   };
 
   return (
@@ -104,7 +144,7 @@ function DAOOverview({
           )}
         </div>
 
-        {/* Stats cards */}
+        {/* Market Stats cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -146,6 +186,85 @@ function DAOOverview({
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Proposal & Holder Stats Section */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Proposal Stats */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              <h3 className="text-lg font-medium">Proposal Stats</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2">
+                  <h3 className="text-sm font-medium">Active Proposals</h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center">
+                    <div className="text-2xl font-bold">
+                      {proposalStats.deployed}
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className="ml-2 bg-primary/10 text-primary"
+                    >
+                      Deployed
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2">
+                  <h3 className="text-sm font-medium">Success Rate</h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <div className="text-2xl font-bold">
+                      {proposalStats.successRate}%
+                    </div>
+                  </div>
+                  <div className="w-full h-2 bg-secondary/10 rounded-full mt-2 overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full"
+                      style={{ width: `${proposalStats.successRate}%` }}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Holder Stats */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              <h3 className="text-lg font-medium">Holder Stats</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2">
+                  <h3 className="text-sm font-medium">Total Holders</h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {holderStats.totalHolders}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="p-4 shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2">
+                  <h3 className="text-sm font-medium">Top 10 Holdings</h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {holderStats.top10Holdings}%
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
 
         {/* About section - only show if there's a description */}
