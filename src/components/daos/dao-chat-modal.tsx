@@ -223,7 +223,7 @@ export function DAOChatModal({
       extensionTypes: [
         "EXTENSIONS_ACTION_PROPOSALS",
         "ACTIONS_MESSAGING_SEND_MESSAGE",
-        "TOKEN_DEX"
+        "TOKEN_DAO",
       ],
     },
     {
@@ -241,7 +241,7 @@ export function DAOChatModal({
       extensionTypes: [
         "EXTENSIONS_ACTION_PROPOSALS",
         "ACTIONS_TREASURY_ALLOW_ASSET",
-        "TOKEN_DEX"
+        "TOKEN_DAO",
       ],
     },
     {
