@@ -190,6 +190,15 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
 
                 <div className="space-y-3">
                   <LabeledField
+                    icon={Wallet}
+                    label="Principal"
+                    value={formatAction(proposal.contract_principal)}
+                    link={getExplorerLink(
+                      "contract",
+                      proposal.contract_principal
+                    )}
+                  />
+                  <LabeledField
                     icon={Activity}
                     label="Action"
                     value={formatAction(proposal.action)}
@@ -204,15 +213,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                     label="Transaction ID"
                     value={truncateString(proposal.tx_id, 8, 8)}
                     link={getExplorerLink("tx", proposal.tx_id)}
-                  />
-                  <LabeledField
-                    icon={Wallet}
-                    label="Principal"
-                    value={formatAction(proposal.contract_principal)}
-                    link={getExplorerLink(
-                      "contract",
-                      proposal.contract_principal
-                    )}
                   />
                 </div>
               </div>
