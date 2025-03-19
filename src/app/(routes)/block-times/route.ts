@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+export const runtime = "edge";
 async function fetchBlockData(blockNumber: number, baseURL: string, apiKey: string) {
     const response = await fetch(
         `${baseURL}/extended/v2/burn-blocks/${blockNumber}`,
