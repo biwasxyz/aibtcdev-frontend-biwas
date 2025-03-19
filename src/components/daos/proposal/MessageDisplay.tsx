@@ -1,6 +1,5 @@
 "use client";
 import type React from "react";
-import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CopyButton from "./CopyButton";
@@ -11,8 +10,6 @@ interface MessageDisplayProps {
 }
 
 const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
-  const [expanded, setExpanded] = useState(false);
-
   // Handle empty message
   if (!message) {
     return (
@@ -39,13 +36,6 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
     }`;
   }
 
-  // Determine if we should truncate
-  const shouldTruncate = decodedMessage.length > 150;
-  const displayMessage =
-    !expanded && shouldTruncate
-      ? decodedMessage.substring(0, 150) + "..."
-      : decodedMessage;
-
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
@@ -55,32 +45,9 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
         <CopyButton text={decodedMessage} />
       </div>
 
-      <div
-        className={`p-3 rounded bg-zinc-800 text-sm break-words ${
-          !expanded && shouldTruncate ? "max-h-32 overflow-y-auto" : ""
-        }`}
-      >
-        {displayMessage}
+      <div className="p-3 rounded bg-zinc-800 text-sm break-words">
+        {decodedMessage}
       </div>
-
-      {shouldTruncate && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setExpanded(!expanded)}
-          className="mt-2 text-xs h-7 px-2 text-muted-foreground hover:text-foreground"
-        >
-          {expanded ? (
-            <>
-              Show less <ChevronUp className="ml-1 h-3 w-3" />
-            </>
-          ) : (
-            <>
-              Show more <ChevronDown className="ml-1 h-3 w-3" />
-            </>
-          )}
-        </Button>
-      )}
     </div>
   );
 };
