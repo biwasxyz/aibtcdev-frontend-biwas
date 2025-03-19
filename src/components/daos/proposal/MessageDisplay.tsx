@@ -1,7 +1,5 @@
 "use client";
 import type React from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import CopyButton from "./CopyButton";
 import { deserializeCV, cvToString } from "@stacks/transactions";
 
