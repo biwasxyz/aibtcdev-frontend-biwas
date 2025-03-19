@@ -6,7 +6,7 @@ import { Timer, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import type { Proposal } from "@/types/supabase";
-import { fetchBlockTimes } from "@/lib/block-time";
+import { useQuery } from "@tanstack/react-query";
 
 interface TimeStatusProps {
   createdAt: string;
@@ -40,6 +40,19 @@ const estimateBlockTime = (
   return new Date(referenceTime.getTime() + blockDiff * avgBlockTime);
 };
 
+// Function to fetch block times from the Next.js API route
+const fetchBlockTimes = async (startBlock: number, endBlock: number) => {
+  const response = await fetch(
+    `/block-times?startBlock=${startBlock}&endBlock=${endBlock}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch block times");
+  }
+
+  return response.json();
+};
+
 export const useVotingStatus = (
   status: Proposal["status"],
   start_block: number,
@@ -54,68 +67,67 @@ export const useVotingStatus = (
     isEnded: false,
   });
 
+  // Use Tanstack Query to fetch and cache block times
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["blockTimes", start_block, end_block],
+    queryFn: () => fetchBlockTimes(start_block, end_block),
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    gcTime: 1000 * 60 * 60, // Keep cached data for 1 hour
+  });
+
   useEffect(() => {
-    const loadBlockTimes = async () => {
-      try {
-        const { startBlockTime, endBlockTime } = await fetchBlockTimes(
-          start_block,
-          end_block
-        );
+    if (isLoading) return;
 
-        let startDate = startBlockTime ? new Date(startBlockTime) : null;
-        let endDate = endBlockTime ? new Date(endBlockTime) : null;
-        let isEndTimeEstimated = false;
+    if (error) {
+      console.error("Error loading block times:", error);
+      setVotingStatus((prev) => ({ ...prev, isLoading: false }));
+      return;
+    }
 
-        // Assuming start time will always exist as mentioned
-        if (!startDate) {
-          console.error("Start block time not found - this shouldn't happen");
-          // Fallback in case it does happen anyway
-          const now = new Date();
-          const avgBlockTime =
-            process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
-              ? 4 * 60 * 1000 // 4 minutes for testnet
-              : 10 * 60 * 1000; // 10 minutes for mainnet
+    if (data) {
+      const { startBlockTime, endBlockTime } = data;
 
-          startDate = new Date(now.getTime() - avgBlockTime); // Assume recent
-        }
+      let startDate = startBlockTime ? new Date(startBlockTime) : null;
+      let endDate = endBlockTime ? new Date(endBlockTime) : null;
+      let isEndTimeEstimated = false;
 
-        // Handle the case where end block hasn't been created yet
-        if (startDate && !endDate) {
-          // We have start time but not end time - estimate end time
-          endDate = estimateBlockTime(end_block, start_block, startDate);
-          isEndTimeEstimated = true;
-        }
-
+      // Assuming start time will always exist as mentioned
+      if (!startDate) {
+        console.error("Start block time not found - this shouldn't happen");
+        // Fallback in case it does happen anyway
         const now = new Date();
-        // Make sure these are always boolean values
-        const isEnded = Boolean(endDate && now.getTime() > endDate.getTime());
-        const isActive = Boolean(
-          endDate && now.getTime() < endDate.getTime() && status !== "FAILED"
-        );
+        const avgBlockTime =
+          process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
+            ? 4 * 60 * 1000 // 4 minutes for testnet
+            : 10 * 60 * 1000; // 10 minutes for mainnet
 
-        setVotingStatus({
-          startBlockTime: startDate,
-          endBlockTime: endDate,
-          isEndTimeEstimated,
-          isLoading: false,
-          isActive,
-          isEnded,
-        });
-      } catch (error) {
-        console.error("Error loading block times:", error);
-        setVotingStatus({
-          startBlockTime: null,
-          endBlockTime: null,
-          isEndTimeEstimated: false,
-          isLoading: false,
-          isActive: false,
-          isEnded: false,
-        });
+        startDate = new Date(now.getTime() - avgBlockTime); // Assume recent
       }
-    };
 
-    loadBlockTimes();
-  }, [start_block, end_block, status]);
+      // Handle the case where end block hasn't been created yet
+      if (startDate && !endDate) {
+        // We have start time but not end time - estimate end time
+        endDate = estimateBlockTime(end_block, start_block, startDate);
+        isEndTimeEstimated = true;
+      }
+
+      const now = new Date();
+      // Make sure these are always boolean values
+      const isEnded = Boolean(endDate && now.getTime() > endDate.getTime());
+      const isActive = Boolean(
+        endDate && now.getTime() < endDate.getTime() && status !== "FAILED"
+      );
+
+      setVotingStatus({
+        startBlockTime: startDate,
+        endBlockTime: endDate,
+        isEndTimeEstimated,
+        isLoading: false,
+        isActive,
+        isEnded,
+      });
+    }
+  }, [data, isLoading, error, start_block, end_block, status]);
 
   return votingStatus;
 };
