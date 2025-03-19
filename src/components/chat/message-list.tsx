@@ -28,27 +28,51 @@ export function MessageList({ messages }: MessageListProps) {
 
     // Handle token messages
     if (message.type === "token") {
-      // If we have a processing token message, append to it
+      // If we have a processing or planning token message, append to it
       if (
         lastMessage?.type === "token" &&
-        lastMessage.status === "processing"
+        (lastMessage.status === "processing" ||
+          lastMessage.status === "planning")
       ) {
         lastMessage.content =
           (lastMessage.content || "") + (message.content || "");
-        if (message.status === "end") {
-          lastMessage.status = "end";
+        if (message.status === "complete" || message.status === "end") {
+          lastMessage.status = message.status;
         }
         return acc;
       }
 
       // Start a new token message
-      if (message.status === "processing" || message.status === "end") {
+      if (
+        message.status === "processing" ||
+        message.status === "planning" ||
+        message.status === "complete" ||
+        message.status === "end"
+      ) {
         acc.push({
           ...message,
           content: message.content || "",
           role: message.role || "assistant",
         });
       }
+      return acc;
+    }
+
+    // Handle step messages with planning status
+    if (message.type === "step" && message.status === "planning") {
+      // If we have a planning step message, append to it
+      if (lastMessage?.type === "step" && lastMessage.status === "planning") {
+        lastMessage.content =
+          (lastMessage.content || "") + (message.content || "");
+        return acc;
+      }
+
+      // Start a new planning message
+      acc.push({
+        ...message,
+        content: message.content || "",
+        role: message.role || "assistant",
+      });
       return acc;
     }
 

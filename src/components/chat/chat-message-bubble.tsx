@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Clock, User } from "lucide-react";
+import { CheckCircle2, Clock, User, Terminal } from "lucide-react";
 import { Message } from "@/lib/chat/types";
 import { useAgent } from "@/hooks/use-agent";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -132,6 +132,8 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
             "rounded-2xl px-3 py-2 w-fit max-w-full",
             message.role === "user"
               ? "bg-blue-600 text-white"
+              : message.status === "planning"
+              ? "bg-indigo-900 text-zinc-200"
               : "bg-zinc-800 text-zinc-200"
           )}
         >
@@ -143,6 +145,12 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
               )}
             >
               {message.tool}
+            </div>
+          )}
+          {message.type === "step" && message.status === "planning" && (
+            <div className="text-sm font-medium mb-1 text-indigo-300 flex items-center gap-1">
+              <Terminal className="h-3.5 w-3.5" />
+              <span>Planning</span>
             </div>
           )}
           <div className="text-md leading-relaxed break-words [&>*:last-child]:mb-0">
@@ -167,7 +175,10 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
             {message.status === "processing" && (
               <Clock className="h-3 w-3 text-zinc-400 animate-pulse" />
             )}
-            {message.status === "end" && (
+            {message.status === "planning" && (
+              <Terminal className="h-3 w-3 text-indigo-400 animate-pulse" />
+            )}
+            {(message.status === "end" || message.status === "complete") && (
               <CheckCircle2 className="h-3 w-3 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             )}
           </div>
