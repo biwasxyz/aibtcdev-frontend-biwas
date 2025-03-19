@@ -90,10 +90,7 @@ export const useVotingStatus = (
         // Make sure these are always boolean values
         const isEnded = Boolean(endDate && now.getTime() > endDate.getTime());
         const isActive = Boolean(
-          endDate &&
-            now.getTime() < endDate.getTime() &&
-            status !== "DEPLOYED" &&
-            status !== "FAILED"
+          endDate && now.getTime() < endDate.getTime() && status !== "FAILED"
         );
 
         setVotingStatus({
