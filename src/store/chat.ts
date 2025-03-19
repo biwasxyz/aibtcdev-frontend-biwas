@@ -106,9 +106,24 @@ export const useChatStore = create<ChatState>((set, get) => ({
         try {
           const data = JSON.parse(event.data);
           // console.log('Received message:', data);
+
+          // Handle various message types with appropriate status
           if (data.type === "token") {
-            get().addMessage(data);
+            // Token messages should have processing or complete status
+            const status = data.status ||
+              (data.status === "end" ? "complete" : "processing");
+            get().addMessage({
+              ...data,
+              status: status
+            });
+          } else if (data.type === "step") {
+            // Step messages are part of planning phase
+            get().addMessage({
+              ...data,
+              status: data.status || "planning"
+            });
           } else {
+            // Handle other message types
             get().addMessage(data);
           }
         } catch (error) {
@@ -191,7 +206,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       // For token messages, try to append to last message if it's processing
       if (message.type === 'token') {
-        if (lastMessage?.type === 'token' && lastMessage.status === 'processing') {
+        if (lastMessage?.type === 'token' &&
+          (lastMessage.status === 'processing' || lastMessage.status === 'planning')) {
           const updatedMessages = [...messages];
           updatedMessages[updatedMessages.length - 1] = {
             ...lastMessage,

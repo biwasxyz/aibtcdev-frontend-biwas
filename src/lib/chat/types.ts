@@ -4,7 +4,7 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   created_at?: string | null;
-  status: 'sent' | 'processing' | 'end' | null;
+  status: 'sent' | 'planning' | 'processing' | 'complete' | 'end' | null;
   type?: 'history' | 'task' | 'step' | 'result' | 'tool' | 'token' | 'message' | null;
   tool?: string;
   tool_input?: string;
