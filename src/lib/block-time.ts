@@ -1,54 +1,81 @@
-"use server";
+'use client';
 
-import { cache } from "react";
+import { useQuery } from '@tanstack/react-query';
 
-// Cache the individual block fetch operation
-const fetchBlockData = cache(async (blockNumber: number, baseURL: string, apiKey: string) => {
-
+// Helper function to fetch a single block
+const fetchBlockData = async (blockNumber: number, baseURL: string, apiKey: string) => {
     const response = await fetch(
         `${baseURL}/extended/v2/burn-blocks/${blockNumber}`,
         {
             headers: {
                 "Accept": "application/json",
                 "X-API-Key": apiKey || "",
-            },
-            // Set cache time to 10 minutes (600 seconds)
-            next: {
-                revalidate: 600 // Cache for 10 minutes
             }
         }
     );
 
-    if (response.ok) {
-        const data = await response.json();
-        return data.burn_block_time_iso;
+    if (!response.ok) {
+        throw new Error(`Failed to fetch block ${blockNumber}`);
     }
-    return null;
-});
 
-// Cache the combined operation
-export const fetchBlockTimes = cache(async (startBlock: number, endBlock: number) => {
+    const data = await response.json();
+    return data.burn_block_time_iso;
+};
+
+// Hook to fetch block times
+export function useBlockTimes(startBlock: number, endBlock: number) {
     const baseURL =
         process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
             ? "https://api.testnet.hiro.so"
             : "https://api.hiro.so";
 
-    const apiKey = process.env.HIRO_API_KEY || "";
+    const apiKey = process.env.NEXT_PUBLIC_HIRO_API_KEY || "";
+
+    // Query for start block
+    const startBlockQuery = useQuery({
+        queryKey: ['blockData', startBlock, baseURL],
+        queryFn: () => fetchBlockData(startBlock, baseURL, apiKey),
+        staleTime: 60 * 60 * 1000, // 1 hour
+
+    });
+
+    // Query for end block
+    const endBlockQuery = useQuery({
+        queryKey: ['blockData', endBlock, baseURL],
+        queryFn: () => fetchBlockData(endBlock, baseURL, apiKey),
+        staleTime: 60 * 60 * 1000, // 1 hour
+
+    });
+
+    // Combined result
+    return {
+        startBlockTime: startBlockQuery.data ?? null,
+        endBlockTime: endBlockQuery.data ?? null,
+        isLoading: startBlockQuery.isLoading || endBlockQuery.isLoading,
+        isError: startBlockQuery.isError || endBlockQuery.isError,
+        error: startBlockQuery.error || endBlockQuery.error,
+    };
+}
+
+// If you need to manually fetch data (to maintain similar API to original)
+export const fetchBlockTimes = async (startBlock: number, endBlock: number) => {
+    const baseURL =
+        process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
+            ? "https://api.testnet.hiro.so"
+            : "https://api.hiro.so";
+
+    const apiKey = process.env.NEXT_PUBLIC_HIRO_API_KEY || "";
 
     try {
-        // Fetch both blocks in parallel for better performance
         const [startBlockData, endBlockData] = await Promise.all([
             fetchBlockData(startBlock, baseURL, apiKey),
             fetchBlockData(endBlock, baseURL, apiKey)
         ]);
 
-        const result = {
+        return {
             startBlockTime: startBlockData,
             endBlockTime: endBlockData,
         };
-
-
-        return result;
     } catch (error) {
         console.error("Error fetching block times:", error);
         return {
@@ -56,4 +83,4 @@ export const fetchBlockTimes = cache(async (startBlock: number, endBlock: number
             endBlockTime: null,
         };
     }
-});
+};
