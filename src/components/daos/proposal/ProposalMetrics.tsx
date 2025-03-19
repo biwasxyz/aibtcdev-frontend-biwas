@@ -8,9 +8,13 @@ interface ProposalMetricsProps {
 }
 
 const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
+  const formatNumber = (num: number): string => {
+    return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   const liquidTokens =
     proposal.liquid_tokens !== null
-      ? (proposal.liquid_tokens / 1e8).toFixed(2)
+      ? formatNumber(proposal.liquid_tokens / 1e8)
       : "No data available";
 
   return (
