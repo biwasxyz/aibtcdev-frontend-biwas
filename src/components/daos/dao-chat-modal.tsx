@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, MessageSquare, Copy, Check } from "lucide-react";
+import { Loader2, MessageSquare } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageList } from "@/components/chat/message-list";
@@ -40,7 +40,7 @@ export function DAOChatModal({
   token,
 }: DAOChatModalProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
-  const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
+  const [inputValue, setInputValue] = useState("");
 
   // Use either controlled or uncontrolled state
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
@@ -163,6 +163,8 @@ export function DAOChatModal({
             selectedAgentId={selectedAgentId}
             onAgentSelect={setSelectedAgent}
             disabled={isChatLoading || !isConnected}
+            value={inputValue}
+            onChange={setInputValue}
           />
         </div>
       </div>
@@ -273,11 +275,8 @@ export function DAOChatModal({
     },
   ];
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedPrompt(text);
-      setTimeout(() => setCopiedPrompt(null), 2000);
-    });
+  const handlePromptClick = (promptText: string) => {
+    setInputValue(promptText);
   };
 
   const renderPromptsSection = () => {
@@ -303,6 +302,7 @@ export function DAOChatModal({
         {/* Middle scrollable area - takes remaining space */}
         <div className="flex-1 overflow-auto">
           <div className="p-4 space-y-4">
+            <span>simply click the prompt for quick message</span>
             {STRUCTURED_PROMPTS.map((promptItem) => {
               // For prompts that require extensions
               let promptText = "";
@@ -333,9 +333,10 @@ export function DAOChatModal({
               }
 
               return (
-                <div
+                <button
                   key={promptItem.step}
-                  className="bg-background/50 backdrop-blur-sm p-3 rounded-lg border relative group"
+                  onClick={() => handlePromptClick(promptText)}
+                  className="bg-background/50 backdrop-blur-sm p-3 rounded-lg border relative group w-full text-left hover:bg-background/80 transition-colors hover:bg-zinc-800"
                 >
                   <div className="flex items-center mb-2">
                     <span className="flex items-center justify-center bg-primary/10 text-primary rounded-full w-6 h-6 text-sm font-medium mr-2">
@@ -347,24 +348,10 @@ export function DAOChatModal({
                     {promptItem.description}
                   </p>
 
-                  {/* Updated prompt container with copy button inside */}
-                  <div className="bg-muted/50 p-2 rounded-md text-sm flex items-start">
-                    <div className="flex-grow whitespace-pre-line">
-                      {promptText}
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(promptText)}
-                      className="ml-2 p-1 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex-shrink-0 self-start"
-                      title="Copy to clipboard"
-                    >
-                      {copiedPrompt === promptText ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </button>
+                  <div className="bg-muted/50 p-2 rounded-md text-sm">
+                    <div className="whitespace-pre-line">{promptText}</div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, FileText } from "lucide-react";
 import { BsGlobe, BsTwitterX, BsTelegram } from "react-icons/bs";
-import type { DAO, Token } from "@/types/supabase";
+import type { DAO, Token, Proposal } from "@/types/supabase";
 import {
   Table,
   TableBody,
@@ -15,6 +15,15 @@ import {
 } from "@/components/ui/table";
 import { DAOCreationDate } from "./dao-creation-date";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
+import { Badge } from "@/components/ui/badge";
+
+interface Holder {
+  address: string;
+  balance: string;
+  percentage: number;
+  value_usd?: string;
+  last_transaction?: string;
+}
 
 interface DAOOverviewProps {
   dao: DAO;
@@ -32,6 +41,8 @@ interface DAOOverviewProps {
     treasuryBalance: number;
     holderCount: number;
   };
+  proposals?: Proposal[];
+  holders?: Holder[];
 }
 
 function DAOOverview({
@@ -43,6 +54,7 @@ function DAOOverview({
     treasuryBalance: 0,
     holderCount: 0,
   },
+  proposals = [],
 }: DAOOverviewProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
@@ -59,6 +71,13 @@ function DAOOverview({
     return `$${num.toFixed(2)}`;
   };
 
+  // Proposal statistics
+  const proposalStats = {
+    deployed: proposals.filter((p) => p.status === "DEPLOYED").length,
+    pending: proposals.filter((p) => p.status === "PENDING").length,
+    total: proposals.length,
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="space-y-8">
@@ -71,7 +90,7 @@ function DAOOverview({
         </div>
 
         {/* Social links */}
-        <div className="flex gap-3 mb-4">
+        <div className="flex gap-3">
           {dao.website_url && (
             <a
               href={dao.website_url}
@@ -104,48 +123,56 @@ function DAOOverview({
           )}
         </div>
 
-        {/* Stats cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Token Price</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatNumber(marketStats.price, true)}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Market Cap</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatNumber(marketStats.marketCap)}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Treasury</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {formatNumber(marketStats.treasuryBalance)}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Holders</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {marketStats.holderCount.toLocaleString()}
-              </div>
-            </CardContent>
-          </Card>
+        {/* Market Stats cards */}
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+          <CardWithBadge
+            title="Token Price"
+            value={formatNumber(marketStats.price, true)}
+          />
+          <CardWithBadge
+            title="Market Cap"
+            value={formatNumber(marketStats.marketCap)}
+          />
+          <CardWithBadge
+            title="Treasury"
+            value={formatNumber(marketStats.treasuryBalance)}
+          />
+          <CardWithBadge
+            title="Total Holders"
+            value={marketStats.holderCount.toLocaleString()}
+          />
+        </div>
+
+        {/* Proposal Stats Section */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            <h3 className="text-lg font-medium">Proposal Stats</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <CardWithBadge
+              title="Total Proposals"
+              value={proposalStats.total.toString()}
+            />
+            <CardWithBadge
+              title="Deployed Proposals"
+              value={proposalStats.deployed.toString()}
+              badge={{
+                text: "Deployed",
+                variant: "secondary",
+                className: "bg-primary/10 text-primary",
+              }}
+            />
+            <CardWithBadge
+              title="Pending Proposals"
+              value={proposalStats.pending.toString()}
+              badge={{
+                text: "Pending",
+                variant: "secondary",
+                className: "bg-amber-500/10 text-amber-500",
+              }}
+            />
+          </div>
         </div>
 
         {/* About section - only show if there's a description */}
@@ -239,6 +266,37 @@ function DAOOverview({
         </div>
       </div>
     </div>
+  );
+}
+
+// Single, unified card component that can optionally display a badge
+interface CardWithBadgeProps {
+  title: string;
+  value: string;
+  badge?: {
+    text: string;
+    variant: "default" | "secondary" | "destructive" | "outline";
+    className?: string;
+  };
+}
+
+function CardWithBadge({ title, value, badge }: CardWithBadgeProps) {
+  return (
+    <Card className="shadow-sm hover:shadow-md transition-shadow">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center gap-2">
+          <div className="text-2xl font-bold">{value}</div>
+          {badge && (
+            <Badge variant={badge.variant} className={badge.className}>
+              {badge.text}
+            </Badge>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

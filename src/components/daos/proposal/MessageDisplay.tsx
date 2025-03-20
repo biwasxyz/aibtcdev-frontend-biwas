@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { MessageSquare } from "lucide-react";
+import type React from "react";
+import CopyButton from "./CopyButton";
 import { deserializeCV, cvToString } from "@stacks/transactions";
 
 interface MessageDisplayProps {
@@ -8,16 +8,23 @@ interface MessageDisplayProps {
 }
 
 const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
+  // Handle empty message
+  if (!message) {
+    return (
+      <div className="rounded-lg bg-zinc-900/50">
+        <div className="flex items-center gap-2">
+          <h4 className="font-medium text-sm">On-Chain Message</h4>
+        </div>
+        <div className="mt-3 text-sm text-muted-foreground">
+          No message available
+        </div>
+      </div>
+    );
+  }
+
+  // Try to decode the Clarity Value
   let decodedMessage = "";
   try {
-    if (!message)
-      return (
-        <div className="p-3 rounded-md  flex items-center">
-          <MessageSquare className="h-4 w-4 mr-2 text-muted-foreground" />
-          <p className="text-sm sm:text-base">No message available</p>
-        </div>
-      );
-
     const hexValue = message.startsWith("0x") ? message.slice(2) : message;
     const clarityValue = deserializeCV(Buffer.from(hexValue, "hex"));
     decodedMessage = cvToString(clarityValue);
@@ -28,12 +35,15 @@ const MessageDisplay: React.FC<MessageDisplayProps> = ({ message }) => {
   }
 
   return (
-    <div className="rounded-md bg-zinc-800 overflow-hidden">
-      <div className="flex items-center px-3 py-2">
-        <MessageSquare className="h-4 w-4 mr-2" />
-        <h3 className="text-sm sm:text-base font-medium">Message</h3>
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <h4 className="font-medium text-base">On-Chain Message</h4>
+        </div>
+        <CopyButton text={decodedMessage} />
       </div>
-      <div className="p-3 sm:p-4 text-sm sm:text-base break-words">
+
+      <div className="p-3 rounded bg-zinc-800 text-sm break-words">
         {decodedMessage}
       </div>
     </div>

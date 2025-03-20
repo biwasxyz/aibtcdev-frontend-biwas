@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, ArrowUpDown } from "lucide-react";
 
 interface Holder {
@@ -72,20 +71,6 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
     });
   }, [filteredHolders, sortBy]);
 
-  const totalHolders = holders.length;
-  const top10Holdings = holders
-    .slice(0, 10)
-    .reduce((acc, holder) => acc + holder.percentage, 0)
-    .toFixed(2);
-  const avgBalance = formatBalance(
-    (
-      holders.reduce(
-        (acc, holder) => acc + Number.parseFloat(holder.balance),
-        0
-      ) / totalHolders
-    ).toString()
-  );
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="space-y-8">
@@ -94,41 +79,6 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
           <p className="text-muted-foreground mt-2">
             View and analyze the distribution of token holders
           </p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Holders
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalHolders}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Top 10 Holdings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{top10Holdings}%</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Average Balance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {avgBalance} {tokenSymbol}
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         <div className="space-y-6">

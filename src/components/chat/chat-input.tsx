@@ -12,14 +12,35 @@ interface ChatInputProps {
   selectedAgentId: string | null;
   onAgentSelect: (agentId: string | null) => void;
   disabled?: boolean;
+  value?: string;
+  onChange?: (value: string) => void;
 }
 
-export function ChatInput({ disabled = false }: ChatInputProps) {
-  const [input, setInput] = useState("");
+export function ChatInput({
+  disabled = false,
+  value,
+  onChange,
+}: ChatInputProps) {
+  const [input, setInput] = useState(value || "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { sendMessage, activeThreadId } = useChatStore();
   const { accessToken } = useSessionStore();
+
+  // Update input when value prop changes
+  useEffect(() => {
+    if (value !== undefined) {
+      setInput(value);
+      // Adjust textarea height
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${Math.min(
+          textareaRef.current.scrollHeight,
+          200
+        )}px`;
+      }
+    }
+  }, [value]);
 
   // Handle mobile keyboard resize
   useEffect(() => {
@@ -48,12 +69,13 @@ export function ChatInput({ disabled = false }: ChatInputProps) {
       try {
         sendMessage(activeThreadId, input.trim());
         setInput("");
+        onChange?.(""); // Notify parent of empty input
         textareaRef.current?.style.setProperty("height", "auto");
       } catch (error) {
         console.error("Failed to send message:", error);
       }
     },
-    [activeThreadId, input, sendMessage, accessToken]
+    [activeThreadId, input, sendMessage, accessToken, onChange]
   );
 
   const handleKeyDown = useCallback(
@@ -68,7 +90,9 @@ export function ChatInput({ disabled = false }: ChatInputProps) {
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setInput(e.target.value);
+      const newValue = e.target.value;
+      setInput(newValue);
+      onChange?.(newValue);
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
         textareaRef.current.style.height = `${Math.min(
@@ -77,7 +101,7 @@ export function ChatInput({ disabled = false }: ChatInputProps) {
         )}px`;
       }
     },
-    []
+    [onChange]
   );
 
   const handleFocus = () => {
@@ -90,7 +114,7 @@ export function ChatInput({ disabled = false }: ChatInputProps) {
   if (!accessToken) return null;
 
   return (
-    <div ref={containerRef} className="w-full  backdrop-blur ">
+    <div ref={containerRef} className="w-full backdrop-blur">
       <div className="mx-auto max-w-5xl px-2 md:px-4 py-2 w-full">
         <form onSubmit={handleSubmit} className="flex gap-2 w-full">
           <div className="flex flex-1 gap-2 items-end w-full">
