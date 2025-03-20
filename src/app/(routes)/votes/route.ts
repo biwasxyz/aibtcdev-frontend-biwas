@@ -1,14 +1,14 @@
 import { Cl, cvToJSON, fetchCallReadOnlyFunction } from "@stacks/transactions";
-// import { STACKS_TESTNET, STACKS_MAINNET } from "@stacks/network";
+import { STACKS_TESTNET, STACKS_MAINNET } from "@stacks/network";
 import { NextResponse } from "next/server";
 
 export const runtime = "edge"
 // export const dynamic = 'force-dynamic'
 // Define network based on environment variable
-const network = "testnet"
-// process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
-//     ? STACKS_TESTNET
-//     : STACKS_MAINNET;
+// const network = "testnet"
+const network = process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
+    ? STACKS_TESTNET
+    : STACKS_MAINNET;
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
