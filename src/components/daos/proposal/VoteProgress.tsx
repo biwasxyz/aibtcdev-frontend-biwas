@@ -1,24 +1,66 @@
 "use client";
-import React from "react";
-import { Activity, ThumbsUp, ThumbsDown } from "lucide-react";
+import type React from "react";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getProposalVotes } from "@/lib/vote-utils";
 
 interface VoteProgressProps {
-  votesFor: string;
-  votesAgainst: string;
+  contractAddress?: string;
+  proposalId?: string;
+  votesFor?: string;
+  votesAgainst?: string;
 }
 
 const VoteProgress: React.FC<VoteProgressProps> = ({
-  votesFor,
-  votesAgainst,
+  contractAddress,
+  proposalId,
+  votesFor: initialVotesFor,
+  votesAgainst: initialVotesAgainst,
 }) => {
+  // Use React Query to fetch votes data if not provided directly
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["proposalVotes", contractAddress, proposalId],
+    queryFn: () => getProposalVotes(contractAddress!, Number(proposalId)),
+    // Only fetch if we have contractAddress and proposalId but no direct votes data
+    enabled:
+      !!contractAddress &&
+      !!proposalId &&
+      !initialVotesFor &&
+      !initialVotesAgainst,
+    // Keep cached data for 5 minutes
+    staleTime: 5 * 60 * 1000,
+    // Don't refetch on window focus for this data
+    refetchOnWindowFocus: false,
+  });
+
+  // Determine which votes data to use
+  const votesFor = initialVotesFor || data?.votesFor || "0";
+  const votesAgainst = initialVotesAgainst || data?.votesAgainst || "0";
+
   // Check if voting data is available
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center text-sm text-muted-foreground py-4">
+        <div className="animate-spin h-5 w-5 border-2 border-green-500 rounded-full border-t-transparent mr-2"></div>
+        Loading voting data...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center text-sm text-red-500 py-4">
+        Error loading voting data
+      </div>
+    );
+  }
+
   if (
     (!votesFor || votesFor.trim() === "") &&
     (!votesAgainst || votesAgainst.trim() === "")
   ) {
     return (
-      <div className="flex items-center justify-center text-sm text-muted-foreground">
-        <Activity className="h-4 w-4 mr-2" />
+      <div className="flex items-center justify-center text-sm text-muted-foreground py-4">
         No voting data available
       </div>
     );
@@ -52,11 +94,6 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-3">
-        <Activity className="h-5 w-5 text-green-500" />
-        <h4 className="font-medium text-base">Voting Progress</h4>
-      </div>
-
       {/* Vote counts above the progress bar */}
       <div className="flex justify-between mb-2">
         <div className="flex items-center">

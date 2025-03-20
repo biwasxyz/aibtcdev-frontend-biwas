@@ -28,14 +28,18 @@ import {
   Calendar,
   ChevronDown,
   ChevronUp,
+  RefreshCw,
 } from "lucide-react";
 import { truncateString, formatAction, getExplorerLink } from "./helper";
 import type { Proposal } from "@/types/supabase";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   const [expanded, setExpanded] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
 
   // Get voting status to display in header
   const { isActive, isEnded, isLoading } = useVotingStatus(
@@ -43,6 +47,27 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
     proposal.start_block,
     proposal.end_block
   );
+
+  // Function to refresh the votes data
+  const refreshVotesData = async () => {
+    setRefreshing(true);
+
+    try {
+      // Invalidate the specific query for this proposal's votes
+      await queryClient.invalidateQueries({
+        queryKey: [
+          "proposalVotes",
+          proposal.contract_principal,
+          proposal.proposal_id,
+        ],
+      });
+
+      // Wait a moment to show the refresh animation
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   return (
     <Card className="transition-all duration-200 hover:shadow-md overflow-hidden bg-zinc-900 border-zinc-800 mb-6 w-full max-w-full">
@@ -126,7 +151,31 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
 
         {/* Voting section - highlighted as important */}
         <div className="rounded-lg border-2 border-green-500/30 p-3 sm:p-4 bg-green-500/5">
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-green-500" />
+              <h4 className="font-medium text-base">Voting Progress</h4>
+            </div>
+
+            {/* Refresh button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={refreshVotesData}
+              disabled={refreshing}
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+              />
+              <span className="sr-only">Refresh votes</span>
+            </Button>
+          </div>
+
+          {/* Pass contract_principal and proposal_id to VoteProgress */}
           <VoteProgress
+            contractAddress={proposal.contract_principal}
+            proposalId={proposal.proposal_id}
             votesFor={proposal.votes_for}
             votesAgainst={proposal.votes_against}
           />
@@ -207,6 +256,11 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                         ? getExplorerLink("contract", proposal.action)
                         : undefined
                     }
+                  />
+                  <LabeledField
+                    icon={Hash}
+                    label="Proposal ID"
+                    value={`#${proposal.proposal_id}`}
                   />
                   <LabeledField
                     icon={Hash}
