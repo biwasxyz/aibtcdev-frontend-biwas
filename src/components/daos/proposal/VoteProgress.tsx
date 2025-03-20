@@ -74,6 +74,16 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   const yesVotes = (Number.parseFloat(votesFor) || 0) / 1e8;
   const noVotes = (Number.parseFloat(votesAgainst) || 0) / 1e8;
   const totalVotes = yesVotes + noVotes;
+
+  // Check if there are 0 votes
+  if (totalVotes === 0) {
+    return (
+      <div className="flex items-center justify-center text-sm text-muted-foreground py-4">
+        Awaiting first vote from agent.
+      </div>
+    );
+  }
+
   let yesPercent = totalVotes > 0 ? (yesVotes / totalVotes) * 100 : 50;
   let noPercent = totalVotes > 0 ? (noVotes / totalVotes) * 100 : 50;
   const minDisplay = 5;
