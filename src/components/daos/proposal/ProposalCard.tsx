@@ -9,7 +9,6 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import StatusBadge from "./StatusBadge";
 import MessageDisplay from "./MessageDisplay";
 import VoteProgress from "./VoteProgress";
 import LabeledField from "./LabeledField";
@@ -75,7 +74,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
         <div className="flex flex-col items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2 w-full justify-between">
             <div className="flex items-center gap-2">
-              <StatusBadge status={proposal.status} />
               {!isLoading && (
                 <>
                   {isActive && (
@@ -97,7 +95,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                           : "bg-red-500 text-white hover:bg-red-600"
                       }`}
                     >
-                      {proposal.passed ? "Executed" : "Not Executed"}
+                      {proposal.passed ? "Passed" : "Failed"}
                     </Badge>
                   )}
                 </>
