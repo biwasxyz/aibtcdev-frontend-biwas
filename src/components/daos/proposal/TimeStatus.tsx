@@ -87,21 +87,21 @@ export const useVotingStatus = (
     if (data) {
       const { startBlockTime, endBlockTime } = data;
 
-      let startDate = startBlockTime ? new Date(startBlockTime) : null;
+      const startDate = startBlockTime ? new Date(startBlockTime) : null;
       let endDate = endBlockTime ? new Date(endBlockTime) : null;
       let isEndTimeEstimated = false;
 
-      // Assuming start time will always exist as mentioned
       if (!startDate) {
-        console.error("Start block time not found - this shouldn't happen");
-        // Fallback in case it does happen anyway
-        const now = new Date();
-        const avgBlockTime =
-          process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
-            ? 4 * 60 * 1000 // 4 minutes for testnet
-            : 10 * 60 * 1000; // 10 minutes for mainnet
-
-        startDate = new Date(now.getTime() - avgBlockTime); // Assume recent
+        console.error("Start block time not found");
+        setVotingStatus({
+          startBlockTime: null,
+          endBlockTime: null,
+          isEndTimeEstimated: false,
+          isLoading: false,
+          isActive: false,
+          isEnded: false,
+        });
+        return;
       }
 
       // Handle the case where end block hasn't been created yet
@@ -163,9 +163,15 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
     return (
       <div className="border border-zinc-800 rounded-md p-3 w-full">
         <div className="flex items-center gap-2">
-          <Timer className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">Unable to determine block times</span>
+          <Timer className="h-4 w-4 text-muted-foreground text-red-500" />
+          <span className="text-sm text-red-500 font-medium">
+            Error retrieving block times
+          </span>
         </div>
+        <p className="text-xs text-muted-foreground mt-2">
+          We encountered an error while getting block times. Please try again in
+          a few minutes.
+        </p>
       </div>
     );
   }
