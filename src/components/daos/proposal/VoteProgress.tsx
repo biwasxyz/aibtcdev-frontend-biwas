@@ -37,6 +37,10 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   const votesFor = initialVotesFor || data?.votesFor || "0";
   const votesAgainst = initialVotesAgainst || data?.votesAgainst || "0";
 
+  // Use formatted votes from API if available
+  const formattedVotesFor = data?.formattedVotesFor;
+  const formattedVotesAgainst = data?.formattedVotesAgainst;
+
   // Check if voting data is available
   if (isLoading) {
     return (
@@ -92,16 +96,20 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
     return (votes / 1000000).toFixed(1) + "M";
   };
 
+  // Use pre-formatted votes if available, otherwise format them here
+  const displayYesVotes = formattedVotesFor || formatVotes(yesVotes);
+  const displayNoVotes = formattedVotesAgainst || formatVotes(noVotes);
+
   return (
     <div>
       {/* Vote counts above the progress bar */}
       <div className="flex justify-between mb-2">
         <div className="flex items-center">
           <ThumbsUp className="h-4 w-4 text-green-500 mr-1.5" />
-          <span className="text-sm font-medium">{formatVotes(yesVotes)}</span>
+          <span className="text-sm font-medium">{displayYesVotes}</span>
         </div>
         <div className="flex items-center">
-          <span className="text-sm font-medium">{formatVotes(noVotes)}</span>
+          <span className="text-sm font-medium">{displayNoVotes}</span>
           <ThumbsDown className="h-4 w-4 text-red-500 ml-1.5" />
         </div>
       </div>

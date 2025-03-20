@@ -1,24 +1,3 @@
-// Client-side utility functions only
-export const formatStacksAddress = (address: string) => {
-    if (!address) return ""
-    return address.substring(0, 6) + "..." + address.substring(address.length - 6)
-}
-
-export const formatStacksAmount = (amount: string) => {
-    try {
-        const value = BigInt(amount)
-        // STX has 6 decimal places
-        const formattedAmount = Number(value) / 1_000_000
-        return formattedAmount.toLocaleString(undefined, {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 6,
-        })
-    } catch (e) {
-        return amount
-    }
-}
-
-// Functio to get just votes data
 export async function getProposalVotes(
     contractAddress: string,
     proposalId: number,
@@ -46,12 +25,25 @@ export async function getProposalVotes(
             throw new Error(data.message || "Failed to get votes data")
         }
 
+        // Format the votes for display (assuming they're in raw form and need formatting)
+        const votesForNum = Number(data.votesFor) / 1e8
+        const votesAgainstNum = Number(data.votesAgainst) / 1e8
+
+        const formatVote = (vote: number): string => {
+            if (vote === 0) return "0"
+            if (vote < 1) return vote.toFixed(2)
+            if (vote < 10) return vote.toFixed(1)
+            if (vote < 1000) return Math.round(vote).toString()
+            if (vote < 1000000) return (vote / 1000).toFixed(1) + "K"
+            return (vote / 1000000).toFixed(1) + "M"
+        }
+
         return {
             success: true,
             votesFor: data.votesFor,
             votesAgainst: data.votesAgainst,
-            formattedVotesFor: formatStacksAmount(data.votesFor),
-            formattedVotesAgainst: formatStacksAmount(data.votesAgainst),
+            formattedVotesFor: formatVote(votesForNum),
+            formattedVotesAgainst: formatVote(votesAgainstNum),
         }
     } catch (error) {
         console.error("Error in getProposalVotes:", error)
