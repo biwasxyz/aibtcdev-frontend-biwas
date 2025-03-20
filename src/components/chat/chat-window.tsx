@@ -10,7 +10,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { PanelLeftOpen, PanelLeftClose } from "lucide-react";
 import AgentWalletSelector from "./agent-selector";
-import { CreateThreadButton } from "../threads/CreateThreadButton";
 import ThreadList from "../threads/thread-list";
 
 export function ChatWindow() {
@@ -124,10 +123,6 @@ export function ChatWindow() {
                 )}
               </div>
             </div>
-          </div>
-
-          <div className="flex-shrink-0 ml-2">
-            <CreateThreadButton />
           </div>
         </div>
 

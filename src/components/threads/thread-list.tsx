@@ -24,6 +24,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/utils/supabase/client";
+import { CreateThreadButton } from "@/components/threads/CreateThreadButton";
 
 export function ThreadList({
   setLeftPanelOpen,
@@ -43,6 +45,7 @@ export function ThreadList({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showClearAllDialog, setShowClearAllDialog] = useState(false);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const { clearThread } = useThread(selectedThreadId || "");
 
@@ -132,14 +135,50 @@ export function ThreadList({
     }
   };
 
+  const handleClearAllThreads = async () => {
+    try {
+      if (!userId) return;
+
+      // Delete all threads from Supabase
+      await supabase.from("threads").delete().eq("profile_id", userId);
+
+      // Clear local state for each thread
+      for (const thread of threads) {
+        clearMessages(thread.id);
+      }
+
+      // Reset active thread
+      setActiveThread("");
+      // Refresh threads list (should be empty now)
+      fetchThreads(userId);
+      setShowClearAllDialog(false);
+    } catch (error) {
+      console.error("Error clearing all threads:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col flex-1">
       <div className="flex-1 p-2" id="step2">
-        <div className="px-3 py-2">
-          {/* <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-            Recent Chats
-          </h3> */}
+        <div className="mb-4 flex items-center justify-between px-3">
+          <CreateThreadButton
+            id=""
+            className="text-green-500 hover:text-green-400 justify-start p-0"
+            variant="ghost"
+          />
+
+          {threads.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowClearAllDialog(true)}
+              className="text-red-500 hover:text-red-400 p-0"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
+
         <ScrollArea className="h-[calc(100vh-280px)]">
           <div className="space-y-4 pr-2">
             {loading ? (
@@ -248,6 +287,29 @@ export function ThreadList({
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
               Clear
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showClearAllDialog} onOpenChange={setShowClearAllDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Clear All Threads</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to clear all threads and their messages?
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setShowClearAllDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleClearAllThreads}>
+              Clear All
             </Button>
           </DialogFooter>
         </DialogContent>
