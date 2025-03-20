@@ -3,6 +3,7 @@ import { STACKS_TESTNET, STACKS_MAINNET } from "@stacks/network";
 import { NextResponse } from "next/server";
 
 export const runtime = "edge"
+export const dynamic = 'force-dynamic'
 // Define network based on environment variable
 const network =
     process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
