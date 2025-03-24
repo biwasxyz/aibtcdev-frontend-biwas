@@ -236,7 +236,30 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
             >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
-                components={MarkdownComponents}
+                components={{
+                  ...MarkdownComponents,
+                  p: ({ children, ...props }) => (
+                    <p className="mb-2 last:mb-0 break-words" {...props}>
+                      {children}
+                    </p>
+                  ),
+                  pre: ({ children, ...props }) => (
+                    <pre
+                      className="overflow-x-auto break-words bg-black/20 rounded p-2 my-2"
+                      {...props}
+                    >
+                      {children}
+                    </pre>
+                  ),
+                  code: ({ children, ...props }) => (
+                    <code
+                      className="rounded bg-zinc-700/50 px-1.5 py-0.5 text-md font-mono break-words"
+                      {...props}
+                    >
+                      {children}
+                    </code>
+                  ),
+                }}
               >
                 {message.content || ""}
               </ReactMarkdown>

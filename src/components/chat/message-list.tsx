@@ -1,26 +1,43 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Message } from "@/lib/chat/types";
 import { ChatMessageBubble } from "./chat-message-bubble";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MessageListProps {
   messages: Message[];
 }
 
 export function MessageList({ messages }: MessageListProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const lastMessageRef = useRef<HTMLDivElement>(null);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
+  const lastMessageLengthRef = useRef(0);
 
-  // Auto scroll to bottom on new messages
+  // Handle auto-scrolling based on message changes
   useEffect(() => {
-    if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({
-        behavior: messages.length <= 1 ? "auto" : "smooth",
-        block: "end",
-      });
+    const lastMessage = messages[messages.length - 1];
+
+    // Enable auto-scroll when user sends a message
+    if (lastMessage?.role === "user") {
+      setShouldAutoScroll(true);
     }
-  }, [messages, messages.length]);
+
+    // Disable auto-scroll when we receive a completion message
+    if (
+      lastMessage?.type === "completion" &&
+      lastMessage.status === "complete"
+    ) {
+      setShouldAutoScroll(false);
+    }
+
+    // If auto-scroll is enabled, scroll to bottom
+    if (shouldAutoScroll && lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: "instant" });
+    }
+
+    lastMessageLengthRef.current = messages.length;
+  }, [messages, shouldAutoScroll]);
 
   // Group messages for streaming
   const groupedMessages = messages.reduce<Message[]>((acc, message) => {
@@ -81,19 +98,18 @@ export function MessageList({ messages }: MessageListProps) {
   }, []);
 
   return (
-    <div
-      ref={containerRef}
-      className="flex-1 overflow-y-auto space-y-3 p-2 w-full md:w-[90%] md:mx-auto min-w-0"
-    >
-      {groupedMessages.map((message, index) => (
-        <div
-          key={index}
-          ref={index === groupedMessages.length - 1 ? lastMessageRef : null}
-          className="w-full min-w-0"
-        >
-          <ChatMessageBubble message={message} />
-        </div>
-      ))}
-    </div>
+    <ScrollArea className="h-full w-full">
+      <div className="flex flex-col space-y-3 p-2 w-full md:w-[90%] md:mx-auto min-w-0">
+        {groupedMessages.map((message, index) => (
+          <div
+            key={index}
+            ref={index === groupedMessages.length - 1 ? lastMessageRef : null}
+            className="w-full min-w-0 break-words"
+          >
+            <ChatMessageBubble message={message} />
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
   );
 }

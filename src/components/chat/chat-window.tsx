@@ -95,8 +95,8 @@ export function ChatWindow() {
         transition-all duration-300 ease-in-out
       `}
       >
-        {/* Header with shadow */}
-        <div className="sticky top-0 flex items-center justify-between px-2 md:px-4 h-14 min-w-0 backdrop-blur-sm w-full shadow-lg z-20">
+        {/* Fixed Header with shadow */}
+        <div className="sticky top-0 flex items-center justify-between px-2 md:px-4 h-14 min-w-0 backdrop-blur-sm w-full shadow-lg z-20 bg-background">
           <div className="flex items-center gap-2 overflow-hidden min-w-0 flex-1">
             {/* Sidebar Toggle - Only visible on desktop */}
             <Button
@@ -137,9 +137,9 @@ export function ChatWindow() {
             </div>
           </div>
         ) : (
-          <>
-            {/* Message list with increased bottom padding */}
-            <div className="flex-1 overflow-hidden w-full min-w-0 max-w-full">
+          <div className="flex flex-col flex-1 min-h-0">
+            {/* Scrollable Message List */}
+            <div className="flex-1 overflow-hidden min-h-0">
               <ScrollArea className="h-full w-full">
                 <div className="flex flex-col justify-end min-h-full w-full max-w-full">
                   {chatError && (
@@ -152,13 +152,12 @@ export function ChatWindow() {
                   )}
                   <MessageList messages={threadMessages} />
                   {/* Add extra padding div at the bottom to ensure content isn't hidden */}
-                  <div className="h-32"></div>
                 </div>
               </ScrollArea>
             </div>
 
-            {/* Input with shadow */}
-            <div className="sticky bottom-0 w-full min-w-0 pb-safe shadow-lg z-20 bg-background">
+            {/* Fixed Input with shadow */}
+            <div className="sticky bottom-0 w-full min-w-0 pb-safe shadow-lg z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <div className="px-2 md:px-4 pt-2">
                 <div className="relative">
                   <ChatInput
@@ -169,7 +168,7 @@ export function ChatWindow() {
                 </div>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
