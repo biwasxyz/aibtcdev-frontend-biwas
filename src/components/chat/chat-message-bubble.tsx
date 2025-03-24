@@ -1,12 +1,12 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Clock, User, Terminal } from "lucide-react";
+import { Clock, User, Terminal, ChevronDown } from "lucide-react";
 import { Message } from "@/lib/chat/types";
 import { useAgent } from "@/hooks/use-agent";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Agent } from "@/types/supabase";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -96,41 +96,48 @@ export const MarkdownComponents: Components = {
 // Memoize the entire ChatMessageBubble component
 export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
   const { agent } = useAgent(
-    message.role === "assistant" ? message.agent_id : null
+    message.type === "tool" || message.role === "assistant"
+      ? message.agent_id
+      : null
   );
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <div
       className={cn(
         "flex w-full gap-2 px-2 py-1 group min-w-0",
-        message.role === "user" ? "flex-row-reverse" : ""
+        message.role === "user" && message.type !== "tool"
+          ? "flex-row-reverse"
+          : ""
       )}
     >
       <div
         className={cn(
           "flex h-6 w-6 shrink-0 select-none items-center justify-center rounded-full",
-          message.role === "user"
-            ? "bg-blue-600 text-white"
-            : "bg-zinc-700 text-zinc-300"
+          message.type === "tool" || message.role === "assistant"
+            ? "bg-zinc-700 text-zinc-300"
+            : "bg-blue-600 text-white"
         )}
       >
-        {message.role === "user" ? (
-          <User className="h-5 w-5" />
-        ) : (
+        {message.type === "tool" || message.role === "assistant" ? (
           <AgentAvatar agent={agent} />
+        ) : (
+          <User className="h-5 w-5" />
         )}
       </div>
       <div
         className={cn(
           "flex flex-col min-w-0 space-y-1",
-          message.role === "user" ? "items-end" : "items-start",
+          message.role === "user" && message.type !== "tool"
+            ? "items-end"
+            : "items-start",
           "max-w-[75%] w-fit"
         )}
       >
         <div
           className={cn(
             "rounded-2xl px-3 py-2 w-fit max-w-full",
-            message.role === "user"
+            message.role === "user" && message.type !== "tool"
               ? "bg-blue-600 text-white"
               : message.status === "planning"
               ? "bg-indigo-900 text-zinc-200"
@@ -138,29 +145,103 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
           )}
         >
           {message.type === "tool" && message.tool && (
+            <>
+              <div
+                className={cn(
+                  "text-sm font-medium mb-1 flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity",
+                  message.role === "user" ? "text-blue-100" : "text-indigo-400"
+                )}
+                onClick={() => setIsExpanded(!isExpanded)}
+              >
+                <Terminal className="h-3.5 w-3.5" />
+                <span>{message.tool}</span>
+                <ChevronDown
+                  className={cn(
+                    "h-3.5 w-3.5 transition-transform duration-200",
+                    isExpanded ? "transform rotate-180" : ""
+                  )}
+                />
+              </div>
+              {isExpanded && (
+                <div className="mt-2 space-y-2 text-sm">
+                  {message.tool_input && (
+                    <div className="space-y-1">
+                      <div className="text-xs font-medium text-indigo-400/70">
+                        Input
+                      </div>
+                      <div className="bg-black/20 rounded p-2 overflow-x-auto">
+                        <pre className="text-xs text-zinc-300 whitespace-pre-wrap break-words font-mono">
+                          {typeof message.tool_input === "string"
+                            ? message.tool_input
+                            : JSON.stringify(message.tool_input, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+                  {message.tool_output && (
+                    <div className="space-y-1">
+                      <div className="text-xs font-medium text-indigo-400/70">
+                        Output
+                      </div>
+                      <div className="bg-black/20 rounded p-2 overflow-x-auto">
+                        <pre className="text-xs text-zinc-300 whitespace-pre-wrap break-words font-mono">
+                          {typeof message.tool_output === "string"
+                            ? message.tool_output
+                            : JSON.stringify(message.tool_output, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+          {message.type === "step" && message.status === "planning" ? (
+            <div
+              className="flex flex-col w-full cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              <div className="flex items-center justify-between w-full text-indigo-300">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 animate-pulse" />
+                  <span className="text-base font-medium">
+                    Planning in progress
+                  </span>
+                </div>
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 transition-transform duration-200",
+                    isExpanded ? "transform rotate-180" : ""
+                  )}
+                />
+              </div>
+              {!isExpanded && (
+                <span className="text-sm text-indigo-300/70 mt-0.5">
+                  Tap to see planning details
+                </span>
+              )}
+            </div>
+          ) : null}
+          {(!message.type ||
+            message.type !== "step" ||
+            message.status !== "planning" ||
+            isExpanded) && (
             <div
               className={cn(
-                "text-sm font-medium mb-1",
-                message.role === "user" ? "text-blue-100" : "text-indigo-400"
+                "text-md leading-relaxed break-words [&>*:last-child]:mb-0",
+                message.type === "step" && message.status === "planning"
+                  ? "mt-2"
+                  : ""
               )}
             >
-              {message.tool}
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={MarkdownComponents}
+              >
+                {message.content || ""}
+              </ReactMarkdown>
             </div>
           )}
-          {message.type === "step" && message.status === "planning" && (
-            <div className="text-sm font-medium mb-1 text-indigo-300 flex items-center gap-1">
-              <Terminal className="h-3.5 w-3.5" />
-              <span>Planning</span>
-            </div>
-          )}
-          <div className="text-md leading-relaxed break-words [&>*:last-child]:mb-0">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={MarkdownComponents}
-            >
-              {message.content || ""}
-            </ReactMarkdown>
-          </div>
         </div>
         {message.created_at && (
           <div
@@ -172,15 +253,6 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
             {/* <p className="text-sm text-zinc-500">
               {new Date(message.created_at).toLocaleTimeString()}
             </p> */}
-            {message.status === "processing" && (
-              <Clock className="h-3 w-3 text-zinc-400 animate-pulse" />
-            )}
-            {message.status === "planning" && (
-              <Terminal className="h-3 w-3 text-indigo-400 animate-pulse" />
-            )}
-            {(message.status === "end" || message.status === "complete") && (
-              <CheckCircle2 className="h-3 w-3 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-            )}
           </div>
         )}
       </div>
