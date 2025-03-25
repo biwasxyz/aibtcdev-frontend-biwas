@@ -9,7 +9,7 @@ import { useChatStore } from "@/store/chat";
 import { useThreadsStore } from "@/store/threads";
 import { useThread } from "@/hooks/use-thread";
 import { useEffect, useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+
 import {
   Dialog,
   DialogContent,
@@ -40,7 +40,6 @@ export function ThreadList({
     fetchThreads,
     updateThread,
   } = useThreadsStore();
-  const router = useRouter();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
