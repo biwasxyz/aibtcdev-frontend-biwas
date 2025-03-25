@@ -2,7 +2,7 @@
 
 import type * as React from "react";
 import { useState, useEffect } from "react";
-import { Bot, Copy, Check, ExternalLink, Plus, X } from "lucide-react";
+import { Bot, Copy, Check, ExternalLink, Plus } from "lucide-react";
 import { useAgents } from "@/hooks/use-agents";
 import { useWalletStore } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";

@@ -10,7 +10,7 @@ import {
   Menu,
   X,
   LogOut,
-  MessageSquare,
+  // MessageSquare,
   User,
   ChevronDown,
 } from "lucide-react";
