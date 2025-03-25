@@ -84,7 +84,7 @@ export function ThreadList({
     if (threadId === activeThreadId) return;
     setActiveThread(threadId);
     setLeftPanelOpen?.(false);
-    router.push(`/chat`);
+    // router.push(`/chat`);
   };
 
   const startEditing = (
