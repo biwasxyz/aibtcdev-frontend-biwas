@@ -161,18 +161,13 @@ export function ThreadList({
     <div className="flex flex-col flex-1">
       <div className="flex-1 p-2" id="step2">
         <div className="mb-4 flex items-center justify-between px-3">
-          <CreateThreadButton
-            id=""
-            className="text-green-500 hover:text-green-400 justify-start p-0"
-            variant="ghost"
-          />
+          <CreateThreadButton className="justify-start" />
 
           {threads.length > 0 && (
             <Button
-              variant="ghost"
+              variant="destructive"
               size="sm"
               onClick={() => setShowClearAllDialog(true)}
-              className="text-red-500 hover:text-red-400 p-0"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

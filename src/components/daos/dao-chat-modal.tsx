@@ -141,7 +141,7 @@ export function DAOChatModal({
               variant="outline"
               size="icon"
               onClick={toggleSidebar}
-              className="hidden md:block"
+              className="hidden md:flex"
             >
               <HistoryIcon className="h-5 w-5" />
             </Button>
