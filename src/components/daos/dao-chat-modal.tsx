@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
@@ -43,6 +43,8 @@ export function DAOChatModal({
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const messageContainerRef = useRef<HTMLDivElement>(null);
 
   // Use either controlled or uncontrolled state
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
@@ -111,6 +113,39 @@ export function DAOChatModal({
     setIsSidebarOpen((prev) => !prev);
   };
 
+  const scrollToBottom = useCallback(() => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTo({
+        top: messageContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (open && threadMessages.length > 0) {
+      // First immediate scroll for positioning
+      if (messageContainerRef.current) {
+        messageContainerRef.current.scrollTop =
+          messageContainerRef.current.scrollHeight;
+      }
+
+      // Then smooth scroll after a delay to ensure content is rendered
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [open, threadMessages.length, scrollToBottom]);
+
+  // Additional effect to scroll when new messages arrive
+  useEffect(() => {
+    if (open && threadMessages.length > 0) {
+      scrollToBottom();
+    }
+  }, [threadMessages, open, scrollToBottom]);
+
   const renderChatSection = () => {
     if (!accessToken) {
       return (
@@ -160,7 +195,7 @@ export function DAOChatModal({
         </div>
 
         {/* Middle scrollable area - takes remaining space */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto" ref={messageContainerRef}>
           <div className="p-4">
             {chatError && (
               <Alert variant="destructive" className="my-2">
