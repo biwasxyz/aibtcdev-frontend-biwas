@@ -1,171 +1,42 @@
 "use client";
-
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import DAOOverview from "@/components/daos/dao-overview";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  fetchDAO,
-  fetchToken,
-  fetchDAOExtensions,
-  fetchMarketStats,
-  fetchTreasuryTokens,
-  fetchTokenPrice,
-  fetchHolders,
-  fetchProposals,
-} from "@/queries/daoQueries";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+import DAOProposals from "@/components/daos/proposal/DAOProposal";
+import { fetchProposals } from "@/queries/daoQueries";
 
 export const runtime = "edge";
 
-export default function DAOPage() {
+export default function ProposalsPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const { data: dao, isLoading: isLoadingDAO } = useQuery({
-    queryKey: ["dao", id],
-    queryFn: () => fetchDAO(id),
-    staleTime: 600000, // 10 minutes
-  });
-
-  const { data: token, isLoading: isLoadingToken } = useQuery({
-    queryKey: ["token", id],
-    queryFn: () => fetchToken(id),
-    enabled: !!dao,
-    staleTime: 600000, // 10 minutes
-  });
-
-  const { data: extensions, isLoading: isLoadingExtensions } = useQuery({
-    queryKey: ["extensions", id],
-    queryFn: () => fetchDAOExtensions(id),
-    enabled: !!dao,
-    staleTime: 600000, // 10 minutes
-  });
-
-  const dex = extensions?.find((ext) => ext.type === "dex")?.contract_principal;
-  const treasuryAddress = extensions?.find(
-    (ext) => ext.type === "aibtc-treasury"
-  )?.contract_principal;
-
-  const { data: tokenPrice, isLoading: isLoadingTokenPrice } = useQuery({
-    queryKey: ["tokenPrice", dex],
-    queryFn: () => fetchTokenPrice(dex!),
-    enabled: !!dex,
-  });
-
-  // Fetch holders data directly from Hiro API
-  const { data: holdersData, isLoading: isLoadingHolders } = useQuery({
-    queryKey: ["holders", token?.contract_principal, token?.symbol],
-    queryFn: () => fetchHolders(token!.contract_principal, token!.symbol),
-    enabled: !!token?.contract_principal && !!token?.symbol,
-    staleTime: 600000, // 10 minutes
-  });
-
-  // New query to fetch proposals
-  const { data: proposals, isLoading: isLoadingProposals } = useQuery({
+  const { data: proposals, isLoading } = useQuery({
     queryKey: ["proposals", id],
     queryFn: () => fetchProposals(id),
-    enabled: !!dao,
-    staleTime: 600000, // 10 minutes
+    staleTime: 1000000,
   });
-
-  const { data: marketStats, isLoading: isLoadingMarketStats } = useQuery({
-    queryKey: [
-      "marketStats",
-      id,
-      dex,
-      token?.contract_principal,
-      token?.symbol,
-      token?.max_supply,
-    ],
-    queryFn: () =>
-      fetchMarketStats(
-        dex!,
-        token!.contract_principal,
-        token!.symbol,
-        token!.max_supply || 0
-      ),
-    enabled: !!dex && !!token && !!token.contract_principal && !!token.symbol,
-  });
-
-  const { data: treasuryTokens, isLoading: isLoadingTreasuryTokens } = useQuery(
-    {
-      queryKey: ["treasuryTokens", treasuryAddress, tokenPrice?.price],
-      queryFn: () => fetchTreasuryTokens(treasuryAddress!, tokenPrice!.price),
-      enabled: !!treasuryAddress && !!tokenPrice,
-    }
-  );
-
-  const isLoading =
-    isLoadingDAO ||
-    isLoadingToken ||
-    isLoadingExtensions ||
-    isLoadingTokenPrice ||
-    isLoadingMarketStats ||
-    isLoadingTreasuryTokens ||
-    isLoadingHolders ||
-    isLoadingProposals; // Add this to loading check
 
   if (isLoading) {
     return (
-      <div className="max-w-[1400px] mx-auto space-y-6">
-        <Skeleton className="h-48 w-full rounded-lg" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-lg" />
-          ))}
-        </div>
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <Skeleton className="h-48 rounded-lg" />
-          </div>
-          <Skeleton className="h-48 rounded-lg" />
-        </div>
+      <div className="flex justify-center items-center min-h-[200px] w-full">
+        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
-
-  if (!dao) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-center space-y-2">
-          <p className="text-lg font-medium text-muted-foreground">
-            DAO not found
-          </p>
-          <p className="text-sm text-muted-foreground/60">
-            The DAO you&apos;re looking for doesn&apos;t exist or has been
-            removed
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Create an enhanced marketStats object that uses the holders count from Hiro API
-  const enhancedMarketStats = marketStats
-    ? {
-        ...marketStats,
-        // Prioritize holders count from Hiro API, fall back to marketStats
-        holderCount: holdersData?.holderCount || marketStats.holderCount,
-      }
-    : {
-        price: tokenPrice?.price || 0,
-        marketCap: tokenPrice?.marketCap || 0,
-        treasuryBalance: token?.max_supply
-          ? token.max_supply * 0.8 * (tokenPrice?.price || 0)
-          : 0,
-        holderCount: holdersData?.holderCount || 0,
-      };
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-6 h-full">
-      <DAOOverview
-        dao={dao}
-        token={token}
-        marketStats={enhancedMarketStats}
-        treasuryTokens={treasuryTokens}
-        proposals={proposals} // Pass proposals to overview
-        holders={holdersData?.holders} // Pass holders to overview
-      />
+    <div className="w-full px-4 sm:px-0">
+      <Suspense
+        fallback={
+          <div className="flex justify-center items-center min-h-[200px] w-full">
+            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-muted-foreground" />
+          </div>
+        }
+      >
+        <DAOProposals proposals={proposals || []} />
+      </Suspense>
     </div>
   );
 }
