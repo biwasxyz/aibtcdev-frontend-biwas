@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
@@ -62,8 +62,11 @@ export function DAOChatModal({
     activeThreadId,
   } = useChatStore();
 
+  const threadMessages = useMemo(() => {
+    return activeThreadId ? messages[activeThreadId] || [] : [];
+  }, [activeThreadId, messages]);
+
   const { accessToken } = useSessionStore();
-  const threadMessages = activeThreadId ? messages[activeThreadId] || [] : [];
 
   const { data: daoExtensions, isLoading: isExtensionsLoading } = useQuery({
     queryKey: ["daoExtensions", daoId],
