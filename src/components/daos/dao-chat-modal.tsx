@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, MessageSquare, Sidebar } from "lucide-react";
+import { HistoryIcon, Loader2, MessageSquare } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageList } from "@/components/chat/message-list";
@@ -138,12 +138,12 @@ export function DAOChatModal({
         <div className="flex-shrink-0 h-14 flex items-center justify-between px-4 shadow-md bg-background z-10">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
               onClick={toggleSidebar}
-              className="mr-2 md:flex hidden"
+              className="hidden md:block"
             >
-              <Sidebar className="h-5 w-5" />
+              <HistoryIcon className="h-5 w-5" />
             </Button>
             <div>
               <AgentWalletSelector

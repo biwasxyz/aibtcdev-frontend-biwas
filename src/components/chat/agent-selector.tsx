@@ -177,10 +177,7 @@ export function AgentWalletSelector({
         <Button className="max-w-[200px] z-100">
           {selectedAgent ? (
             <div className="flex items-center overflow-hidden">
-              <AgentAvatar
-                agent={selectedAgent}
-                className="h-8 w-8 min-w-8 mr-2"
-              />
+              <AgentAvatar agent={selectedAgent} className="h-3 w-3 mr-2" />
               <span className="text-sm font-medium truncate">
                 {selectedAgent.name}
               </span>
