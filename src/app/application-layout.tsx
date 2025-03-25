@@ -35,7 +35,7 @@ interface ApplicationLayoutProps {
 
 const navigation = [
   { id: "daos", name: "DAOs", href: "/daos", icon: Boxes },
-  { id: "chat", name: "Chat", href: "/chat", icon: MessageSquare },
+  // { id: "chat", name: "Chat", href: "/chat", icon: MessageSquare },
   { id: "agents", name: "Agents", href: "/agents", icon: Users },
 ];
 
