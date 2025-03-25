@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardHeader,
@@ -38,6 +38,7 @@ import { useQueryClient } from "@tanstack/react-query";
 const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   const [expanded, setExpanded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [nextRefreshIn, setNextRefreshIn] = useState(30);
   const queryClient = useQueryClient();
 
   // Get voting status to display in header
@@ -48,8 +49,9 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   );
 
   // Function to refresh the votes data
-  const refreshVotesData = async () => {
+  const refreshVotesData = useCallback(async () => {
     setRefreshing(true);
+    setNextRefreshIn(30); // Reset countdown when manually refreshing
 
     try {
       // Invalidate the specific query for this proposal's votes
@@ -66,7 +68,35 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [queryClient, proposal.contract_principal, proposal.proposal_id]);
+
+  // Auto-refresh votes every 30 seconds if voting is in progress
+  useEffect(() => {
+    if (isActive) {
+      // Initialize countdown
+      setNextRefreshIn(30);
+
+      // Update countdown every second
+      const countdownInterval = setInterval(() => {
+        setNextRefreshIn((prev) => {
+          if (prev <= 1) {
+            return 30; // Reset to 30 when we reach 0
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      // Refresh data every 30 seconds
+      const refreshInterval = setInterval(() => {
+        refreshVotesData();
+      }, 30000); // 30 seconds
+
+      return () => {
+        clearInterval(countdownInterval);
+        clearInterval(refreshInterval);
+      };
+    }
+  }, [isActive, refreshVotesData]);
 
   return (
     <Card className="transition-all duration-200 hover:shadow-md overflow-hidden bg-zinc-900 border-zinc-800 mb-6 w-full max-w-full">
@@ -155,19 +185,20 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
               <h4 className="font-medium text-base">Voting Progress</h4>
             </div>
 
-            {/* Refresh button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              onClick={refreshVotesData}
-              disabled={refreshing}
-            >
-              <RefreshCw
-                className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-              />
-              <span className="sr-only">Refresh votes</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              {isActive && (
+                <span className="text-xs text-muted-foreground">
+                  {refreshing ? (
+                    <span className="text-blue-400 flex items-center">
+                      <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                      Updating...
+                    </span>
+                  ) : (
+                    <span>Updating in {nextRefreshIn}s</span>
+                  )}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Pass contract_principal and proposal_id to VoteProgress */}
