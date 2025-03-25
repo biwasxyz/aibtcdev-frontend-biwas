@@ -19,6 +19,7 @@ import { ThreadList } from "@/components/threads/thread-list";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { supabase } from "@/utils/supabase/client";
+import { NetworkIndicator } from "@/components/reusables/network-indicator";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -178,6 +179,7 @@ export default function ApplicationLayout({
           </div>
         </nav>
         <div className="w-1/4 flex justify-end items-center gap-4">
+          <NetworkIndicator />
           {hasUser ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
