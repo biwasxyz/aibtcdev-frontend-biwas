@@ -11,17 +11,18 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare, Sidebar } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageList } from "@/components/chat/message-list";
-import AgentWalletSelector from "@/components/chat/agent-selector";
+import AgentWalletSelector from "../chat/agent-selector";
 import { CreateThreadButton } from "@/components/threads/CreateThreadButton";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
 import { fetchDAOExtensions, fetchToken } from "@/queries/daoQueries";
 import type { DAO, Token, Extension } from "@/types/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ThreadList from "@/components/threads/thread-list";
 
 interface DAOChatModalProps {
   daoId: string;
@@ -41,6 +42,7 @@ export function DAOChatModal({
 }: DAOChatModalProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Use either controlled or uncontrolled state
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
@@ -105,6 +107,10 @@ export function DAOChatModal({
     };
   }, [accessToken, memoizedConnect, isConnected, open]);
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
   const renderChatSection = () => {
     if (!accessToken) {
       return (
@@ -130,7 +136,15 @@ export function DAOChatModal({
       <div className="flex flex-col h-full">
         {/* Header - fixed height */}
         <div className="flex-shrink-0 h-14 flex items-center justify-between px-4 shadow-md bg-background z-10">
-          <div className="flex items-center gap-2  min-w-0 flex-1">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleSidebar}
+              className="mr-2 md:flex hidden"
+            >
+              <Sidebar className="h-5 w-5" />
+            </Button>
             <div>
               <AgentWalletSelector
                 selectedAgentId={selectedAgentId}
@@ -379,17 +393,19 @@ export function DAOChatModal({
           {tokenName} DAO&apos;s extensions
         </DialogDescription>
         <div className="h-full overflow-hidden">
-          {/* Desktop view */}
-          <div className="hidden md:grid md:grid-cols-2 h-full">
-            {/* Chat Section - Left Side */}
-            <div className="h-full border-r flex flex-col overflow-auto">
-              {renderChatSection()}
-            </div>
-
-            {/* Prompts Section - Right Side */}
-            <div className="h-full flex flex-col overflow-auto">
-              {renderPromptsSection()}
-            </div>
+          {/* ThreadList Sidebar */}
+          <div
+            className={`
+              hidden md:block fixed left-0 top-15 h-full
+              ${isSidebarOpen ? "w-64" : "w-0"}
+              transition-all duration-300 ease-in-out
+              border-r border-zinc-800
+              overflow-hidden
+              bg-background
+              z-30
+            `}
+          >
+            <ThreadList />
           </div>
 
           {/* Mobile view */}
@@ -406,6 +422,29 @@ export function DAOChatModal({
                 {renderPromptsSection()}
               </TabsContent>
             </Tabs>
+          </div>
+
+          {/* Desktop view */}
+          <div
+            className={`hidden md:grid md:grid-cols-${
+              isSidebarOpen ? "1" : "2"
+            } h-full transition-all duration-300`}
+          >
+            {/* Chat Section - Left Side */}
+            <div
+              className={`h-full border-r flex flex-col overflow-auto ${
+                isSidebarOpen ? "ml-64" : ""
+              } transition-all duration-300`}
+            >
+              {renderChatSection()}
+            </div>
+
+            {/* Prompts Section - Right Side */}
+            {!isSidebarOpen && (
+              <div className="h-full flex flex-col overflow-auto">
+                {renderPromptsSection()}
+              </div>
+            )}
           </div>
         </div>
       </DialogContent>
