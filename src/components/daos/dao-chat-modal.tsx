@@ -43,6 +43,7 @@ export function DAOChatModal({
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("chat");
 
   const messageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -115,15 +116,31 @@ export function DAOChatModal({
 
   const scrollToBottom = useCallback(() => {
     if (messageContainerRef.current) {
+      const isMobile = window.innerWidth < 768;
       messageContainerRef.current.scrollTo({
         top: messageContainerRef.current.scrollHeight,
-        behavior: "smooth",
+        behavior: isMobile ? "auto" : "smooth", // Use auto for mobile to avoid jank
       });
     }
   }, []);
 
+  // Handle tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // If switching to chat tab, scroll to bottom after a short delay
+    if (value === "chat" && threadMessages.length > 0) {
+      setTimeout(() => {
+        scrollToBottom();
+      }, 150);
+    }
+  };
+
   useEffect(() => {
-    if (open && threadMessages.length > 0) {
+    if (
+      open &&
+      threadMessages.length > 0 &&
+      (activeTab === "chat" || window.innerWidth >= 768)
+    ) {
       // First immediate scroll for positioning
       if (messageContainerRef.current) {
         messageContainerRef.current.scrollTop =
@@ -137,14 +154,31 @@ export function DAOChatModal({
 
       return () => clearTimeout(timer);
     }
-  }, [open, threadMessages.length, scrollToBottom]);
+  }, [open, threadMessages.length, scrollToBottom, activeTab]);
 
   // Additional effect to scroll when new messages arrive
   useEffect(() => {
-    if (open && threadMessages.length > 0) {
+    if (
+      open &&
+      threadMessages.length > 0 &&
+      (activeTab === "chat" || window.innerWidth >= 768)
+    ) {
       scrollToBottom();
     }
-  }, [threadMessages, open, scrollToBottom]);
+  }, [threadMessages, open, scrollToBottom, activeTab]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (threadMessages.length > 0 && messageContainerRef.current) {
+        messageContainerRef.current.scrollTop =
+          messageContainerRef.current.scrollHeight;
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [threadMessages.length]);
 
   const renderChatSection = () => {
     if (!accessToken) {
@@ -326,6 +360,14 @@ export function DAOChatModal({
 
   const handlePromptClick = (promptText: string) => {
     setInputValue(promptText);
+    // Switch to chat tab after selecting a prompt on mobile
+    if (window.innerWidth < 768) {
+      setActiveTab("chat");
+      // Schedule scroll after tab switch
+      setTimeout(() => {
+        scrollToBottom();
+      }, 150);
+    }
   };
 
   const renderPromptsSection = () => {
@@ -445,15 +487,25 @@ export function DAOChatModal({
 
           {/* Mobile view */}
           <div className="md:hidden h-full">
-            <Tabs defaultValue="chat" className="h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-2">
+            <Tabs
+              value={activeTab}
+              onValueChange={handleTabChange}
+              className="h-full flex flex-col"
+            >
+              <TabsList className="grid grid-cols-2">
                 <TabsTrigger value="chat">Chat</TabsTrigger>
                 <TabsTrigger value="prompts">Guide</TabsTrigger>
               </TabsList>
-              <TabsContent value="chat" className="flex-1 overflow-auto">
+              <TabsContent
+                value="chat"
+                className="flex-1 overflow-hidden h-[calc(90vh-48px)]"
+              >
                 {renderChatSection()}
               </TabsContent>
-              <TabsContent value="prompts" className="flex-1 overflow-auto">
+              <TabsContent
+                value="prompts"
+                className="flex-1 overflow-hidden h-[calc(90vh-48px)]"
+              >
                 {renderPromptsSection()}
               </TabsContent>
             </Tabs>
