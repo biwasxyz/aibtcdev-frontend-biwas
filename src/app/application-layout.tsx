@@ -4,28 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  Users,
-  Boxes,
-  Menu,
-  X,
-  LogOut,
-  MessageSquare,
-  User,
-  ChevronDown,
-} from "lucide-react";
+import { Users, Boxes, Menu, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThreadList } from "@/components/threads/thread-list";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { supabase } from "@/utils/supabase/client";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { getStacksAddress } from "@/lib/address";
+import { NetworkIndicator } from "@/components/reusables/network-indicator";
+// import { getStacksAddress } from "@/lib/address";
 import AuthButton from "@/components/home/auth-button";
 
 interface ApplicationLayoutProps {
@@ -34,14 +20,15 @@ interface ApplicationLayoutProps {
 
 const navigation = [
   { id: "daos", name: "DAOs", href: "/daos", icon: Boxes },
-  { id: "chat", name: "Chat", href: "/chat", icon: MessageSquare },
-  { id: "agents", name: "Agents", href: "/agents", icon: Users },
+  // { id: "chat", name: "Chat", href: "/chat", icon: MessageSquare },
+  // { id: "agents", name: "Agents", href: "/agents", icon: Users },
+  { id: "profile", name: "Profile", href: "/profile", icon: Users },
 ];
 
-function truncateAddress(address: string | null) {
-  if (!address) return "";
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
+// function truncateAddress(address: string | null) {
+//   if (!address) return "";
+//   return `${address.slice(0, 6)}...${address.slice(-4)}`;
+// }
 
 export default function ApplicationLayout({
   children,
@@ -50,7 +37,7 @@ export default function ApplicationLayout({
   const router = useRouter();
   const [leftPanelOpen, setLeftPanelOpen] = React.useState(false);
   const [hasUser, setHasUser] = React.useState(false);
-  const [stacksAddress, setStacksAddress] = React.useState<string | null>(null);
+  // const [stacksAddress, setStacksAddress] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const checkUser = async () => {
@@ -60,8 +47,8 @@ export default function ApplicationLayout({
       setHasUser(!!user);
 
       // Get Stacks address
-      const address = getStacksAddress();
-      setStacksAddress(address);
+      // const address = getStacksAddress();
+      // setStacksAddress(address);
     };
 
     checkUser();
@@ -94,7 +81,7 @@ export default function ApplicationLayout({
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <div className="flex items-center gap-2">
+        <Link href="/daos" className="flex items-center gap-2">
           <Image
             src="/logos/aibtcdev-avatar-1000px.png"
             alt="AIBTCDEV"
@@ -107,32 +94,10 @@ export default function ApplicationLayout({
             width={150}
             height={300}
           />
-        </div>
+        </Link>
         <div className="flex items-center gap-2">
           {hasUser ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-zinc-400">
-                  <User className="h-5 w-5" />
-                  <ChevronDown className="h-4 w-4 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" className="flex items-center">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleSignOut}
-                  className="flex items-center"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button onClick={handleSignOut}> Sign out</Button>
           ) : (
             <AuthButton />
           )}
@@ -141,19 +106,21 @@ export default function ApplicationLayout({
 
       {/* Desktop Header */}
       <div className="hidden md:flex h-16 bg-zinc-900 items-center px-6">
-        <div className="w-1/4 flex items-center gap-2">
-          <Image
-            src="/logos/aibtcdev-avatar-1000px.png"
-            alt="AIBTCDEV"
-            width={24}
-            height={24}
-          />
-          <Image
-            src="/logos/aibtcdev-primary-logo-white-wide-1000px.png"
-            alt="AIBTCDEV"
-            width={150}
-            height={300}
-          />
+        <div className="w-1/4">
+          <Link href="/daos" className="flex items-center gap-2">
+            <Image
+              src="/logos/aibtcdev-avatar-1000px.png"
+              alt="AIBTCDEV"
+              width={24}
+              height={24}
+            />
+            <Image
+              src="/logos/aibtcdev-primary-logo-white-wide-1000px.png"
+              alt="AIBTCDEV"
+              width={150}
+              height={300}
+            />
+          </Link>
         </div>
         <nav className="flex-1 flex justify-center">
           <div className="flex space-x-4">
@@ -178,35 +145,12 @@ export default function ApplicationLayout({
           </div>
         </nav>
         <div className="w-1/4 flex justify-end items-center gap-4">
+          <NetworkIndicator />
           {hasUser ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="h-8 px-3 flex items-center gap-2"
-                >
-                  <User className="h-6 w-6 text-zinc-400" />
-                  <span className="text-sm text-white">
-                    {truncateAddress(stacksAddress)}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" className="flex items-center">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleSignOut}
-                  className="flex items-center"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button onClick={handleSignOut} variant="outline">
+              {" "}
+              Sign out
+            </Button>
           ) : (
             <AuthButton />
           )}
@@ -226,7 +170,7 @@ export default function ApplicationLayout({
         >
           {/* Mobile Sidebar Header */}
           <div className="h-14 px-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <Link href="/daos" className="flex items-center gap-2">
               <Image
                 src="/logos/aibtcdev-avatar-1000px.png"
                 alt="AIBTCDEV"
@@ -240,7 +184,7 @@ export default function ApplicationLayout({
                 width={150}
                 height={300}
               />
-            </div>
+            </Link>
             <Button
               variant="ghost"
               size="icon"

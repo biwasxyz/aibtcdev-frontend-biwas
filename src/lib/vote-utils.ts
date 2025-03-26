@@ -1,61 +1,61 @@
-export async function getProposalVotes(
-    contractAddress: string,
-    proposalId: number,
-): Promise<{
-    success: boolean
-    votesFor: string
-    votesAgainst: string
-    formattedVotesFor: string
-    formattedVotesAgainst: string
-    error?: string
-}> {
-    const apiBase = process.env.NEXT_PUBLIC_BASE_URL || '';
-    try {
-        const response = await fetch(
-            `${apiBase}/votes?contractAddress=${encodeURIComponent(contractAddress)}&proposalId=${proposalId}&votesOnly=true`,
-        )
+export async function getProposalVotes(contractPrincipal: string, proposalId: number) {
+    // Parse the contract principal to extract address and name
+    const [contractAddress, contractName] = contractPrincipal.split(".")
 
-        if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.message || "Failed to fetch proposal votes")
-        }
+    if (!contractAddress || !contractName) {
+        throw new Error("Invalid contract principal format")
+    }
 
-        const data = await response.json()
+    // Call the endpoint with POST method and the correct request body format
+    const response = await fetch(
+        // NEED TO ADD THIS TO ENV AFTER
+        `https://cache-staging.aibtc.dev/contract-calls/read-only/${contractAddress}/${contractName}/get-proposal`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            // Use the required format for the request body
+            body: JSON.stringify({
+                functionArgs: [
+                    {
+                        type: "uint",
+                        value: proposalId.toString(),
+                    },
+                ],
+            }),
+        },
+    )
 
-        if (!data.success) {
-            throw new Error(data.message || "Failed to get votes data")
-        }
+    if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch proposal votes: ${errorText}`)
+    }
 
-        // Format the votes for display (assuming they're in raw form and need formatting)
-        const votesForNum = Number(data.votesFor) / 1e8
-        const votesAgainstNum = Number(data.votesAgainst) / 1e8
+    const data = await response.json()
 
-        const formatVote = (vote: number): string => {
-            if (vote === 0) return "0"
-            if (vote < 1) return vote.toFixed(2)
-            if (vote < 10) return vote.toFixed(1)
-            if (vote < 1000) return Math.round(vote).toString()
-            if (vote < 1000000) return (vote / 1000).toFixed(1) + "K"
-            return (vote / 1000000).toFixed(1) + "M"
-        }
+    // Format the votes for display
+    const votesFor = data.votesFor || "0"
+    const votesAgainst = data.votesAgainst || "0"
 
-        return {
-            success: true,
-            votesFor: data.votesFor,
-            votesAgainst: data.votesAgainst,
-            formattedVotesFor: formatVote(votesForNum),
-            formattedVotesAgainst: formatVote(votesAgainstNum),
-        }
-    } catch (error) {
-        console.error("Error in getProposalVotes:", error)
-        return {
-            success: false,
-            votesFor: "0",
-            votesAgainst: "0",
-            formattedVotesFor: "0",
-            formattedVotesAgainst: "0",
-            error: error instanceof Error ? error.message : "An unknown error occurred",
-        }
+    // Calculate formatted votes
+    const formattedVotesFor = formatVotes(Number(votesFor) / 1e8)
+    const formattedVotesAgainst = formatVotes(Number(votesAgainst) / 1e8)
+
+    return {
+        votesFor,
+        votesAgainst,
+        formattedVotesFor,
+        formattedVotesAgainst,
     }
 }
 
+// Helper function to format votes with appropriate suffixes
+function formatVotes(votes: number): string {
+    if (votes === 0) return "0"
+    if (votes < 1) return votes.toFixed(2)
+    if (votes < 10) return votes.toFixed(1)
+    if (votes < 1000) return Math.round(votes).toString()
+    if (votes < 1000000) return (votes / 1000).toFixed(1) + "K"
+    return (votes / 1000000).toFixed(1) + "M"
+}

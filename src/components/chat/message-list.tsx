@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Message } from "@/lib/chat/types";
+import { useRef } from "react";
+import type { Message } from "@/lib/chat/types";
 import { ChatMessageBubble } from "./chat-message-bubble";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -11,33 +11,6 @@ interface MessageListProps {
 
 export function MessageList({ messages }: MessageListProps) {
   const lastMessageRef = useRef<HTMLDivElement>(null);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
-  const lastMessageLengthRef = useRef(0);
-
-  // Handle auto-scrolling based on message changes
-  useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-
-    // Enable auto-scroll when user sends a message
-    if (lastMessage?.role === "user") {
-      setShouldAutoScroll(true);
-    }
-
-    // Disable auto-scroll when we receive a completion message
-    if (
-      lastMessage?.type === "completion" &&
-      lastMessage.status === "complete"
-    ) {
-      setShouldAutoScroll(false);
-    }
-
-    // If auto-scroll is enabled, scroll to bottom
-    if (shouldAutoScroll && lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: "instant" });
-    }
-
-    lastMessageLengthRef.current = messages.length;
-  }, [messages, shouldAutoScroll]);
 
   // Group messages for streaming
   const groupedMessages = messages.reduce<Message[]>((acc, message) => {
@@ -99,7 +72,7 @@ export function MessageList({ messages }: MessageListProps) {
 
   return (
     <ScrollArea className="h-full w-full">
-      <div className="flex flex-col space-y-3 p-2 w-full md:w-[90%] md:mx-auto min-w-0">
+      <div className="flex flex-col space-y-3 p-2 max-w-full mx-auto">
         {groupedMessages.map((message, index) => (
           <div
             key={index}

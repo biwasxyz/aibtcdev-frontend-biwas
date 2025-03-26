@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
@@ -11,17 +11,18 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, MessageSquare } from "lucide-react";
+import { HistoryIcon, Loader2, MessageSquare } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageList } from "@/components/chat/message-list";
-import AgentWalletSelector from "@/components/chat/agent-selector";
+import AgentWalletSelector from "../chat/agent-selector";
 import { CreateThreadButton } from "@/components/threads/CreateThreadButton";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
 import { fetchDAOExtensions, fetchToken } from "@/queries/daoQueries";
 import type { DAO, Token, Extension } from "@/types/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ThreadList from "@/components/threads/thread-list";
 
 interface DAOChatModalProps {
   daoId: string;
@@ -41,6 +42,10 @@ export function DAOChatModal({
 }: DAOChatModalProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("chat");
+
+  const messageContainerRef = useRef<HTMLDivElement>(null);
 
   // Use either controlled or uncontrolled state
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
@@ -57,8 +62,11 @@ export function DAOChatModal({
     activeThreadId,
   } = useChatStore();
 
+  const threadMessages = useMemo(() => {
+    return activeThreadId ? messages[activeThreadId] || [] : [];
+  }, [activeThreadId, messages]);
+
   const { accessToken } = useSessionStore();
-  const threadMessages = activeThreadId ? messages[activeThreadId] || [] : [];
 
   const { data: daoExtensions, isLoading: isExtensionsLoading } = useQuery({
     queryKey: ["daoExtensions", daoId],
@@ -105,6 +113,76 @@ export function DAOChatModal({
     };
   }, [accessToken, memoizedConnect, isConnected, open]);
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
+  const scrollToBottom = useCallback(() => {
+    if (messageContainerRef.current) {
+      const isMobile = window.innerWidth < 768;
+      messageContainerRef.current.scrollTo({
+        top: messageContainerRef.current.scrollHeight,
+        behavior: isMobile ? "auto" : "smooth", // Use auto for mobile to avoid jank
+      });
+    }
+  }, []);
+
+  // Handle tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // If switching to chat tab, scroll to bottom after a short delay
+    if (value === "chat" && threadMessages.length > 0) {
+      setTimeout(() => {
+        scrollToBottom();
+      }, 150);
+    }
+  };
+
+  useEffect(() => {
+    if (
+      open &&
+      threadMessages.length > 0 &&
+      (activeTab === "chat" || window.innerWidth >= 768)
+    ) {
+      // First immediate scroll for positioning
+      if (messageContainerRef.current) {
+        messageContainerRef.current.scrollTop =
+          messageContainerRef.current.scrollHeight;
+      }
+
+      // Then smooth scroll after a delay to ensure content is rendered
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [open, threadMessages.length, scrollToBottom, activeTab]);
+
+  // Additional effect to scroll when new messages arrive
+  useEffect(() => {
+    if (
+      open &&
+      threadMessages.length > 0 &&
+      (activeTab === "chat" || window.innerWidth >= 768)
+    ) {
+      scrollToBottom();
+    }
+  }, [threadMessages, open, scrollToBottom, activeTab]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (threadMessages.length > 0 && messageContainerRef.current) {
+        messageContainerRef.current.scrollTop =
+          messageContainerRef.current.scrollHeight;
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [threadMessages.length]);
+
   const renderChatSection = () => {
     if (!accessToken) {
       return (
@@ -130,7 +208,15 @@ export function DAOChatModal({
       <div className="flex flex-col h-full">
         {/* Header - fixed height */}
         <div className="flex-shrink-0 h-14 flex items-center justify-between px-4 shadow-md bg-background z-10">
-          <div className="flex items-center gap-2  min-w-0 flex-1">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleSidebar}
+              className="hidden md:flex"
+            >
+              <HistoryIcon className="h-5 w-5" />
+            </Button>
             <div>
               <AgentWalletSelector
                 selectedAgentId={selectedAgentId}
@@ -146,7 +232,7 @@ export function DAOChatModal({
         </div>
 
         {/* Middle scrollable area - takes remaining space */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto" ref={messageContainerRef}>
           <div className="p-4">
             {chatError && (
               <Alert variant="destructive" className="my-2">
@@ -277,6 +363,14 @@ export function DAOChatModal({
 
   const handlePromptClick = (promptText: string) => {
     setInputValue(promptText);
+    // Switch to chat tab after selecting a prompt on mobile
+    if (window.innerWidth < 768) {
+      setActiveTab("chat");
+      // Schedule scroll after tab switch
+      setTimeout(() => {
+        scrollToBottom();
+      }, 150);
+    }
   };
 
   const renderPromptsSection = () => {
@@ -379,33 +473,68 @@ export function DAOChatModal({
           {tokenName} DAO&apos;s extensions
         </DialogDescription>
         <div className="h-full overflow-hidden">
-          {/* Desktop view */}
-          <div className="hidden md:grid md:grid-cols-2 h-full">
-            {/* Chat Section - Left Side */}
-            <div className="h-full border-r flex flex-col overflow-auto">
-              {renderChatSection()}
-            </div>
-
-            {/* Prompts Section - Right Side */}
-            <div className="h-full flex flex-col overflow-auto">
-              {renderPromptsSection()}
-            </div>
+          {/* ThreadList Sidebar */}
+          <div
+            className={`
+              hidden md:block fixed left-0 top-15 h-full
+              ${isSidebarOpen ? "w-64" : "w-0"}
+              transition-all duration-300 ease-in-out
+              border-r border-zinc-800
+              overflow-hidden
+              bg-background
+              z-30
+            `}
+          >
+            <ThreadList />
           </div>
 
           {/* Mobile view */}
           <div className="md:hidden h-full">
-            <Tabs defaultValue="chat" className="h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-2">
+            <Tabs
+              value={activeTab}
+              onValueChange={handleTabChange}
+              className="h-full flex flex-col"
+            >
+              <TabsList className="grid grid-cols-2">
                 <TabsTrigger value="chat">Chat</TabsTrigger>
                 <TabsTrigger value="prompts">Guide</TabsTrigger>
               </TabsList>
-              <TabsContent value="chat" className="flex-1 overflow-auto">
+              <TabsContent
+                value="chat"
+                className="flex-1 overflow-hidden h-[calc(90vh-48px)]"
+              >
                 {renderChatSection()}
               </TabsContent>
-              <TabsContent value="prompts" className="flex-1 overflow-auto">
+              <TabsContent
+                value="prompts"
+                className="flex-1 overflow-hidden h-[calc(90vh-48px)]"
+              >
                 {renderPromptsSection()}
               </TabsContent>
             </Tabs>
+          </div>
+
+          {/* Desktop view */}
+          <div
+            className={`hidden md:grid md:grid-cols-${
+              isSidebarOpen ? "1" : "2"
+            } h-full transition-all duration-300`}
+          >
+            {/* Chat Section - Left Side */}
+            <div
+              className={`h-full border-r flex flex-col overflow-auto ${
+                isSidebarOpen ? "ml-64" : ""
+              } transition-all duration-300`}
+            >
+              {renderChatSection()}
+            </div>
+
+            {/* Prompts Section - Right Side */}
+            {!isSidebarOpen && (
+              <div className="h-full flex flex-col overflow-auto">
+                {renderPromptsSection()}
+              </div>
+            )}
           </div>
         </div>
       </DialogContent>

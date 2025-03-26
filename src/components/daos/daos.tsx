@@ -22,7 +22,6 @@ import {
   fetchTokenTrades,
   fetchHolders,
 } from "@/queries/daoQueries";
-import { NetworkIndicator } from "../reusables/network-indicator";
 
 export default function DAOs() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -203,7 +202,6 @@ export default function DAOs() {
             {!isLoadingDAOs && (
               <Heading className="text-2xl font-bold sm:text-3xl px-2">
                 AI DAOs: {filteredAndSortedDAOs.length}
-                <NetworkIndicator />
               </Heading>
             )}
           </div>

@@ -17,7 +17,7 @@ export function NetworkIndicator() {
       />
       <span
         className={cn(
-          "text-sm font-medium",
+          "text-sm font-medium hidden md:block",
           isTestnet ? "text-orange-500" : "text-green-500"
         )}
       >

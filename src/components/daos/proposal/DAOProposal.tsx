@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useRef } from "react";
 import type React from "react";
 import { Card, CardDescription } from "@/components/ui/card";
 import ProposalCard from "./ProposalCard";
@@ -9,6 +10,15 @@ interface DAOProposalsProps {
 }
 
 const DAOProposals: React.FC<DAOProposalsProps> = ({ proposals }) => {
+  const proposalsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Scroll to proposals section when component mounts
+    if (proposalsRef.current) {
+      proposalsRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="space-y-8">
@@ -19,7 +29,7 @@ const DAOProposals: React.FC<DAOProposalsProps> = ({ proposals }) => {
           </p>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"></div>
-        <div className="space-y-6">
+        <div ref={proposalsRef} className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h3 className="text-lg font-semibold">All Proposals</h3>
           </div>

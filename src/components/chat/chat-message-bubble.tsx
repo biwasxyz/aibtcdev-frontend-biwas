@@ -2,12 +2,12 @@
 
 import { cn } from "@/lib/utils";
 import { Clock, User, Terminal, ChevronDown } from "lucide-react";
-import { Message } from "@/lib/chat/types";
+import type { Message } from "@/lib/chat/types";
 import { useAgent } from "@/hooks/use-agent";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
 import { memo, useState } from "react";
-import { Agent } from "@/types/supabase";
+import type { Agent } from "@/types/supabase";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
@@ -80,7 +80,7 @@ export const MarkdownComponents: Components = {
   ),
   code: ({ children, ...props }) => (
     <code
-      className="rounded bg-zinc-700/50 px-1.5 py-0.5 text-md font-mono"
+      className="rounded bg-zinc-700/50 px-1.5 py-0.5 text-xs sm:text-sm font-mono"
       {...props}
     >
       {children}
@@ -131,12 +131,12 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
           message.role === "user" && message.type !== "tool"
             ? "items-end"
             : "items-start",
-          "max-w-[75%] w-fit"
+          "max-w-[85%] sm:max-w-[75%] w-fit"
         )}
       >
         <div
           className={cn(
-            "rounded-2xl px-3 py-2 w-fit max-w-full",
+            "rounded-2xl px-3 py-2 w-fit sm:max-w-full max-w-[200px]",
             message.role === "user" && message.type !== "tool"
               ? "bg-blue-600 text-white"
               : message.status === "planning"
@@ -148,7 +148,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
             <>
               <div
                 className={cn(
-                  "text-sm font-medium mb-1 flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity",
+                  "text-xs sm:text-sm font-medium mb-1 flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity",
                   message.role === "user" ? "text-blue-100" : "text-indigo-400"
                 )}
                 onClick={() => setIsExpanded(!isExpanded)}
@@ -163,7 +163,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
                 />
               </div>
               {isExpanded && (
-                <div className="mt-2 space-y-2 text-sm">
+                <div className="mt-2 space-y-2 text-xs sm:text-sm">
                   {message.tool_input && (
                     <div className="space-y-1">
                       <div className="text-xs font-medium text-indigo-400/70">
@@ -204,7 +204,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
               <div className="flex items-center justify-between w-full text-indigo-300">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 animate-pulse" />
-                  <span className="text-base font-medium">
+                  <span className="text-sm sm:text-base font-medium">
                     Planning in progress
                   </span>
                 </div>
@@ -216,7 +216,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
                 />
               </div>
               {!isExpanded && (
-                <span className="text-sm text-indigo-300/70 mt-0.5">
+                <span className="text-xs sm:text-sm text-indigo-300/70 mt-0.5">
                   Tap to see planning details
                 </span>
               )}
@@ -228,7 +228,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
             isExpanded) && (
             <div
               className={cn(
-                "text-md leading-relaxed break-words [&>*:last-child]:mb-0",
+                "text-xs sm:text-sm md:text-md leading-relaxed break-words [&>*:last-child]:mb-0",
                 message.type === "step" && message.status === "planning"
                   ? "mt-2"
                   : ""
@@ -253,7 +253,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
                   ),
                   code: ({ children, ...props }) => (
                     <code
-                      className="rounded bg-zinc-700/50 px-1.5 py-0.5 text-md font-mono break-words"
+                      className="rounded bg-zinc-700/50 px-1.5 py-0.5 text-xs sm:text-sm font-mono break-words"
                       {...props}
                     >
                       {children}

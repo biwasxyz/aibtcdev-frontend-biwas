@@ -9,17 +9,21 @@ import { useSessionStore } from "@/store/session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import type { Agent, Wallet } from "@/types/supabase";
 import { getStacksAddress } from "@/lib/address";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
 // Dynamically import Stacks components
 const StacksComponents = dynamic(() => import("../wallet/stacks-component"), {
   ssr: false,
@@ -83,6 +87,18 @@ export function AgentWalletSelector({
   useEffect(() => {
     setUserAddress(getStacksAddress());
   }, []);
+
+  // Initialize stxAmounts with empty strings for all wallet addresses
+  useEffect(() => {
+    const initialStxAmounts: { [key: string]: string } = {};
+    if (userWallet) {
+      initialStxAmounts[getWalletAddress(userWallet)] = "";
+    }
+    agentWallets.forEach((wallet) => {
+      initialStxAmounts[getWalletAddress(wallet)] = "";
+    });
+    setStxAmounts(initialStxAmounts);
+  }, [userWallet, agentWallets]);
 
   const truncateAddress = (address: string) => {
     if (!address) return "";
@@ -156,15 +172,12 @@ export function AgentWalletSelector({
   const selectedAgent = activeAgents.find((a) => a.id === selectedAgentId);
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button className="max-w-[200px]">
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button className="max-w-[200px] z-100">
           {selectedAgent ? (
             <div className="flex items-center overflow-hidden">
-              <AgentAvatar
-                agent={selectedAgent}
-                className="h-8 w-8 min-w-8 mr-2"
-              />
+              <AgentAvatar agent={selectedAgent} className="h-3 w-3 mr-2" />
               <span className="text-sm font-medium truncate">
                 {selectedAgent.name}
               </span>
@@ -176,194 +189,203 @@ export function AgentWalletSelector({
             </div>
           )}
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-[min(400px,calc(100vw-2rem))] max-h-[min(600px,calc(100vh-4rem))] overflow-y-auto"
-      >
-        {/* Assistant Agent Option */}
-        <DropdownMenuItem
-          className="flex flex-col items-stretch p-3 cursor-pointer hover:bg-black focus:bg-gray/100"
-          onSelect={(e) => {
-            e.preventDefault();
-            handleSelect(null);
-          }}
-        >
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2 min-w-[140px]">
-              <div className="flex items-center justify-center rounded-full bg-background h-8 w-8">
-                <Bot className="h-5 w-5 text-foreground/50" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-medium truncate max-w-[150px]">
-                  Assistant Agent
-                </span>
-                {userWallet && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <code className="break-all">
-                      {truncateAddress(getWalletAddress(userWallet))}
-                    </code>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-4 w-4 p-0 flex-shrink-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        copyToClipboard(getWalletAddress(userWallet));
-                      }}
-                    >
-                      {copiedAddress === getWalletAddress(userWallet) ? (
-                        <Check className="h-3 w-3" />
-                      ) : (
-                        <Copy className="h-3 w-3" />
-                      )}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-            {userWallet &&
-              balances[getWalletAddress(userWallet)]?.stx?.balance && (
-                <span className="text-sm text-muted-foreground">
-                  {formatBalance(
-                    balances[getWalletAddress(userWallet)].stx.balance
-                  )}{" "}
-                  STX
-                </span>
-              )}
-          </div>
-
-          {userWallet && (
+      </SheetTrigger>
+      <SheetContent className="w-full sm:max-w-md p-0 overflow-hidden">
+        <SheetHeader className="p-4 pb-0">
+          <SheetTitle>Select Agent</SheetTitle>
+          <SheetClose>
+            <span className="sr-only">Close</span>
+          </SheetClose>
+        </SheetHeader>
+        <ScrollArea className="h-[calc(100vh-80px)]">
+          <div className="p-4">
+            {/* Assistant Agent Option */}
             <div
-              className="mt-2 flex items-center gap-2 flex-wrap"
-              onClick={handleStacksAction}
+              className="flex flex-col items-stretch p-3 cursor-pointer hover:bg-zinc-800 rounded-md"
+              onClick={() => handleSelect(null)}
             >
-              <div className="flex-1 min-w-[200px]">
-                <StacksComponents
-                  address={getWalletAddress(userWallet)}
-                  amount={stxAmounts[getWalletAddress(userWallet)] || ""}
-                  onAmountChange={(value) =>
-                    handleAmountChange(getWalletAddress(userWallet), value)
-                  }
-                  onToast={(title, description, variant) =>
-                    toast({ title, description, variant })
-                  }
-                />
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2 min-w-[140px]">
+                  <div className="flex items-center justify-center rounded-full bg-background h-8 w-8">
+                    <Bot className="h-5 w-5 text-foreground/50" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-medium truncate max-w-[150px]">
+                      Assistant Agent
+                    </span>
+                    {userWallet && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <code className="break-all">
+                          {truncateAddress(getWalletAddress(userWallet))}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-4 w-4 p-0 flex-shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyToClipboard(getWalletAddress(userWallet));
+                          }}
+                        >
+                          {copiedAddress === getWalletAddress(userWallet) ? (
+                            <Check className="h-3 w-3" />
+                          ) : (
+                            <Copy className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {userWallet &&
+                  balances[getWalletAddress(userWallet)]?.stx?.balance && (
+                    <span className="text-sm text-muted-foreground">
+                      {formatBalance(
+                        balances[getWalletAddress(userWallet)].stx.balance
+                      )}{" "}
+                      STX
+                    </span>
+                  )}
               </div>
-            </div>
-          )}
-        </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
-
-        {/* Create New Agent Button */}
-        {activeAgents.length === 0 && (
-          <div className="p-3">
-            <Link href="/agents/new" className="block">
-              <Button className="w-full" variant="secondary">
-                <Plus className="h-4 w-4 mr-2" />
-                Create New Agent
-              </Button>
-            </Link>
-          </div>
-        )}
-
-        {/* Agents Section */}
-        {activeAgents.length > 0 && (
-          <div className="overflow-y-auto">
-            {activeAgents.map((agent) => {
-              const wallet = agentWallets.find((w) => w.agent_id === agent.id);
-              const walletAddress = wallet ? getWalletAddress(wallet) : null;
-              const balance = walletAddress
-                ? balances[walletAddress]?.stx?.balance
-                : null;
-
-              return (
-                <DropdownMenuItem
-                  key={agent.id}
-                  className="flex flex-col items-stretch p-3 cursor-pointer hover:bg-black focus:bg-gray/100"
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    handleSelect(agent.id);
-                  }}
+              {userWallet && (
+                <div
+                  className="mt-2 flex items-center gap-2 flex-wrap"
+                  onClick={handleStacksAction}
                 >
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-2 min-w-[140px]">
-                      <AgentAvatar agent={agent} className="h-8 w-8" />
-                      <div className="flex flex-col">
-                        <span className="font-medium truncate max-w-[150px]">
-                          {agent.name}
-                        </span>
-                        {walletAddress && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <code className="break-all">
-                              {truncateAddress(walletAddress)}
-                            </code>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-4 w-4 p-0 flex-shrink-0"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                copyToClipboard(walletAddress);
-                              }}
-                            >
-                              {copiedAddress === walletAddress ? (
-                                <Check className="h-3 w-3" />
-                              ) : (
-                                <Copy className="h-3 w-3" />
-                              )}
-                            </Button>
+                  <div className="flex-1 min-w-[200px]">
+                    <StacksComponents
+                      address={getWalletAddress(userWallet)}
+                      amount={stxAmounts[getWalletAddress(userWallet)] || ""}
+                      onAmountChange={(value) =>
+                        handleAmountChange(getWalletAddress(userWallet), value)
+                      }
+                      onToast={(title, description, variant) =>
+                        toast({ title, description, variant })
+                      }
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Separator className="my-4" />
+
+            {/* Create New Agent Button */}
+            {activeAgents.length === 0 && (
+              <div className="p-3">
+                <Link href="/agents/new" className="block">
+                  <Button
+                    className="w-full"
+                    variant="secondary"
+                    onClick={() => setOpen(false)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create New Agent
+                  </Button>
+                </Link>
+              </div>
+            )}
+
+            {/* Agents Section */}
+            {activeAgents.length > 0 && (
+              <div>
+                {activeAgents.map((agent) => {
+                  const wallet = agentWallets.find(
+                    (w) => w.agent_id === agent.id
+                  );
+                  const walletAddress = wallet
+                    ? getWalletAddress(wallet)
+                    : null;
+                  const balance = walletAddress
+                    ? balances[walletAddress]?.stx?.balance
+                    : null;
+
+                  return (
+                    <div
+                      key={agent.id}
+                      className="flex flex-col items-stretch p-3 cursor-pointer hover:bg-zinc-800 rounded-md mb-2"
+                      onClick={() => handleSelect(agent.id)}
+                    >
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-2 min-w-[140px]">
+                          <AgentAvatar agent={agent} className="h-8 w-8" />
+                          <div className="flex flex-col">
+                            <span className="font-medium truncate max-w-[150px]">
+                              {agent.name}
+                            </span>
+                            {walletAddress && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <code className="break-all">
+                                  {truncateAddress(walletAddress)}
+                                </code>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-4 w-4 p-0 flex-shrink-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyToClipboard(walletAddress);
+                                  }}
+                                >
+                                  {copiedAddress === walletAddress ? (
+                                    <Check className="h-3 w-3" />
+                                  ) : (
+                                    <Copy className="h-3 w-3" />
+                                  )}
+                                </Button>
+                              </div>
+                            )}
                           </div>
+                        </div>
+                        {balance && (
+                          <span className="text-sm text-muted-foreground">
+                            {formatBalance(balance)} STX
+                          </span>
                         )}
                       </div>
-                    </div>
-                    {balance && (
-                      <span className="text-sm text-muted-foreground">
-                        {formatBalance(balance)} STX
-                      </span>
-                    )}
-                  </div>
 
-                  <div className="mt-2 flex items-center gap-2 flex-wrap">
-                    {walletAddress && (
-                      <div
-                        className="flex-1 min-w-[200px]"
-                        onClick={handleStacksAction}
-                      >
-                        <StacksComponents
-                          address={walletAddress}
-                          amount={stxAmounts[walletAddress] || ""}
-                          onAmountChange={(value) =>
-                            handleAmountChange(walletAddress, value)
-                          }
-                          onToast={(title, description, variant) =>
-                            toast({ title, description, variant })
-                          }
-                        />
+                      <div className="mt-2 flex items-center gap-2 flex-wrap">
+                        {walletAddress && (
+                          <div
+                            className="flex-1 min-w-[200px]"
+                            onClick={handleStacksAction}
+                          >
+                            <StacksComponents
+                              address={walletAddress}
+                              amount={stxAmounts[walletAddress] || ""}
+                              onAmountChange={(value) =>
+                                handleAmountChange(walletAddress, value)
+                              }
+                              onToast={(title, description, variant) =>
+                                toast({ title, description, variant })
+                              }
+                            />
+                          </div>
+                        )}
+                        <Link
+                          href={`/agents/${agent.id}`}
+                          className="inline-flex items-center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Button
+                            variant="ghost"
+                            className="h-8 px-3 flex items-center gap-2"
+                          >
+                            <span className="text-sm">Manage</span>
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </Link>
                       </div>
-                    )}
-                    <Link
-                      href={`/agents/${agent.id}`}
-                      className="inline-flex items-center"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Button
-                        variant="ghost"
-                        className="h-8 px-3 flex items-center gap-2"
-                      >
-                        <span className="text-sm">Manage</span>
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </div>
-                </DropdownMenuItem>
-              );
-            })}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
   );
 }
 

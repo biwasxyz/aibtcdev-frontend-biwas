@@ -210,7 +210,7 @@ export const DAOTable = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Link
-                          href={`/daos/${dao.id}/proposals`}
+                          href={`/daos/${dao.id}`}
                           className="font-medium hover:underline hover:text-primary text-sm"
                         >
                           {truncateName(dao.name)}
@@ -411,7 +411,7 @@ export const DAOTable = ({
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Link
-                                    href={`/daos/${dao.id}/proposals`}
+                                    href={`/daos/${dao.id}`}
                                     className="font-medium hover:underline text-sm"
                                   >
                                     {truncateName(dao.name)}
