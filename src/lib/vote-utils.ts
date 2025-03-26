@@ -1,4 +1,4 @@
-export async function getProposalVotes(contractPrincipal: string, proposalId: number) {
+export async function getProposalVotes(contractPrincipal: string, proposalId: number, bustCache = false) {
     // Parse the contract principal to extract address and name
     const [contractAddress, contractName] = contractPrincipal.split(".")
 
@@ -14,7 +14,7 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
             headers: {
                 "Content-Type": "application/json",
             },
-            // Use the required format for the request body
+            // Use the required format for the request body with cache control
             body: JSON.stringify({
                 functionArgs: [
                     {
@@ -22,7 +22,14 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
                         value: proposalId.toString(),
                     },
                 ],
-                network: process.env.NEXT_PUBLIC_STACKS_NETWORK
+                network: process.env.NEXT_PUBLIC_STACKS_NETWORK,
+                // Add cache control parameters when bustCache is true
+                ...(bustCache && {
+                    cacheControl: {
+                        bustCache: true, // Force a fresh request, bypassing the cache
+                        ttl: 3600, // Cache this result for 1 hour (3600 seconds)
+                    },
+                }),
             }),
         },
     )
@@ -51,7 +58,7 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
 }
 
 // Helper function to format votes with appropriate suffixes
-function formatVotes(votes: number): string {
+export function formatVotes(votes: number): string {
     if (votes === 0) return "0"
     if (votes < 1) return votes.toFixed(2)
     if (votes < 10) return votes.toFixed(1)
@@ -59,4 +66,3 @@ function formatVotes(votes: number): string {
     if (votes < 1000000) return (votes / 1000).toFixed(1) + "K"
     return (votes / 1000000).toFixed(1) + "M"
 }
-

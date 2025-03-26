@@ -34,6 +34,7 @@ import type { Proposal } from "@/types/supabase";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
+import { getProposalVotes } from "@/lib/vote-utils";
 
 const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   const [expanded, setExpanded] = useState(false);
@@ -48,19 +49,28 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
     proposal.end_block
   );
 
-  // Function to refresh the votes data
+  // Function to refresh the votes data with cache busting
   const refreshVotesData = useCallback(async () => {
     setRefreshing(true);
     setNextRefreshIn(30); // Reset countdown when manually refreshing
 
     try {
-      // Invalidate the specific query for this proposal's votes
-      await queryClient.invalidateQueries({
+      // Fetch fresh data with cache busting
+      await queryClient.fetchQuery({
         queryKey: [
           "proposalVotes",
           proposal.contract_principal,
           proposal.proposal_id,
         ],
+        queryFn: () =>
+          getProposalVotes(
+            proposal.contract_principal,
+            Number(proposal.proposal_id),
+            true // Always bust cache on manual refresh
+          ),
+        meta: {
+          bustCache: true,
+        },
       });
 
       // Wait a moment to show the refresh animation
@@ -198,6 +208,23 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                   )}
                 </span>
               )}
+
+              {/* {isActive && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2"
+                  onClick={refreshVotesData}
+                  disabled={refreshing}
+                >
+                  <RefreshCw
+                    className={`h-3.5 w-3.5 ${
+                      refreshing ? "animate-spin" : ""
+                    }`}
+                  />
+                  <span className="sr-only">Refresh</span>
+                </Button>
+              )} */}
             </div>
           </div>
 

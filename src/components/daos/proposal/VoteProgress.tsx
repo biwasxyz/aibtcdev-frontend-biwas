@@ -2,7 +2,7 @@
 import type React from "react";
 
 import { useQuery } from "@tanstack/react-query";
-import { getProposalVotes } from "@/lib/vote-utils";
+import { getProposalVotes, formatVotes } from "@/lib/vote-utils";
 
 interface VoteProgressProps {
   contractAddress?: string;
@@ -20,7 +20,11 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   // Update the useQuery call to use the contract principal directly
   const { data, isLoading, error } = useQuery({
     queryKey: ["proposalVotes", contractAddress, proposalId],
-    queryFn: () => getProposalVotes(contractAddress!, Number(proposalId)),
+    queryFn: ({ meta }) => {
+      // Use the bustCache flag from query meta if available
+      const bustCache = meta?.bustCache === true;
+      return getProposalVotes(contractAddress!, Number(proposalId), bustCache);
+    },
     // Only fetch if we have contractAddress and proposalId but no direct votes data
     enabled:
       !!contractAddress &&
@@ -48,16 +52,6 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
     totalVotes > 0 ? (Number(votesFor) / totalVotes) * 100 : 0;
   const percentageAgainst = 100 - percentageFor;
 
-  // Helper function to format votes with appropriate suffixes
-  function formatVotes(votes: number): string {
-    if (votes === 0) return "0";
-    if (votes < 1) return votes.toFixed(2);
-    if (votes < 10) return votes.toFixed(1);
-    if (votes < 1000) return Math.round(votes).toString();
-    if (votes < 1000000) return (votes / 1000).toFixed(1) + "K";
-    return (votes / 1000000).toFixed(1) + "M";
-  }
-
   if (isLoading) {
     return <div className="h-4 bg-zinc-800 rounded-full animate-pulse"></div>;
   }
@@ -71,7 +65,7 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   return (
     <div className="space-y-4">
       {Number(votesFor) === 0 && Number(votesAgainst) === 0 ? (
-        <div className="py-4 text-center  bg-zinc-800 rounded-lg">
+        <div className="py-4 text-center bg-zinc-800 rounded-lg">
           Awaiting first vote from agent
         </div>
       ) : (
@@ -107,8 +101,6 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
           <span className="text-sm text-gray-500">For</span>
           <span className="font-medium">{formattedVotesFor}</span>
         </div>
-
-        {/* Remove the live update button */}
 
         <div className="flex flex-col items-end">
           <span className="text-sm text-gray-500">Against</span>
