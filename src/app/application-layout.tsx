@@ -81,7 +81,7 @@ export default function ApplicationLayout({
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <div className="flex items-center gap-2">
+        <Link href="/daos" className="flex items-center gap-2">
           <Image
             src="/logos/aibtcdev-avatar-1000px.png"
             alt="AIBTCDEV"
@@ -94,7 +94,7 @@ export default function ApplicationLayout({
             width={150}
             height={300}
           />
-        </div>
+        </Link>
         <div className="flex items-center gap-2">
           {hasUser ? (
             <Button onClick={handleSignOut}> Sign out</Button>
@@ -106,19 +106,21 @@ export default function ApplicationLayout({
 
       {/* Desktop Header */}
       <div className="hidden md:flex h-16 bg-zinc-900 items-center px-6">
-        <div className="w-1/4 flex items-center gap-2">
-          <Image
-            src="/logos/aibtcdev-avatar-1000px.png"
-            alt="AIBTCDEV"
-            width={24}
-            height={24}
-          />
-          <Image
-            src="/logos/aibtcdev-primary-logo-white-wide-1000px.png"
-            alt="AIBTCDEV"
-            width={150}
-            height={300}
-          />
+        <div className="w-1/4">
+          <Link href="/daos" className="flex items-center gap-2">
+            <Image
+              src="/logos/aibtcdev-avatar-1000px.png"
+              alt="AIBTCDEV"
+              width={24}
+              height={24}
+            />
+            <Image
+              src="/logos/aibtcdev-primary-logo-white-wide-1000px.png"
+              alt="AIBTCDEV"
+              width={150}
+              height={300}
+            />
+          </Link>
         </div>
         <nav className="flex-1 flex justify-center">
           <div className="flex space-x-4">
@@ -168,7 +170,7 @@ export default function ApplicationLayout({
         >
           {/* Mobile Sidebar Header */}
           <div className="h-14 px-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <Link href="/daos" className="flex items-center gap-2">
               <Image
                 src="/logos/aibtcdev-avatar-1000px.png"
                 alt="AIBTCDEV"
@@ -182,7 +184,7 @@ export default function ApplicationLayout({
                 width={150}
                 height={300}
               />
-            </div>
+            </Link>
             <Button
               variant="ghost"
               size="icon"
