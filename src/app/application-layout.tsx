@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { supabase } from "@/utils/supabase/client";
 import { NetworkIndicator } from "@/components/reusables/network-indicator";
-import { getStacksAddress } from "@/lib/address";
+// import { getStacksAddress } from "@/lib/address";
 import AuthButton from "@/components/home/auth-button";
 
 interface ApplicationLayoutProps {
@@ -25,10 +25,10 @@ const navigation = [
   { id: "profile", name: "Profile", href: "/profile", icon: Users },
 ];
 
-function truncateAddress(address: string | null) {
-  if (!address) return "";
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
+// function truncateAddress(address: string | null) {
+//   if (!address) return "";
+//   return `${address.slice(0, 6)}...${address.slice(-4)}`;
+// }
 
 export default function ApplicationLayout({
   children,
@@ -37,7 +37,7 @@ export default function ApplicationLayout({
   const router = useRouter();
   const [leftPanelOpen, setLeftPanelOpen] = React.useState(false);
   const [hasUser, setHasUser] = React.useState(false);
-  const [stacksAddress, setStacksAddress] = React.useState<string | null>(null);
+  // const [stacksAddress, setStacksAddress] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const checkUser = async () => {
@@ -47,8 +47,8 @@ export default function ApplicationLayout({
       setHasUser(!!user);
 
       // Get Stacks address
-      const address = getStacksAddress();
-      setStacksAddress(address);
+      // const address = getStacksAddress();
+      // setStacksAddress(address);
     };
 
     checkUser();
