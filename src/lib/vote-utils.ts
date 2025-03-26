@@ -1,4 +1,4 @@
-export async function getProposalVotes(contractPrincipal: string, proposalId: number, bustCache = false) {
+export async function getProposalVotes(contractPrincipal: string, proposalId: number) {
     // Parse the contract principal to extract address and name
     const [contractAddress, contractName] = contractPrincipal.split(".")
 
@@ -8,13 +8,13 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
 
     // Call the endpoint with POST method and the correct request body format
     const response = await fetch(
-        `${process.env.NEXT_PUBLIC_CACHE_URL}/contract-calls/read-only/${contractAddress}/${contractName}/get-proposal`,
+        `https://cache-staging.aibtc.dev/contract-calls/read-only/${contractAddress}/${contractName}/get-proposal`,
         {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            // Use the required format for the request body with cache control
+            // Use the required format for the request body
             body: JSON.stringify({
                 functionArgs: [
                     {
@@ -22,14 +22,7 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
                         value: proposalId.toString(),
                     },
                 ],
-                network: process.env.NEXT_PUBLIC_STACKS_NETWORK,
-                // Add cache control parameters when bustCache is true
-                ...(bustCache && {
-                    cacheControl: {
-                        bustCache: true, // Force a fresh request, bypassing the cache
-                        ttl: 3600, // Cache this result for 1 hour (3600 seconds)
-                    },
-                }),
+                network: process.env.NEXT_PUBLIC_STACKS_NETWORK
             }),
         },
     )
@@ -58,7 +51,7 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
 }
 
 // Helper function to format votes with appropriate suffixes
-export function formatVotes(votes: number): string {
+function formatVotes(votes: number): string {
     if (votes === 0) return "0"
     if (votes < 1) return votes.toFixed(2)
     if (votes < 10) return votes.toFixed(1)
@@ -66,3 +59,4 @@ export function formatVotes(votes: number): string {
     if (votes < 1000000) return (votes / 1000).toFixed(1) + "K"
     return (votes / 1000000).toFixed(1) + "M"
 }
+
