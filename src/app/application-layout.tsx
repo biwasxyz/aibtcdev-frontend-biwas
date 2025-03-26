@@ -4,28 +4,13 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  Users,
-  Boxes,
-  Menu,
-  X,
-  LogOut,
-  // MessageSquare,
-  User,
-  ChevronDown,
-} from "lucide-react";
+import { Users, Boxes, Menu, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThreadList } from "@/components/threads/thread-list";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { supabase } from "@/utils/supabase/client";
 import { NetworkIndicator } from "@/components/reusables/network-indicator";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { getStacksAddress } from "@/lib/address";
 import AuthButton from "@/components/home/auth-button";
 
