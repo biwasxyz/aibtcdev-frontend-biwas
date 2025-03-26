@@ -8,8 +8,7 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
 
     // Call the endpoint with POST method and the correct request body format
     const response = await fetch(
-        // NEED TO ADD THIS TO ENV AFTER THE PR IS MERGED FROM CACHE
-        `https://aibtcdev-cache-preview.hosting-962.workers.dev/contract-calls/read-only/${contractAddress}/${contractName}/get-proposal`,
+        `${process.env.NEXT_PUBLIC_CACHE_URL}/contract-calls/read-only/${contractAddress}/${contractName}/get-proposal`,
         {
             method: "POST",
             headers: {
@@ -23,6 +22,7 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
                         value: proposalId.toString(),
                     },
                 ],
+                network: process.env.NEXT_PUBLIC_STACKS_NETWORK
             }),
         },
     )
