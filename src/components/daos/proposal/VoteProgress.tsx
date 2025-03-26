@@ -1,39 +1,42 @@
 "use client";
-import type React from "react";
 
+import type React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getProposalVotes } from "@/lib/vote-utils";
 
+// Helper function to format votes with appropriate suffixes
+function formatVotes(votes: number): string {
+  if (votes === 0) return "0";
+  if (votes < 1) return votes.toFixed(2);
+  if (votes < 10) return votes.toFixed(1);
+  if (votes < 1000) return Math.round(votes).toString();
+  if (votes < 1000000) return (votes / 1000).toFixed(1) + "K";
+  return (votes / 1000000).toFixed(1) + "M";
+}
+
 interface VoteProgressProps {
-  contractAddress?: string;
-  proposalId?: string;
   votesFor?: string;
   votesAgainst?: string;
+  contractAddress?: string;
+  proposalId?: string | number;
 }
 
 const VoteProgress: React.FC<VoteProgressProps> = ({
-  contractAddress,
-  proposalId,
   votesFor: initialVotesFor,
   votesAgainst: initialVotesAgainst,
+  contractAddress,
+  proposalId,
 }) => {
   // Update the useQuery call to use the contract principal directly
   const { data, isLoading, error } = useQuery({
     queryKey: ["proposalVotes", contractAddress, proposalId],
-    queryFn: () => getProposalVotes(contractAddress!, Number(proposalId)),
-    // Only fetch if we have contractAddress and proposalId but no direct votes data
-    enabled:
-      !!contractAddress &&
-      !!proposalId &&
-      !initialVotesFor &&
-      !initialVotesAgainst,
-    // Keep cached data for 5 minutes
-    staleTime: 5 * 60 * 1000,
-    // Don't refetch on window focus for this data
-    refetchOnWindowFocus: false,
+    queryFn: () =>
+      contractAddress && proposalId
+        ? getProposalVotes(contractAddress, Number(proposalId))
+        : Promise.resolve(null),
+    enabled: !!contractAddress && !!proposalId,
   });
 
-  // Determine which votes data to use
   const votesFor = initialVotesFor || data?.votesFor || "0";
   const votesAgainst = initialVotesAgainst || data?.votesAgainst || "0";
 
@@ -48,18 +51,16 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
     totalVotes > 0 ? (Number(votesFor) / totalVotes) * 100 : 0;
   const percentageAgainst = 100 - percentageFor;
 
-  // Helper function to format votes with appropriate suffixes
-  function formatVotes(votes: number): string {
-    if (votes === 0) return "0";
-    if (votes < 1) return votes.toFixed(2);
-    if (votes < 10) return votes.toFixed(1);
-    if (votes < 1000) return Math.round(votes).toString();
-    if (votes < 1000000) return (votes / 1000).toFixed(1) + "K";
-    return (votes / 1000000).toFixed(1) + "M";
-  }
-
   if (isLoading) {
-    return <div className="h-4 bg-zinc-800 rounded-full animate-pulse"></div>;
+    return (
+      <div className="space-y-2">
+        <div className="h-4 bg-gray-200 rounded-full animate-pulse"></div>
+        <div className="flex justify-between">
+          <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -71,7 +72,7 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   return (
     <div className="space-y-4">
       {Number(votesFor) === 0 && Number(votesAgainst) === 0 ? (
-        <div className="py-4 text-center  bg-zinc-800 rounded-lg">
+        <div className="py-4 text-center bg-zinc-800 rounded-lg">
           Awaiting first vote from agent
         </div>
       ) : (
@@ -107,8 +108,6 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
           <span className="text-sm text-gray-500">For</span>
           <span className="font-medium">{formattedVotesFor}</span>
         </div>
-
-        {/* Remove the live update button */}
 
         <div className="flex flex-col items-end">
           <span className="text-sm text-gray-500">Against</span>

@@ -8,6 +8,7 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
 
     // Call the endpoint with POST method and the correct request body format
     const response = await fetch(
+        // NEED TO ADD THIS TO ENV AFTER
         `https://cache-staging.aibtc.dev/contract-calls/read-only/${contractAddress}/${contractName}/get-proposal`,
         {
             method: "POST",
@@ -22,7 +23,6 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
                         value: proposalId.toString(),
                     },
                 ],
-                network: process.env.NEXT_PUBLIC_STACKS_NETWORK
             }),
         },
     )
@@ -59,4 +59,3 @@ function formatVotes(votes: number): string {
     if (votes < 1000000) return (votes / 1000).toFixed(1) + "K"
     return (votes / 1000000).toFixed(1) + "M"
 }
-
