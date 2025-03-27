@@ -2,12 +2,7 @@
 
 import type React from "react";
 import { useState, useEffect, useCallback } from "react";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import MessageDisplay from "./MessageDisplay";
 import VoteProgress from "./VoteProgress";
@@ -103,6 +98,52 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
       <CardHeader className="space-y-3 pb-3 px-4 sm:px-6">
         <div className="flex flex-col items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2 w-full justify-between">
+            <h3 className="text-lg sm:text-xl font-bold">{proposal.title}</h3>
+
+            <div className="flex flex-col items-start sm:items-end sm:flex-row gap-1.5 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <User className="h-3.5 w-3.5" />
+                <span>Created by:</span>
+                <a
+                  href={getExplorerLink("address", proposal.creator)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline text-foreground"
+                >
+                  {truncateString(proposal.creator, 4, 4)}
+                </a>
+              </div>
+
+              <span className="hidden sm:inline mx-1">•</span>
+
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>
+                  {format(new Date(proposal.created_at), "MMM d, yyyy")}
+                </span>
+              </div>
+
+              {proposal.concluded_by && (
+                <>
+                  <span className="hidden sm:inline mx-1">•</span>
+                  <div className="flex items-center gap-1.5">
+                    <User className="h-3.5 w-3.5" />
+                    <span>Concluded by:</span>
+                    <a
+                      href={getExplorerLink("address", proposal.concluded_by)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline text-foreground"
+                    >
+                      {truncateString(proposal.concluded_by, 4, 4)}
+                    </a>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 w-full justify-between">
             <div className="flex items-center gap-2">
               {!isLoading && (
                 <>
@@ -116,7 +157,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                       Voting Period has Ended
                     </Badge>
                   )}
-                  {/* New badge for execution status */}
                   {isEnded && (
                     <Badge
                       className={`text-xs ${
@@ -130,42 +170,17 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                   )}
                 </>
               )}
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <User className="h-3.5 w-3.5" />
-              <span>Created by:</span>
-              <a
-                href={getExplorerLink("address", proposal.creator)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline text-foreground"
-              >
-                {truncateString(proposal.creator, 4, 4)}
-              </a>
-            </div>
-          </div>
 
-          <h3 className="text-lg sm:text-xl font-bold">{proposal.title}</h3>
-
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground w-full">
-            <Calendar className="h-3.5 w-3.5" />
-            <span>
-              Created: {format(new Date(proposal.created_at), "MMM d, yyyy")}
-            </span>
-
-            {isActive && (
-              <span className="ml-2 flex items-center gap-1">
-                <Timer className="h-3.5 w-3.5 text-blue-500" />
-                <span className="text-blue-500 font-medium">
-                  Voting in progress
+              {isActive && (
+                <span className="flex items-center gap-1 text-xs">
+                  <Timer className="h-3.5 w-3.5 text-blue-500" />
+                  <span className="text-blue-500 font-medium">
+                    Voting in progress
+                  </span>
                 </span>
-              </span>
-            )}
+              )}
+            </div>
           </div>
-
-          <p className="text-sm text-muted-foreground">
-            {proposal.description || "No description available"}
-          </p>
         </div>
       </CardHeader>
 
@@ -317,23 +332,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
           )}
         </Button>
       </CardContent>
-
-      {proposal.concluded_by && (
-        <CardFooter className="px-4 sm:px-6 py-3 border-t border-zinc-800 mt-2">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <User className="h-3.5 w-3.5" />
-            <span>Concluded by:</span>
-            <a
-              href={getExplorerLink("address", proposal.concluded_by)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline text-foreground"
-            >
-              {truncateString(proposal.concluded_by, 4, 4)}
-            </a>
-          </div>
-        </CardFooter>
-      )}
     </Card>
   );
 };
