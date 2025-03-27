@@ -15,7 +15,6 @@ const SignOut = () => {
   async function handleLogout() {
     await supabase.auth.signOut();
     disconnectWallet();
-    router.push("/");
   }
   return (
     <div>
