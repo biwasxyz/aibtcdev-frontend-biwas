@@ -13,6 +13,17 @@ interface VoteProgressProps {
   refreshing?: boolean;
 }
 
+// Utility function to format numbers with K, M suffixes
+const formatNumber = (num: number): string => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + "M";
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + "K";
+  } else {
+    return num.toString();
+  }
+};
+
 const VoteProgress: React.FC<VoteProgressProps> = ({
   votesFor: initialVotesFor,
   votesAgainst: initialVotesAgainst,
@@ -32,11 +43,14 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
       ? Number(parsedAgainst)
       : 0;
 
+    const formattedVotesFor = formatNumber(votesForNum / 1e8);
+    const formattedVotesAgainst = formatNumber(votesAgainstNum / 1e8);
+
     return {
       votesFor: parsedFor,
       votesAgainst: parsedAgainst,
-      formattedVotesFor: (votesForNum / 1e8).toString(),
-      formattedVotesAgainst: (votesAgainstNum / 1e8).toString(),
+      formattedVotesFor,
+      formattedVotesAgainst,
     };
   }, [initialVotesFor, initialVotesAgainst]);
 
@@ -87,11 +101,18 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   // Update parsed votes when data changes
   useEffect(() => {
     if (data) {
+      const formattedVotesFor = formatNumber(
+        Number(data.votesFor || "0") / 1e8
+      );
+      const formattedVotesAgainst = formatNumber(
+        Number(data.votesAgainst || "0") / 1e8
+      );
+
       setParsedVotes({
         votesFor: data.votesFor || "0",
         votesAgainst: data.votesAgainst || "0",
-        formattedVotesFor: data.formattedVotesFor || "0",
-        formattedVotesAgainst: data.formattedVotesAgainst || "0",
+        formattedVotesFor,
+        formattedVotesAgainst,
       });
     }
   }, [data]);
