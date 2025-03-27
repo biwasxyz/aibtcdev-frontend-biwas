@@ -9,6 +9,7 @@ interface VoteProgressProps {
   votesAgainst?: string;
   contractAddress?: string;
   proposalId?: string | number;
+  bustCache?: boolean; // Add a new prop to control cache busting
 }
 
 const VoteProgress: React.FC<VoteProgressProps> = ({
@@ -16,15 +17,20 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   votesAgainst: initialVotesAgainst,
   contractAddress,
   proposalId,
+  bustCache = false, // Default to false
 }) => {
   // Update the useQuery call to use the contract principal directly
   const { data, isLoading, error } = useQuery({
-    queryKey: ["proposalVotes", contractAddress, proposalId],
+    queryKey: ["proposalVotes", contractAddress, proposalId, bustCache], // Add bustCache to the query key
     queryFn: () =>
       contractAddress && proposalId
-        ? getProposalVotes(contractAddress, Number(proposalId))
+        ? getProposalVotes(contractAddress, Number(proposalId), bustCache) // Pass bustCache parameter
         : Promise.resolve(null),
     enabled: !!contractAddress && !!proposalId,
+    // This ensures stale data isn't shown while refetching
+    refetchOnWindowFocus: false,
+    // Reduce staleTime if you want votes to update quicker
+    staleTime: bustCache ? 0 : 30000, // 0 when bustCache is true, otherwise 30 seconds
   });
 
   // Clean up votes data by removing 'n' if present
@@ -34,9 +40,9 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   };
 
   // Get votes from props or from fetched data
-  const votesFor = cleanVotesValue(initialVotesFor || data?.votesFor);
+  const votesFor = cleanVotesValue(data?.votesFor || initialVotesFor);
   const votesAgainst = cleanVotesValue(
-    initialVotesAgainst || data?.votesAgainst
+    data?.votesAgainst || initialVotesAgainst
   );
 
   // Format votes for display
@@ -48,7 +54,8 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
     totalVotes > 0 ? (Number(votesFor) / totalVotes) * 100 : 0;
   const percentageAgainst = 100 - percentageFor;
 
-  if (isLoading) {
+  if (isLoading && !data) {
+    // Only show loading state if we don't have any data yet
     return (
       <div className="space-y-2">
         <div className="h-4 bg-gray-200 rounded-full animate-pulse"></div>

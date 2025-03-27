@@ -56,6 +56,8 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
           proposal.contract_principal,
           proposal.proposal_id,
         ],
+        // Force refetch immediately
+        refetchType: "all",
       });
 
       // Wait a moment to show the refresh animation
@@ -222,6 +224,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             proposalId={proposal.proposal_id}
             votesFor={proposal.votes_for}
             votesAgainst={proposal.votes_against}
+            bustCache={refreshing} // Pass true when refreshing
           />
         </div>
 

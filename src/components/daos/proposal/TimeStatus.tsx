@@ -163,14 +163,12 @@ const TimeStatus: React.FC<TimeStatusProps> = ({
     return (
       <div className="border border-zinc-800 rounded-md p-3 w-full">
         <div className="flex items-center gap-2">
-          <Timer className="h-4 w-4 text-muted-foreground text-red-500" />
-          <span className="text-sm text-red-500 font-medium">
-            Error retrieving block times
-          </span>
+          <Timer className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium">Voting not started yet</span>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          We encountered an error while getting block times. Please try again in
-          a few minutes.
+          The voting period will begin once the start block is created on the
+          blockchain.
         </p>
       </div>
     );

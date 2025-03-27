@@ -1,4 +1,4 @@
-export async function getProposalVotes(contractPrincipal: string, proposalId: number) {
+export async function getProposalVotes(contractPrincipal: string, proposalId: number, bustCache: boolean = false) {
     // Parse the contract principal to extract address and name
     const [contractAddress, contractName] = contractPrincipal.split(".")
 
@@ -23,6 +23,11 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
                         value: proposalId.toString(),
                     },
                 ],
+
+                cacheControl: bustCache ? {
+                    bustCache: true,  // Force a fresh request, bypassing the cache
+                    ttl: 60           // Cache this result for 60 seconds
+                } : undefined
             }),
         },
     )
