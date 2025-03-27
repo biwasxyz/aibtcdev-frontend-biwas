@@ -3,7 +3,7 @@
 import type React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getProposalVotes } from "@/lib/vote-utils";
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 interface VoteProgressProps {
   votesFor?: string;
@@ -20,59 +20,73 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   proposalId,
   refreshing = false,
 }) => {
+  // Memoize initial votes parsing
+  const initialParsedVotes = useMemo(() => {
+    const parsedFor = initialVotesFor ? initialVotesFor.replace(/n$/, "") : "0";
+    const parsedAgainst = initialVotesAgainst
+      ? initialVotesAgainst.replace(/n$/, "")
+      : "0";
+
+    const votesForNum = !isNaN(Number(parsedFor)) ? Number(parsedFor) : 0;
+    const votesAgainstNum = !isNaN(Number(parsedAgainst))
+      ? Number(parsedAgainst)
+      : 0;
+
+    return {
+      votesFor: parsedFor,
+      votesAgainst: parsedAgainst,
+      formattedVotesFor: (votesForNum / 1e8).toString(),
+      formattedVotesAgainst: (votesAgainstNum / 1e8).toString(),
+    };
+  }, [initialVotesFor, initialVotesAgainst]);
+
   // State to store parsed vote values
-  const [parsedVotes, setParsedVotes] = useState({
-    votesFor: "0",
-    votesAgainst: "0",
-    formattedVotesFor: "0",
-    formattedVotesAgainst: "0",
-  });
+  const [parsedVotes, setParsedVotes] = useState(initialParsedVotes);
 
-  // Update the useQuery call to use the contract principal directly
-  // and always use cache busting when refreshing
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["proposalVotes", contractAddress, proposalId, refreshing],
-    queryFn: async () => {
-      if (contractAddress && proposalId) {
-        // Always use cache busting when the refreshing prop is true
-        return getProposalVotes(
-          contractAddress,
-          Number(proposalId),
-          refreshing
-        );
-      }
-      return null;
-    },
-    enabled: !!contractAddress && !!proposalId,
-    refetchOnWindowFocus: false, // Disable refetching when window regains focus
-  });
+  // Memoize query options to prevent unnecessary refetches
+  const queryOptions = useMemo(
+    () => ({
+      queryKey: ["proposalVotes", contractAddress, proposalId, refreshing],
+      queryFn: async () => {
+        if (contractAddress && proposalId) {
+          return getProposalVotes(
+            contractAddress,
+            Number(proposalId),
+            refreshing
+          );
+        }
+        return null;
+      },
+      enabled: !!contractAddress && !!proposalId,
+      refetchOnWindowFocus: false,
+    }),
+    [contractAddress, proposalId, refreshing]
+  );
 
-  // Process initial votes or data from the query
+  // Use useQuery with memoized options
+  const { data, isLoading, error } = useQuery(queryOptions);
+
+  // Memoize vote calculations to prevent unnecessary recalculations
+  const voteCalculations = useMemo(() => {
+    const votesForNum = Number(parsedVotes.votesFor) || 0;
+    const votesAgainstNum = Number(parsedVotes.votesAgainst) || 0;
+    const totalVotes = votesForNum + votesAgainstNum;
+
+    const percentageFor = totalVotes > 0 ? (votesForNum / totalVotes) * 100 : 0;
+    const percentageAgainst = 100 - percentageFor;
+
+    return {
+      votesForNum,
+      votesAgainstNum,
+      percentageFor,
+      percentageAgainst,
+      totalVotes,
+    };
+  }, [parsedVotes]);
+
+  // Update parsed votes when data changes
   useEffect(() => {
-    // Parse initial votes if provided
-    if (initialVotesFor || initialVotesAgainst) {
-      const parsedFor = initialVotesFor
-        ? initialVotesFor.replace(/n$/, "")
-        : "0";
-      const parsedAgainst = initialVotesAgainst
-        ? initialVotesAgainst.replace(/n$/, "")
-        : "0";
-
-      // Convert to numbers for calculations, defaulting to 0 if invalid
-      const votesForNum = !isNaN(Number(parsedFor)) ? Number(parsedFor) : 0;
-      const votesAgainstNum = !isNaN(Number(parsedAgainst))
-        ? Number(parsedAgainst)
-        : 0;
-
-      setParsedVotes({
-        votesFor: parsedFor,
-        votesAgainst: parsedAgainst,
-        formattedVotesFor: (votesForNum / 1e8).toString(),
-        formattedVotesAgainst: (votesAgainstNum / 1e8).toString(),
-      });
-    }
-    // Otherwise use data from the query
-    else if (data) {
+    if (data) {
       setParsedVotes({
         votesFor: data.votesFor || "0",
         votesAgainst: data.votesAgainst || "0",
@@ -80,15 +94,7 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
         formattedVotesAgainst: data.formattedVotesAgainst || "0",
       });
     }
-  }, [initialVotesFor, initialVotesAgainst, data]);
-
-  // Calculate percentages
-  const votesForNum = Number(parsedVotes.votesFor) || 0;
-  const votesAgainstNum = Number(parsedVotes.votesAgainst) || 0;
-  const totalVotes = votesForNum + votesAgainstNum;
-
-  const percentageFor = totalVotes > 0 ? (votesForNum / totalVotes) * 100 : 0;
-  const percentageAgainst = 100 - percentageFor;
+  }, [data]);
 
   if (isLoading && !refreshing) {
     return (
@@ -110,7 +116,8 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
 
   return (
     <div className="space-y-4">
-      {votesForNum === 0 && votesAgainstNum === 0 ? (
+      {voteCalculations.votesForNum === 0 &&
+      voteCalculations.votesAgainstNum === 0 ? (
         <div className="py-4 text-center bg-zinc-800 rounded-lg">
           Awaiting first vote from agent
         </div>
@@ -119,23 +126,23 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
           <div className="relative h-6 bg-zinc-800 rounded-full overflow-hidden">
             <div
               className="absolute h-full bg-green-500 rounded-l-full"
-              style={{ width: `${percentageFor}%` }}
+              style={{ width: `${voteCalculations.percentageFor}%` }}
             ></div>
             <div
               className="absolute h-full bg-red-500 rounded-r-full right-0"
-              style={{ width: `${percentageAgainst}%` }}
+              style={{ width: `${voteCalculations.percentageAgainst}%` }}
             ></div>
 
             {/* Percentage labels */}
-            {percentageFor > 10 && (
+            {voteCalculations.percentageFor > 10 && (
               <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white text-xs font-medium">
-                {percentageFor.toFixed(1)}%
+                {voteCalculations.percentageFor.toFixed(1)}%
               </span>
             )}
 
-            {percentageAgainst > 10 && (
+            {voteCalculations.percentageAgainst > 10 && (
               <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white text-xs font-medium">
-                {percentageAgainst.toFixed(1)}%
+                {voteCalculations.percentageAgainst.toFixed(1)}%
               </span>
             )}
           </div>

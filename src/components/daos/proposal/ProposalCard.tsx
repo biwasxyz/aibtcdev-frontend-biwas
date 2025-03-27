@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import MessageDisplay from "./MessageDisplay";
@@ -33,60 +33,85 @@ import { useQueryClient } from "@tanstack/react-query";
 const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   const [expanded, setExpanded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [nextRefreshIn, setNextRefreshIn] = useState(60); // Changed to 60 seconds
+  const [nextRefreshIn, setNextRefreshIn] = useState(60);
   const queryClient = useQueryClient();
 
-  // Get voting status to display in header
+  // Memoize voting status to prevent unnecessary recalculations
   const { isActive, isEnded, isLoading } = useVotingStatus(
     proposal.status,
     proposal.start_block,
     proposal.end_block
   );
 
-  // Function to refresh the votes data with cache busting
+  // Memoize refresh function to prevent unnecessary re-creation
   const refreshVotesData = useCallback(async () => {
     setRefreshing(true);
-    setNextRefreshIn(60); // Reset countdown to 60 seconds
+    setNextRefreshIn(60);
 
     try {
-      // Invalidate the specific query for this proposal's votes
       await queryClient.invalidateQueries({
         queryKey: [
           "proposalVotes",
           proposal.contract_principal,
           proposal.proposal_id,
         ],
-        // Force refetch immediately
         refetchType: "all",
       });
 
-      // Wait a moment to show the refresh animation
       await new Promise((resolve) => setTimeout(resolve, 500));
     } finally {
       setRefreshing(false);
     }
   }, [queryClient, proposal.contract_principal, proposal.proposal_id]);
 
+  // Memoize badge rendering to prevent unnecessary re-renders
+  const renderBadges = useMemo(() => {
+    if (isLoading) return null;
+
+    return (
+      <>
+        {isActive && (
+          <Badge className="bg-blue-500 text-white hover:bg-blue-600">
+            Active
+          </Badge>
+        )}
+        {isEnded && (
+          <>
+            <Badge variant="destructive" className="text-xs">
+              Voting Period has Ended
+            </Badge>
+            <Badge
+              className={`text-xs ${
+                proposal.passed
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-red-500 text-white hover:bg-red-600"
+              }`}
+            >
+              {proposal.passed ? "Passed" : "Failed"}
+            </Badge>
+          </>
+        )}
+      </>
+    );
+  }, [isLoading, isActive, isEnded, proposal.passed]);
+
   // Auto-refresh votes every 60 seconds if voting is in progress
   useEffect(() => {
     if (isActive) {
-      // Initialize countdown
       setNextRefreshIn(60);
 
-      // Update countdown every second
       const countdownInterval = setInterval(() => {
         setNextRefreshIn((prev) => {
           if (prev <= 1) {
-            return 60; // Reset to 60 when we reach 0
+            return 60;
           }
           return prev - 1;
         });
       }, 1000);
 
-      // Refresh data every 60 seconds
       const refreshInterval = setInterval(() => {
         refreshVotesData();
-      }, 60000); // 60 seconds
+      }, 60000);
 
       return () => {
         clearInterval(countdownInterval);
@@ -147,31 +172,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
 
           <div className="flex items-center gap-2 w-full justify-between">
             <div className="flex items-center gap-2">
-              {!isLoading && (
-                <>
-                  {isActive && (
-                    <Badge className="bg-blue-500 text-white hover:bg-blue-600">
-                      Active
-                    </Badge>
-                  )}
-                  {isEnded && (
-                    <Badge variant="destructive" className="text-xs">
-                      Voting Period has Ended
-                    </Badge>
-                  )}
-                  {isEnded && (
-                    <Badge
-                      className={`text-xs ${
-                        proposal.passed
-                          ? "bg-green-500 text-white hover:bg-green-600"
-                          : "bg-red-500 text-white hover:bg-red-600"
-                      }`}
-                    >
-                      {proposal.passed ? "Passed" : "Failed"}
-                    </Badge>
-                  )}
-                </>
-              )}
+              {renderBadges}
 
               {isActive && (
                 <span className="flex items-center gap-1 text-xs">
@@ -187,14 +188,12 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
       </CardHeader>
 
       <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6 pt-1">
-        {/* Message section - highlighted as important */}
         {proposal.parameters && (
           <div className="rounded-lg border-2 border-blue-500/30 p-3 sm:p-4 bg-blue-500/5">
             <MessageDisplay message={proposal.parameters} />
           </div>
         )}
 
-        {/* Voting section - highlighted as important */}
         <div className="rounded-lg border-2 border-green-500/30 p-3 sm:p-4 bg-green-500/5">
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
@@ -230,14 +229,12 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             </div>
           </div>
 
-          {/* Pass contract_principal, proposal_id, and refreshing state to VoteProgress */}
           <VoteProgress
             contractAddress={proposal.contract_principal}
             proposalId={proposal.proposal_id}
             votesFor={proposal.votes_for}
             votesAgainst={proposal.votes_against}
             refreshing={refreshing}
-            // Don't pass onRefresh - we'll handle refreshing in this component
           />
         </div>
 
