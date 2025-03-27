@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import type React from "react";
 import { Card, CardDescription } from "@/components/ui/card";
 import ProposalCard from "./ProposalCard";
@@ -11,13 +11,6 @@ interface DAOProposalsProps {
 
 const DAOProposals: React.FC<DAOProposalsProps> = ({ proposals }) => {
   const proposalsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Scroll to proposals section when component mounts
-    if (proposalsRef.current) {
-      proposalsRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">
