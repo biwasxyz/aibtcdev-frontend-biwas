@@ -44,6 +44,7 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
       return null;
     },
     enabled: !!contractAddress && !!proposalId,
+    refetchOnWindowFocus: false, // Disable refetching when window regains focus
   });
 
   // Process initial votes or data from the query
