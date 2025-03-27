@@ -4,16 +4,6 @@ import type React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getProposalVotes } from "@/lib/vote-utils";
 
-// Helper function to format votes with appropriate suffixes
-function formatVotes(votes: number): string {
-  if (votes === 0) return "0";
-  if (votes < 1) return votes.toFixed(2);
-  if (votes < 10) return votes.toFixed(1);
-  if (votes < 1000) return Math.round(votes).toString();
-  if (votes < 1000000) return (votes / 1000).toFixed(1) + "K";
-  return (votes / 1000000).toFixed(1) + "M";
-}
-
 interface VoteProgressProps {
   votesFor?: string;
   votesAgainst?: string;
@@ -37,14 +27,21 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
     enabled: !!contractAddress && !!proposalId,
   });
 
-  const votesFor = initialVotesFor || data?.votesFor || "0";
-  const votesAgainst = initialVotesAgainst || data?.votesAgainst || "0";
+  // Clean up votes data by removing 'n' if present
+  const cleanVotesValue = (value?: string) => {
+    if (!value) return "0";
+    return value.toString().replace(/n$/, "");
+  };
 
-  // Use the formatted votes for display
-  const formattedVotesFor =
-    data?.formattedVotesFor || formatVotes(Number(votesFor) / 1e8);
-  const formattedVotesAgainst =
-    data?.formattedVotesAgainst || formatVotes(Number(votesAgainst) / 1e8);
+  // Get votes from props or from fetched data
+  const votesFor = cleanVotesValue(initialVotesFor || data?.votesFor);
+  const votesAgainst = cleanVotesValue(
+    initialVotesAgainst || data?.votesAgainst
+  );
+
+  // Format votes for display
+  const formattedVotesFor = formatVotes(Number(votesFor) / 1e8);
+  const formattedVotesAgainst = formatVotes(Number(votesAgainst) / 1e8);
 
   const totalVotes = Number(votesFor) + Number(votesAgainst);
   const percentageFor =
@@ -117,5 +114,15 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
     </div>
   );
 };
+
+// Helper function to format votes with appropriate suffixes
+function formatVotes(votes: number): string {
+  if (votes === 0) return "0";
+  if (votes < 1) return votes.toFixed(2);
+  if (votes < 10) return votes.toFixed(1);
+  if (votes < 1000) return Math.round(votes).toString();
+  if (votes < 1000000) return (votes / 1000).toFixed(1) + "K";
+  return (votes / 1000000).toFixed(1) + "M";
+}
 
 export default VoteProgress;

@@ -32,30 +32,5 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
         throw new Error(`Failed to fetch proposal votes: ${errorText}`)
     }
 
-    const data = await response.json()
-
-    // Format the votes for display
-    const votesFor = data.votesFor || "0"
-    const votesAgainst = data.votesAgainst || "0"
-
-    // Calculate formatted votes
-    const formattedVotesFor = formatVotes(Number(votesFor) / 1e8)
-    const formattedVotesAgainst = formatVotes(Number(votesAgainst) / 1e8)
-
-    return {
-        votesFor,
-        votesAgainst,
-        formattedVotesFor,
-        formattedVotesAgainst,
-    }
-}
-
-// Helper function to format votes with appropriate suffixes
-function formatVotes(votes: number): string {
-    if (votes === 0) return "0"
-    if (votes < 1) return votes.toFixed(2)
-    if (votes < 10) return votes.toFixed(1)
-    if (votes < 1000) return Math.round(votes).toString()
-    if (votes < 1000000) return (votes / 1000).toFixed(1) + "K"
-    return (votes / 1000000).toFixed(1) + "M"
+    return await response.json()
 }
