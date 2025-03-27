@@ -3,13 +3,14 @@
 import type React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getProposalVotes } from "@/lib/vote-utils";
+import { useState, useEffect } from "react";
 
 interface VoteProgressProps {
   votesFor?: string;
   votesAgainst?: string;
   contractAddress?: string;
   proposalId?: string | number;
-  bustCache?: boolean; // Add a new prop to control cache busting
+  refreshing?: boolean;
 }
 
 const VoteProgress: React.FC<VoteProgressProps> = ({
@@ -17,51 +18,84 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   votesAgainst: initialVotesAgainst,
   contractAddress,
   proposalId,
-  bustCache = false, // Default to false
+  refreshing = false,
 }) => {
-  // Update the useQuery call to use the contract principal directly
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["proposalVotes", contractAddress, proposalId, bustCache], // Add bustCache to the query key
-    queryFn: () =>
-      contractAddress && proposalId
-        ? getProposalVotes(contractAddress, Number(proposalId), bustCache) // Pass bustCache parameter
-        : Promise.resolve(null),
-    enabled: !!contractAddress && !!proposalId,
-    // This ensures stale data isn't shown while refetching
-    refetchOnWindowFocus: false,
-    // Reduce staleTime if you want votes to update quicker
-    staleTime: bustCache ? 0 : 30000, // 0 when bustCache is true, otherwise 30 seconds
+  // State to store parsed vote values
+  const [parsedVotes, setParsedVotes] = useState({
+    votesFor: "0",
+    votesAgainst: "0",
+    formattedVotesFor: "0",
+    formattedVotesAgainst: "0",
   });
 
-  // Clean up votes data by removing 'n' if present
-  const cleanVotesValue = (value?: string) => {
-    if (!value) return "0";
-    return value.toString().replace(/n$/, "");
-  };
+  // Update the useQuery call to use the contract principal directly
+  // and always use cache busting when refreshing
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["proposalVotes", contractAddress, proposalId, refreshing],
+    queryFn: async () => {
+      if (contractAddress && proposalId) {
+        // Always use cache busting when the refreshing prop is true
+        return getProposalVotes(
+          contractAddress,
+          Number(proposalId),
+          refreshing
+        );
+      }
+      return null;
+    },
+    enabled: !!contractAddress && !!proposalId,
+  });
 
-  // Get votes from props or from fetched data
-  const votesFor = cleanVotesValue(data?.votesFor || initialVotesFor);
-  const votesAgainst = cleanVotesValue(
-    data?.votesAgainst || initialVotesAgainst
-  );
+  // Process initial votes or data from the query
+  useEffect(() => {
+    // Parse initial votes if provided
+    if (initialVotesFor || initialVotesAgainst) {
+      const parsedFor = initialVotesFor
+        ? initialVotesFor.replace(/n$/, "")
+        : "0";
+      const parsedAgainst = initialVotesAgainst
+        ? initialVotesAgainst.replace(/n$/, "")
+        : "0";
 
-  // Format votes for display
-  const formattedVotesFor = formatVotes(Number(votesFor) / 1e8);
-  const formattedVotesAgainst = formatVotes(Number(votesAgainst) / 1e8);
+      // Convert to numbers for calculations, defaulting to 0 if invalid
+      const votesForNum = !isNaN(Number(parsedFor)) ? Number(parsedFor) : 0;
+      const votesAgainstNum = !isNaN(Number(parsedAgainst))
+        ? Number(parsedAgainst)
+        : 0;
 
-  const totalVotes = Number(votesFor) + Number(votesAgainst);
-  const percentageFor =
-    totalVotes > 0 ? (Number(votesFor) / totalVotes) * 100 : 0;
+      setParsedVotes({
+        votesFor: parsedFor,
+        votesAgainst: parsedAgainst,
+        formattedVotesFor: (votesForNum / 1e8).toString(),
+        formattedVotesAgainst: (votesAgainstNum / 1e8).toString(),
+      });
+    }
+    // Otherwise use data from the query
+    else if (data) {
+      setParsedVotes({
+        votesFor: data.votesFor || "0",
+        votesAgainst: data.votesAgainst || "0",
+        formattedVotesFor: data.formattedVotesFor || "0",
+        formattedVotesAgainst: data.formattedVotesAgainst || "0",
+      });
+    }
+  }, [initialVotesFor, initialVotesAgainst, data]);
+
+  // Calculate percentages
+  const votesForNum = Number(parsedVotes.votesFor) || 0;
+  const votesAgainstNum = Number(parsedVotes.votesAgainst) || 0;
+  const totalVotes = votesForNum + votesAgainstNum;
+
+  const percentageFor = totalVotes > 0 ? (votesForNum / totalVotes) * 100 : 0;
   const percentageAgainst = 100 - percentageFor;
 
-  if (isLoading && !data) {
-    // Only show loading state if we don't have any data yet
+  if (isLoading && !refreshing) {
     return (
       <div className="space-y-2">
-        <div className="h-4 bg-gray-200 rounded-full animate-pulse"></div>
+        <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded-full animate-pulse"></div>
         <div className="flex justify-between">
-          <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+          <div className="h-4 w-16 bg-gray-200 dark:bg-zinc-700 rounded animate-pulse"></div>
+          <div className="h-4 w-16 bg-gray-200 dark:bg-zinc-700 rounded animate-pulse"></div>
         </div>
       </div>
     );
@@ -75,7 +109,7 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
 
   return (
     <div className="space-y-4">
-      {Number(votesFor) === 0 && Number(votesAgainst) === 0 ? (
+      {votesForNum === 0 && votesAgainstNum === 0 ? (
         <div className="py-4 text-center bg-zinc-800 rounded-lg">
           Awaiting first vote from agent
         </div>
@@ -110,26 +144,18 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <span className="text-sm text-gray-500">For</span>
-          <span className="font-medium">{formattedVotesFor}</span>
+          <span className="font-medium">{parsedVotes.formattedVotesFor}</span>
         </div>
 
         <div className="flex flex-col items-end">
           <span className="text-sm text-gray-500">Against</span>
-          <span className="font-medium">{formattedVotesAgainst}</span>
+          <span className="font-medium">
+            {parsedVotes.formattedVotesAgainst}
+          </span>
         </div>
       </div>
     </div>
   );
 };
-
-// Helper function to format votes with appropriate suffixes
-function formatVotes(votes: number): string {
-  if (votes === 0) return "0";
-  if (votes < 1) return votes.toFixed(2);
-  if (votes < 10) return votes.toFixed(1);
-  if (votes < 1000) return Math.round(votes).toString();
-  if (votes < 1000000) return (votes / 1000).toFixed(1) + "K";
-  return (votes / 1000000).toFixed(1) + "M";
-}
 
 export default VoteProgress;

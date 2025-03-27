@@ -33,7 +33,7 @@ import { useQueryClient } from "@tanstack/react-query";
 const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   const [expanded, setExpanded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [nextRefreshIn, setNextRefreshIn] = useState(30);
+  const [nextRefreshIn, setNextRefreshIn] = useState(60); // Changed to 60 seconds
   const queryClient = useQueryClient();
 
   // Get voting status to display in header
@@ -43,10 +43,10 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
     proposal.end_block
   );
 
-  // Function to refresh the votes data
+  // Function to refresh the votes data with cache busting
   const refreshVotesData = useCallback(async () => {
     setRefreshing(true);
-    setNextRefreshIn(30); // Reset countdown when manually refreshing
+    setNextRefreshIn(60); // Reset countdown to 60 seconds
 
     try {
       // Invalidate the specific query for this proposal's votes
@@ -67,26 +67,26 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
     }
   }, [queryClient, proposal.contract_principal, proposal.proposal_id]);
 
-  // Auto-refresh votes every 30 seconds if voting is in progress
+  // Auto-refresh votes every 60 seconds if voting is in progress
   useEffect(() => {
     if (isActive) {
       // Initialize countdown
-      setNextRefreshIn(30);
+      setNextRefreshIn(60);
 
       // Update countdown every second
       const countdownInterval = setInterval(() => {
         setNextRefreshIn((prev) => {
           if (prev <= 1) {
-            return 30; // Reset to 30 when we reach 0
+            return 60; // Reset to 60 when we reach 0
           }
           return prev - 1;
         });
       }, 1000);
 
-      // Refresh data every 30 seconds
+      // Refresh data every 60 seconds
       const refreshInterval = setInterval(() => {
         refreshVotesData();
-      }, 30000); // 30 seconds
+      }, 60000); // 60 seconds
 
       return () => {
         clearInterval(countdownInterval);
@@ -215,16 +215,29 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                   )}
                 </span>
               )}
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2"
+                onClick={refreshVotesData}
+                disabled={refreshing}
+              >
+                <RefreshCw
+                  className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
+                />
+              </Button>
             </div>
           </div>
 
-          {/* Pass contract_principal and proposal_id to VoteProgress */}
+          {/* Pass contract_principal, proposal_id, and refreshing state to VoteProgress */}
           <VoteProgress
             contractAddress={proposal.contract_principal}
             proposalId={proposal.proposal_id}
             votesFor={proposal.votes_for}
             votesAgainst={proposal.votes_against}
-            bustCache={refreshing} // Pass true when refreshing
+            refreshing={refreshing}
+            // Don't pass onRefresh - we'll handle refreshing in this component
           />
         </div>
 

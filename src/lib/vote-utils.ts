@@ -1,4 +1,13 @@
-export async function getProposalVotes(contractPrincipal: string, proposalId: number, bustCache: boolean = false) {
+// Helper function to format votes with appropriate suffixes
+export function formatVotes(votes: number): string {
+    if (isNaN(votes)) return "0"
+    if (votes === 0) return "0"
+
+    // Simply return the number divided by 1e8 as requested
+    return (votes / 1e8).toString()
+}
+
+export async function getProposalVotes(contractPrincipal: string, proposalId: number, bustCache = false) {
     // Parse the contract principal to extract address and name
     const [contractAddress, contractName] = contractPrincipal.split(".")
 
@@ -8,7 +17,6 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
 
     // Call the endpoint with POST method and the correct request body format
     const response = await fetch(
-        // NEED TO ADD THIS TO ENV AFTER
         `https://cache-staging.aibtc.dev/contract-calls/read-only/${contractAddress}/${contractName}/get-proposal`,
         {
             method: "POST",
@@ -23,11 +31,13 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
                         value: proposalId.toString(),
                     },
                 ],
-
-                cacheControl: bustCache ? {
-                    bustCache: true,  // Force a fresh request, bypassing the cache
-                    ttl: 60           // Cache this result for 60 seconds
-                } : undefined
+                // Add cache control in the request body
+                cacheControl: bustCache
+                    ? {
+                        bustCache: true, // Force a fresh request
+                        ttl: 3600, // Cache for 1 hour
+                    }
+                    : undefined,
             }),
         },
     )
@@ -37,5 +47,34 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
         throw new Error(`Failed to fetch proposal votes: ${errorText}`)
     }
 
-    return await response.json()
+    const responseData = await response.json()
+
+    // Check if the data is nested inside a data property
+    const voteData = responseData.data || responseData
+
+    // Parse the vote values to remove the "n" suffix and ensure they're valid numbers
+    let votesFor = "0"
+    let votesAgainst = "0"
+
+    if (voteData.votesFor && typeof voteData.votesFor === "string") {
+        votesFor = voteData.votesFor.replace(/n$/, "")
+    }
+
+    if (voteData.votesAgainst && typeof voteData.votesAgainst === "string") {
+        votesAgainst = voteData.votesAgainst.replace(/n$/, "")
+    }
+
+    // Convert to numbers for calculations, defaulting to 0 if invalid
+    const votesForNum = !isNaN(Number(votesFor)) ? Number(votesFor) : 0
+    const votesAgainstNum = !isNaN(Number(votesAgainst)) ? Number(votesAgainst) : 0
+
+    // Create a result object with all the data and the formatted votes
+    return {
+        ...responseData,
+        votesFor,
+        votesAgainst,
+        formattedVotesFor: (votesForNum / 1e8).toString(),
+        formattedVotesAgainst: (votesAgainstNum / 1e8).toString(),
+    }
 }
+
