@@ -111,6 +111,24 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
             )}
           </div>
         </div>
+
+        <div className="space-y-1">
+          <div className="flex items-center">
+            {isActive ? (
+              <span className="font-medium text-sm text-blue-500">Pending</span>
+            ) : proposal.executed ? (
+              <>
+                <CheckCircle2 className="h-4 w-4 text-green-500 mr-1.5" />
+                <span className="font-medium text-sm">Executed</span>
+              </>
+            ) : (
+              <>
+                <XCircle className="h-4 w-4 text-red-500 mr-1.5" />
+                <span className="font-medium text-sm">Failed</span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
