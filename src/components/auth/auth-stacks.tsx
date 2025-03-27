@@ -166,7 +166,7 @@ export default function StacksAuth() {
               AIBTC Disclosures
             </DialogTitle>
           </DialogHeader>
-          <ScrollArea className="h-full pr-4">
+          <ScrollArea className="h-full pr-4" type="always">
             <div className="prose dark:prose-invert max-w-none space-y-8">
               <section>
                 <p className="text-zinc-800 dark:text-zinc-200">

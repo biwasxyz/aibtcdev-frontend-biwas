@@ -1,13 +1,8 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useCallback } from "react";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import MessageDisplay from "./MessageDisplay";
 import VoteProgress from "./VoteProgress";
@@ -38,58 +33,85 @@ import { useQueryClient } from "@tanstack/react-query";
 const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   const [expanded, setExpanded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [nextRefreshIn, setNextRefreshIn] = useState(30);
+  const [nextRefreshIn, setNextRefreshIn] = useState(60);
   const queryClient = useQueryClient();
 
-  // Get voting status to display in header
+  // Memoize voting status to prevent unnecessary recalculations
   const { isActive, isEnded, isLoading } = useVotingStatus(
     proposal.status,
     proposal.start_block,
     proposal.end_block
   );
 
-  // Function to refresh the votes data
+  // Memoize refresh function to prevent unnecessary re-creation
   const refreshVotesData = useCallback(async () => {
     setRefreshing(true);
-    setNextRefreshIn(30); // Reset countdown when manually refreshing
+    setNextRefreshIn(60);
 
     try {
-      // Invalidate the specific query for this proposal's votes
       await queryClient.invalidateQueries({
         queryKey: [
           "proposalVotes",
           proposal.contract_principal,
           proposal.proposal_id,
         ],
+        refetchType: "all",
       });
 
-      // Wait a moment to show the refresh animation
       await new Promise((resolve) => setTimeout(resolve, 500));
     } finally {
       setRefreshing(false);
     }
   }, [queryClient, proposal.contract_principal, proposal.proposal_id]);
 
-  // Auto-refresh votes every 30 seconds if voting is in progress
+  // Memoize badge rendering to prevent unnecessary re-renders
+  const renderBadges = useMemo(() => {
+    if (isLoading) return null;
+
+    return (
+      <>
+        {isActive && (
+          <Badge className="bg-blue-500 text-white hover:bg-blue-600">
+            Active
+          </Badge>
+        )}
+        {isEnded && (
+          <>
+            <Badge variant="destructive" className="text-xs">
+              Voting Period has Ended
+            </Badge>
+            <Badge
+              className={`text-xs ${
+                proposal.passed
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-red-500 text-white hover:bg-red-600"
+              }`}
+            >
+              {proposal.passed ? "Passed" : "Failed"}
+            </Badge>
+          </>
+        )}
+      </>
+    );
+  }, [isLoading, isActive, isEnded, proposal.passed]);
+
+  // Auto-refresh votes every 60 seconds if voting is in progress
   useEffect(() => {
     if (isActive) {
-      // Initialize countdown
-      setNextRefreshIn(30);
+      setNextRefreshIn(60);
 
-      // Update countdown every second
       const countdownInterval = setInterval(() => {
         setNextRefreshIn((prev) => {
           if (prev <= 1) {
-            return 30; // Reset to 30 when we reach 0
+            return 60;
           }
           return prev - 1;
         });
       }, 1000);
 
-      // Refresh data every 30 seconds
       const refreshInterval = setInterval(() => {
         refreshVotesData();
-      }, 30000); // 30 seconds
+      }, 60000);
 
       return () => {
         clearInterval(countdownInterval);
@@ -103,81 +125,75 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
       <CardHeader className="space-y-3 pb-3 px-4 sm:px-6">
         <div className="flex flex-col items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2 w-full justify-between">
-            <div className="flex items-center gap-2">
-              {!isLoading && (
+            <h3 className="text-lg sm:text-xl font-bold">{proposal.title}</h3>
+
+            <div className="flex flex-col items-start sm:items-end sm:flex-row gap-1.5 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <User className="h-3.5 w-3.5" />
+                <span>Created by:</span>
+                <a
+                  href={getExplorerLink("address", proposal.creator)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline text-foreground"
+                >
+                  {truncateString(proposal.creator, 4, 4)}
+                </a>
+              </div>
+
+              <span className="hidden sm:inline mx-1">•</span>
+
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>
+                  {format(new Date(proposal.created_at), "MMM d, yyyy")}
+                </span>
+              </div>
+
+              {proposal.concluded_by && (
                 <>
-                  {isActive && (
-                    <Badge className="bg-blue-500 text-white hover:bg-blue-600">
-                      Active
-                    </Badge>
-                  )}
-                  {isEnded && (
-                    <Badge variant="destructive" className="text-xs">
-                      Voting Period has Ended
-                    </Badge>
-                  )}
-                  {/* New badge for execution status */}
-                  {isEnded && (
-                    <Badge
-                      className={`text-xs ${
-                        proposal.passed
-                          ? "bg-green-500 text-white hover:bg-green-600"
-                          : "bg-red-500 text-white hover:bg-red-600"
-                      }`}
+                  <span className="hidden sm:inline mx-1">•</span>
+                  <div className="flex items-center gap-1.5">
+                    <User className="h-3.5 w-3.5" />
+                    <span>Concluded by:</span>
+                    <a
+                      href={getExplorerLink("address", proposal.concluded_by)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline text-foreground"
                     >
-                      {proposal.passed ? "Passed" : "Failed"}
-                    </Badge>
-                  )}
+                      {truncateString(proposal.concluded_by, 4, 4)}
+                    </a>
+                  </div>
                 </>
               )}
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <User className="h-3.5 w-3.5" />
-              <span>Created by:</span>
-              <a
-                href={getExplorerLink("address", proposal.creator)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline text-foreground"
-              >
-                {truncateString(proposal.creator, 4, 4)}
-              </a>
+          </div>
+
+          <div className="flex items-center gap-2 w-full justify-between">
+            <div className="flex items-center gap-2">
+              {renderBadges}
+
+              {isActive && (
+                <span className="flex items-center gap-1 text-xs">
+                  <Timer className="h-3.5 w-3.5 text-blue-500" />
+                  <span className="text-blue-500 font-medium">
+                    Voting in progress
+                  </span>
+                </span>
+              )}
             </div>
           </div>
-
-          <h3 className="text-lg sm:text-xl font-bold">{proposal.title}</h3>
-
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground w-full">
-            <Calendar className="h-3.5 w-3.5" />
-            <span>
-              Created: {format(new Date(proposal.created_at), "MMM d, yyyy")}
-            </span>
-
-            {isActive && (
-              <span className="ml-2 flex items-center gap-1">
-                <Timer className="h-3.5 w-3.5 text-blue-500" />
-                <span className="text-blue-500 font-medium">
-                  Voting in progress
-                </span>
-              </span>
-            )}
-          </div>
-
-          <p className="text-sm text-muted-foreground">
-            {proposal.description || "No description available"}
-          </p>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6 pt-1">
-        {/* Message section - highlighted as important */}
         {proposal.parameters && (
           <div className="rounded-lg border-2 border-blue-500/30 p-3 sm:p-4 bg-blue-500/5">
             <MessageDisplay message={proposal.parameters} />
           </div>
         )}
 
-        {/* Voting section - highlighted as important */}
         <div className="rounded-lg border-2 border-green-500/30 p-3 sm:p-4 bg-green-500/5">
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
@@ -198,15 +214,27 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                   )}
                 </span>
               )}
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2"
+                onClick={refreshVotesData}
+                disabled={refreshing}
+              >
+                <RefreshCw
+                  className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
+                />
+              </Button>
             </div>
           </div>
 
-          {/* Pass contract_principal and proposal_id to VoteProgress */}
           <VoteProgress
             contractAddress={proposal.contract_principal}
             proposalId={proposal.proposal_id}
             votesFor={proposal.votes_for}
             votesAgainst={proposal.votes_against}
+            refreshing={refreshing}
           />
         </div>
 
@@ -317,23 +345,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
           )}
         </Button>
       </CardContent>
-
-      {proposal.concluded_by && (
-        <CardFooter className="px-4 sm:px-6 py-3 border-t border-zinc-800 mt-2">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <User className="h-3.5 w-3.5" />
-            <span>Concluded by:</span>
-            <a
-              href={getExplorerLink("address", proposal.concluded_by)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline text-foreground"
-            >
-              {truncateString(proposal.concluded_by, 4, 4)}
-            </a>
-          </div>
-        </CardFooter>
-      )}
     </Card>
   );
 };

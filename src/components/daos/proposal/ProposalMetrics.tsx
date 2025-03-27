@@ -9,11 +9,14 @@ interface ProposalMetricsProps {
 }
 
 const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
-  const { isActive } = useVotingStatus(
+  const { isActive, startBlockTime } = useVotingStatus(
     proposal.status,
     proposal.start_block,
     proposal.end_block
   );
+
+  // Check if voting has not started yet (start block not found)
+  const votingNotStarted = startBlockTime === null;
 
   const formatNumber = (num: number): string => {
     return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -47,7 +50,7 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
             The minimum number of votes needed for a valid decision.
           </div>
           <div className="flex items-center">
-            {isActive ? (
+            {votingNotStarted || isActive ? (
               <span className="font-medium text-sm text-blue-500">Pending</span>
             ) : proposal.met_quorum ? (
               <>
@@ -73,7 +76,7 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
             the proposal.
           </div>
           <div className="flex items-center">
-            {isActive ? (
+            {votingNotStarted || isActive ? (
               <span className="font-medium text-sm text-blue-500">Pending</span>
             ) : proposal.met_threshold ? (
               <>
@@ -96,7 +99,7 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
             Shows if the proposal passed or failed.
           </div>
           <div className="flex items-center">
-            {isActive ? (
+            {votingNotStarted || isActive ? (
               <span className="font-medium text-sm text-blue-500">Pending</span>
             ) : proposal.passed ? (
               <>
@@ -107,6 +110,31 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
               <>
                 <XCircle className="h-4 w-4 text-red-500 mr-1.5" />
                 <span className="font-medium text-sm">Failed</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Execution Status */}
+        <div className="space-y-1">
+          <div className="text-md font-bold text-muted-foreground">
+            Execution
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Shows if the proposal has been executed.
+          </div>
+          <div className="flex items-center">
+            {votingNotStarted || isActive ? (
+              <span className="font-medium text-sm text-blue-500">Pending</span>
+            ) : proposal.executed ? (
+              <>
+                <CheckCircle2 className="h-4 w-4 text-green-500 mr-1.5" />
+                <span className="font-medium text-sm">Executed</span>
+              </>
+            ) : (
+              <>
+                <XCircle className="h-4 w-4 text-red-500 mr-1.5" />
+                <span className="font-medium text-sm">Not Executed</span>
               </>
             )}
           </div>

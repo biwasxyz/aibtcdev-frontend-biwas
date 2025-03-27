@@ -82,7 +82,14 @@ export const fetchExtensions = async () => {
 export const fetchDAOs = async (): Promise<DAO[]> => {
     const [{ data: daosData, error: daosError }, xUsersData, extensionsData] =
         await Promise.all([
-            supabase.from("daos").select("*").order("created_at", { ascending: false }).eq("is_broadcasted", true),
+            supabase
+                .from("daos")
+                .select("*")
+                .order("created_at", { ascending: false })
+                .eq("is_broadcasted", true)
+                // SHOULD BE GOOD
+                // FETCH ONLY MEDIA3(FOR TESTNET REMOVE IN MAINNET LATER) AND FACES FOR MAINNET
+                .in("name", ["MEDIA3", "FACES"]),
             fetchXUsers(),
             fetchExtensions()
         ]);
