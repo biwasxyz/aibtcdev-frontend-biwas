@@ -21,6 +21,7 @@ import type { DAO, Token, Extension } from "@/types/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { WalletBalance, WalletWithAgent } from "@/store/wallet";
+import AuthButton from "../home/auth-button";
 
 interface DAOChatModalProps {
   daoId: string;
@@ -175,10 +176,10 @@ export function DAOBuyModal({
       return (
         <div className="flex items-center justify-center h-full p-6">
           <div className="text-center">
-            <p className="text-lg mb-6">Please sign in to buy tokens</p>
-            <Button variant="outline" size="lg" onClick={() => setOpen(false)}>
-              Close
-            </Button>
+            <p className="text-lg mb-6">
+              Please connect your wallet to buy tokens
+            </p>
+            <AuthButton />
           </div>
         </div>
       );
