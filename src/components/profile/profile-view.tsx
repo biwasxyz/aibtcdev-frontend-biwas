@@ -27,7 +27,6 @@ import ReactMarkdown from "react-markdown";
 const stacksAddress = getStacksAddress();
 
 export function ProfileView() {
-  // Using useQuery instead of useState + useEffect
   const {
     data: votes = [],
     isLoading,
@@ -153,11 +152,11 @@ export function ProfileView() {
                                   {vote.reasoning.length > 40 ? "..." : ""}
                                 </div>
                               </DialogTrigger>
-                              <DialogContent className="w-full">
+                              <DialogContent className="w-[80vw] max-w-5xl">
                                 <DialogHeader>
                                   <DialogTitle>Vote Reasoning</DialogTitle>
                                 </DialogHeader>
-                                <div className="mt-4 prose prose-sm dark:prose-invert max-w-none">
+                                <div className="mt-4 prose prose-sm md:prose-base dark:prose-invert max-w-none px-2">
                                   <ReactMarkdown>
                                     {vote.reasoning}
                                   </ReactMarkdown>
