@@ -1,192 +1,49 @@
-import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/utils/supabase/client";
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Loader2, ExternalLink, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getStacksAddress } from "@/lib/address";
-
-interface Profile {
-  id: string;
-  email: string;
-  discord_username: string | null;
-}
-
-interface TelegramUser {
-  id: string | null;
-  telegram_user_id: string | null;
-  username: string | null;
-  first_name: string | null;
-  last_name: string | null;
-  is_registered: boolean;
-  profile_id: string | null;
-}
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { fetchVotes, type Vote } from "@/queries/vote-queries";
+import { formatDistanceToNow } from "date-fns";
 
 const stacksAddress = getStacksAddress();
+
 export function ProfileView() {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
+  const [votes, setVotes] = useState<Vote[]>([]);
   const [loading, setLoading] = useState(true);
-  const [telegramLoading, setTelegramLoading] = useState(false);
-  const [shouldCheckTelegramStatus, setShouldCheckTelegramStatus] =
-    useState(false);
-  const [telegramStatusCheckCount, setTelegramStatusCheckCount] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load profile on component mount
   useEffect(() => {
-    async function loadProfile() {
+    async function loadVotes() {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-
-        if (profileError) throw profileError;
-        setProfile(profileData);
-
-        const { data: telegramData, error: telegramError } = await supabase
-          .from("telegram_users")
-          .select("*")
-          .eq("profile_id", user.id)
-          .single();
-
-        if (!telegramError) {
-          setTelegramUser(telegramData);
-        }
-      } catch (error) {
-        console.error("Error loading profile:", error);
+        const votesData = await fetchVotes();
+        setVotes(votesData);
+      } catch (err) {
+        console.error("Error loading votes:", err);
+        setError("Failed to load voting history");
       } finally {
         setLoading(false);
       }
     }
 
-    loadProfile();
+    loadVotes();
   }, []);
-
-  // Initialize Telegram User
-  const initializeTelegramUser = async () => {
-    try {
-      setTelegramLoading(true);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { error: upsertError } = await supabase
-        .from("telegram_users")
-        .upsert({
-          profile_id: user.id,
-          is_registered: false,
-        });
-
-      if (upsertError) throw upsertError;
-
-      const { data: telegramData } = await supabase
-        .from("telegram_users")
-        .select("*")
-        .eq("profile_id", user.id)
-        .single();
-
-      setTelegramUser(telegramData);
-    } catch (error) {
-      console.error("Error initializing telegram user:", error);
-    } finally {
-      setTelegramLoading(false);
-    }
-  };
-
-  // Check Telegram Status
-  const checkTelegramStatus = useCallback(async () => {
-    console.log("Checking Telegram status...");
-    if (telegramStatusCheckCount >= 2) {
-      console.log("Max check count reached. Stopping checks.");
-      setShouldCheckTelegramStatus(false);
-      return;
-    }
-
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        console.log("No user found");
-        return;
-      }
-
-      const { data: telegramData, error: telegramError } = await supabase
-        .from("telegram_users")
-        .select("*")
-        .eq("profile_id", user.id)
-        .single();
-
-      if (!telegramError) {
-        console.log("Telegram user data:", telegramData);
-        setTelegramUser(telegramData);
-
-        if (telegramData.is_registered) {
-          console.log("Telegram registration completed!");
-          setShouldCheckTelegramStatus(false); // Stop checking if registered
-        } else {
-          setTelegramStatusCheckCount((prevCount) => {
-            if (prevCount + 1 < 2) {
-              setTimeout(checkTelegramStatus, 5000); // Check again in 5 seconds
-            }
-            return prevCount + 1;
-          });
-        }
-      } else {
-        console.error("Error fetching Telegram user:", telegramError);
-      }
-    } catch (error) {
-      console.error("Error checking Telegram status:", error);
-    }
-  }, [telegramStatusCheckCount]);
-
-  // Handle visibility change
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && shouldCheckTelegramStatus) {
-        console.log("Tab became visible, checking Telegram status");
-
-        if (telegramStatusCheckCount < 2) {
-          checkTelegramStatus();
-        } else {
-          console.log("Max check count reached. Stopping further checks.");
-          setShouldCheckTelegramStatus(false);
-        }
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [
-    shouldCheckTelegramStatus,
-    telegramStatusCheckCount,
-    checkTelegramStatus,
-  ]);
-
-  // Start Telegram Bot
-  const startTelegramBot = () => {
-    console.log("Starting Telegram bot registration");
-    setShouldCheckTelegramStatus(true);
-    setTelegramStatusCheckCount(0);
-
-    const botUsername =
-      process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "aibtcdevbot";
-    window.open(`https://t.me/${botUsername}?start=${telegramUser?.id}`);
-
-    setTimeout(checkTelegramStatus, 5000); // Initial check after 5 seconds
-  };
 
   if (loading) {
     return (
@@ -198,7 +55,8 @@ export function ProfileView() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+        {/* Wallet Information */}
         <Card className="border-none shadow-none bg-background/40 backdrop-blur">
           <CardHeader>
             <CardTitle className="text-base sm:text-2xl font-medium">
@@ -218,80 +76,118 @@ export function ProfileView() {
           </CardContent>
         </Card>
 
+        {/* Detailed Voting History */}
         <Card className="border-none shadow-none bg-background/40 backdrop-blur">
           <CardHeader>
             <CardTitle className="text-base sm:text-2xl font-medium">
-              Social Connections
+              Voting History
             </CardTitle>
             <Separator className="my-2" />
           </CardHeader>
-          <CardContent className="grid gap-6">
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">Discord</label>
-              <div className="bg-muted/30 p-3 rounded-md space-y-2">
-                <Badge
-                  variant={profile?.discord_username ? "default" : "outline"}
-                  className="text-xs"
-                >
-                  {profile?.discord_username ? "Connected" : "Not Connected"}
-                </Badge>
-                {profile?.discord_username && (
-                  <p className="text-sm text-muted-foreground">
-                    {profile.discord_username}
-                  </p>
-                )}{" "}
-                <br />
-                <Button disabled variant="ghost">
-                  Connect
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">Telegram</label>
-              {telegramUser ? (
-                <div className="bg-muted/30 p-3 rounded-md space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={
-                        telegramUser.is_registered ? "default" : "outline"
-                      }
-                      className="text-xs"
-                    >
-                      {telegramUser.is_registered
-                        ? "Connected"
-                        : "Pending Registration"}
-                    </Badge>
-                  </div>
-                  {telegramUser.is_registered ? (
-                    <p className="text-sm text-muted-foreground">
-                      {telegramUser.username || "N/A"}
-                    </p>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      onClick={startTelegramBot}
-                      disabled={!telegramUser}
-                    >
-                      Start Registration
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <div className="mt-2">
-                  <Button
-                    variant="ghost"
-                    onClick={initializeTelegramUser}
-                    disabled={telegramLoading}
-                  >
-                    {telegramLoading && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <CardContent>
+            {error ? (
+              <div className="text-center py-4 text-red-500">{error}</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="whitespace-nowrap">Agent</TableHead>
+                      <TableHead className="whitespace-nowrap">DAO</TableHead>
+                      <TableHead className="whitespace-nowrap">
+                        Proposal
+                      </TableHead>
+                      <TableHead className="whitespace-nowrap">Vote</TableHead>
+                      <TableHead className="whitespace-nowrap">Date</TableHead>
+                      <TableHead className="whitespace-nowrap">
+                        Reasoning
+                      </TableHead>
+                      <TableHead className="whitespace-nowrap">TX</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {votes.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-4">
+                          No voting history found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      votes.map((vote) => (
+                        <TableRow key={vote.id}>
+                          <TableCell className="font-medium">
+                            {vote.agent_name}
+                          </TableCell>
+                          <TableCell>{vote.dao_name}</TableCell>
+                          <TableCell>
+                            <div
+                              className="max-w-xs truncate"
+                              title={vote.proposal_title}
+                            >
+                              {vote.proposal_title}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {vote.answer ? (
+                              <span className="flex items-center text-green-500">
+                                <ThumbsUp className="h-4 w-4 mr-1" />
+                                Yes
+                              </span>
+                            ) : (
+                              <span className="flex items-center text-red-500">
+                                <ThumbsDown className="h-4 w-4 mr-1" />
+                                No
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap">
+                            {formatDistanceToNow(new Date(vote.created_at), {
+                              addSuffix: true,
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <div className="max-w-xs truncate">
+                                    {vote.reasoning.substring(0, 40)}
+                                    {vote.reasoning.length > 40 ? "..." : ""}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-md">
+                                  <p>{vote.reasoning}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </TableCell>
+                          <TableCell>
+                            {vote.tx_id ? (
+                              <a
+                                href={`https://explorer.stacks.co/txid/${
+                                  vote.tx_id
+                                }?chain=${
+                                  process.env.NEXT_PUBLIC_STACKS_NETWORK ===
+                                  "testnet"
+                                    ? "testnet"
+                                    : "mainnet"
+                                }`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:text-blue-700"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
                     )}
-                    Initialize Telegram Connection
-                  </Button>
-                </div>
-              )}
-            </div>
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
