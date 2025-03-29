@@ -18,7 +18,6 @@ import { useSessionStore } from "@/store/session";
 import { useWalletStore } from "@/store/wallet";
 import { fetchDAOExtensions, fetchToken } from "@/queries/daoQueries";
 import type { DAO, Token, Extension } from "@/types/supabase";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import type { WalletBalance, WalletWithAgent } from "@/store/wallet";
 import AuthButton from "../home/auth-button";
@@ -46,8 +45,6 @@ export function DAOBuyModal({
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
   const setOpen = setControlledOpen || setUncontrolledOpen;
-
-  const { toast } = useToast();
 
   const {
     isLoading: isChatLoading,
