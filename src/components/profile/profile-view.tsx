@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ExternalLink, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -20,33 +19,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { fetchVotes, type Vote } from "@/queries/vote-queries";
+import { fetchVotes } from "@/queries/vote-queries";
 import { formatDistanceToNow } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
 
 const stacksAddress = getStacksAddress();
 
 export function ProfileView() {
-  const [votes, setVotes] = useState<Vote[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Using useQuery instead of useState + useEffect
+  const {
+    data: votes = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["votes"],
+    queryFn: fetchVotes,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
 
-  useEffect(() => {
-    async function loadVotes() {
-      try {
-        const votesData = await fetchVotes();
-        setVotes(votesData);
-      } catch (err) {
-        console.error("Error loading votes:", err);
-        setError("Failed to load voting history");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadVotes();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -87,7 +79,11 @@ export function ProfileView() {
           </CardHeader>
           <CardContent>
             {error ? (
-              <div className="text-center py-4 text-red-500">{error}</div>
+              <div className="text-center py-4 text-red-500">
+                {error instanceof Error
+                  ? error.message
+                  : "Failed to load voting history"}
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
