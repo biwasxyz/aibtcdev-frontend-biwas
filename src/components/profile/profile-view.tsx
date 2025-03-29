@@ -14,11 +14,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { fetchVotes, type Vote } from "@/queries/vote-queries";
 import { formatDistanceToNow } from "date-fns";
 
@@ -146,19 +147,22 @@ export function ProfileView() {
                             })}
                           </TableCell>
                           <TableCell>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <div className="max-w-xs truncate">
-                                    {vote.reasoning.substring(0, 40)}
-                                    {vote.reasoning.length > 40 ? "..." : ""}
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className="max-w-md">
-                                  <p>{vote.reasoning}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <Dialog>
+                              <DialogTrigger className="cursor-pointer text-primary hover:underline">
+                                <div className="max-w-xs truncate">
+                                  {vote.reasoning.substring(0, 40)}
+                                  {vote.reasoning.length > 40 ? "..." : ""}
+                                </div>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-md">
+                                <DialogHeader>
+                                  <DialogTitle>Vote Reasoning</DialogTitle>
+                                </DialogHeader>
+                                <div className="mt-4">
+                                  <p className="text-sm">{vote.reasoning}</p>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
                           </TableCell>
                           <TableCell>
                             {vote.tx_id ? (
