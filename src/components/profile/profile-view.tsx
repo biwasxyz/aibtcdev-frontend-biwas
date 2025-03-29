@@ -22,6 +22,7 @@ import {
 import { fetchVotes } from "@/queries/vote-queries";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
+import ReactMarkdown from "react-markdown";
 
 const stacksAddress = getStacksAddress();
 
@@ -146,16 +147,20 @@ export function ProfileView() {
                             <Dialog>
                               <DialogTrigger className="cursor-pointer text-primary hover:underline">
                                 <div className="max-w-xs truncate">
-                                  {vote.reasoning.substring(0, 40)}
+                                  {vote.reasoning
+                                    .substring(0, 40)
+                                    .replace(/[#*`_~[\]]/g, "")}
                                   {vote.reasoning.length > 40 ? "..." : ""}
                                 </div>
                               </DialogTrigger>
-                              <DialogContent className="max-w-md">
+                              <DialogContent className="w-full">
                                 <DialogHeader>
                                   <DialogTitle>Vote Reasoning</DialogTitle>
                                 </DialogHeader>
-                                <div className="mt-4">
-                                  <p className="text-sm">{vote.reasoning}</p>
+                                <div className="mt-4 prose prose-sm dark:prose-invert max-w-none">
+                                  <ReactMarkdown>
+                                    {vote.reasoning}
+                                  </ReactMarkdown>
                                 </div>
                               </DialogContent>
                             </Dialog>
