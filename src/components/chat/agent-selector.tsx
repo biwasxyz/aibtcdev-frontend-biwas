@@ -9,13 +9,12 @@ import { useSessionStore } from "@/store/session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -191,34 +190,41 @@ export function AgentWalletSelector({
   const selectedAgent = activeAgents.find((a) => a.id === selectedAgentId);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         <Button className="max-w-[200px] z-100">
           {selectedAgent ? (
-            <div className="flex items-center overflow-hidden">
-              <AgentAvatar agent={selectedAgent} className="h-3 w-3 mr-2" />
-              <span className="text-sm font-medium truncate">
-                {selectedAgent.name}
-              </span>
+            <div className="flex flex-col items-center">
+              <div className="flex items-center overflow-hidden">
+                <AgentAvatar agent={selectedAgent} className="h-3 w-3 mr-2" />
+                <span className="text-sm font-medium truncate">
+                  {selectedAgent.name}
+                </span>
+              </div>
+              {/* <span className="text-xs text-muted-foreground mt-0.5">
+                click to manage
+              </span> */}
             </div>
           ) : (
-            <div className="flex items-center">
-              <Bot className="h-5 w-5 text-foreground/50 mr-2" />
-              <span className="text-sm font-medium">DAO Manager</span>
+            <div className="flex flex-col items-center">
+              <div className="flex items-center">
+                <Bot className="h-5 w-5 text-foreground/50 mr-2" />
+                <span className="text-sm font-medium">DAO Manager</span>
+              </div>
+              {/* <span className="text-xs text-muted-foreground mt-0.5">
+                click to manage
+              </span> */}
             </div>
           )}
         </Button>
-      </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md p-0 overflow-hidden">
-        <SheetHeader className="p-4 pb-0">
-          <SheetTitle>Select Agent</SheetTitle>
-          <SheetClose>
-            <span className="sr-only">Close</span>
-          </SheetClose>
-        </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-80px)]">
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+        <DialogHeader className="p-4 pb-0">
+          <DialogTitle>Select Agent</DialogTitle>
+        </DialogHeader>
+        <ScrollArea className="h-[calc(100vh-200px)] max-h-[500px]">
           <div className="p-4">
-            {/* Assistant Agent Option - Commented out as requested
+            {/* Assistant Agent Option 
             <div
               className="flex flex-col items-stretch p-3 cursor-pointer hover:bg-zinc-800 rounded-md"
               onClick={() => handleSelect(null)}
@@ -384,7 +390,7 @@ export function AgentWalletSelector({
                           </div>
                         )}
                         <Link
-                          href={`/agents/${agent.id}`}
+                          href={`/profile`}
                           className="inline-flex items-center"
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -404,8 +410,8 @@ export function AgentWalletSelector({
             )}
           </div>
         </ScrollArea>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
 
