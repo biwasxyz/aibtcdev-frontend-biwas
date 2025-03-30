@@ -100,6 +100,25 @@ export function AgentWalletSelector({
     setStxAmounts(initialStxAmounts);
   }, [userWallet, agentWallets]);
 
+  // Add this after the other useEffect hooks
+  useEffect(() => {
+    // Find the DAO Manager agent
+    const daoManagerAgent = activeAgents.find(
+      (agent) => agent.name === "DAO Manager"
+    );
+
+    // If found and no agent is currently selected, select it by default
+    if (daoManagerAgent && !selectedAgentId) {
+      onSelect(daoManagerAgent.id);
+      if (userAddress) {
+        localStorage.setItem(
+          `${userAddress}_selectedAgentId`,
+          daoManagerAgent.id
+        );
+      }
+    }
+  }, [activeAgents, selectedAgentId, onSelect, userAddress]);
+
   const truncateAddress = (address: string) => {
     if (!address) return "";
     return `${address.slice(0, 5)}...${address.slice(-5)}`;
@@ -185,7 +204,7 @@ export function AgentWalletSelector({
           ) : (
             <div className="flex items-center">
               <Bot className="h-5 w-5 text-foreground/50 mr-2" />
-              <span className="text-sm font-medium">Assistant Agent</span>
+              <span className="text-sm font-medium">DAO Manager</span>
             </div>
           )}
         </Button>
@@ -199,7 +218,7 @@ export function AgentWalletSelector({
         </SheetHeader>
         <ScrollArea className="h-[calc(100vh-80px)]">
           <div className="p-4">
-            {/* Assistant Agent Option */}
+            {/* Assistant Agent Option - Commented out as requested
             <div
               className="flex flex-col items-stretch p-3 cursor-pointer hover:bg-zinc-800 rounded-md"
               onClick={() => handleSelect(null)}
@@ -268,6 +287,7 @@ export function AgentWalletSelector({
                 </div>
               )}
             </div>
+            */}
 
             <Separator className="my-4" />
 
