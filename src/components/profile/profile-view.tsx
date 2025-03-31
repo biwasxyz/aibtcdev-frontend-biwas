@@ -23,6 +23,7 @@ import { fetchVotes } from "@/queries/vote-queries";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
+import { AgentPromptForm } from "./agent-prompt-form";
 
 const stacksAddress = getStacksAddress();
 
@@ -68,6 +69,9 @@ export function ProfileView() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Agent Prompts Form */}
+        <AgentPromptForm />
 
         {/* Detailed Voting History */}
         <Card className="border-none shadow-none bg-background/40 backdrop-blur">
