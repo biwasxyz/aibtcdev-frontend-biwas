@@ -54,6 +54,7 @@ export interface AgentPrompt {
   prompt_text: string;
   prompt_type: string;
   is_active: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: any;
   created_at: string;
   updated_at: string;
