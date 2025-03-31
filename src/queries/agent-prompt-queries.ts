@@ -10,7 +10,7 @@ export interface AgentPrompt {
     prompt_text: string;
     prompt_type: string;
     is_active: boolean;
-    metadata?: any;
+    metadata?: string;
     created_at: string;
     updated_at: string;
 }

@@ -327,17 +327,6 @@ export function AgentPromptForm() {
     return dao ? dao.name : "Unknown DAO";
   };
 
-  // Get agent name by ID
-  const getAgentName = (agentId: string) => {
-    const agent = agents.find((a) => a.id === agentId);
-    return agent ? agent.name : "Unknown Agent";
-  };
-
-  // Format date
-  // const formatDate = (dateString: string) => {
-  //   return new Date(dateString).toLocaleDateString()
-  // }
-
   return (
     <Card className="border-none shadow-none bg-background/40 backdrop-blur">
       <CardHeader className="flex flex-row items-center justify-between">
