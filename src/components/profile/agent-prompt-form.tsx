@@ -2,8 +2,8 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
-import { Loader2, Save, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Loader2, Save, Plus, Trash2, Edit } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -18,13 +18,28 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 import { fetchDAOs } from "@/queries/daoQueries";
 import { fetchAgents } from "@/queries/agentQueries";
 import {
-  fetchAgentPromptsByDao,
+  fetchAgentPrompts,
   createAgentPrompt,
   updateAgentPrompt,
   deleteAgentPrompt,
@@ -61,11 +76,22 @@ export function AgentPromptForm() {
   const [selectedDaoId, setSelectedDaoId] = useState<string>("");
   const [selectedAgentId, setSelectedAgentId] = useState<string>("");
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const { toast } = useToast();
 
   // Form errors
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Fetch all prompts immediately
+  const {
+    data: prompts = [],
+    isLoading: isLoadingPrompts,
+    refetch: refetchPrompts,
+  } = useQuery({
+    queryKey: ["agent_prompts"],
+    queryFn: fetchAgentPrompts,
+  });
 
   // Fetch DAOs
   const { data: daos = [], isLoading: isLoadingDaos } = useQuery({
@@ -77,17 +103,6 @@ export function AgentPromptForm() {
   const { data: agents = [], isLoading: isLoadingAgents } = useQuery({
     queryKey: ["agents"],
     queryFn: fetchAgents,
-  });
-
-  // Fetch prompts for selected DAO
-  const {
-    data: prompts = [],
-    isLoading: isLoadingPrompts,
-    refetch: refetchPrompts,
-  } = useQuery({
-    queryKey: ["agent_prompts", selectedDaoId],
-    queryFn: () => fetchAgentPromptsByDao(selectedDaoId),
-    enabled: !!selectedDaoId,
   });
 
   // Create mutation
@@ -102,6 +117,7 @@ export function AgentPromptForm() {
       queryClient.invalidateQueries({ queryKey: ["agent_prompts"] });
       refetchPrompts();
       resetForm();
+      setIsDialogOpen(false);
     },
     onError: (error) => {
       toast({
@@ -128,6 +144,7 @@ export function AgentPromptForm() {
       });
       queryClient.invalidateQueries({ queryKey: ["agent_prompts"] });
       refetchPrompts();
+      setIsDialogOpen(false);
     },
     onError: (error) => {
       toast({
@@ -197,6 +214,8 @@ export function AgentPromptForm() {
       metadata: {},
     });
     setSelectedPromptId(null);
+    setSelectedDaoId("");
+    setSelectedAgentId("");
     setIsCreatingNew(false);
     setErrors({});
   };
@@ -217,6 +236,14 @@ export function AgentPromptForm() {
       newErrors.prompt_type = "Prompt type is required";
     }
 
+    if (!selectedDaoId) {
+      newErrors.dao_id = "DAO is required";
+    }
+
+    if (!selectedAgentId) {
+      newErrors.agent_id = "Agent is required";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -226,15 +253,6 @@ export function AgentPromptForm() {
     e.preventDefault();
 
     if (!validateForm()) {
-      return;
-    }
-
-    if (!selectedDaoId || !selectedAgentId) {
-      toast({
-        title: "Error",
-        description: "Please select a DAO and an agent",
-        variant: "destructive",
-      });
       return;
     }
 
@@ -255,11 +273,12 @@ export function AgentPromptForm() {
     }
   };
 
-  // Handle prompt selection
-  const handlePromptSelect = (promptId: string) => {
+  // Handle prompt selection for editing
+  const handleEditPrompt = (promptId: string) => {
     const selectedPrompt = prompts.find((p) => p.id === promptId);
     if (selectedPrompt) {
       setSelectedPromptId(promptId);
+      setSelectedDaoId(selectedPrompt.dao_id);
       setSelectedAgentId(selectedPrompt.agent_id);
       setIsCreatingNew(false);
 
@@ -273,6 +292,7 @@ export function AgentPromptForm() {
       });
 
       setErrors({});
+      setIsDialogOpen(true);
     }
   };
 
@@ -280,6 +300,7 @@ export function AgentPromptForm() {
   const handleCreateNew = () => {
     resetForm();
     setIsCreatingNew(true);
+    setIsDialogOpen(true);
   };
 
   // Handle deleting a prompt
@@ -287,14 +308,10 @@ export function AgentPromptForm() {
     if (selectedPromptId) {
       if (confirm("Are you sure you want to delete this prompt?")) {
         deleteMutation.mutate(selectedPromptId);
+        setIsDialogOpen(false);
       }
     }
   };
-
-  // Effect to reset form when DAO changes
-  useEffect(() => {
-    resetForm();
-  }, [selectedDaoId]);
 
   const isLoading =
     isLoadingDaos ||
@@ -304,156 +321,241 @@ export function AgentPromptForm() {
     updateMutation.isPending ||
     deleteMutation.isPending;
 
+  // Get DAO name by ID
+  const getDaoName = (daoId: string) => {
+    const dao = daos.find((d) => d.id === daoId);
+    return dao ? dao.name : "Unknown DAO";
+  };
+
+  // Get agent name by ID
+  const getAgentName = (agentId: string) => {
+    const agent = agents.find((a) => a.id === agentId);
+    return agent ? agent.name : "Unknown Agent";
+  };
+
+  // Format date
+  // const formatDate = (dateString: string) => {
+  //   return new Date(dateString).toLocaleDateString()
+  // }
+
   return (
     <Card className="border-none shadow-none bg-background/40 backdrop-blur">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-base sm:text-2xl font-medium">
-          DAO-Specific Agent Prompts
+          Agent Prompts
         </CardTitle>
-        <Separator className="my-2" />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleCreateNew}
+          disabled={isLoading}
+        >
+          <Plus className="h-4 w-4 mr-1" />
+          New Prompt
+        </Button>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium mb-2 block">Select DAO</label>
-            <Select
-              value={selectedDaoId}
-              onValueChange={(value) => setSelectedDaoId(value)}
-              disabled={isLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a DAO" />
-              </SelectTrigger>
-              <SelectContent>
-                {daos.map((dao) => (
-                  <SelectItem key={dao.id} value={dao.id}>
-                    {dao.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedDaoId && (
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-medium">Existing Prompts</label>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCreateNew}
-                  disabled={isLoading}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  New
-                </Button>
-              </div>
-              <Select
-                value={selectedPromptId || ""}
-                onValueChange={handlePromptSelect}
-                disabled={isLoading || isCreatingNew}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a prompt or create new" />
-                </SelectTrigger>
-                <SelectContent>
-                  {prompts.map((prompt) => (
-                    <SelectItem key={prompt.id} value={prompt.id}>
-                      {prompt.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+      <CardContent>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>DAO</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Prompt Text</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoadingPrompts ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                  </TableCell>
+                </TableRow>
+              ) : prompts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-4">
+                    No prompts found. Create a new one.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                prompts.map((prompt) => (
+                  <TableRow key={prompt.id}>
+                    <TableCell className="font-medium">{prompt.name}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{prompt.prompt_type}</Badge>
+                    </TableCell>
+                    <TableCell>{getDaoName(prompt.dao_id)}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={prompt.is_active ? "default" : "secondary"}
+                        className={
+                          prompt.is_active
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }
+                      >
+                        {prompt.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="max-w-md">
+                      <p className="truncate text-sm text-muted-foreground">
+                        {prompt.prompt_text}
+                      </p>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditPrompt(prompt.id)}
+                      >
+                        <Edit className="h-4 w-4" />
+                        <span className="sr-only">Edit</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPromptId(prompt.id);
+                          if (
+                            confirm(
+                              "Are you sure you want to delete this prompt?"
+                            )
+                          ) {
+                            deleteMutation.mutate(prompt.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
 
-        {selectedDaoId && (isCreatingNew || selectedPromptId) && (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Name</label>
-                <Input
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Prompt name"
-                />
-                {errors.name && (
-                  <p className="text-sm text-red-500">{errors.name}</p>
-                )}
-              </div>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>
+                {isCreatingNew ? "Create New Prompt" : "Edit Prompt"}
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Name</label>
+                  <Input
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Prompt name"
+                  />
+                  {errors.name && (
+                    <p className="text-sm text-red-500">{errors.name}</p>
+                  )}
+                </div>
 
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Select Agent
-                </label>
-                <Select
-                  value={selectedAgentId}
-                  onValueChange={setSelectedAgentId}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an agent" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {agents
-                      .filter((agent) => !agent.is_archived)
-                      .map((agent) => (
-                        <SelectItem key={agent.id} value={agent.id}>
-                          {agent.name}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Select DAO</label>
+                  <Select
+                    value={selectedDaoId}
+                    onValueChange={setSelectedDaoId}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a DAO" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {daos.map((dao) => (
+                        <SelectItem key={dao.id} value={dao.id}>
+                          {dao.name}
                         </SelectItem>
                       ))}
-                  </SelectContent>
-                </Select>
+                    </SelectContent>
+                  </Select>
+                  {errors.dao_id && (
+                    <p className="text-sm text-red-500">{errors.dao_id}</p>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Description</label>
-              <Input
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Prompt description"
-              />
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Select Agent</label>
+                  <Select
+                    value={selectedAgentId}
+                    onValueChange={setSelectedAgentId}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an agent" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {agents
+                        .filter((agent) => !agent.is_archived)
+                        .map((agent) => (
+                          <SelectItem key={agent.id} value={agent.id}>
+                            {agent.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.agent_id && (
+                    <p className="text-sm text-red-500">{errors.agent_id}</p>
+                  )}
+                </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Prompt Text</label>
-              <Textarea
-                name="prompt_text"
-                value={formData.prompt_text}
-                onChange={handleInputChange}
-                placeholder="Enter the prompt text"
-                className="min-h-[150px]"
-              />
-              {errors.prompt_text && (
-                <p className="text-sm text-red-500">{errors.prompt_text}</p>
-              )}
-            </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Prompt Type</label>
+                  <Select
+                    value={formData.prompt_type}
+                    onValueChange={(value) =>
+                      handleSelectChange("prompt_type", value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a prompt type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="system">System</SelectItem>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="assistant">Assistant</SelectItem>
+                      <SelectItem value="function">Function</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.prompt_type && (
+                    <p className="text-sm text-red-500">{errors.prompt_type}</p>
+                  )}
+                </div>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Prompt Type</label>
-                <Select
-                  value={formData.prompt_type}
-                  onValueChange={(value) =>
-                    handleSelectChange("prompt_type", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a prompt type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="system">System</SelectItem>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="assistant">Assistant</SelectItem>
-                    <SelectItem value="function">Function</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.prompt_type && (
-                  <p className="text-sm text-red-500">{errors.prompt_type}</p>
+                <label className="text-sm font-medium">Description</label>
+                <Input
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Prompt description"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Prompt Text</label>
+                <Textarea
+                  name="prompt_text"
+                  value={formData.prompt_text}
+                  onChange={handleInputChange}
+                  placeholder="Enter the prompt text"
+                  className="min-h-[150px]"
+                />
+                {errors.prompt_text && (
+                  <p className="text-sm text-red-500">{errors.prompt_text}</p>
                 )}
               </div>
 
@@ -471,29 +573,31 @@ export function AgentPromptForm() {
                   }
                 />
               </div>
-            </div>
 
-            <div className="flex justify-between">
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={
-                  isLoading || isCreatingNew || selectedPromptId === null
-                }
-              >
-                {deleteMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Trash2 className="h-4 w-4 mr-2" />
+              <DialogFooter>
+                {!isCreatingNew && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={handleDelete}
+                    disabled={isLoading}
+                    className="mr-auto"
+                  >
+                    {deleteMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-2" />
+                    )}
+                    Delete
+                  </Button>
                 )}
-                Delete
-              </Button>
-              <div className="space-x-2">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={resetForm}
+                  onClick={() => {
+                    resetForm();
+                    setIsDialogOpen(false);
+                  }}
                   disabled={isLoading}
                 >
                   Cancel
@@ -506,10 +610,10 @@ export function AgentPromptForm() {
                   )}
                   Save
                 </Button>
-              </div>
-            </div>
-          </form>
-        )}
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
