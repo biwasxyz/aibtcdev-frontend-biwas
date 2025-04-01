@@ -40,13 +40,17 @@ export function WalletInfoCard({
     }
   };
 
-  const formatBalance = (balance: string) => {
-    return (Number(balance) / 1_000_000).toFixed(6);
+  const formatStxBalance = (balance: string) => {
+    return (Number(balance) / 1_000_000).toFixed(2);
+  };
+
+  const formatTokenBalance = (balance: string) => {
+    return (Number(balance) / 1_000_000_00).toFixed(2);
   };
 
   return (
     <div className="p-4 rounded-xl bg-zinc-800/40 text-sm">
-      <h3 className="font-medium text-zinc-300 mb-3">Wallet</h3>
+      <h3 className="font-medium text-zinc-300 mb-3">Wallet Address</h3>
       {walletAddress ? (
         <>
           <button
@@ -68,7 +72,7 @@ export function WalletInfoCard({
               <div className="flex justify-between items-center">
                 <span className="text-zinc-400">STX Balance</span>
                 <span className="text-zinc-200">
-                  {formatBalance(walletBalance.stx.balance)} STX
+                  {formatStxBalance(walletBalance.stx.balance)} STX
                 </span>
               </div>
 
@@ -84,7 +88,7 @@ export function WalletInfoCard({
                         {tokenSymbol || "Token"}
                       </span>
                       <span className="text-zinc-200">
-                        {formatBalance(token.balance)}
+                        {formatTokenBalance(token.balance)}
                       </span>
                     </div>
                   );

@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { Loader2, Save, Plus, Trash2, Edit } from "lucide-react";
+import { Loader2, Save, Plus, Trash2, Edit, Wallet } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { WalletInfoCard } from "./agent-wallet-info";
 
 import { fetchDAOs } from "@/queries/daoQueries";
 import { fetchAgents } from "@/queries/agentQueries";
@@ -44,6 +45,8 @@ import {
   updateAgentPrompt,
   deleteAgentPrompt,
 } from "@/queries/agent-prompt-queries";
+import { useWalletStore } from "@/store/wallet";
+import { useSessionStore } from "@/store/session";
 
 export interface AgentPrompt {
   id: string;
@@ -62,6 +65,9 @@ export interface AgentPrompt {
 
 export function AgentPromptForm() {
   const queryClient = useQueryClient();
+  const { agentWallets, balances, fetchWallets } = useWalletStore();
+  const { userId } = useSessionStore();
+  const { toast } = useToast();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -78,10 +84,23 @@ export function AgentPromptForm() {
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
-  const { toast } = useToast();
 
   // Form errors
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Fetch wallet information when userId is available
+  useEffect(() => {
+    if (userId) {
+      fetchWallets(userId).catch((err) => {
+        console.error("Failed to fetch wallets:", err);
+        toast({
+          title: "Error",
+          description: "Failed to fetch wallet information",
+          variant: "destructive",
+        });
+      });
+    }
+  }, [userId, fetchWallets, toast]);
 
   // Fetch all prompts immediately
   const {
@@ -339,11 +358,48 @@ export function AgentPromptForm() {
   // Get Agent name by ID
   const getAgentName = (agentId: string) => {
     const agent = agents.find((a) => a.id === agentId);
-    return agent?.name;
+    return agent?.name || "Unknown Agent";
   };
+
+  // Get wallet information for an agent
+  const getAgentWalletInfo = (agentId: string) => {
+    if (!agentId) return { walletAddress: null, walletBalance: null };
+
+    const agentWallet = agentWallets.find(
+      (wallet) => wallet.agent_id === agentId
+    );
+
+    const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
+    const walletAddress =
+      network === "mainnet"
+        ? agentWallet?.mainnet_address
+        : agentWallet?.testnet_address;
+
+    const walletBalance = walletAddress ? balances[walletAddress] : null;
+
+    return { walletAddress, walletBalance };
+  };
+
+  // Get DAO Manager wallet info
+  const {
+    walletAddress: daoManagerWalletAddress,
+    walletBalance: daoManagerWalletBalance,
+  } = getAgentWalletInfo(daoManagerAgentId);
 
   return (
     <Card className="border-none shadow-none bg-background/40 backdrop-blur">
+      {daoManagerAgentId && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <Wallet className="h-4 w-4" />
+            <h3 className="text-sm font-medium">Agent Wallet</h3>
+          </div>
+          <WalletInfoCard
+            walletAddress={daoManagerWalletAddress}
+            walletBalance={daoManagerWalletBalance}
+          />
+        </div>
+      )}
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-base sm:text-2xl font-medium">
           Agent Prompts
@@ -359,6 +415,8 @@ export function AgentPromptForm() {
         </Button>
       </CardHeader>
       <CardContent>
+        {/* DAO Manager Wallet Info Card */}
+
         <div className="rounded-md border">
           <Table>
             <TableHeader>
@@ -492,15 +550,17 @@ export function AgentPromptForm() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* <div className="space-y-2">
+                <div className="space-y-2">
                   <label className="text-sm font-medium">Agent</label>
                   <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
-                    {isLoadingAgents && "(Loading...)"}
+                    {isLoadingAgents
+                      ? "(Loading...)"
+                      : getAgentName(daoManagerAgentId)}
                   </div>
                   {errors.agent_id && (
                     <p className="text-sm text-red-500">{errors.agent_id}</p>
                   )}
-                </div> */}
+                </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Prompt Type</label>
