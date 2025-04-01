@@ -390,10 +390,6 @@ export function AgentPromptForm() {
     <Card className="border-none shadow-none bg-background/40 backdrop-blur">
       {daoManagerAgentId && (
         <div className="mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <Wallet className="h-4 w-4" />
-            <h3 className="text-sm font-medium">Agent Wallet</h3>
-          </div>
           <WalletInfoCard
             walletAddress={daoManagerWalletAddress}
             walletBalance={daoManagerWalletBalance}

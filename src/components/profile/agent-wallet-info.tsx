@@ -1,7 +1,10 @@
 "use client";
+
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface WalletInfoCardProps {
   walletAddress?: string | null;
@@ -43,74 +46,100 @@ export function WalletInfoCard({
   };
 
   return (
-    <div className="p-4 rounded-xl bg-zinc-800/40 text-sm">
-      <h3 className="font-medium text-zinc-300 mb-3">Wallet Address</h3>
-      {walletAddress ? (
-        <>
-          <button
-            onClick={() => copyToClipboard(walletAddress)}
-            className="w-full flex items-center justify-between text-xs text-zinc-500 font-mono hover:text-zinc-300 transition-colors group mb-3"
-          >
-            <span>{walletAddress}</span>
-            <span className="text-zinc-600 group-hover:text-zinc-400">
-              {copiedAddress === walletAddress ? (
-                <Check className="h-3.5 w-3.5" />
-              ) : (
-                <Copy className="h-3.5 w-3.5" />
-              )}
-            </span>
-          </button>
-
-          {walletBalance && (
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-zinc-400">STX Balance</span>
-                <span className="text-zinc-200">
-                  {formatStxBalance(walletBalance.stx.balance)} STX
-                </span>
-              </div>
-
-              {Object.entries(walletBalance.fungible_tokens).map(
-                ([tokenId, token]) => {
-                  const [, tokenSymbol] = tokenId.split("::");
-                  return (
-                    <div
-                      key={tokenId}
-                      className="flex justify-between items-center"
-                    >
-                      <span className="text-zinc-400">
-                        {tokenSymbol || "Token"}
-                      </span>
-                      <span className="text-zinc-200">
-                        {formatTokenBalance(token.balance)}
-                      </span>
-                    </div>
-                  );
-                }
-              )}
-
-              {Object.entries(walletBalance.non_fungible_tokens).map(
-                ([tokenId, token]) => {
-                  const [, tokenSymbol] = tokenId.split("::");
-                  return (
-                    <div
-                      key={tokenId}
-                      className="flex justify-between items-center"
-                    >
-                      <span className="text-zinc-400">
-                        {tokenSymbol || "NFT"}
-                      </span>
-                      <span className="text-zinc-200">{token.count} items</span>
-                    </div>
-                  );
-                }
-              )}
+    <Card className="border-none shadow-none bg-background/40 backdrop-blur">
+      <CardHeader>
+        <CardTitle className="text-base sm:text-2xl font-medium">
+          Agent Wallet Information
+        </CardTitle>
+        <Separator className="my-2" />
+      </CardHeader>
+      <CardContent className="grid gap-6">
+        <div className="space-y-2">
+          <label className="text-sm text-muted-foreground">
+            Agent Wallet Address
+          </label>
+          {walletAddress ? (
+            <button
+              onClick={() => copyToClipboard(walletAddress)}
+              className="w-full flex items-center justify-between font-mono text-sm bg-muted/30 p-2 rounded-md hover:bg-muted/50 transition-colors group"
+            >
+              <span>{walletAddress}</span>
+              <span className="text-muted-foreground group-hover:text-foreground">
+                {copiedAddress === walletAddress ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" />
+                )}
+              </span>
+            </button>
+          ) : (
+            <div className="font-mono text-sm bg-muted/30 p-2 rounded-md text-muted-foreground">
+              No wallet address
             </div>
           )}
-        </>
-      ) : (
-        <div className="text-xs text-zinc-500 font-mono">No wallet address</div>
-      )}
-    </div>
+        </div>
+
+        {walletBalance && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm text-muted-foreground">
+                STX Balance
+              </label>
+              <div className="font-mono text-sm bg-muted/30 p-2 rounded-md">
+                {formatStxBalance(walletBalance.stx.balance)} STX
+              </div>
+            </div>
+
+            {Object.entries(walletBalance.fungible_tokens).length > 0 && (
+              <div className="space-y-2">
+                <label className="text-sm text-muted-foreground">
+                  Fungible Tokens
+                </label>
+                <div className="space-y-2">
+                  {Object.entries(walletBalance.fungible_tokens).map(
+                    ([tokenId, token]) => {
+                      const [, tokenSymbol] = tokenId.split("::");
+                      return (
+                        <div
+                          key={tokenId}
+                          className="flex justify-between items-center font-mono text-sm bg-muted/30 p-2 rounded-md"
+                        >
+                          <span>{tokenSymbol || "Token"}</span>
+                          <span>{formatTokenBalance(token.balance)}</span>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              </div>
+            )}
+
+            {Object.entries(walletBalance.non_fungible_tokens).length > 0 && (
+              <div className="space-y-2">
+                <label className="text-sm text-muted-foreground">
+                  Non-Fungible Tokens
+                </label>
+                <div className="space-y-2">
+                  {Object.entries(walletBalance.non_fungible_tokens).map(
+                    ([tokenId, token]) => {
+                      const [, tokenSymbol] = tokenId.split("::");
+                      return (
+                        <div
+                          key={tokenId}
+                          className="flex justify-between items-center font-mono text-sm bg-muted/30 p-2 rounded-md"
+                        >
+                          <span>{tokenSymbol || "NFT"}</span>
+                          <span>{token.count} items</span>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
