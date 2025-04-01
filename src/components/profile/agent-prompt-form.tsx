@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, Save, Plus, Trash2, Edit } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -75,7 +75,6 @@ export function AgentPromptForm() {
 
   // Selection state
   const [selectedDaoId, setSelectedDaoId] = useState<string>("");
-  const [selectedAgentId, setSelectedAgentId] = useState<string>("");
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
@@ -100,11 +99,22 @@ export function AgentPromptForm() {
     queryFn: fetchDAOs,
   });
 
-  // Fetch Agents
+  // Fetch the DAO Manager agent
   const { data: agents = [], isLoading: isLoadingAgents } = useQuery({
     queryKey: ["agents"],
     queryFn: fetchAgents,
   });
+
+  // Store the DAO Manager agent ID
+  const [daoManagerAgentId, setDaoManagerAgentId] = useState<string>("");
+
+  // Set the DAO Manager agent ID once it's loaded
+  useEffect(() => {
+    if (agents.length > 0) {
+      // Since we're filtering for "DAO Manager" in the query, we can use the first item
+      setDaoManagerAgentId(agents[0]?.id || "");
+    }
+  }, [agents]);
 
   // Create mutation
   const createMutation = useMutation({
@@ -216,7 +226,6 @@ export function AgentPromptForm() {
     });
     setSelectedPromptId(null);
     setSelectedDaoId("");
-    setSelectedAgentId("");
     setIsCreatingNew(false);
     setErrors({});
   };
@@ -241,8 +250,8 @@ export function AgentPromptForm() {
       newErrors.dao_id = "DAO is required";
     }
 
-    if (!selectedAgentId) {
-      newErrors.agent_id = "Agent is required";
+    if (!daoManagerAgentId) {
+      newErrors.agent_id = "DAO Manager agent not found";
     }
 
     setErrors(newErrors);
@@ -260,7 +269,7 @@ export function AgentPromptForm() {
     const promptData = {
       ...formData,
       dao_id: selectedDaoId,
-      agent_id: selectedAgentId,
+      agent_id: daoManagerAgentId, // Always use the DAO Manager agent
       metadata: formData.metadata || {},
     };
 
@@ -280,7 +289,6 @@ export function AgentPromptForm() {
     if (selectedPrompt) {
       setSelectedPromptId(promptId);
       setSelectedDaoId(selectedPrompt.dao_id);
-      setSelectedAgentId(selectedPrompt.agent_id);
       setIsCreatingNew(false);
 
       setFormData({
@@ -328,6 +336,12 @@ export function AgentPromptForm() {
     return dao ? dao.name : "Unknown DAO";
   };
 
+  // Get Agent name by ID
+  const getAgentName = (agentId: string) => {
+    const agent = agents.find((a) => a.id === agentId);
+    return agent?.name;
+  };
+
   return (
     <Card className="border-none shadow-none bg-background/40 backdrop-blur">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -352,6 +366,7 @@ export function AgentPromptForm() {
                 <TableHead>Name</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>DAO</TableHead>
+                <TableHead>Agent</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Prompt Text</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -360,13 +375,13 @@ export function AgentPromptForm() {
             <TableBody>
               {isLoadingPrompts ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={7} className="text-center py-4">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : prompts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-4">
+                  <TableCell colSpan={7} className="text-center py-4">
                     No prompts found. Create a new one.
                   </TableCell>
                 </TableRow>
@@ -378,6 +393,7 @@ export function AgentPromptForm() {
                       <Badge variant="outline">{prompt.prompt_type}</Badge>
                     </TableCell>
                     <TableCell>{getDaoName(prompt.dao_id)}</TableCell>
+                    <TableCell>{getAgentName(prompt.agent_id)}</TableCell>
                     <TableCell>
                       <Badge
                         variant={prompt.is_active ? "default" : "secondary"}
@@ -476,30 +492,15 @@ export function AgentPromptForm() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Select Agent</label>
-                  <Select
-                    value={selectedAgentId}
-                    onValueChange={setSelectedAgentId}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an agent" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {agents
-                        .filter((agent) => !agent.is_archived)
-                        .map((agent) => (
-                          <SelectItem key={agent.id} value={agent.id}>
-                            {agent.name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                {/* <div className="space-y-2">
+                  <label className="text-sm font-medium">Agent</label>
+                  <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+                    {isLoadingAgents && "(Loading...)"}
+                  </div>
                   {errors.agent_id && (
                     <p className="text-sm text-red-500">{errors.agent_id}</p>
                   )}
-                </div>
+                </div> */}
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Prompt Type</label>
