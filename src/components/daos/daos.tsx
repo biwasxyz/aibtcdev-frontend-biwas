@@ -13,8 +13,6 @@ import {
 } from "@/components/ui/select";
 import { DAOTable } from "./daos-table";
 import type { DAO, SortField } from "@/types/supabase";
-import { createDaoAgent } from "../agents/dao-agent";
-import { useToast } from "@/hooks/use-toast";
 import {
   fetchDAOs,
   fetchTokens,
@@ -26,31 +24,6 @@ import {
 export default function DAOs() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<SortField>("newest");
-  const { toast } = useToast();
-  const agentInitialized = useRef(false);
-
-  // Initialize DAO agent
-  const initializeAgent = useCallback(async () => {
-    if (agentInitialized.current) return;
-
-    try {
-      const agent = await createDaoAgent();
-      if (agent) {
-        toast({
-          title: "DAO Agent Initialized",
-          description: "Your DAO agent has been set up successfully.",
-          variant: "default",
-        });
-        agentInitialized.current = true;
-      }
-    } catch (error) {
-      console.error("Error initializing DAO agent:", error);
-    }
-  }, [toast]);
-
-  useEffect(() => {
-    initializeAgent();
-  }, [initializeAgent]);
 
   // Fetch DAOs with TanStack Query
   const { data: daos, isLoading: isLoadingDAOs } = useQuery({

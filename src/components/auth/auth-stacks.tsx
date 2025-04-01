@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -15,6 +15,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import dynamic from "next/dynamic";
 import { connectWallet, requestSignature } from "./stacks-provider";
+import { createDaoAgent } from "../agents/dao-agent";
 
 // Dynamically import StacksProvider component
 const StacksProvider = dynamic(() => import("./stacks-provider"), {
@@ -54,6 +55,20 @@ export default function StacksAuth() {
         });
 
         if (signUpError) throw signUpError;
+
+        // Initialize DAO agent only during signup
+        try {
+          const agent = await createDaoAgent();
+          if (agent) {
+            toast({
+              title: "DAO Agent Initialized",
+              description: "Your DAO agent has been set up successfully.",
+              variant: "default",
+            });
+          }
+        } catch (error) {
+          console.error("Error initializing DAO agent:", error);
+        }
 
         toast({
           description: "Successfully signed up...",
@@ -385,7 +400,6 @@ export default function StacksAuth() {
                   token and you may lose the entire value of your tokens.
                 </p>
               </section>
-              (Previous code remains the same, with this additional section)
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
                   AIBTC makes no promises to the value of any token
