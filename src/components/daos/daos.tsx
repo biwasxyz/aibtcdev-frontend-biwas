@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search } from "lucide-react";
