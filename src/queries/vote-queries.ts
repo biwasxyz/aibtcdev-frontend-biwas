@@ -12,6 +12,7 @@ export interface Vote {
     proposal_title: string
     reasoning: string
     tx_id: string
+    amount: number | null
 }
 
 /**
@@ -55,7 +56,8 @@ export async function fetchVotes(): Promise<Vote[]> {
             answer, 
             proposal_id, 
             reasoning, 
-            tx_id
+            tx_id,
+            amount
         `)
         .in("agent_id", agentIds)
         .order("created_at", { ascending: false })
@@ -96,6 +98,7 @@ export async function fetchVotes(): Promise<Vote[]> {
         proposal_title: proposalMap.get(vote.proposal_id) || "Unknown Proposal",
         reasoning: vote.reasoning,
         tx_id: vote.tx_id,
+        amount: vote.amount,
     }))
 
     return transformedVotes

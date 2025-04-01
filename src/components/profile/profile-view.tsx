@@ -94,6 +94,9 @@ export function ProfileView() {
                         Proposal
                       </TableHead>
                       <TableHead className="whitespace-nowrap">Vote</TableHead>
+                      <TableHead className="whitespace-nowrap">
+                        Amount
+                      </TableHead>
                       <TableHead className="whitespace-nowrap">Date</TableHead>
                       <TableHead className="whitespace-nowrap">
                         Reasoning
@@ -104,7 +107,7 @@ export function ProfileView() {
                   <TableBody>
                     {votes.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-4">
+                        <TableCell colSpan={8} className="text-center py-4">
                           No voting history found
                         </TableCell>
                       </TableRow>
@@ -135,6 +138,11 @@ export function ProfileView() {
                                 No
                               </span>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            {vote.amount !== null
+                              ? (vote.amount / 1_000_000_00).toFixed(2)
+                              : "-"}
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
                             {formatDistanceToNow(new Date(vote.created_at), {
