@@ -51,7 +51,7 @@ export function ProfileView() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
         {/* Wallet Information */}
-        <Card className="border-none shadow-none bg-background/40 backdrop-blur">
+        <Card className="border-none shadow-none bg-background/40 backdrop-blur mb-6">
           <CardHeader>
             <CardTitle className="text-base sm:text-2xl font-medium">
               Wallet Information
@@ -69,12 +69,7 @@ export function ProfileView() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Agent Prompts Form */}
-        <AgentPromptForm />
-
-        {/* Detailed Voting History */}
-        <Card className="border-none shadow-none bg-background/40 backdrop-blur">
+        <Card className="border-none shadow-none bg-background/40 backdrop-blur mb-6">
           <CardHeader>
             <CardTitle className="text-base sm:text-2xl font-medium">
               Voting History
@@ -89,7 +84,7 @@ export function ProfileView() {
                   : "Failed to load voting history"}
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto mt-2">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -198,6 +193,12 @@ export function ProfileView() {
             )}
           </CardContent>
         </Card>
+        {/* Agent Prompts Form */}
+        <div className="mb-6">
+          <AgentPromptForm />
+        </div>
+
+        {/* Detailed Voting History */}
       </div>
     </div>
   );

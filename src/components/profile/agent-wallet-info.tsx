@@ -50,9 +50,11 @@ export function WalletInfoCard({
   };
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-muted/40 pb-3">
-        <CardTitle className="text-lg font-medium">Agent Wallet</CardTitle>
+    <Card className="border-none shadow-none bg-background/40 backdrop-blur overflow-hidden">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base sm:text-2xl font-medium">
+          Agent Wallet
+        </CardTitle>
       </CardHeader>
       <CardContent className="p-4 space-y-4">
         {walletAddress ? (
@@ -90,14 +92,14 @@ export function WalletInfoCard({
             {Object.entries(walletBalance.fungible_tokens).length > 0 && (
               <div className="space-y-2">
                 <h3 className="text-sm font-medium">Tokens</h3>
-                <div className="grid gap-1">
+                <div className="grid gap-2">
                   {Object.entries(walletBalance.fungible_tokens).map(
                     ([tokenId, token]) => {
                       const [, tokenSymbol] = tokenId.split("::");
                       return (
                         <div
                           key={tokenId}
-                          className="flex justify-between items-center p-2 bg-muted/10 rounded-md"
+                          className="flex justify-between items-center p-3 bg-muted/20 rounded-md"
                         >
                           <span className="text-xs">
                             {tokenSymbol || "Token"}
@@ -119,14 +121,14 @@ export function WalletInfoCard({
             {Object.entries(walletBalance.non_fungible_tokens).length > 0 && (
               <div className="space-y-2">
                 <h3 className="text-sm font-medium">NFTs</h3>
-                <div className="grid gap-1">
+                <div className="grid gap-2">
                   {Object.entries(walletBalance.non_fungible_tokens).map(
                     ([tokenId, token]) => {
                       const [, tokenSymbol] = tokenId.split("::");
                       return (
                         <div
                           key={tokenId}
-                          className="flex justify-between items-center p-2 bg-muted/10 rounded-md"
+                          className="flex justify-between items-center p-3 bg-muted/20 rounded-md"
                         >
                           <span className="text-xs">
                             {tokenSymbol || "NFT"}

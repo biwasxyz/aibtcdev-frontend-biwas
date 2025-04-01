@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { Loader2, Save, Plus, Trash2, Edit, Wallet } from "lucide-react";
+import { Loader2, Save, Plus, Trash2, Edit } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -413,7 +413,7 @@ export function AgentPromptForm() {
       <CardContent>
         {/* DAO Manager Wallet Info Card */}
 
-        <div className="rounded-md border">
+        <div className="rounded-md border mt-2">
           <Table>
             <TableHeader>
               <TableRow>
@@ -453,8 +453,8 @@ export function AgentPromptForm() {
                         variant={prompt.is_active ? "default" : "secondary"}
                         className={
                           prompt.is_active
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800"
+                            ? "bg-green-500/20 text-green-700 hover:bg-green-500/20"
+                            : "bg-muted text-muted-foreground hover:bg-muted"
                         }
                       >
                         {prompt.is_active ? "Active" : "Inactive"}
