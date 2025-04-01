@@ -5,8 +5,8 @@ export const fetchAgents = async (): Promise<Agent[]> => {
     const { data, error } = await supabase
         .from("agents")
         .select("*")
+        .eq("name", "DAO Manager")
         .order("is_archived", { ascending: true })
-        .order("name", { ascending: true })
 
     if (error) {
         throw error
@@ -14,4 +14,3 @@ export const fetchAgents = async (): Promise<Agent[]> => {
 
     return data
 }
-

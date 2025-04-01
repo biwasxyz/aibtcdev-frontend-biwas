@@ -18,9 +18,9 @@ import { useSessionStore } from "@/store/session";
 import { useWalletStore } from "@/store/wallet";
 import { fetchDAOExtensions, fetchToken } from "@/queries/daoQueries";
 import type { DAO, Token, Extension } from "@/types/supabase";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { WalletBalance, WalletWithAgent } from "@/store/wallet";
+import type { WalletBalance, WalletWithAgent } from "@/store/wallet";
+import AuthButton from "../home/auth-button";
 
 interface DAOChatModalProps {
   daoId: string;
@@ -42,10 +42,9 @@ export function DAOBuyModal({
 }: DAOChatModalProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [currentAmount, setCurrentAmount] = useState(presetAmount);
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
   const setOpen = setControlledOpen || setUncontrolledOpen;
-
-  const { toast } = useToast();
 
   const {
     isLoading: isChatLoading,
@@ -57,6 +56,16 @@ export function DAOBuyModal({
 
   const { accessToken } = useSessionStore();
   const { balances, userWallet, agentWallets } = useWalletStore();
+
+  const { data: tokenData, isLoading: isTokenLoading } = useQuery({
+    queryKey: ["token", daoId],
+    queryFn: () => fetchToken(daoId),
+    staleTime: 600000,
+    enabled: open && !token,
+  });
+
+  // Add this line near the beginning of the component, after the variable declarations
+  const tokenName = tokenData?.symbol || token?.symbol || "DAO";
 
   useEffect(() => {
     // Update current amount when presetAmount changes
@@ -70,13 +79,6 @@ export function DAOBuyModal({
     queryFn: () => fetchDAOExtensions(daoId),
     staleTime: 600000,
     enabled: open,
-  });
-
-  const { data: tokenData, isLoading: isTokenLoading } = useQuery({
-    queryKey: ["token", daoId],
-    queryFn: () => fetchToken(daoId),
-    staleTime: 600000,
-    enabled: open && !token,
   });
 
   const memoizedConnect = useCallback(
@@ -110,11 +112,8 @@ export function DAOBuyModal({
   };
 
   const handleSendMessage = () => {
-    toast({
-      title: "Message sent successfully",
-      description: "The agent will receive funds shortly.",
-    });
-    setOpen(false);
+    setPurchaseSuccess(true);
+    // Don't close the modal immediately, let the user see the success state
   };
 
   // Format the balance from microSTX to STX with 6 decimal places
@@ -171,14 +170,50 @@ export function DAOBuyModal({
   const btcValue = satoshiToBTC(currentAmount);
 
   const renderBuySection = () => {
+    if (purchaseSuccess) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-10 w-10 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <h3 className="text-2xl font-bold mb-2">Transaction Successful!</h3>
+          <p className="text-muted-foreground mb-6">
+            The agent will receive {currentAmount} {tokenName} shortly.
+          </p>
+          <Button
+            onClick={() => {
+              setPurchaseSuccess(false);
+              setOpen(false);
+            }}
+            className="w-full max-w-xs"
+          >
+            Close
+          </Button>
+        </div>
+      );
+    }
+
     if (!accessToken) {
       return (
         <div className="flex items-center justify-center h-full p-6">
           <div className="text-center">
-            <p className="text-lg mb-6">Please sign in to buy tokens</p>
-            <Button variant="outline" size="lg" onClick={() => setOpen(false)}>
-              Close
-            </Button>
+            <p className="text-lg mb-6">
+              Please connect your wallet to buy tokens
+            </p>
+            <AuthButton />
           </div>
         </div>
       );
@@ -196,7 +231,7 @@ export function DAOBuyModal({
     const tokenDexExtension = daoExtensions?.find(
       (ext: Extension) => ext.type === "TOKEN_DEX"
     );
-    const tokenName = tokenData?.symbol || "DAO";
+    // Using the component-level tokenName variable
 
     return (
       <div className="flex flex-col h-full">
@@ -302,7 +337,11 @@ export function DAOBuyModal({
     );
   };
 
-  const tokenName = tokenData?.symbol || "DAO";
+  useEffect(() => {
+    if (!open) {
+      setPurchaseSuccess(false);
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -310,8 +349,7 @@ export function DAOBuyModal({
       <DialogContent className="sm:max-w-[600px] max-h-[85vh] h-[650px] p-0 rounded-lg">
         <DialogTitle className="sr-only">Buy {tokenName} Tokens</DialogTitle>
         <DialogDescription className="sr-only">
-          Purchase {tokenName} tokens with LucideBitcoin through your selected
-          agent
+          Purchase {tokenName} tokens with sBtc through your selected agent
         </DialogDescription>
         <div className="h-full overflow-hidden">{renderBuySection()}</div>
       </DialogContent>

@@ -75,7 +75,7 @@ export default function StacksComponents({
       <DialogTrigger asChild>
         <Button size="sm" className="text-zinc-400 hover:text-white">
           <BsRobot className="h-4 w-4 mr-2" />
-          Fund Agent
+          Send STX to this Agent
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
