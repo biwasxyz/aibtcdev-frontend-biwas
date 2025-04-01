@@ -19,12 +19,6 @@ export function WalletInfoCard({
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const truncateAddress = (address: string) => {
-    if (!address) return "";
-    if (address.length <= 10) return address;
-    return `${address.slice(0, 5)}...${address.slice(-5)}`;
-  };
-
   const copyToClipboard = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
@@ -57,7 +51,7 @@ export function WalletInfoCard({
             onClick={() => copyToClipboard(walletAddress)}
             className="w-full flex items-center justify-between text-xs text-zinc-500 font-mono hover:text-zinc-300 transition-colors group mb-3"
           >
-            <span>{truncateAddress(walletAddress)}</span>
+            <span>{walletAddress}</span>
             <span className="text-zinc-600 group-hover:text-zinc-400">
               {copiedAddress === walletAddress ? (
                 <Check className="h-3.5 w-3.5" />
