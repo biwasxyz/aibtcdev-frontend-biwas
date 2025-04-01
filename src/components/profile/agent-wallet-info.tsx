@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 interface WalletInfoCardProps {
   walletAddress?: string | null;
@@ -26,6 +26,10 @@ export function WalletInfoCard({
     try {
       await navigator.clipboard.writeText(address);
       setCopiedAddress(address);
+      toast({
+        title: "Address copied",
+        description: "Wallet address copied to clipboard",
+      });
       setTimeout(() => setCopiedAddress(null), 2000);
     } catch (err) {
       console.error("Failed to copy address:", err);
@@ -46,66 +50,64 @@ export function WalletInfoCard({
   };
 
   return (
-    <Card className="border-none shadow-none bg-background/40 backdrop-blur">
-      <CardHeader>
-        <CardTitle className="text-base sm:text-2xl font-medium">
-          Agent Wallet Information
-        </CardTitle>
-        <Separator className="my-2" />
+    <Card className="overflow-hidden">
+      <CardHeader className="bg-muted/40 pb-3">
+        <CardTitle className="text-lg font-medium">Agent Wallet</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-6">
-        <div className="space-y-2">
-          <label className="text-sm text-muted-foreground">
-            Agent Wallet Address
-          </label>
-          {walletAddress ? (
+      <CardContent className="p-4 space-y-4">
+        {walletAddress ? (
+          <div className="flex items-center justify-between gap-2 bg-muted/20 p-3 rounded-md">
+            <div className="truncate font-mono text-xs sm:text-sm">
+              {walletAddress}
+            </div>
             <button
               onClick={() => copyToClipboard(walletAddress)}
-              className="w-full flex items-center justify-between font-mono text-sm bg-muted/30 p-2 rounded-md hover:bg-muted/50 transition-colors group"
+              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Copy wallet address"
             >
-              <span>{walletAddress}</span>
-              <span className="text-muted-foreground group-hover:text-foreground">
-                {copiedAddress === walletAddress ? (
-                  <Check className="h-3.5 w-3.5" />
-                ) : (
-                  <Copy className="h-3.5 w-3.5" />
-                )}
-              </span>
+              {copiedAddress === walletAddress ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
             </button>
-          ) : (
-            <div className="font-mono text-sm bg-muted/30 p-2 rounded-md text-muted-foreground">
-              No wallet address
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="text-sm text-muted-foreground p-3 bg-muted/20 rounded-md">
+            No wallet address
+          </div>
+        )}
 
         {walletBalance && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">
-                STX Balance
-              </label>
-              <div className="font-mono text-sm bg-muted/30 p-2 rounded-md">
+          <div className="grid gap-3">
+            <div className="flex items-center justify-between p-3 bg-muted/20 rounded-md">
+              <span className="text-sm font-medium">STX Balance</span>
+              <Badge variant="outline" className="font-mono">
                 {formatStxBalance(walletBalance.stx.balance)} STX
-              </div>
+              </Badge>
             </div>
 
             {Object.entries(walletBalance.fungible_tokens).length > 0 && (
               <div className="space-y-2">
-                <label className="text-sm text-muted-foreground">
-                  Fungible Tokens
-                </label>
-                <div className="space-y-2">
+                <h3 className="text-sm font-medium">Tokens</h3>
+                <div className="grid gap-1">
                   {Object.entries(walletBalance.fungible_tokens).map(
                     ([tokenId, token]) => {
                       const [, tokenSymbol] = tokenId.split("::");
                       return (
                         <div
                           key={tokenId}
-                          className="flex justify-between items-center font-mono text-sm bg-muted/30 p-2 rounded-md"
+                          className="flex justify-between items-center p-2 bg-muted/10 rounded-md"
                         >
-                          <span>{tokenSymbol || "Token"}</span>
-                          <span>{formatTokenBalance(token.balance)}</span>
+                          <span className="text-xs">
+                            {tokenSymbol || "Token"}
+                          </span>
+                          <Badge
+                            variant="secondary"
+                            className="font-mono text-xs"
+                          >
+                            {formatTokenBalance(token.balance)}
+                          </Badge>
                         </div>
                       );
                     }
@@ -116,20 +118,25 @@ export function WalletInfoCard({
 
             {Object.entries(walletBalance.non_fungible_tokens).length > 0 && (
               <div className="space-y-2">
-                <label className="text-sm text-muted-foreground">
-                  Non-Fungible Tokens
-                </label>
-                <div className="space-y-2">
+                <h3 className="text-sm font-medium">NFTs</h3>
+                <div className="grid gap-1">
                   {Object.entries(walletBalance.non_fungible_tokens).map(
                     ([tokenId, token]) => {
                       const [, tokenSymbol] = tokenId.split("::");
                       return (
                         <div
                           key={tokenId}
-                          className="flex justify-between items-center font-mono text-sm bg-muted/30 p-2 rounded-md"
+                          className="flex justify-between items-center p-2 bg-muted/10 rounded-md"
                         >
-                          <span>{tokenSymbol || "NFT"}</span>
-                          <span>{token.count} items</span>
+                          <span className="text-xs">
+                            {tokenSymbol || "NFT"}
+                          </span>
+                          <Badge
+                            variant="secondary"
+                            className="font-mono text-xs"
+                          >
+                            {token.count}
+                          </Badge>
                         </div>
                       );
                     }
