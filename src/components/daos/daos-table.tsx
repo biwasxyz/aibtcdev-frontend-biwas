@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/tooltip";
 import { DAOBuyToken } from "./dao-buy-token";
 import { Button } from "../ui/button";
+import { createDaoSlug } from "@/lib/url-helpers";
 
 interface DAOTableProps {
   daos: DAO[];
@@ -210,7 +211,7 @@ export const DAOTable = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Link
-                          href={`/daos/${encodeURIComponent(dao.name)}`}
+                          href={`/daos/${createDaoSlug(dao.name)}`}
                           className="font-medium hover:underline hover:text-primary text-sm"
                         >
                           {truncateName(dao.name)}
@@ -244,7 +245,7 @@ export const DAOTable = ({
               {dao?.name === "FACES" ||
               dao?.name === "MEDIA2" ||
               dao?.name === "MEDIA3" ? (
-                <DAOBuyToken daoId={encodeURIComponent(dao.name)} />
+                <DAOBuyToken daoId={createDaoSlug(dao.name)} />
               ) : (
                 <Button className="cursor-not-allowed" disabled>
                   Participate.
@@ -385,7 +386,7 @@ export const DAOTable = ({
                     key={dao.id}
                     className="border-b hover:bg-muted/30 transition-colors"
                     onClick={() =>
-                      (window.location.href = `/daos/${encodeURIComponent(
+                      (window.location.href = `/daos/${createDaoSlug(
                         dao.name
                       )}`)
                     }
@@ -401,6 +402,7 @@ export const DAOTable = ({
                               token?.image_url ||
                               dao.image_url ||
                               "/placeholder.svg?height=32&width=32" ||
+                              "/placeholder.svg" ||
                               "/placeholder.svg"
                             }
                             alt={dao.name}
@@ -415,9 +417,7 @@ export const DAOTable = ({
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Link
-                                    href={`/daos/${encodeURIComponent(
-                                      dao.name
-                                    )}`}
+                                    href={`/daos/${createDaoSlug(dao.name)}`}
                                     className="font-medium hover:underline text-sm"
                                   >
                                     {truncateName(dao.name)}
@@ -527,7 +527,7 @@ export const DAOTable = ({
                         {dao?.name === "FACES" ||
                         dao?.name === "MEDIA2" ||
                         dao?.name === "MEDIA3" ? (
-                          <DAOBuyToken daoId={dao.id} />
+                          <DAOBuyToken daoId={createDaoSlug(dao.id)} />
                         ) : (
                           <Button className="cursor-not-allowed" disabled>
                             20k Sats
