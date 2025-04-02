@@ -83,11 +83,7 @@ export function AgentPromptForm() {
   }, [userId, fetchWallets, toast]);
 
   // Fetch all prompts
-  const {
-    data: prompts = [],
-    isLoading: isLoadingPrompts,
-    refetch: refetchPrompts,
-  } = useQuery({
+  const { data: prompts = [], isLoading: isLoadingPrompts } = useQuery({
     queryKey: ["prompts"],
     queryFn: fetchAgentPrompts,
   });
@@ -402,7 +398,7 @@ export function AgentPromptForm() {
             <TableHeader>
               <TableRow>
                 <TableHead>DAO</TableHead>
-                <TableHead>Individual Token Balances</TableHead>
+                <TableHead> Token Balances</TableHead>
                 <TableHead>Prompt Status</TableHead>
                 <TableHead>Prompt Text</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
