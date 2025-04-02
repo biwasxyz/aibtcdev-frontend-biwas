@@ -78,8 +78,8 @@ export default function ProposalsPage() {
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-2">DAO Not Found</h2>
           <p className="text-muted-foreground">
-            Could not find a DAO with the name "
-            {decodeURIComponent(encodedName)}"
+            Could not find a DAO with the name &apos;
+            {decodeURIComponent(encodedName)}&apos;
           </p>
         </div>
       </div>

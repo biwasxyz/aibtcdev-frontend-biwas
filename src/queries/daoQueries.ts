@@ -314,23 +314,20 @@ export const fetchProposals = async (daoId: string): Promise<Proposal[]> => {
 
 export const fetchDAOByName = async (encodedName: string): Promise<DAO | null> => {
     // Decode the URL-encoded name
-    const name = decodeURIComponent(encodedName);
+    const name = decodeURIComponent(encodedName)
 
-    console.log("Fetching DAO with name:", name); // Add this for debugging
-
-    // Query by name, not by ID
-    let { data } = await supabase
+    const { data } = await supabase
         .from("daos")
         .select("*")
-        .eq("name", name) // Use name column, not id
+        .eq("name", name)
         .eq("is_broadcasted", true)
         .single();
 
 
     if (!data) {
-        console.error("No DAO found with name:", name);
-        return null;
+        console.error("No DAO found with name:", name)
+        return null
     }
     console.log(data)
-    return data;
-};
+    return data
+}
