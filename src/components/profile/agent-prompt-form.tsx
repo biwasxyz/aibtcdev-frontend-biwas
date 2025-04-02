@@ -28,7 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { WalletInfoCard } from "./agent-wallet-info";
 
-import { fetchDAOs } from "@/queries/daoQueries";
+import { fetchAllDAOs } from "@/queries/daoQueries";
 import { fetchAgents } from "@/queries/agentQueries";
 import {
   fetchAgentPrompts,
@@ -103,7 +103,7 @@ export function AgentPromptForm() {
   // Fetch DAOs
   const { data: daos = [], isLoading: isLoadingDaos } = useQuery({
     queryKey: ["daos"],
-    queryFn: fetchDAOs,
+    queryFn: fetchAllDAOs,
   });
 
   // Fetch the DAO Manager agent
