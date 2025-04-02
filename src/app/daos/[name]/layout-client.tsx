@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { BsGlobe, BsTwitterX, BsTelegram } from "react-icons/bs";
 import {
-  fetchDAO,
   fetchToken,
   fetchDAOExtensions,
   fetchMarketStats,
@@ -26,6 +25,7 @@ import {
   fetchTokenPrice,
   fetchHolders,
   fetchProposals,
+  fetchDAOByName,
 } from "@/queries/daoQueries";
 import { DAOChatButton } from "@/components/daos/dao-chat-button";
 import { Button } from "@/components/ui/button";
@@ -43,34 +43,37 @@ import { DAOCreationDate } from "@/components/daos/dao-creation-date";
 
 export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   const params = useParams();
-  const id = params.id as string;
+  const encodedName = params.name as string; // Changed from id to name
   const pathname = usePathname();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
-  // Determine which tab is active
-  const isProposals = pathname === `/daos/${id}`;
-  const isExtensions = pathname === `/daos/${id}/extensions`;
-  const isHolders = pathname === `/daos/${id}/holders`;
-
-  // Fetch DAO and token data
-  const { data: dao, isLoading: isLoadingDAO } = useQuery({
-    queryKey: ["dao", id],
-    queryFn: () => fetchDAO(id),
+  // First, fetch the DAO by name to get its ID
+  const { data: dao, isLoading: isLoadingDAOByName } = useQuery({
+    queryKey: ["dao", encodedName],
+    queryFn: () => fetchDAOByName(encodedName),
     staleTime: 600000, // 10 minutes
   });
 
+  const id = dao?.id; // Get the ID from the fetched DAO
+
+  // Determine which tab is active - update paths to use name instead of id
+  const isProposals = pathname === `/daos/${encodedName}`;
+  const isExtensions = pathname === `/daos/${encodedName}/extensions`;
+  const isHolders = pathname === `/daos/${encodedName}/holders`;
+
+  // Fetch token data - only if we have the DAO ID
   const { data: token, isLoading: isLoadingToken } = useQuery({
     queryKey: ["token", id],
-    queryFn: () => fetchToken(id),
-    enabled: !!dao,
+    queryFn: () => fetchToken(id!),
+    enabled: !!id, // Only run if we have the DAO ID
     staleTime: 600000, // 10 minutes
   });
 
-  // Fetch extensions data
+  // Fetch extensions data - only if we have the DAO ID
   const { data: extensions, isLoading: isLoadingExtensions } = useQuery({
     queryKey: ["extensions", id],
-    queryFn: () => fetchDAOExtensions(id),
-    enabled: !!dao,
+    queryFn: () => fetchDAOExtensions(id!),
+    enabled: !!id, // Only run if we have the DAO ID
     staleTime: 600000, // 10 minutes
   });
 
@@ -97,8 +100,8 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   // Fetch proposals
   const { data: proposals, isLoading: isLoadingProposals } = useQuery({
     queryKey: ["proposals", id],
-    queryFn: () => fetchProposals(id),
-    enabled: !!dao,
+    queryFn: () => fetchProposals(id!),
+    enabled: !!id, // Only run if we have the DAO ID
     staleTime: 600000, // 10 minutes
   });
 
@@ -132,7 +135,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   );
 
   // Check if we're loading basic DAO info
-  const isBasicLoading = isLoadingDAO || isLoadingToken;
+  const isBasicLoading = isLoadingDAOByName || isLoadingToken;
 
   // Check if we're loading overview-specific data
   const isOverviewLoading =
@@ -246,7 +249,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               {dao?.name === "FACES" ||
               dao?.name === "MEDIA2" ||
               dao?.name === "MEDIA3" ? (
-                <DAOChatButton daoId={id} />
+                <DAOChatButton daoId={id!} />
               ) : (
                 <Button className="cursor-not-allowed" disabled>
                   Participate
@@ -393,7 +396,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         {/* Navigation Tabs - Mobile */}
         <div className="block sm:hidden border-b border-border overflow-x-auto mb-4">
           <div className="flex whitespace-nowrap">
-            <Link href={`/daos/${id}/proposals`} className="mr-4">
+            <Link href={`/daos/${encodedName}`} className="mr-4">
               <div
                 className={`flex items-center gap-1 pb-2 ${
                   isProposals
@@ -405,7 +408,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                 <span className="text-xs font-medium">Proposals</span>
               </div>
             </Link>
-            <Link href={`/daos/${id}/extensions`} className="mr-4">
+            <Link href={`/daos/${encodedName}/extensions`} className="mr-4">
               <div
                 className={`flex items-center gap-1 pb-2 ${
                   isExtensions
@@ -417,7 +420,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                 <span className="text-xs font-medium">Extensions</span>
               </div>
             </Link>
-            <Link href={`/daos/${id}/holders`} className="mr-4">
+            <Link href={`/daos/${encodedName}/holders`} className="mr-4">
               <div
                 className={`flex items-center gap-1 pb-2 ${
                   isHolders
@@ -434,7 +437,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
         {/* Navigation Tabs - Desktop */}
         <div className="hidden sm:flex border-b border-border mb-4">
-          <Link href={`/daos/${id}`} className="mr-6">
+          <Link href={`/daos/${encodedName}`} className="mr-6">
             <div
               className={`flex items-center gap-2 pb-2 ${
                 isProposals
@@ -446,7 +449,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               <span className="text-sm font-medium">Proposals</span>
             </div>
           </Link>
-          <Link href={`/daos/${id}/extensions`} className="mr-6">
+          <Link href={`/daos/${encodedName}/extensions`} className="mr-6">
             <div
               className={`flex items-center gap-2 pb-2 ${
                 isExtensions
@@ -458,7 +461,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               <span className="text-sm font-medium">Extensions</span>
             </div>
           </Link>
-          <Link href={`/daos/${id}/holders`} className="mr-6">
+          <Link href={`/daos/${encodedName}/holders`} className="mr-6">
             <div
               className={`flex items-center gap-2 pb-2 ${
                 isHolders

@@ -4,27 +4,36 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import DAOHolders from "@/components/daos/dao-holders";
-import { fetchToken, fetchHolders } from "@/queries/daoQueries";
-
-export const runtime = "edge";
+import { fetchToken, fetchHolders, fetchDAOByName } from "@/queries/daoQueries";
 
 export default function HoldersPage() {
   const params = useParams();
-  const id = params.id as string;
+  const encodedName = params.name as string;
 
-  const { data: token, isLoading: isLoadingToken } = useQuery({
-    queryKey: ["token", id],
-    queryFn: () => fetchToken(id),
-    staleTime: 600000, // 10 minutes
+  // First, fetch the DAO by name to get its ID
+  const { data: dao, isLoading: isLoadingDAO } = useQuery({
+    queryKey: ["dao", encodedName],
+    queryFn: () => fetchDAOByName(encodedName),
   });
 
+  const daoId = dao?.id;
+
+  // Then use the ID to fetch the token
+  const { data: token, isLoading: isLoadingToken } = useQuery({
+    queryKey: ["token", daoId],
+    queryFn: () => (daoId ? fetchToken(daoId) : null),
+    staleTime: 600000, // 10 minutes
+    enabled: !!daoId, // Only run this query when we have the daoId
+  });
+
+  // Finally fetch the holders using the token data
   const { data: holdersData, isLoading: isLoadingHolders } = useQuery({
     queryKey: ["holders", token?.contract_principal, token?.symbol],
     queryFn: () => fetchHolders(token!.contract_principal, token!.symbol),
     enabled: !!token?.contract_principal && !!token?.symbol,
   });
 
-  const isLoading = isLoadingToken || isLoadingHolders;
+  const isLoading = isLoadingDAO || isLoadingToken || isLoadingHolders;
 
   if (isLoading) {
     return <LoadingSpinner />;

@@ -210,7 +210,7 @@ export const DAOTable = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Link
-                          href={`/daos/${dao.id}`}
+                          href={`/daos/${encodeURIComponent(dao.name)}`}
                           className="font-medium hover:underline hover:text-primary text-sm"
                         >
                           {truncateName(dao.name)}
@@ -244,7 +244,7 @@ export const DAOTable = ({
               {dao?.name === "FACES" ||
               dao?.name === "MEDIA2" ||
               dao?.name === "MEDIA3" ? (
-                <DAOBuyToken daoId={dao.id} />
+                <DAOBuyToken daoId={encodeURIComponent(dao.name)} />
               ) : (
                 <Button className="cursor-not-allowed" disabled>
                   Participate.
@@ -384,7 +384,11 @@ export const DAOTable = ({
                   <tr
                     key={dao.id}
                     className="border-b hover:bg-muted/30 transition-colors"
-                    onClick={() => (window.location.href = `/daos/${dao.id}`)}
+                    onClick={() =>
+                      (window.location.href = `/daos/${encodeURIComponent(
+                        dao.name
+                      )}`)
+                    }
                   >
                     <td
                       className="p-4 text-left"
@@ -411,7 +415,9 @@ export const DAOTable = ({
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Link
-                                    href={`/daos/${dao.id}`}
+                                    href={`/daos/${encodeURIComponent(
+                                      dao.name
+                                    )}`}
                                     className="font-medium hover:underline text-sm"
                                   >
                                     {truncateName(dao.name)}
