@@ -6,6 +6,8 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import DAOHolders from "@/components/daos/dao-holders";
 import { fetchToken, fetchHolders, fetchDAOByName } from "@/queries/daoQueries";
 
+export const runtime = "edge";
+
 export default function HoldersPage() {
   const params = useParams();
   const encodedName = params.name as string;

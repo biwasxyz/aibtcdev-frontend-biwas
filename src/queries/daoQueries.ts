@@ -86,10 +86,10 @@ export const fetchDAOs = async (): Promise<DAO[]> => {
                 .from("daos")
                 .select("*")
                 .order("created_at", { ascending: false })
-                .eq("is_broadcasted", true)
-                // SHOULD BE GOOD
-                // FETCH ONLY MEDIA3(FOR TESTNET REMOVE IN MAINNET LATER) AND FACES FOR MAINNET
-                .in("name", ["MEDIA3", "FACES"]),
+                .eq("is_broadcasted", true),
+            // SHOULD BE GOOD
+            // FETCH ONLY MEDIA3(FOR TESTNET REMOVE IN MAINNET LATER) AND FACES FOR MAINNET
+            // .in("name", ["MEDIA3", "FACES"]),
             fetchXUsers(),
             fetchExtensions()
         ]);

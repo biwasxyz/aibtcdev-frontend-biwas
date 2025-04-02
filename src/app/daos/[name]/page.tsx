@@ -9,6 +9,8 @@ import { fetchProposals, fetchDAOByName } from "@/queries/daoQueries";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 
+export const runtime = "edge";
+
 export default function ProposalsPage() {
   const params = useParams();
   const encodedName = params.name as string;
