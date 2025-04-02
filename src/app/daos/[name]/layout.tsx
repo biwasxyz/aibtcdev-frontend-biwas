@@ -1,6 +1,8 @@
-import { Metadata } from "next";
+import type React from "react";
+import type { Metadata } from "next";
 import { DAOLayoutClient } from "./layout-client";
 import { supabase } from "@/utils/supabase/client";
+import { fetchDAOByName } from "@/queries/daoQueries";
 
 // Twitter recommends 2:1 ratio images
 // Minimum dimensions: 300x157
@@ -16,20 +18,10 @@ const OG_IMAGE_HEIGHT = 628;
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: { name: string }; // Changed from id to name
 }): Promise<Metadata> {
-  const [{ data: dao }, { data: token }] = await Promise.all([
-    supabase
-      .from("daos")
-      .select("name, description")
-      .eq("id", params.id)
-      .single(),
-    supabase
-      .from("tokens")
-      .select("image_url")
-      .eq("dao_id", params.id)
-      .single(),
-  ]);
+  // First fetch the DAO by name to get its ID
+  const dao = await fetchDAOByName(params.name);
 
   if (!dao) {
     return {
@@ -37,6 +29,13 @@ export async function generateMetadata({
       description: "The requested DAO could not be found.",
     };
   }
+
+  // Now fetch the token using the DAO ID
+  const { data: token } = await supabase
+    .from("tokens")
+    .select("image_url")
+    .eq("dao_id", dao.id)
+    .single();
 
   // Generate separate URLs for Twitter and Open Graph with correct dimensions
   const twitterImageUrl = token?.image_url
@@ -74,7 +73,7 @@ export async function generateMetadata({
       creator: "@aibtcdev",
     },
     alternates: {
-      canonical: `/daos/${params.id}`,
+      canonical: `/daos/${params.name}`, // Updated to use name instead of ID
     },
     robots: {
       index: true,

@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-
 import { useState, useEffect } from "react";
 import { Loader2, Save, Edit, Trash2, Power } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -28,7 +26,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { WalletInfoCard } from "./agent-wallet-info";
 
-import { fetchDAOs } from "@/queries/daoQueries";
+import { fetchAllDAOs } from "@/queries/daoQueries";
 import { fetchAgents } from "@/queries/agentQueries";
 import {
   fetchAgentPrompts,
@@ -85,11 +83,7 @@ export function AgentPromptForm() {
   }, [userId, fetchWallets, toast]);
 
   // Fetch all prompts
-  const {
-    data: prompts = [],
-    isLoading: isLoadingPrompts,
-    refetch: refetchPrompts,
-  } = useQuery({
+  const { data: prompts = [], isLoading: isLoadingPrompts } = useQuery({
     queryKey: ["prompts"],
     queryFn: fetchAgentPrompts,
   });
@@ -103,7 +97,7 @@ export function AgentPromptForm() {
   // Fetch DAOs
   const { data: daos = [], isLoading: isLoadingDaos } = useQuery({
     queryKey: ["daos"],
-    queryFn: fetchDAOs,
+    queryFn: fetchAllDAOs,
   });
 
   // Fetch the DAO Manager agent
@@ -132,7 +126,6 @@ export function AgentPromptForm() {
         description: "Prompt created successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
-      refetchPrompts();
       resetForm();
       setIsDialogOpen(false);
     },
@@ -160,7 +153,6 @@ export function AgentPromptForm() {
         description: "Prompt updated successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
-      refetchPrompts();
       setIsDialogOpen(false);
     },
     onError: (error) => {
@@ -181,7 +173,6 @@ export function AgentPromptForm() {
         description: "Prompt deleted successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["prompts"] });
-      refetchPrompts();
       resetForm();
     },
     onError: (error) => {
@@ -324,11 +315,35 @@ export function AgentPromptForm() {
     return dao ? dao.name : "Unknown DAO";
   };
 
-  // Get Agent name by ID
-  // const getAgentName = (agentId: string) => {
-  //   const agent = agents.find((a) => a.id === agentId);
-  //   return agent?.name || "Unknown Agent";
-  // };
+  // Format token balance
+  const formatTokenBalance = (balance: string | number) => {
+    return (Number(balance) / 1_000_000).toFixed(2);
+  };
+
+  // Extract token name from full token identifier
+  const extractTokenName = (fullTokenId: string): string => {
+    if (!fullTokenId) return "";
+
+    // Try to extract the token name after the :: delimiter
+    if (fullTokenId.includes("::")) {
+      return fullTokenId.split("::")[1];
+    }
+
+    // If no :: delimiter, try to extract the token name after the last dot
+    if (fullTokenId.includes(".")) {
+      const parts = fullTokenId.split(".");
+      const lastPart = parts[parts.length - 1];
+
+      // If the last part contains a hyphen, extract the part after the hyphen
+      if (lastPart.includes("-")) {
+        return lastPart.split("-")[0];
+      }
+
+      return lastPart;
+    }
+
+    return fullTokenId;
+  };
 
   // Get wallet information for an agent
   const getAgentWalletInfo = (agentId: string) => {
@@ -383,7 +398,7 @@ export function AgentPromptForm() {
             <TableHeader>
               <TableRow>
                 <TableHead>DAO</TableHead>
-                <TableHead>Token Balance</TableHead>
+                <TableHead> Token Balances</TableHead>
                 <TableHead>Prompt Status</TableHead>
                 <TableHead>Prompt Text</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -408,17 +423,67 @@ export function AgentPromptForm() {
                     (token) => token.dao_id === daoId
                   );
                   const prompt = prompts.find((p) => p.dao_id === daoId);
-                  const totalBalance = daoTokens.reduce(
-                    (sum, token) => sum + parseFloat(token.amount || "0"),
-                    0
-                  );
+                  const daoName = getDaoName(daoId);
+
+                  // Get tokens for this DAO from the wallet balance
+                  let tokenBalances: { name: string; balance: string }[] = [];
+
+                  if (
+                    daoManagerWalletAddress &&
+                    daoManagerWalletBalance?.fungible_tokens
+                  ) {
+                    // Extract tokens from fungible_tokens that match this DAO
+                    tokenBalances = Object.entries(
+                      daoManagerWalletBalance.fungible_tokens
+                    )
+                      .map(([tokenId, tokenData]) => {
+                        const tokenName = extractTokenName(tokenId);
+                        return {
+                          name: tokenName,
+                          balance: tokenData.balance,
+                        };
+                      })
+                      .filter((token) => {
+                        return token.name
+                          .toUpperCase()
+                          .includes(daoName.toUpperCase());
+                      });
+                  }
 
                   return (
                     <TableRow key={daoId}>
-                      <TableCell className="font-medium">
-                        {getDaoName(daoId)}
+                      <TableCell className="font-medium">{daoName}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {tokenBalances.length > 0
+                            ? tokenBalances.map((token, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between text-sm"
+                                >
+                                  <span>
+                                    {formatTokenBalance(token.balance)}
+                                  </span>
+                                </div>
+                              ))
+                            : daoTokens.map((token, index) => (
+                                <div
+                                  key={index}
+                                  className="flex items-center justify-between text-sm"
+                                >
+                                  <span>
+                                    {formatTokenBalance(token.amount || "0")}
+                                  </span>
+                                </div>
+                              ))}
+                          {daoTokens.length === 0 &&
+                            tokenBalances.length === 0 && (
+                              <span className="text-muted-foreground">
+                                No tokens
+                              </span>
+                            )}
+                        </div>
                       </TableCell>
-                      <TableCell>{totalBalance.toFixed(2)}</TableCell>
                       <TableCell>
                         <Badge
                           variant={prompt?.is_active ? "default" : "secondary"}

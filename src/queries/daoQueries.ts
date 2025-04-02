@@ -107,6 +107,21 @@ export const fetchDAOs = async (): Promise<DAO[]> => {
     });
 };
 
+export const fetchAllDAOs = async (): Promise<DAO[]> => {
+    const [{ data: daosData, error: daosError }] =
+        await Promise.all([
+            supabase
+                .from("daos")
+                .select("*")
+                .order("created_at", { ascending: false })
+                .eq("is_broadcasted", true)
+        ]);
+
+    if (daosError) throw daosError;
+    return daosData ?? [];
+};
+
+
 export const fetchDAO = async (id: string): Promise<DAO> => {
     const { data, error } = await supabase
         .from("daos")
@@ -296,3 +311,23 @@ export const fetchProposals = async (daoId: string): Promise<Proposal[]> => {
     if (error) throw error;
     return data || [];
 };
+
+export const fetchDAOByName = async (encodedName: string): Promise<DAO | null> => {
+    // Decode the URL-encoded name
+    const name = decodeURIComponent(encodedName)
+
+    const { data } = await supabase
+        .from("daos")
+        .select("*")
+        .eq("name", name)
+        .eq("is_broadcasted", true)
+        .single();
+
+
+    if (!data) {
+        console.error("No DAO found with name:", name)
+        return null
+    }
+    console.log(data)
+    return data
+}
