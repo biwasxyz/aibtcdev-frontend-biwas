@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Users, Boxes, Menu, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ThreadList } from "@/components/threads/thread-list";
+// import { ThreadList } from "@/components/threads/thread-list";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { supabase } from "@/utils/supabase/client";
@@ -198,11 +198,11 @@ export default function ApplicationLayout({
           {/* Mobile Sidebar Content */}
           <div className="flex flex-col h-[calc(100vh-3.5rem)]">
             {/* Thread List */}
-            <div className="flex-1 overflow-hidden">
+            {/* <div className="flex-1 overflow-hidden">
               <ScrollArea className="h-full">
                 <ThreadList setLeftPanelOpen={setLeftPanelOpen} />
               </ScrollArea>
-            </div>
+            </div> */}
 
             {/* Navigation */}
             <nav className="flex-shrink-0">
