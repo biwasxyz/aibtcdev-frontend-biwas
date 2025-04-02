@@ -3,20 +3,11 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { Loader2, Save, Plus, Trash2, Edit } from "lucide-react";
+import { Loader2, Save, Edit, Trash2, Power } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -45,6 +36,7 @@ import {
   updateAgentPrompt,
   deleteAgentPrompt,
 } from "@/queries/agent-prompt-queries";
+import { fetchWalletTokens } from "@/queries/wallet-token-queries";
 import { useWalletStore } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
 
@@ -52,13 +44,9 @@ export interface AgentPrompt {
   id: string;
   dao_id: string;
   agent_id: string;
-  name: string;
-  description?: string;
+  profile_id: string;
   prompt_text: string;
-  prompt_type: string;
   is_active: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata?: any;
   created_at: string;
   updated_at: string;
 }
@@ -71,19 +59,13 @@ export function AgentPromptForm() {
 
   // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
     prompt_text: "",
-    prompt_type: "system",
-    is_active: true,
-    metadata: {},
   });
 
   // Selection state
   const [selectedDaoId, setSelectedDaoId] = useState<string>("");
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   // Form errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -102,14 +84,20 @@ export function AgentPromptForm() {
     }
   }, [userId, fetchWallets, toast]);
 
-  // Fetch all prompts immediately
+  // Fetch all prompts
   const {
     data: prompts = [],
     isLoading: isLoadingPrompts,
     refetch: refetchPrompts,
   } = useQuery({
-    queryKey: ["agent_prompts"],
+    queryKey: ["prompts"],
     queryFn: fetchAgentPrompts,
+  });
+
+  // Fetch wallet tokens
+  const { data: walletTokens = [], isLoading: isLoadingTokens } = useQuery({
+    queryKey: ["holders"],
+    queryFn: fetchWalletTokens,
   });
 
   // Fetch DAOs
@@ -130,7 +118,6 @@ export function AgentPromptForm() {
   // Set the DAO Manager agent ID once it's loaded
   useEffect(() => {
     if (agents.length > 0) {
-      // Since we're filtering for "DAO Manager" in the query, we can use the first item
       setDaoManagerAgentId(agents[0]?.id || "");
     }
   }, [agents]);
@@ -144,7 +131,7 @@ export function AgentPromptForm() {
         title: "Success",
         description: "Prompt created successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["agent_prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
       refetchPrompts();
       resetForm();
       setIsDialogOpen(false);
@@ -172,7 +159,7 @@ export function AgentPromptForm() {
         title: "Success",
         description: "Prompt updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["agent_prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
       refetchPrompts();
       setIsDialogOpen(false);
     },
@@ -193,7 +180,7 @@ export function AgentPromptForm() {
         title: "Success",
         description: "Prompt deleted successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["agent_prompts"] });
+      queryClient.invalidateQueries({ queryKey: ["prompts"] });
       refetchPrompts();
       resetForm();
     },
@@ -213,7 +200,6 @@ export function AgentPromptForm() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Clear error for this field if it exists
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -223,29 +209,13 @@ export function AgentPromptForm() {
     }
   };
 
-  // Handle select changes
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Handle switch changes
-  const handleSwitchChange = (name: string, checked: boolean) => {
-    setFormData((prev) => ({ ...prev, [name]: checked }));
-  };
-
   // Reset form and selection
   const resetForm = () => {
     setFormData({
-      name: "",
-      description: "",
       prompt_text: "",
-      prompt_type: "system",
-      is_active: true,
-      metadata: {},
     });
     setSelectedPromptId(null);
     setSelectedDaoId("");
-    setIsCreatingNew(false);
     setErrors({});
   };
 
@@ -253,16 +223,8 @@ export function AgentPromptForm() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
-
     if (!formData.prompt_text.trim()) {
       newErrors.prompt_text = "Prompt text is required";
-    }
-
-    if (!formData.prompt_type) {
-      newErrors.prompt_type = "Prompt type is required";
     }
 
     if (!selectedDaoId) {
@@ -285,14 +247,24 @@ export function AgentPromptForm() {
       return;
     }
 
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "User ID is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const promptData = {
       ...formData,
       dao_id: selectedDaoId,
-      agent_id: daoManagerAgentId, // Always use the DAO Manager agent
-      metadata: formData.metadata || {},
+      agent_id: daoManagerAgentId,
+      profile_id: userId,
+      is_active: true,
     };
 
-    if (selectedPromptId && !isCreatingNew) {
+    if (selectedPromptId) {
       updateMutation.mutate({
         id: selectedPromptId,
         data: promptData,
@@ -303,31 +275,27 @@ export function AgentPromptForm() {
   };
 
   // Handle prompt selection for editing
-  const handleEditPrompt = (promptId: string) => {
+  const handleEditPrompt = (promptId: string, daoId: string) => {
     const selectedPrompt = prompts.find((p) => p.id === promptId);
     if (selectedPrompt) {
       setSelectedPromptId(promptId);
-      setSelectedDaoId(selectedPrompt.dao_id);
-      setIsCreatingNew(false);
-
+      setSelectedDaoId(daoId);
       setFormData({
-        name: selectedPrompt.name,
-        description: selectedPrompt.description || "",
         prompt_text: selectedPrompt.prompt_text,
-        prompt_type: selectedPrompt.prompt_type,
-        is_active: selectedPrompt.is_active,
-        metadata: selectedPrompt.metadata || {},
       });
-
       setErrors({});
       setIsDialogOpen(true);
     }
   };
 
-  // Handle creating a new prompt
-  const handleCreateNew = () => {
-    resetForm();
-    setIsCreatingNew(true);
+  // Handle enabling a prompt for a DAO
+  const handleEnablePrompt = (daoId: string) => {
+    setSelectedDaoId(daoId);
+    setSelectedPromptId(null);
+    setFormData({
+      prompt_text: "",
+    });
+    setErrors({});
     setIsDialogOpen(true);
   };
 
@@ -345,6 +313,7 @@ export function AgentPromptForm() {
     isLoadingDaos ||
     isLoadingAgents ||
     isLoadingPrompts ||
+    isLoadingTokens ||
     createMutation.isPending ||
     updateMutation.isPending ||
     deleteMutation.isPending;
@@ -356,10 +325,10 @@ export function AgentPromptForm() {
   };
 
   // Get Agent name by ID
-  const getAgentName = (agentId: string) => {
-    const agent = agents.find((a) => a.id === agentId);
-    return agent?.name || "Unknown Agent";
-  };
+  // const getAgentName = (agentId: string) => {
+  //   const agent = agents.find((a) => a.id === agentId);
+  //   return agent?.name || "Unknown Agent";
+  // };
 
   // Get wallet information for an agent
   const getAgentWalletInfo = (agentId: string) => {
@@ -386,6 +355,13 @@ export function AgentPromptForm() {
     walletBalance: daoManagerWalletBalance,
   } = getAgentWalletInfo(daoManagerAgentId);
 
+  // Get unique DAOs from wallet tokens
+  const uniqueDaoIds = Array.from(
+    new Set(
+      walletTokens.map((token) => token.dao_id).filter(Boolean) as string[]
+    )
+  );
+
   return (
     <Card className="border-none shadow-none bg-background/40 backdrop-blur">
       {daoManagerAgentId && (
@@ -396,104 +372,113 @@ export function AgentPromptForm() {
           />
         </div>
       )}
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader>
         <CardTitle className="text-base sm:text-2xl font-medium">
           Agent Prompts
         </CardTitle>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCreateNew}
-          disabled={isLoading}
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          New Prompt
-        </Button>
       </CardHeader>
       <CardContent>
-        {/* DAO Manager Wallet Info Card */}
-
         <div className="rounded-md border mt-2">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Type</TableHead>
                 <TableHead>DAO</TableHead>
-                <TableHead>Agent</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Token Balance</TableHead>
+                <TableHead>Prompt Status</TableHead>
                 <TableHead>Prompt Text</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoadingPrompts ? (
+              {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">
+                  <TableCell colSpan={5} className="text-center py-4">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                   </TableCell>
                 </TableRow>
-              ) : prompts.length === 0 ? (
+              ) : uniqueDaoIds.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">
-                    No prompts found. Create a new one.
+                  <TableCell colSpan={5} className="text-center py-4">
+                    No DAOs with tokens found.
                   </TableCell>
                 </TableRow>
               ) : (
-                prompts.map((prompt) => (
-                  <TableRow key={prompt.id}>
-                    <TableCell className="font-medium">{prompt.name}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{prompt.prompt_type}</Badge>
-                    </TableCell>
-                    <TableCell>{getDaoName(prompt.dao_id)}</TableCell>
-                    <TableCell>{getAgentName(prompt.agent_id)}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={prompt.is_active ? "default" : "secondary"}
-                        className={
-                          prompt.is_active
-                            ? "bg-green-500/20 text-green-700 hover:bg-green-500/20"
-                            : "bg-muted text-muted-foreground hover:bg-muted"
-                        }
-                      >
-                        {prompt.is_active ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-md">
-                      <p className="truncate text-sm text-muted-foreground">
-                        {prompt.prompt_text}
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditPrompt(prompt.id)}
-                      >
-                        <Edit className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedPromptId(prompt.id);
-                          if (
-                            confirm(
-                              "Are you sure you want to delete this prompt?"
-                            )
-                          ) {
-                            deleteMutation.mutate(prompt.id);
+                uniqueDaoIds.map((daoId) => {
+                  const daoTokens = walletTokens.filter(
+                    (token) => token.dao_id === daoId
+                  );
+                  const prompt = prompts.find((p) => p.dao_id === daoId);
+                  const totalBalance = daoTokens.reduce(
+                    (sum, token) => sum + parseFloat(token.amount || "0"),
+                    0
+                  );
+
+                  return (
+                    <TableRow key={daoId}>
+                      <TableCell className="font-medium">
+                        {getDaoName(daoId)}
+                      </TableCell>
+                      <TableCell>{totalBalance.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={prompt?.is_active ? "default" : "secondary"}
+                          className={
+                            prompt?.is_active
+                              ? "bg-green-500/20 text-green-700 hover:bg-green-500/20"
+                              : "bg-muted text-muted-foreground hover:bg-muted"
                           }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                        <span className="sr-only">Delete</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
+                        >
+                          {prompt?.is_active ? "Active" : "Disabled"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="max-w-md">
+                        <p className="truncate text-sm text-muted-foreground">
+                          {prompt?.prompt_text || "No prompt configured"}
+                        </p>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {prompt ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditPrompt(prompt.id, daoId)}
+                            >
+                              <Edit className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedPromptId(prompt.id);
+                                if (
+                                  confirm(
+                                    "Are you sure you want to delete this prompt?"
+                                  )
+                                ) {
+                                  deleteMutation.mutate(prompt.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEnablePrompt(daoId)}
+                          >
+                            <Power className="h-4 w-4" />
+                            <span className="sr-only">Enable</span>
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
@@ -503,93 +488,15 @@ export function AgentPromptForm() {
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>
-                {isCreatingNew ? "Create New Prompt" : "Edit Prompt"}
+                {selectedPromptId ? "Edit Prompt" : "Enable Prompt"}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Name</label>
-                  <Input
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Prompt name"
-                  />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Select DAO</label>
-                  <Select
-                    value={selectedDaoId}
-                    onValueChange={setSelectedDaoId}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a DAO" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {daos.map((dao) => (
-                        <SelectItem key={dao.id} value={dao.id}>
-                          {dao.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.dao_id && (
-                    <p className="text-sm text-red-500">{errors.dao_id}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Agent</label>
-                  <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
-                    {isLoadingAgents
-                      ? "(Loading...)"
-                      : getAgentName(daoManagerAgentId)}
-                  </div>
-                  {errors.agent_id && (
-                    <p className="text-sm text-red-500">{errors.agent_id}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Prompt Type</label>
-                  <Select
-                    value={formData.prompt_type}
-                    onValueChange={(value) =>
-                      handleSelectChange("prompt_type", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a prompt type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="system">System</SelectItem>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="assistant">Assistant</SelectItem>
-                      <SelectItem value="function">Function</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.prompt_type && (
-                    <p className="text-sm text-red-500">{errors.prompt_type}</p>
-                  )}
-                </div>
-              </div>
-
               <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
-                <Input
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Prompt description"
-                />
+                <label className="text-sm font-medium">DAO</label>
+                <div className="text-sm text-muted-foreground">
+                  {getDaoName(selectedDaoId)}
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -606,23 +513,8 @@ export function AgentPromptForm() {
                 )}
               </div>
 
-              <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                <div className="space-y-0.5">
-                  <label className="text-sm font-medium">Active</label>
-                  <p className="text-sm text-muted-foreground">
-                    Enable or disable this prompt
-                  </p>
-                </div>
-                <Switch
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) =>
-                    handleSwitchChange("is_active", checked)
-                  }
-                />
-              </div>
-
               <DialogFooter>
-                {!isCreatingNew && (
+                {selectedPromptId && (
                   <Button
                     type="button"
                     variant="destructive"

@@ -69,6 +69,20 @@ export function ProfileView() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Agent Prompts Form */}
+        <Card className="border-none shadow-none bg-background/40 backdrop-blur mb-6">
+          <CardHeader>
+            <CardTitle className="text-base sm:text-2xl font-medium">
+              Agent
+            </CardTitle>
+            <Separator className="my-2" />
+          </CardHeader>
+          <CardContent>
+            <AgentPromptForm />
+          </CardContent>
+        </Card>
+
         <Card className="border-none shadow-none bg-background/40 backdrop-blur mb-6">
           <CardHeader>
             <CardTitle className="text-base sm:text-2xl font-medium">
@@ -201,10 +215,6 @@ export function ProfileView() {
             )}
           </CardContent>
         </Card>
-        {/* Agent Prompts Form */}
-        <div className="mb-6">
-          <AgentPromptForm />
-        </div>
 
         {/* Detailed Voting History */}
       </div>
