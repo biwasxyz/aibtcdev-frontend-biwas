@@ -34,33 +34,10 @@ const AssetTracker = () => {
   useEffect(() => {
     console.log("AssetTracker component mounted");
 
-    const address = "ST3NZFPCS28QN0SK9BQ2KYJ1RKJME8MYC1AZECTWB";
+    const address = getStacksAddress();
     if (address) {
       console.log("Address found:", address);
       setCurrentAddress(address);
-
-      // Try to get cached data first
-      const cachedData = localStorage.getItem(`wallet_has_sbtc_${address}`);
-      const cachedTimestamp = localStorage.getItem(
-        `wallet_cache_timestamp_${address}`
-      );
-
-      if (cachedData && cachedTimestamp) {
-        const now = new Date().getTime();
-        const timestamp = Number.parseInt(cachedTimestamp);
-
-        // Cache valid for 30 minutes
-        if (now - timestamp < 30 * 60 * 1000) {
-          console.log("Using cached data:", cachedData);
-          setHasSbtc(cachedData === "true");
-          setIsLoaded(true);
-          return;
-        }
-      }
-
-      // Fetch fresh data if no valid cache
-      console.log("Fetching fresh data");
-      fetchData(address);
     } else {
       console.log("No address found");
       // Show something even if no address is found
@@ -90,16 +67,6 @@ const AssetTracker = () => {
       );
     }
   }, [balances, currentAddress, isLoaded]);
-
-  async function fetchData(address: string) {
-    try {
-      console.log("Fetching balance for:", address);
-      await fetchSingleBalance(address);
-    } catch (err) {
-      console.error("Error fetching balance:", err);
-      setIsLoaded(true);
-    }
-  }
 
   const openDepositModal = () => {
     console.log("Opening deposit modal");
