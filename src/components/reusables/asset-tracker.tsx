@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Button } from "../ui/button";
 
 const AssetTracker = () => {
   const { balances, fetchSingleBalance } = useWalletStore();
@@ -33,7 +34,7 @@ const AssetTracker = () => {
   useEffect(() => {
     console.log("AssetTracker component mounted");
 
-    const address = getStacksAddress();
+    const address = "ST3NZFPCS28QN0SK9BQ2KYJ1RKJME8MYC1AZECTWB";
     if (address) {
       console.log("Address found:", address);
       setCurrentAddress(address);
@@ -162,22 +163,15 @@ const AssetTracker = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Deposit sBTC</DialogTitle>
-            <DialogDescription>
-              Coming soon! This feature is currently under development.
-            </DialogDescription>
+            <DialogDescription>Coming soon</DialogDescription>
           </DialogHeader>
           <div className="p-4 text-center">
             <p className="text-lg font-medium">Feature Coming Soon</p>
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2">
               The ability to deposit sBTC into your smart wallet will be
               available in a future update.
             </p>
-            <button
-              onClick={() => setIsDepositModalOpen(false)}
-              className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-            >
-              Close
-            </button>
+            <Button onClick={() => setIsDepositModalOpen(false)}>Close</Button>
           </div>
         </DialogContent>
       </Dialog>
