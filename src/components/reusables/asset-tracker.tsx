@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getStacksAddress } from "@/lib/address";
 import { useWalletStore } from "@/store/wallet";
 import {
@@ -11,6 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
+import type { WalletBalance } from "@/store/wallet";
 
 const AssetTracker = () => {
   const { balances, fetchSingleBalance } = useWalletStore();
@@ -20,7 +21,9 @@ const AssetTracker = () => {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
 
   // Function to find sBTC token in fungible tokens
-  const findSbtcToken = (fungibleTokens: Record<string, any> | undefined) => {
+  const findSbtcToken = (
+    fungibleTokens: WalletBalance["fungible_tokens"] | undefined
+  ) => {
     if (!fungibleTokens) return null;
 
     const sbtcTokenKey = Object.keys(fungibleTokens).find((key) =>
@@ -30,6 +33,20 @@ const AssetTracker = () => {
     return sbtcTokenKey ? true : false;
   };
 
+  // Memoize fetchData to prevent unnecessary recreations
+  const fetchData = useCallback(
+    async (address: string) => {
+      try {
+        console.log("Fetching balance for:", address);
+        await fetchSingleBalance(address);
+      } catch (err) {
+        console.error("Error fetching balance:", err);
+        setIsLoaded(true);
+      }
+    },
+    [fetchSingleBalance]
+  );
+
   // Initialize and check for data
   useEffect(() => {
     console.log("AssetTracker component mounted");
@@ -38,33 +55,27 @@ const AssetTracker = () => {
     if (address) {
       console.log("Address found:", address);
       setCurrentAddress(address);
+
+      // Fetch fresh data if no valid cache
+      console.log("Fetching fresh data");
+      fetchData(address);
     } else {
       console.log("No address found");
       // Show something even if no address is found
       setIsLoaded(true);
     }
-  }, []);
+  }, [fetchData]); // fetchData is now memoized with useCallback
 
   // Update when balances change
   useEffect(() => {
     if (currentAddress && balances[currentAddress] && !isLoaded) {
-      console.log("Balances updated:", balances[currentAddress]);
+      //   console.log("Balances updated:", balances[currentAddress]);
       const hasSbtcToken = findSbtcToken(
         balances[currentAddress]?.fungible_tokens
       );
-      console.log("Has sBTC:", hasSbtcToken);
+      //   console.log("Has sBTC:", hasSbtcToken);
       setHasSbtc(!!hasSbtcToken);
       setIsLoaded(true);
-
-      // Cache the result
-      localStorage.setItem(
-        `wallet_has_sbtc_${currentAddress}`,
-        String(!!hasSbtcToken)
-      );
-      localStorage.setItem(
-        `wallet_cache_timestamp_${currentAddress}`,
-        String(new Date().getTime())
-      );
     }
   }, [balances, currentAddress, isLoaded]);
 
@@ -95,7 +106,7 @@ const AssetTracker = () => {
 
         {isLoaded && hasSbtc === false && (
           <p className="text-center text-amber-800">
-            You don't have sBTC in your wallet. Visit{" "}
+            You don&apos;t have sBTC in your wallet. Visit{" "}
             <a href="https://bitflow.app" className="underline font-medium">
               Bitflow or velar
             </a>{" "}
