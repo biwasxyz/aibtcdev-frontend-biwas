@@ -37,6 +37,7 @@ import {
 import { fetchWalletTokens } from "@/queries/wallet-token-queries";
 import { useWalletStore } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
+import AssetTracker from "../reusables/asset-tracker";
 
 export interface AgentPrompt {
   id: string;
@@ -379,6 +380,7 @@ export function AgentPromptForm() {
 
   return (
     <Card className="border-none shadow-none bg-background/40 backdrop-blur">
+      <AssetTracker />
       {daoManagerAgentId && (
         <div className="mb-6">
           <WalletInfoCard
