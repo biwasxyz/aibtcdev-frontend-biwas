@@ -13,6 +13,7 @@ export interface Vote {
     reasoning: string
     tx_id: string
     amount: number | null
+    prompt: string
 }
 
 /**
@@ -57,7 +58,8 @@ export async function fetchVotes(): Promise<Vote[]> {
             proposal_id, 
             reasoning, 
             tx_id,
-            amount
+            amount,
+            prompt
         `)
         .in("agent_id", agentIds)
         .order("created_at", { ascending: false })
@@ -99,6 +101,73 @@ export async function fetchVotes(): Promise<Vote[]> {
         reasoning: vote.reasoning,
         tx_id: vote.tx_id,
         amount: vote.amount,
+        prompt: vote.prompt,
+    }))
+
+    return transformedVotes
+}
+
+/**
+ * Fetches votes for a specific proposal
+ * @param proposalId The ID of the proposal to fetch votes for
+ * @returns An array of votes for the specified proposal
+ */
+export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
+    // Fetch votes for the specific proposal
+    const { data, error } = await supabase
+        .from("votes")
+        .select(`
+            id, 
+            created_at, 
+            dao_id, 
+            agent_id, 
+            answer, 
+            proposal_id, 
+            reasoning, 
+            tx_id,
+            amount,
+            prompt
+        `)
+        .eq("proposal_id", proposalId)
+        .order("created_at", { ascending: false })
+
+    if (error) {
+        throw error
+    }
+
+    if (!data || data.length === 0) {
+        return []
+    }
+
+    // Fetch related data in separate queries
+    const agentIds = Array.from(new Set(data.map((vote) => vote.agent_id)))
+    const daoIds = Array.from(new Set(data.map((vote) => vote.dao_id)))
+
+    // Fetch agents
+    const { data: agents } = await supabase.from("agents").select("id, name").in("id", agentIds)
+
+    // Fetch DAOs
+    const { data: daos } = await supabase.from("daos").select("id, name").in("id", daoIds)
+
+    // Create lookup maps for faster access
+    const agentMap = new Map(agents?.map((agent) => [agent.id, agent.name]) || [])
+    const daoMap = new Map(daos?.map((dao) => [dao.id, dao.name]) || [])
+
+    // Transform the data to match our Vote interface
+    const transformedVotes = data.map((vote) => ({
+        id: vote.id,
+        created_at: vote.created_at,
+        dao_id: vote.dao_id,
+        dao_name: daoMap.get(vote.dao_id) || "Unknown DAO",
+        agent_id: vote.agent_id,
+        agent_name: agentMap.get(vote.agent_id) || "Unknown Agent",
+        answer: vote.answer,
+        proposal_id: vote.proposal_id,
+        proposal_title: "Current Proposal", // We already know this is for the current proposal
+        reasoning: vote.reasoning,
+        tx_id: vote.tx_id,
+        amount: vote.amount,
+        prompt: vote.prompt,
     }))
 
     return transformedVotes

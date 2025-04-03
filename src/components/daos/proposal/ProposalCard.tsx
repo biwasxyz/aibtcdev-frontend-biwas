@@ -10,6 +10,7 @@ import LabeledField from "./LabeledField";
 import TimeStatus, { useVotingStatus } from "./TimeStatus";
 import ProposalMetrics from "./ProposalMetrics";
 import BlockVisual from "./BlockVisual";
+import VotesTable from "./VotesTable";
 import {
   ArrowRight,
   Timer,
@@ -23,6 +24,7 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
+  MessageSquare,
 } from "lucide-react";
 import { truncateString, formatAction, getExplorerLink } from "./helper";
 import type { Proposal } from "@/types/supabase";
@@ -236,6 +238,18 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             votesAgainst={proposal.votes_against}
             refreshing={refreshing}
           />
+        </div>
+
+        {/* Votes Table */}
+        <div className="rounded-lg border-2 border-purple-500/30 p-3 sm:p-4 bg-purple-500/5">
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-purple-500" />
+              <h4 className="font-medium text-base">Votes</h4>
+            </div>
+          </div>
+
+          <VotesTable proposalId={proposal.id} refreshing={refreshing} />
         </div>
 
         <TimeStatus
