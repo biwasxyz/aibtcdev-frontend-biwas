@@ -82,6 +82,7 @@ const VotesTable: React.FC<VotesTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead className="whitespace-nowrap">Vote</TableHead>
+            <TableHead className="whitespace-nowrap">Amount</TableHead>
             <TableHead className="whitespace-nowrap">Date</TableHead>
             <TableHead className="whitespace-nowrap">Confidence</TableHead>
             <TableHead className="whitespace-nowrap">Reasoning</TableHead>
@@ -103,6 +104,13 @@ const VotesTable: React.FC<VotesTableProps> = ({
                     <ThumbsDown className="h-4 w-4 mr-1" />
                     No
                   </span>
+                )}
+              </TableCell>
+              <TableCell className="whitespace-nowrap">
+                {vote.amount ? (
+                  <span>{vote.amount.toLocaleString()}</span>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
               <TableCell className="whitespace-nowrap">
