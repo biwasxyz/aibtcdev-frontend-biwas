@@ -14,6 +14,7 @@ export interface Vote {
     tx_id: string
     amount: number | null
     prompt: string
+    confidence: number | null
 }
 
 /**
@@ -59,7 +60,8 @@ export async function fetchVotes(): Promise<Vote[]> {
             reasoning, 
             tx_id,
             amount,
-            prompt
+            prompt,
+            confidence
         `)
         .in("agent_id", agentIds)
         .order("created_at", { ascending: false })
@@ -102,6 +104,7 @@ export async function fetchVotes(): Promise<Vote[]> {
         tx_id: vote.tx_id,
         amount: vote.amount,
         prompt: vote.prompt,
+        confidence: vote.confidence || null
     }))
 
     return transformedVotes
@@ -126,7 +129,8 @@ export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
             reasoning, 
             tx_id,
             amount,
-            prompt
+            prompt,
+            confidence
         `)
         .eq("proposal_id", proposalId)
         .order("created_at", { ascending: false })
@@ -168,6 +172,7 @@ export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
         tx_id: vote.tx_id,
         amount: vote.amount,
         prompt: vote.prompt,
+        confidence: vote.confidence || null
     }))
 
     return transformedVotes

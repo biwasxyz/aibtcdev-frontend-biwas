@@ -66,6 +66,16 @@ const VotesTable: React.FC<VotesTableProps> = ({
     );
   }
 
+  // Helper function to get confidence color
+  const getConfidenceColor = (confidence: number | null) => {
+    if (confidence === null) return "bg-gray-300 dark:bg-gray-600";
+    if (confidence >= 0.8) return "bg-green-500";
+    if (confidence >= 0.6) return "bg-green-400";
+    if (confidence >= 0.4) return "bg-yellow-400";
+    if (confidence >= 0.2) return "bg-yellow-500";
+    return "bg-red-500";
+  };
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -73,6 +83,7 @@ const VotesTable: React.FC<VotesTableProps> = ({
           <TableRow>
             <TableHead className="whitespace-nowrap">Vote</TableHead>
             <TableHead className="whitespace-nowrap">Date</TableHead>
+            <TableHead className="whitespace-nowrap">Confidence</TableHead>
             <TableHead className="whitespace-nowrap">Reasoning</TableHead>
             <TableHead className="whitespace-nowrap">Prompt</TableHead>
             <TableHead className="whitespace-nowrap">TX</TableHead>
@@ -98,6 +109,25 @@ const VotesTable: React.FC<VotesTableProps> = ({
                 {formatDistanceToNow(new Date(vote.created_at), {
                   addSuffix: true,
                 })}
+              </TableCell>
+              <TableCell>
+                {vote.confidence !== null ? (
+                  <div className="flex items-center">
+                    <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full mr-2">
+                      <div
+                        className={`h-2 rounded-full ${getConfidenceColor(
+                          vote.confidence
+                        )}`}
+                        style={{ width: `${vote.confidence * 100}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs">
+                      {Math.round(vote.confidence * 100)}%
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
               </TableCell>
               <TableCell>
                 <Dialog>
