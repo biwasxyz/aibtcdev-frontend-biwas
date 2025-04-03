@@ -70,24 +70,29 @@ export async function fetchVotes(): Promise<Vote[]> {
         throw error
     }
 
+    if (!data || data.length === 0) {
+        return []
+    }
+
     // Fetch related data in separate queries
-    const agentIds2 = Array.from(new Set(data.map((vote) => vote.agent_id)))
-    const daoIds = Array.from(new Set(data.map((vote) => vote.dao_id)))
-    const proposalIds = Array.from(new Set(data.map((vote) => vote.proposal_id)))
+    // Filter out any null or undefined values before using .in()
+    const agentIds2 = Array.from(new Set(data.map((vote) => vote.agent_id))).filter(Boolean)
+    const daoIds = Array.from(new Set(data.map((vote) => vote.dao_id))).filter(Boolean)
+    const proposalIds = Array.from(new Set(data.map((vote) => vote.proposal_id))).filter(Boolean)
 
-    // Fetch agents
-    const { data: agents } = await supabase.from("agents").select("id, name").in("id", agentIds2)
+    // Only fetch if we have valid IDs
+    const agents =
+        agentIds2.length > 0 ? await supabase.from("agents").select("id, name").in("id", agentIds2) : { data: [] }
 
-    // Fetch DAOs
-    const { data: daos } = await supabase.from("daos").select("id, name").in("id", daoIds)
+    const daos = daoIds.length > 0 ? await supabase.from("daos").select("id, name").in("id", daoIds) : { data: [] }
 
-    // Fetch proposals
-    const { data: proposals } = await supabase.from("proposals").select("id, title").in("id", proposalIds)
+    const proposals =
+        proposalIds.length > 0 ? await supabase.from("proposals").select("id, title").in("id", proposalIds) : { data: [] }
 
     // Create lookup maps for faster access
-    const agentMap = new Map(agents?.map((agent) => [agent.id, agent.name]) || [])
-    const daoMap = new Map(daos?.map((dao) => [dao.id, dao.name]) || [])
-    const proposalMap = new Map(proposals?.map((proposal) => [proposal.id, proposal.title]) || [])
+    const agentMap = new Map(agents.data?.map((agent) => [agent.id, agent.name]) || [])
+    const daoMap = new Map(daos.data?.map((dao) => [dao.id, dao.name]) || [])
+    const proposalMap = new Map(proposals.data?.map((proposal) => [proposal.id, proposal.title]) || [])
 
     // Transform the data to match our Vote interface
     const transformedVotes = data.map((vote) => ({
@@ -144,18 +149,19 @@ export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
     }
 
     // Fetch related data in separate queries
-    const agentIds = Array.from(new Set(data.map((vote) => vote.agent_id)))
-    const daoIds = Array.from(new Set(data.map((vote) => vote.dao_id)))
+    // Filter out any null or undefined values before using .in()
+    const agentIds = Array.from(new Set(data.map((vote) => vote.agent_id))).filter(Boolean)
+    const daoIds = Array.from(new Set(data.map((vote) => vote.dao_id))).filter(Boolean)
 
-    // Fetch agents
-    const { data: agents } = await supabase.from("agents").select("id, name").in("id", agentIds)
+    // Only fetch if we have valid IDs
+    const agents =
+        agentIds.length > 0 ? await supabase.from("agents").select("id, name").in("id", agentIds) : { data: [] }
 
-    // Fetch DAOs
-    const { data: daos } = await supabase.from("daos").select("id, name").in("id", daoIds)
+    const daos = daoIds.length > 0 ? await supabase.from("daos").select("id, name").in("id", daoIds) : { data: [] }
 
     // Create lookup maps for faster access
-    const agentMap = new Map(agents?.map((agent) => [agent.id, agent.name]) || [])
-    const daoMap = new Map(daos?.map((dao) => [dao.id, dao.name]) || [])
+    const agentMap = new Map(agents.data?.map((agent) => [agent.id, agent.name]) || [])
+    const daoMap = new Map(daos.data?.map((dao) => [dao.id, dao.name]) || [])
 
     // Transform the data to match our Vote interface
     const transformedVotes = data.map((vote) => ({
