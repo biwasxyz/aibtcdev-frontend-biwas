@@ -108,7 +108,7 @@ const VotesTable: React.FC<VotesTableProps> = ({
               </TableCell>
               <TableCell className="whitespace-nowrap">
                 {vote.amount ? (
-                  <span>{vote.amount.toLocaleString()}</span>
+                  <span>{(vote.amount / 1_000_000_00).toFixed(2)}</span>
                 ) : (
                   <span className="text-muted-foreground">-</span>
                 )}

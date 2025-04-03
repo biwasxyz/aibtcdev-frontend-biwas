@@ -13,6 +13,7 @@ import { supabase } from "@/utils/supabase/client";
 import { NetworkIndicator } from "@/components/reusables/network-indicator";
 // import { getStacksAddress } from "@/lib/address";
 import AuthButton from "@/components/home/auth-button";
+import AssetTracker from "@/components/reusables/asset-tracker";
 
 interface ApplicationLayoutProps {
   children: React.ReactNode;
@@ -158,6 +159,7 @@ export default function ApplicationLayout({
       </div>
 
       {/* Main Content */}
+      <AssetTracker />
       <div className="flex-1 flex min-w-0 max-h-[calc(100vh-3.5rem)] md:max-h-[calc(100vh-4rem)] overflow-hidden">
         {/* Mobile Sidebar */}
         <aside
