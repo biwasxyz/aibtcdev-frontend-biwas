@@ -102,7 +102,7 @@ export function ProfileView() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="whitespace-nowrap">Agent</TableHead>
+                      {/* <TableHead className="whitespace-nowrap">Agent</TableHead> */}
                       <TableHead className="whitespace-nowrap">DAO</TableHead>
                       <TableHead className="whitespace-nowrap">
                         Proposal
@@ -128,9 +128,9 @@ export function ProfileView() {
                     ) : (
                       votes.map((vote) => (
                         <TableRow key={vote.id}>
-                          <TableCell className="font-medium">
+                          {/* <TableCell className="font-medium">
                             {vote.agent_name}
-                          </TableCell>
+                          </TableCell> */}
                           <TableCell>{vote.dao_name}</TableCell>
                           <TableCell>
                             <div
