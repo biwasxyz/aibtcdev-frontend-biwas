@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import type { WalletBalance } from "@/store/wallet";
 
 const AssetTracker = () => {
@@ -87,16 +87,16 @@ const AssetTracker = () => {
   // Always render something
   return (
     <>
-      <div className="w-full bg-amber-50 border-b border-amber-200 py-3 px-4 shadow-sm">
+      <div className="w-full border-b border-border py-3 px-4 shadow-sm">
         {!isLoaded && (
-          <p className="text-center text-amber-800">
+          <p className="text-center text-foreground">
             Checking your sBTC status...
           </p>
         )}
 
         {isLoaded && hasSbtc === true && (
           <p
-            className="text-center text-amber-800 font-medium cursor-pointer hover:underline"
+            className="text-center text-primary font-medium cursor-pointer hover:underline"
             onClick={openDepositModal}
           >
             You have sBTC in your wallet! Click here to deposit it in your smart
@@ -105,7 +105,7 @@ const AssetTracker = () => {
         )}
 
         {isLoaded && hasSbtc === false && (
-          <p className="text-center text-amber-800">
+          <p className="text-center text-primary">
             You don&apos;t have sBTC in your wallet. Visit{" "}
             <a href="https://bitflow.app" className="underline font-medium">
               Bitflow or velar
@@ -115,7 +115,7 @@ const AssetTracker = () => {
         )}
 
         {isLoaded && hasSbtc === null && currentAddress && (
-          <p className="text-center text-amber-800">
+          <p className="text-center text-primary">
             Unable to check your sBTC status. Visit{" "}
             <a href="https://bitflow.app" className="underline font-medium">
               Bitflow
@@ -125,7 +125,7 @@ const AssetTracker = () => {
         )}
 
         {isLoaded && !currentAddress && (
-          <p className="text-center text-amber-800">
+          <p className="text-center text-primary">
             No wallet connected. Connect your wallet to check for sBTC.
           </p>
         )}
