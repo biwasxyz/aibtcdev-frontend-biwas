@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useState, useEffect } from "react";
 import { Loader2, Save, Edit, Trash2, Power } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -26,7 +28,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { WalletInfoCard } from "./agent-wallet-info";
 
-import { fetchAllDAOs } from "@/queries/daoQueries";
+import { fetchDAOs } from "@/queries/daoQueries";
 import { fetchAgents } from "@/queries/agentQueries";
 import {
   fetchAgentPrompts,
@@ -97,7 +99,7 @@ export function AgentPromptForm() {
   // Fetch DAOs
   const { data: daos = [], isLoading: isLoadingDaos } = useQuery({
     queryKey: ["daos"],
-    queryFn: fetchAllDAOs,
+    queryFn: fetchDAOs,
   });
 
   // Fetch the DAO Manager agent
@@ -312,7 +314,9 @@ export function AgentPromptForm() {
   // Get DAO name by ID
   const getDaoName = (daoId: string) => {
     const dao = daos.find((d) => d.id === daoId);
-    return dao ? dao.name : "Unknown DAO";
+    // Only return the name if the DAO is found, otherwise return empty string
+    // This will help filter out "Unknown DAO" entries
+    return dao ? dao.name : "";
   };
 
   // Format token balance
@@ -370,10 +374,14 @@ export function AgentPromptForm() {
     walletBalance: daoManagerWalletBalance,
   } = getAgentWalletInfo(daoManagerAgentId);
 
-  // Get unique DAOs from wallet tokens
+  // Get unique DAOs from wallet tokens, but only include those that match our filtered DAOs
   const uniqueDaoIds = Array.from(
     new Set(
-      walletTokens.map((token) => token.dao_id).filter(Boolean) as string[]
+      walletTokens
+        .map((token) => token.dao_id)
+        .filter(
+          (daoId) => daoId && daos.some((d) => d.id === daoId)
+        ) as string[]
     )
   );
 

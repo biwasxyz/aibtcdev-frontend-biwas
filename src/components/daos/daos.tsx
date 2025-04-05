@@ -29,23 +29,19 @@ export default function DAOs() {
   const { data: daos, isLoading: isLoadingDAOs } = useQuery({
     queryKey: ["daos"],
     queryFn: fetchDAOs,
-    staleTime: 600000, // 10 minutes
   });
 
   // Fetch tokens with TanStack Query
   const { data: tokens } = useQuery({
     queryKey: ["tokens"],
     queryFn: fetchTokens,
-    staleTime: 600000, // 10 minutes
   });
 
   // Fetch token prices with TanStack Query
   const { data: tokenPrices, isFetching: isFetchingTokenPrices } = useQuery({
-    queryKey: ["tokenPrices", daos, tokens],
+    queryKey: ["tokenPrices"],
     queryFn: () => fetchTokenPrices(daos || [], tokens || []),
     enabled: !!daos && !!tokens,
-    staleTime: 600000, // 10 minutes
-    refetchInterval: 600000, // Refetch every 10 minutes for price updates
   });
 
   // Helper function to get dex principal and token contract
@@ -62,7 +58,7 @@ export default function DAOs() {
     queries: (daos || []).map((dao) => {
       const tokenContract = getTokenContract(dao);
       return {
-        queryKey: ["tokenTrades", dao.id, tokenContract], // Add dao.id
+        queryKey: ["tokenTrades", dao.id],
         queryFn: async () => {
           if (!tokenContract) return [];
           return fetchTokenTrades(tokenContract).then((trades) =>
@@ -74,9 +70,8 @@ export default function DAOs() {
               .sort((a, b) => a.timestamp - b.timestamp)
           );
         },
-        enabled: !!tokenContract && !!dao.id, // Add dao.id check
-        staleTime: 300000,
-        cacheTime: 600000,
+        enabled: !!tokenContract && !!dao.id,
+        // Global settings from QueryClient will apply here
       };
     }),
   });
@@ -86,7 +81,7 @@ export default function DAOs() {
     queries: (daos || []).map((dao) => {
       const token = tokens?.find((t) => t.dao_id === dao.id);
       return {
-        queryKey: ["holders", token?.contract_principal, token?.symbol, dao.id],
+        queryKey: ["holders", dao.id],
         queryFn: async () => {
           if (!token?.contract_principal || !token?.symbol) return null;
           try {
@@ -101,7 +96,6 @@ export default function DAOs() {
           }
         },
         enabled: !!token?.contract_principal && !!token?.symbol,
-        staleTime: 600000, // 10 minutes
       };
     }),
   });
