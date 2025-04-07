@@ -391,7 +391,7 @@ export const DAOTable = ({
                     }
                   >
                     <td
-                      className="p-4 text-left"
+                      className="p-4 text-left cursor-pointer"
                       // onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center gap-3">
@@ -448,13 +448,13 @@ export const DAOTable = ({
                       </div>
                     </td>
                     <td
-                      className="p-4 w-[20%] max-w-[300px] text-left"
+                      className="p-4 w-[20%] max-w-[300px] text-left cursor-pointer"
                       // onClick={(e) => e.stopPropagation()}
                     >
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <p className="text-sm text-muted-foreground truncate cursor-help">
+                            <p className="text-sm text-muted-foreground truncate">
                               {dao.mission || "No mission statement available"}
                             </p>
                           </TooltipTrigger>
@@ -467,7 +467,7 @@ export const DAOTable = ({
                       </TooltipProvider>
                     </td>
                     <td
-                      className="p-4 w-[15%] text-center"
+                      className="p-4 w-[15%] text-center cursor-pointer"
                       // onClick={(e) => e.stopPropagation()}
                     >
                       <div className="mx-auto h-16 w-[180px]">
@@ -475,7 +475,7 @@ export const DAOTable = ({
                       </div>
                     </td>
                     <td
-                      className="p-4 text-center font-medium"
+                      className="p-4 text-center font-medium cursor-pointer"
                       // onClick={(e) => e.stopPropagation()}
                     >
                       {isFetchingPrice ? (
@@ -487,7 +487,7 @@ export const DAOTable = ({
                       )}
                     </td>
                     <td
-                      className="p-4 text-center font-medium"
+                      className="p-4 text-center font-medium cursor-pointer"
                       // onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex justify-center">
@@ -499,7 +499,7 @@ export const DAOTable = ({
                       </div>
                     </td>
                     <td
-                      className="p-4 text-center font-medium"
+                      className="p-4 text-center font-medium cursor-pointer"
                       // onClick={(e) => e.stopPropagation()}
                     >
                       {isFetchingPrice ? (
@@ -511,7 +511,7 @@ export const DAOTable = ({
                       )}
                     </td>
                     <td
-                      className="p-4 text-center font-medium"
+                      className="p-4 text-center font-medium cursor-pointer"
                       // onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex flex-col items-center justify-center">
@@ -519,7 +519,7 @@ export const DAOTable = ({
                       </div>
                     </td>
                     <td
-                      className="p-4 text-center"
+                      className="p-4 text-center cursor-pointer"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex justify-center">

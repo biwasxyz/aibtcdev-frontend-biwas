@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useQuery } from "@tanstack/react-query";
 import { fetchProposalVotes } from "@/queries/vote-queries";
 import { formatDistanceToNow } from "date-fns";
@@ -20,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import ReactMarkdown from "react-markdown";
+import CopyButton from "./CopyButton";
 
 interface VotesTableProps {
   proposalId: string;
@@ -138,45 +141,51 @@ const VotesTable: React.FC<VotesTableProps> = ({
                 )}
               </TableCell>
               <TableCell>
-                <Dialog>
-                  <DialogTrigger className="cursor-pointer text-primary hover:underline">
-                    <div className="max-w-xs truncate">
-                      {vote.reasoning
-                        .substring(0, 40)
-                        .replace(/[#*`_~[\]]/g, "")}
-                      {vote.reasoning.length > 40 ? "..." : ""}
-                    </div>
-                  </DialogTrigger>
-                  <DialogContent className="w-[80vw] max-w-5xl max-h-[80vh] overflow-hidden flex flex-col">
-                    <DialogHeader>
-                      <DialogTitle>Vote Reasoning</DialogTitle>
-                    </DialogHeader>
-                    <div className="mt-4 prose prose-sm md:prose-base dark:prose-invert max-w-none px-2 overflow-y-auto flex-1">
-                      <ReactMarkdown>{vote.reasoning}</ReactMarkdown>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </TableCell>
-              <TableCell>
-                {vote.prompt ? (
+                <div className="flex items-center gap-1">
                   <Dialog>
                     <DialogTrigger className="cursor-pointer text-primary hover:underline">
                       <div className="max-w-xs truncate">
-                        {vote.prompt
+                        {vote.reasoning
                           .substring(0, 40)
                           .replace(/[#*`_~[\]]/g, "")}
-                        {vote.prompt.length > 40 ? "..." : ""}
+                        {vote.reasoning.length > 40 ? "..." : ""}
                       </div>
                     </DialogTrigger>
                     <DialogContent className="w-[80vw] max-w-5xl max-h-[80vh] overflow-hidden flex flex-col">
                       <DialogHeader>
-                        <DialogTitle>Vote Prompt</DialogTitle>
+                        <DialogTitle>Vote Reasoning</DialogTitle>
                       </DialogHeader>
                       <div className="mt-4 prose prose-sm md:prose-base dark:prose-invert max-w-none px-2 overflow-y-auto flex-1">
-                        <ReactMarkdown>{vote.prompt}</ReactMarkdown>
+                        <ReactMarkdown>{vote.reasoning}</ReactMarkdown>
                       </div>
                     </DialogContent>
                   </Dialog>
+                  <CopyButton text={vote.reasoning} />
+                </div>
+              </TableCell>
+              <TableCell>
+                {vote.prompt ? (
+                  <div className="flex items-center gap-1">
+                    <Dialog>
+                      <DialogTrigger className="cursor-pointer text-primary hover:underline">
+                        <div className="max-w-xs truncate">
+                          {vote.prompt
+                            .substring(0, 40)
+                            .replace(/[#*`_~[\]]/g, "")}
+                          {vote.prompt.length > 40 ? "..." : ""}
+                        </div>
+                      </DialogTrigger>
+                      <DialogContent className="w-[80vw] max-w-5xl max-h-[80vh] overflow-hidden flex flex-col">
+                        <DialogHeader>
+                          <DialogTitle>Vote Prompt</DialogTitle>
+                        </DialogHeader>
+                        <div className="mt-4 prose prose-sm md:prose-base dark:prose-invert max-w-none px-2 overflow-y-auto flex-1">
+                          <ReactMarkdown>{vote.prompt}</ReactMarkdown>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    <CopyButton text={vote.prompt} />
+                  </div>
                 ) : (
                   <span className="text-muted-foreground">-</span>
                 )}

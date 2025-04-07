@@ -23,6 +23,7 @@ import { fetchDAOExtensions, fetchToken } from "@/queries/daoQueries";
 import type { DAO, Token, Extension } from "@/types/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ThreadList from "@/components/threads/thread-list";
+import AuthButton from "../home/auth-button";
 
 interface DAOChatModalProps {
   daoId: string;
@@ -186,8 +187,9 @@ export function DAOChatModal({
   const renderChatSection = () => {
     if (!accessToken) {
       return (
-        <div className="flex items-center justify-center h-full">
-          Please sign in to start chatting
+        <div className="flex items-center justify-center h-full flex-col">
+          Please Connect your wallet to start participating
+          <AuthButton />
         </div>
       );
     }
