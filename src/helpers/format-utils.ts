@@ -8,11 +8,24 @@ export function truncateAddress(address: string, startChars = 5, endChars = 5): 
 }
 
 /**
- * Formats STX balance from microunits to a human-readable format
+ * Formats a STX balance from microSTX to a human-readable format with 6 decimal places
  */
-export function formatBalance(balance: string | number, decimals = 6): string {
+export function formatStxBalance(balance: string | number): string {
     if (!balance) return "0"
-    return (Number(balance) / 1_000_000).toFixed(decimals)
+    const num = Number(balance) / 1_000_000
+    return num.toFixed(2)
+}
+
+/**
+ * Formats a token balance from microunits to a human-readable format with 8 decimal places and commas
+ */
+export function formatTokenBalance(balance: string | number): string {
+    if (!balance) return "0"
+    const num = Number(balance) / 1_000_000_00
+    return num.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    })
 }
 
 /**
@@ -54,6 +67,8 @@ export function extractTokenName(fullTokenId: string): string {
 
 /**
  * Converts satoshis to BTC
+ * @param satoshis The amount in satoshis
+ * @returns The amount in BTC
  */
 export function satoshiToBTC(satoshis: string): string {
     if (!satoshis || isNaN(Number(satoshis))) return "0.00000000"

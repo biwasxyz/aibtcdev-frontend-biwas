@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, ArrowUpDown } from "lucide-react";
+import { formatTokenBalance } from "@/helpers/format-utils";
 
 interface Holder {
   address: string;
@@ -28,19 +29,6 @@ interface Holder {
 interface DAOHoldersProps {
   holders: Holder[];
   tokenSymbol: string;
-}
-
-function formatBalance(balance: string): string {
-  const num = Number.parseFloat(balance) / 1_00_00_00;
-  if (num >= 1_000_000_000) {
-    return (num / 1_000_000_000).toFixed(2) + "B";
-  } else if (num >= 1_000_000) {
-    return (num / 1_000_000).toFixed(2) + "M";
-  } else if (num >= 1_000) {
-    return (num / 1_000).toFixed(2) + "K";
-  } else {
-    return num.toFixed(2);
-  }
 }
 
 export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
@@ -139,7 +127,7 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
                       </code>
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
-                      {formatBalance(holder.balance)} {tokenSymbol}
+                      {formatTokenBalance(holder.balance)} {tokenSymbol}
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
                       {holder.percentage.toFixed(2)}%

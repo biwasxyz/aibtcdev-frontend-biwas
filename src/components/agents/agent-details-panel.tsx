@@ -7,8 +7,11 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useWalletStore } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { truncateAddress } from "@/helpers/format-utils";
+import { useClipboard } from "@/helpers/clipboard-utils";
+import { getWalletAddress } from "@/helpers/wallet-utils";
+import { formatStxBalance, formatTokenBalance } from "@/helpers/format-utils";
 
 interface AgentDetailsPanelProps {
   agent: Agent;
@@ -18,7 +21,7 @@ export function AgentDetailsPanel({ agent }: AgentDetailsPanelProps) {
   const router = useRouter();
   const { agentWallets, balances, fetchWallets } = useWalletStore();
   const { userId } = useSessionStore();
-  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  const { copiedText, copyToClipboard } = useClipboard();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,37 +41,8 @@ export function AgentDetailsPanel({ agent }: AgentDetailsPanelProps) {
   const agentWallet = agentWallets.find(
     (wallet) => wallet.agent_id === agent.id
   );
-  const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
-  const walletAddress =
-    network === "mainnet"
-      ? agentWallet?.mainnet_address
-      : agentWallet?.testnet_address;
+  const walletAddress = getWalletAddress(agentWallet);
   const walletBalance = walletAddress ? balances[walletAddress] : null;
-
-  const truncateAddress = (address: string) => {
-    if (!address) return "";
-    if (address.length <= 10) return address;
-    return `${address.slice(0, 5)}...${address.slice(-5)}`;
-  };
-
-  const copyToClipboard = async (address: string) => {
-    try {
-      await navigator.clipboard.writeText(address);
-      setCopiedAddress(address);
-      setTimeout(() => setCopiedAddress(null), 2000);
-    } catch (err) {
-      console.error("Failed to copy address:", err);
-      toast({
-        title: "Failed to copy",
-        description: "Could not copy address to clipboard",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const formatBalance = (balance: string) => {
-    return (Number(balance) / 1_000_000).toFixed(6);
-  };
 
   return (
     <div className={cn("h-full flex-1", agent.is_archived && "opacity-75")}>
@@ -134,7 +108,7 @@ export function AgentDetailsPanel({ agent }: AgentDetailsPanelProps) {
                       >
                         <span>{truncateAddress(walletAddress)}</span>
                         <span className="text-zinc-600 group-hover:text-zinc-400">
-                          {copiedAddress === walletAddress ? (
+                          {copiedText === walletAddress ? (
                             <Check className="h-3.5 w-3.5" />
                           ) : (
                             <Copy className="h-3.5 w-3.5" />
@@ -147,7 +121,7 @@ export function AgentDetailsPanel({ agent }: AgentDetailsPanelProps) {
                           <div className="flex justify-between items-center">
                             <span className="text-zinc-400">STX Balance</span>
                             <span className="text-zinc-200">
-                              {formatBalance(walletBalance.stx.balance)} STX
+                              {formatStxBalance(walletBalance.stx.balance)} STX
                             </span>
                           </div>
 
@@ -163,7 +137,7 @@ export function AgentDetailsPanel({ agent }: AgentDetailsPanelProps) {
                                     {tokenSymbol || "Token"}
                                   </span>
                                   <span className="text-zinc-200">
-                                    {formatBalance(token.balance)}
+                                    {formatTokenBalance(token.balance)}
                                   </span>
                                 </div>
                               );

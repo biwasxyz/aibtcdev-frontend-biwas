@@ -18,10 +18,14 @@ import {
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import type { Agent, Wallet } from "@/types/supabase";
+import type { Agent } from "@/types/supabase";
 import { getStacksAddress } from "@/lib/address";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { truncateAddress } from "@/helpers/format-utils";
+import { useClipboard } from "@/helpers/clipboard-utils";
+import { getWalletAddress } from "@/helpers/wallet-utils";
+import { formatStxBalance } from "@/helpers/format-utils";
 
 // Dynamically import Stacks components
 const StacksComponents = dynamic(() => import("../wallet/stacks-component"), {
@@ -49,7 +53,7 @@ export function AgentWalletSelector({
   } = useWalletStore();
   const { userId } = useSessionStore();
   const { toast } = useToast();
-  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  const { copiedText, copyToClipboard } = useClipboard();
   const [stxAmounts, setStxAmounts] = useState<{ [key: string]: string }>({});
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -117,35 +121,6 @@ export function AgentWalletSelector({
       }
     }
   }, [activeAgents, selectedAgentId, onSelect, userAddress]);
-
-  const truncateAddress = (address: string) => {
-    if (!address) return "";
-    return `${address.slice(0, 5)}...${address.slice(-5)}`;
-  };
-
-  const copyToClipboard = async (address: string) => {
-    try {
-      await navigator.clipboard.writeText(address);
-      setCopiedAddress(address);
-      setTimeout(() => setCopiedAddress(null), 2000);
-    } catch (error) {
-      toast({
-        title: "Failed to copy",
-        description: `Error: ${error}`,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const formatBalance = (balance: string) => {
-    return (Number(balance) / 1_000_000).toFixed(6);
-  };
-
-  const getWalletAddress = (wallet: Wallet) => {
-    return process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
-      ? wallet.mainnet_address
-      : wallet.testnet_address;
-  };
 
   const handleAmountChange = (address: string, value: string) => {
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
@@ -320,9 +295,7 @@ export function AgentWalletSelector({
                   const wallet = agentWallets.find(
                     (w) => w.agent_id === agent.id
                   );
-                  const walletAddress = wallet
-                    ? getWalletAddress(wallet)
-                    : null;
+                  const walletAddress = getWalletAddress(wallet);
                   const balance = walletAddress
                     ? balances[walletAddress]?.stx?.balance
                     : null;
@@ -354,7 +327,7 @@ export function AgentWalletSelector({
                                     copyToClipboard(walletAddress);
                                   }}
                                 >
-                                  {copiedAddress === walletAddress ? (
+                                  {copiedText === walletAddress ? (
                                     <Check className="h-3 w-3" />
                                   ) : (
                                     <Copy className="h-3 w-3" />
@@ -366,7 +339,7 @@ export function AgentWalletSelector({
                         </div>
                         {balance && (
                           <span className="text-sm text-muted-foreground">
-                            {formatBalance(balance)} STX
+                            {formatStxBalance(balance)} STX
                           </span>
                         )}
                       </div>
