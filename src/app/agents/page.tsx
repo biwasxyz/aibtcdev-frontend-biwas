@@ -12,6 +12,7 @@ import { useWalletStore } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
 import { useToast } from "@/hooks/use-toast";
 import type { Agent } from "@/types/supabase";
+import { truncateAddress } from "@/helpers/format-utils";
 
 export default function AgentsPage() {
   const { data: agents, isLoading: isLoadingAgents } = useQuery({
@@ -60,11 +61,6 @@ export default function AgentsPage() {
     return process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
       ? wallet.mainnet_address
       : wallet.testnet_address;
-  };
-
-  const truncateAddress = (address: string) => {
-    if (!address) return "";
-    return `${address.slice(0, 5)}...${address.slice(-5)}`;
   };
 
   const formatBalance = (balance: string) => {

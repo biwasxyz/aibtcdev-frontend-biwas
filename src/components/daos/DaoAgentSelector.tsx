@@ -20,6 +20,7 @@ import { AgentBalance } from "../reusables/AgentBalance";
 import { TransferTokenModal } from "./TransferTokenModal";
 import { SuccessModal } from "../reusables/SuccessModal";
 import type { Wallet, DAO, Token } from "@/types/supabase";
+import { truncateAddress } from "@/helpers/format-utils";
 
 interface AgentSelectorSheetProps {
   selectedAgentId: string | null;
@@ -83,12 +84,6 @@ export function AgentSelectorSheet({
       });
     }
   }, [userId, fetchWallets]);
-
-  // Helper functions
-  const truncateAddress = (address: string) => {
-    if (!address) return "";
-    return `${address.slice(0, 5)}...${address.slice(-5)}`;
-  };
 
   const getDexPrincipal = (dao: DAO) => {
     const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");

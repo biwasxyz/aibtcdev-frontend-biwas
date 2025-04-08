@@ -9,6 +9,7 @@ import { useSessionStore } from "@/store/session";
 import { useToast } from "@/hooks/use-toast";
 import dynamic from "next/dynamic";
 import type { Wallet, Agent } from "@/types/supabase";
+import { truncateAddress } from "@/helpers/format-utils";
 
 interface WalletWithAgent extends Wallet {
   agent?: Agent;
@@ -30,12 +31,6 @@ export function WalletPanel({ onClose }: WalletPanelProps) {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [stxAmounts, setStxAmounts] = useState<{ [key: string]: string }>({});
   const { toast } = useToast();
-
-  const truncateAddress = (address: string) => {
-    if (!address) return "";
-    if (address.length <= 10) return address;
-    return `${address.slice(0, 5)}...${address.slice(-5)}`;
-  };
 
   const copyToClipboard = async (address: string) => {
     try {
