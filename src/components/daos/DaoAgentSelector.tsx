@@ -19,7 +19,8 @@ import { AgentAvatar } from "../reusables/AgentAvatar";
 import { AgentBalance } from "../reusables/AgentBalance";
 import { TransferTokenModal } from "./TransferTokenModal";
 import { SuccessModal } from "../reusables/SuccessModal";
-import type { Wallet, DAO, Token } from "@/types/supabase";
+import type { DAO, Token } from "@/types/supabase";
+import { getWalletAddress } from "@/helpers/wallet-utils";
 import { truncateAddress } from "@/helpers/format-utils";
 
 interface AgentSelectorSheetProps {
@@ -102,12 +103,6 @@ export function AgentSelectorSheet({
         variant: "destructive",
       });
     }
-  };
-
-  const getWalletAddress = (wallet: Wallet) => {
-    return process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
-      ? wallet.mainnet_address
-      : wallet.testnet_address;
   };
 
   const isAgentEligible = (

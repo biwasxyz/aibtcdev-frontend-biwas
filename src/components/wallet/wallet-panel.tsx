@@ -1,3 +1,4 @@
+// THIS FILE IS NOT BEING USED ANYWHERE
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,12 +9,9 @@ import { useWalletStore } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
 import { useToast } from "@/hooks/use-toast";
 import dynamic from "next/dynamic";
-import type { Wallet, Agent } from "@/types/supabase";
 import { truncateAddress } from "@/helpers/format-utils";
-
-interface WalletWithAgent extends Wallet {
-  agent?: Agent;
-}
+import { getWalletAddress } from "@/helpers/wallet-utils";
+import { useClipboard } from "@/helpers/clipboard-utils";
 
 // Dynamically import Stacks components with ssr: false
 const StacksComponents = dynamic(() => import("./stacks-component"), {
@@ -28,23 +26,10 @@ export function WalletPanel({ onClose }: WalletPanelProps) {
   const { balances, userWallet, agentWallets, isLoading, error, fetchWallets } =
     useWalletStore();
   const { userId } = useSessionStore();
-  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  // const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [stxAmounts, setStxAmounts] = useState<{ [key: string]: string }>({});
   const { toast } = useToast();
-
-  const copyToClipboard = async (address: string) => {
-    try {
-      await navigator.clipboard.writeText(address);
-      setCopiedAddress(address);
-      setTimeout(() => setCopiedAddress(null), 2000);
-    } catch (error) {
-      toast({
-        title: `error: ${error}`,
-        description: "Failed to copy",
-        variant: "destructive",
-      });
-    }
-  };
+  const { copiedText, copyToClipboard } = useClipboard();
 
   useEffect(() => {
     if (userId) {
@@ -64,12 +49,6 @@ export function WalletPanel({ onClose }: WalletPanelProps) {
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setStxAmounts((prev) => ({ ...prev, [address]: value }));
     }
-  };
-
-  const getWalletAddress = (wallet: WalletWithAgent) => {
-    return process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
-      ? wallet.mainnet_address
-      : wallet.testnet_address;
   };
 
   return (
@@ -117,7 +96,7 @@ export function WalletPanel({ onClose }: WalletPanelProps) {
                         {truncateAddress(getWalletAddress(userWallet))}
                       </span>
                       <span className="text-zinc-600 group-hover:text-zinc-400">
-                        {copiedAddress === getWalletAddress(userWallet) ? (
+                        {copiedText === getWalletAddress(userWallet) ? (
                           <Check className="h-3.5 w-3.5" />
                         ) : (
                           <Copy className="h-3.5 w-3.5" />
@@ -194,7 +173,7 @@ export function WalletPanel({ onClose }: WalletPanelProps) {
                     ? balances[getWalletAddress(wallet)]
                     : null;
                   const address = getWalletAddress(wallet);
-                  const isCopied = address === copiedAddress;
+                  const isCopied = address === copiedText;
 
                   return (
                     <div
