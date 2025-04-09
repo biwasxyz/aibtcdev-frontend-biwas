@@ -1,5 +1,6 @@
 import { supabase } from "@/utils/supabase/client"
 import type { WalletBalance } from "@/store/wallet"
+import { Wallet } from "@/types/supabase"
 
 /**
  * Fetches wallets for a specific user
@@ -74,7 +75,7 @@ export async function fetchWalletBalances(addresses: string[]): Promise<Record<s
  * @param wallet - The wallet object
  * @returns The appropriate wallet address for the current network
  */
-export function getWalletAddressFromNetwork(wallet: any) {
+export function getWalletAddressFromNetwork(wallet: Wallet) {
     if (!wallet) return null
     return process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet" ? wallet.mainnet_address : wallet.testnet_address
 }
