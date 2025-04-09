@@ -3,7 +3,6 @@
 import type * as React from "react";
 import { useState, useEffect } from "react";
 import { Bot, Copy, Check, ExternalLink, Plus } from "lucide-react";
-import { useAgents } from "@/hooks/use-agents";
 import { useWalletStore } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +25,8 @@ import { truncateAddress } from "@/helpers/format-utils";
 import { useClipboard } from "@/helpers/clipboard-utils";
 import { getWalletAddress } from "@/helpers/wallet-utils";
 import { formatStxBalance } from "@/helpers/format-utils";
+import { useQuery } from "@tanstack/react-query";
+import { fetchAgents, fetchAgentById } from "@/queries/agent-queries";
 
 // Dynamically import Stacks components
 const StacksComponents = dynamic(() => import("../wallet/stacks-component"), {
@@ -43,7 +44,6 @@ export function AgentWalletSelector({
   onSelect,
 }: AgentWalletSelectorProps) {
   const [userAddress, setUserAddress] = useState<string | null>(null);
-  const { agents, loading: agentsLoading } = useAgents();
   const {
     balances,
     userWallet,
@@ -58,8 +58,23 @@ export function AgentWalletSelector({
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
+  // Fetch agents using React Query
+  const { data: agents = [], isLoading: agentsLoading } = useQuery({
+    queryKey: ["agents"],
+    queryFn: () => fetchAgents(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   // Filter out archived agents
   const activeAgents = agents.filter((agent) => !agent.is_archived);
+
+  // Fetch selected agent details
+  const { data: selectedAgent } = useQuery({
+    queryKey: ["agent", selectedAgentId],
+    queryFn: () => fetchAgentById(selectedAgentId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!selectedAgentId,
+  });
 
   useEffect(() => {
     if (userId) {
@@ -161,8 +176,6 @@ export function AgentWalletSelector({
       </div>
     );
   }
-
-  const selectedAgent = activeAgents.find((a) => a.id === selectedAgentId);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
