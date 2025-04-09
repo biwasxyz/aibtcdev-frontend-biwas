@@ -249,7 +249,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             </div>
           </div>
 
-          <VotesTable proposalId={proposal.id} refreshing={refreshing} />
+          <VotesTable proposalId={proposal.id} />
         </div>
 
         <TimeStatus
