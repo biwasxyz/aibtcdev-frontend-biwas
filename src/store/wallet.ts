@@ -1,6 +1,6 @@
 import { create } from "zustand"
-import { supabase } from "@/utils/supabase/client"
 import type { Wallet, Agent } from "@/types/supabase"
+import { fetchWallets as fetchWalletsQuery, fetchWalletBalance, fetchWalletBalances } from "@/queries/wallet-queries"
 
 export interface TokenBalance {
     balance: string
@@ -36,7 +36,7 @@ interface WalletState {
     error: string | null
     fetchBalances: (addresses: string[]) => Promise<void>
     fetchSingleBalance: (address: string) => Promise<WalletBalance | null>
-    fetchWallets: (userId: string) => Promise<void>
+    fetchWallets: (userId: string | null) => Promise<void>
 }
 
 export const useWalletStore = create<WalletState>((set, get) => ({
@@ -46,25 +46,27 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     isLoading: false,
     error: null,
 
-    fetchWallets: async (userId: string) => {
+    fetchWallets: async (userId: string | null) => {
+        if (!userId) {
+            set({
+                userWallet: null,
+                agentWallets: [],
+                isLoading: false,
+            })
+            return
+        }
+
         try {
             set({ isLoading: true, error: null })
 
-            const { data: walletsData, error: walletsError } = await supabase
-                .from("wallets")
-                .select("*, agent:agents(*)")
-                .eq("profile_id", userId)
-
-            if (walletsError) {
-                throw walletsError
-            }
+            // Use the query function from walletQueries.ts
+            const walletsData = await fetchWalletsQuery(userId)
 
             // Separate user wallet (agent_id is null) from agent wallets
             const userWallet = walletsData?.find((wallet) => wallet.agent_id === null) || null
             const agentWallets = walletsData?.filter((wallet) => wallet.agent_id !== null) || []
 
             // Fetch balances for all addresses
-            // if NEXT_PUBLIC_STACKS_NETWORK is mainnet, use mainnet_address, otherwise use testnet_address
             const allAddresses = walletsData
                 ?.map((wallet) =>
                     process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet" ? wallet.mainnet_address : wallet.testnet_address,
@@ -92,14 +94,8 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         try {
             set({ isLoading: true, error: null })
 
-            const network = process.env.NEXT_PUBLIC_STACKS_NETWORK
-            const response = await fetch(`https://api.${network}.hiro.so/extended/v1/address/${address}/balances`)
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch balance for ${address}`)
-            }
-
-            const data = (await response.json()) as WalletBalance
+            // Use the query function from walletQueries.ts
+            const data = await fetchWalletBalance(address)
 
             // Update the balances state with the new balance
             set((state) => ({
@@ -124,18 +120,8 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         try {
             set({ isLoading: true, error: null })
 
-            const balancePromises = addresses.map(async (address) => {
-                const network = process.env.NEXT_PUBLIC_STACKS_NETWORK
-                const response = await fetch(`https://api.${network}.hiro.so/extended/v1/address/${address}/balances`)
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch balance for ${address}`)
-                }
-                const data = await response.json()
-                return [address, data] as [string, WalletBalance]
-            })
-
-            const results = await Promise.all(balancePromises)
-            const newBalances = Object.fromEntries(results)
+            // Use the query function from walletQueries.ts
+            const newBalances = await fetchWalletBalances(addresses)
 
             set((state) => ({
                 balances: {
@@ -152,4 +138,3 @@ export const useWalletStore = create<WalletState>((set, get) => ({
         }
     },
 }))
-

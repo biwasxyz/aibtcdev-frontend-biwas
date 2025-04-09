@@ -2,38 +2,23 @@ import { supabase } from "@/utils/supabase/client"
 import type { Agent } from "@/types/supabase"
 
 /**
- * Fetches all agents, optionally filtered by name
- * 
- * @param options Optional filtering options
+ * Fetches all DAO Manager agents that are not archived
+ *
  * @returns Promise resolving to an array of agents
- * 
- * Query key: ['agents', options.filterByName]
- * Used in: 
+ *
+ * Query key: ['agents']
+ * Used in:
  * - src/components/chat/agent-selector.tsx
  * - src/components/daos/DaoAgentSelector.tsx
  */
-export const fetchAgents = async (options?: {
-    filterByName?: string,
-    includeArchived?: boolean
-}): Promise<Agent[]> => {
+export const fetchAgents = async (): Promise<Agent[]> => {
     try {
-        let query = supabase
+        const { data, error } = await supabase
             .from("agents")
             .select("*")
-            .order("is_archived", { ascending: true })
+            .eq("name", "DAO Manager")
+            .eq("is_archived", false)
             .order("name", { ascending: true })
-
-        // Apply name filter if provided
-        if (options?.filterByName) {
-            query = query.eq("name", options.filterByName)
-        }
-
-        // Exclude archived agents unless specifically requested
-        if (!options?.includeArchived) {
-            query = query.eq("is_archived", false)
-        }
-
-        const { data, error } = await query
 
         if (error) {
             console.error("Error fetching agents:", error)
@@ -49,10 +34,10 @@ export const fetchAgents = async (options?: {
 
 /**
  * Fetches a single agent by ID
- * 
+ *
  * @param agentId The ID of the agent to fetch
  * @returns Promise resolving to an agent or null if not found
- * 
+ *
  * Query key: ['agent', agentId]
  * Used in:
  * - src/components/chat/agent-selector.tsx
@@ -62,11 +47,7 @@ export const fetchAgentById = async (agentId: string | null | undefined): Promis
     if (!agentId) return null
 
     try {
-        const { data, error } = await supabase
-            .from("agents")
-            .select("*")
-            .eq("id", agentId)
-            .single()
+        const { data, error } = await supabase.from("agents").select("*").eq("id", agentId).single()
 
         if (error) {
             console.error(`Error fetching agent with ID ${agentId}:`, error)
@@ -82,10 +63,10 @@ export const fetchAgentById = async (agentId: string | null | undefined): Promis
 
 /**
  * Fetches an agent's name by ID
- * 
+ *
  * @param agentId The ID of the agent
  * @returns Promise resolving to the agent's name or null
- * 
+ *
  * Query key: ['agentName', agentId]
  * Used in:
  * - src/components/chat/chat-window.tsx
@@ -95,11 +76,7 @@ export const fetchAgentName = async (agentId: string | undefined): Promise<strin
     if (!agentId) return null
 
     try {
-        const { data, error } = await supabase
-            .from("agents")
-            .select("name")
-            .eq("id", agentId)
-            .single()
+        const { data, error } = await supabase.from("agents").select("name").eq("id", agentId).single()
 
         if (error) {
             console.error(`Error fetching agent name for ID ${agentId}:`, error)
@@ -115,19 +92,15 @@ export const fetchAgentName = async (agentId: string | undefined): Promise<strin
 
 /**
  * Creates a new agent
- * 
+ *
  * @param agent The agent data to insert
  * @returns Promise resolving to the created agent
- * 
+ *
  * Mutation key: ['createAgent']
  */
 export const createAgent = async (agent: Partial<Agent>): Promise<Agent | null> => {
     try {
-        const { data, error } = await supabase
-            .from("agents")
-            .insert([agent])
-            .select()
-            .single()
+        const { data, error } = await supabase.from("agents").insert([agent]).select().single()
 
         if (error) {
             console.error("Error creating agent:", error)
@@ -143,21 +116,16 @@ export const createAgent = async (agent: Partial<Agent>): Promise<Agent | null> 
 
 /**
  * Updates an existing agent
- * 
+ *
  * @param agentId The ID of the agent to update
  * @param updates The fields to update
  * @returns Promise resolving to the updated agent
- * 
+ *
  * Mutation key: ['updateAgent', agentId]
  */
 export const updateAgent = async (agentId: string, updates: Partial<Agent>): Promise<Agent | null> => {
     try {
-        const { data, error } = await supabase
-            .from("agents")
-            .update(updates)
-            .eq("id", agentId)
-            .select()
-            .single()
+        const { data, error } = await supabase.from("agents").update(updates).eq("id", agentId).select().single()
 
         if (error) {
             console.error(`Error updating agent with ID ${agentId}:`, error)
@@ -173,11 +141,11 @@ export const updateAgent = async (agentId: string, updates: Partial<Agent>): Pro
 
 /**
  * Archives or unarchives an agent
- * 
+ *
  * @param agentId The ID of the agent
  * @param archive Whether to archive (true) or unarchive (false)
  * @returns Promise resolving to the updated agent
- * 
+ *
  * Mutation key: ['archiveAgent', agentId, archive]
  */
 export const archiveAgent = async (agentId: string, archive: boolean): Promise<Agent | null> => {
@@ -190,7 +158,7 @@ export const archiveAgent = async (agentId: string, archive: boolean): Promise<A
             .single()
 
         if (error) {
-            console.error(`Error ${archive ? 'archiving' : 'unarchiving'} agent with ID ${agentId}:`, error)
+            console.error(`Error ${archive ? "archiving" : "unarchiving"} agent with ID ${agentId}:`, error)
             throw error
         }
 

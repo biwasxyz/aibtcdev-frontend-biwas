@@ -1,7 +1,7 @@
 "use client";
 
 import type * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Bot, Copy, Check, ExternalLink, Plus } from "lucide-react";
 import { useWalletStore } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
@@ -27,6 +27,7 @@ import { getWalletAddress } from "@/helpers/wallet-utils";
 import { formatStxBalance } from "@/helpers/format-utils";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAgents, fetchAgentById } from "@/queries/agent-queries";
+import { fetchWallets } from "@/queries/wallet-queries";
 
 // Dynamically import Stacks components
 const StacksComponents = dynamic(() => import("../wallet/stacks-component"), {
@@ -43,30 +44,27 @@ export function AgentWalletSelector({
   selectedAgentId,
   onSelect,
 }: AgentWalletSelectorProps) {
-  const [userAddress, setUserAddress] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [stxAmounts, setStxAmounts] = useState<{ [key: string]: string }>({});
   const {
     balances,
-    userWallet,
     agentWallets,
     isLoading: walletsLoading,
-    fetchWallets,
+    fetchWallets: fetchWalletsStore,
   } = useWalletStore();
   const { userId } = useSessionStore();
   const { toast } = useToast();
   const { copiedText, copyToClipboard } = useClipboard();
-  const [stxAmounts, setStxAmounts] = useState<{ [key: string]: string }>({});
-  const [error, setError] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
+
+  // Get user address once
+  const userAddress = useMemo(() => getStacksAddress(), []);
 
   // Fetch agents using React Query
   const { data: agents = [], isLoading: agentsLoading } = useQuery({
     queryKey: ["agents"],
-    queryFn: () => fetchAgents(),
+    queryFn: fetchAgents,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
-  // Filter out archived agents
-  const activeAgents = agents.filter((agent) => !agent.is_archived);
 
   // Fetch selected agent details
   const { data: selectedAgent } = useQuery({
@@ -76,66 +74,69 @@ export function AgentWalletSelector({
     enabled: !!selectedAgentId,
   });
 
+  // Fetch wallets using React Query
+  const {
+    isLoading: isLoadingWallets,
+    isError: isWalletsError,
+    data: walletsData,
+  } = useQuery({
+    queryKey: ["wallets", userId],
+    queryFn: () => fetchWallets(userId),
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Handle wallet data loading
   useEffect(() => {
-    if (userId) {
-      fetchWallets(userId).catch((err) => {
-        setError("Failed to fetch wallets. Please try again.");
-        console.error(err);
+    if (walletsData && userId) {
+      // Update the wallet store with the fetched data
+      fetchWalletsStore(userId);
+
+      // Initialize stxAmounts with empty strings for all wallet addresses
+      const initialStxAmounts: { [key: string]: string } = {};
+      const userWallet = walletsData.find((wallet) => wallet.agent_id === null);
+      const agentWallets = walletsData.filter(
+        (wallet) => wallet.agent_id !== null
+      );
+
+      if (userWallet) {
+        initialStxAmounts[getWalletAddress(userWallet)] = "";
+      }
+
+      agentWallets.forEach((wallet) => {
+        initialStxAmounts[getWalletAddress(wallet)] = "";
       });
-    }
-  }, [userId, fetchWallets]);
 
-  useEffect(() => {
-    if (userId) {
-      fetchWallets(userId);
+      setStxAmounts(initialStxAmounts);
     }
-  }, [userId, fetchWallets]);
+  }, [walletsData, userId, fetchWalletsStore]);
 
+  // Handle stored agent ID and default agent selection
   useEffect(() => {
     if (userAddress) {
+      // Load stored agent ID from localStorage
       const storedAgentId = localStorage.getItem(
         `${userAddress}_selectedAgentId`
       );
-      if (storedAgentId) {
+      if (storedAgentId && !selectedAgentId) {
         onSelect(storedAgentId);
-      }
-    }
-  }, [userAddress, onSelect]);
-
-  useEffect(() => {
-    setUserAddress(getStacksAddress());
-  }, []);
-
-  // Initialize stxAmounts with empty strings for all wallet addresses
-  useEffect(() => {
-    const initialStxAmounts: { [key: string]: string } = {};
-    if (userWallet) {
-      initialStxAmounts[getWalletAddress(userWallet)] = "";
-    }
-    agentWallets.forEach((wallet) => {
-      initialStxAmounts[getWalletAddress(wallet)] = "";
-    });
-    setStxAmounts(initialStxAmounts);
-  }, [userWallet, agentWallets]);
-
-  // Add this after the other useEffect hooks
-  useEffect(() => {
-    // Find the DAO Manager agent
-    const daoManagerAgent = activeAgents.find(
-      (agent) => agent.name === "DAO Manager"
-    );
-
-    // If found and no agent is currently selected, select it by default
-    if (daoManagerAgent && !selectedAgentId) {
-      onSelect(daoManagerAgent.id);
-      if (userAddress) {
-        localStorage.setItem(
-          `${userAddress}_selectedAgentId`,
-          daoManagerAgent.id
+      } else if (!selectedAgentId && agents.length > 0) {
+        // Find the DAO Manager agent
+        const daoManagerAgent = agents.find(
+          (agent) => agent.name === "DAO Manager"
         );
+
+        // If found and no agent is currently selected, select it by default
+        if (daoManagerAgent) {
+          onSelect(daoManagerAgent.id);
+          localStorage.setItem(
+            `${userAddress}_selectedAgentId`,
+            daoManagerAgent.id
+          );
+        }
       }
     }
-  }, [activeAgents, selectedAgentId, onSelect, userAddress]);
+  }, [userAddress, agents, selectedAgentId, onSelect]);
 
   const handleAmountChange = (address: string, value: string) => {
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
@@ -160,15 +161,17 @@ export function AgentWalletSelector({
     e.preventDefault();
   };
 
-  if (error) {
+  if (isWalletsError) {
     return (
       <div className="flex h-11 w-auto items-center justify-center rounded-full bg-destructive/10 text-destructive px-4">
-        <span className="text-sm">{error}</span>
+        <span className="text-sm">
+          Failed to fetch wallets. Please try again.
+        </span>
       </div>
     );
   }
 
-  if (agentsLoading || walletsLoading) {
+  if (agentsLoading || walletsLoading || isLoadingWallets) {
     return (
       <div className="flex h-11 w-auto items-center justify-center rounded-full bg-background/50 backdrop-blur-sm px-4">
         <Bot className="h-4 w-4 animate-pulse text-foreground/50 mr-2" />
@@ -286,7 +289,7 @@ export function AgentWalletSelector({
             <Separator className="my-4" />
 
             {/* Create New Agent Button */}
-            {activeAgents.length === 0 && (
+            {agents.length === 0 && (
               <div className="p-3">
                 <Link href="/agents/new" className="block">
                   <Button
@@ -302,9 +305,9 @@ export function AgentWalletSelector({
             )}
 
             {/* Agents Section */}
-            {activeAgents.length > 0 && (
+            {agents.length > 0 && (
               <div>
-                {activeAgents.map((agent) => {
+                {agents.map((agent) => {
                   const wallet = agentWallets.find(
                     (w) => w.agent_id === agent.id
                   );
