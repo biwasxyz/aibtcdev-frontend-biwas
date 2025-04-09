@@ -39,10 +39,13 @@ const VotesTable: React.FC<VotesTableProps> = ({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["proposalVotesTable", proposalId, refreshing],
+    // Remove refreshing from queryKey
+    queryKey: ["proposalVotesTable", proposalId],
     queryFn: () => fetchProposalVotes(proposalId),
     enabled: !!proposalId,
     refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 1, // 1 minute stale time
+    gcTime: 1000 * 60 * 5, // 5 minutes garbage collection time
   });
 
   if (isLoading) {
