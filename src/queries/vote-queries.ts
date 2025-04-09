@@ -1,28 +1,22 @@
-// Example Path: src/queries/vote-queries.ts or src/lib/vote-utils.ts
-import { supabase } from "@/utils/supabase/client"; // Adjust path to your Supabase client
 
-// --- Define the Vote interface directly here ---
-// Based on the fields constructed in fetchVotes and fetchProposalVotes
+import { supabase } from "@/utils/supabase/client";
 export interface Vote {
     id: string;
-    created_at: string; // Assuming ISO string format
+    created_at: string;
     dao_id: string;
-    dao_name: string;   // Name fetched from related 'daos' table
+    dao_name: string;
     agent_id: string;
-    agent_name: string; // Name fetched from related 'agents' table
-    answer: boolean;    // true for 'Yes', false for 'No'
+    agent_name: string;
+    answer: boolean;
     proposal_id: string;
-    proposal_title: string; // Title fetched from related 'proposals' table or set contextually
-    reasoning: string | null; // Allow null if reasoning can be missing
-    tx_id: string | null;     // Allow null if tx_id can be missing
-    amount: number | null;    // Allow null if amount can be missing
-    prompt: string | null;    // Allow null if prompt can be missing
-    confidence: number | null; // Allow null if confidence can be missing
+    proposal_title: string;
+    reasoning: string | null;
+    tx_id: string | null;
+    amount: number | null;
+    prompt: string | null;
+    confidence: number | null;
 }
 
-// Helper interface for the structure returned by Supabase join in the refactored query
-// Represents the raw data from Supabase before transforming into the Vote interface
-// Corrected based on TypeScript error: Expects arrays for related items
 interface VoteWithDetails {
     id: string;
     created_at: string;
@@ -35,9 +29,8 @@ interface VoteWithDetails {
     amount: number | null;
     prompt: string | null;
     confidence: number | null;
-    // Nested objects returned by the Supabase join - now arrays
-    agents: { id: string; name: string }[]; // Array (usually 0 or 1 item)
-    daos: { id: string; name: string }[];   // Array (usually 0 or 1 item)
+    agents: { id: string; name: string }[];
+    daos: { id: string; name: string }[];
 }
 
 
@@ -114,12 +107,6 @@ export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
         console.warn("fetchProposalVotes called with null or empty proposalId.");
         return [];
     }
-
-    // Fetch votes AND related data in ONE query
-    // Assumes 'votes' table has Foreign Keys:
-    // - 'agent_id' referencing 'agents(id)'
-    // - 'dao_id' referencing 'daos(id)'
-    // Adjust the select string if your relationships/table names are different!
     const { data, error } = await supabase
         .from("votes")
         .select(`
@@ -149,7 +136,6 @@ export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
         return []; // Return empty array if no votes found
     }
 
-    // Transform the Supabase result (VoteWithDetails) into the Vote interface
     const transformedVotes: Vote[] = data.map((vote: VoteWithDetails) => ({
         // Spread basic vote properties that match
         id: vote.id,
@@ -163,10 +149,8 @@ export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
         amount: vote.amount,
         prompt: vote.prompt,
         confidence: vote.confidence ?? null,
-        // Extract names from the FIRST element of the nested arrays
         agent_name: vote.agents?.[0]?.name || "Unknown Agent",
         dao_name: vote.daos?.[0]?.name || "Unknown DAO",
-        // Set proposal title contextually - if needed from proposals table, add to join above
         proposal_title: "Current Proposal",
     }));
 
@@ -227,7 +211,7 @@ export async function getProposalVotes(contractPrincipal: string, proposalId: nu
                 body: JSON.stringify({
                     functionArgs: [{ type: "uint", value: proposalIdString }],
                     // Optional: Add cache control if the endpoint supports it
-                    // cacheControl: bustCache ? { bustCache: true, ttl: 3600 } : undefined,
+                    cacheControl: bustCache ? { bustCache: true, ttl: 3600 } : undefined,
                 }),
             },
         );
