@@ -38,7 +38,7 @@ export async function fetchWalletBalance(address: string): Promise<WalletBalance
     try {
         const network = process.env.NEXT_PUBLIC_STACKS_NETWORK
         const response = await fetch(`https://api.${network}.hiro.so/extended/v1/address/${address}/balances`, {
-            // WILL FORCE-CACHE WORK WHEN DEPLOYING IN CLOUDFLARE ?
+            // USING force-cache won't work on cloudflare deployment
             next: {
                 revalidate: 1200 // Cache for 20 minutes (1200 seconds)
             }
