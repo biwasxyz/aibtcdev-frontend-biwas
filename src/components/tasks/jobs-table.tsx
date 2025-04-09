@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
-import { useJobs } from "@/hooks/use-jobs";
 import { useProfile } from "@/hooks/use-profile";
 import { format } from "date-fns";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -14,6 +13,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { fetchJobs } from "@/queries/jobs-queries";
+import { useQuery } from "@tanstack/react-query";
 
 interface JobsTableProps {
   agentId: string;
@@ -21,7 +22,18 @@ interface JobsTableProps {
 
 export function JobsTable({ agentId }: JobsTableProps) {
   const { user: profile } = useProfile();
-  const { jobs, isLoading, error } = useJobs(agentId, profile?.id || "");
+  const profileId = profile?.id || "";
+
+  const {
+    data: jobs = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["jobs", agentId, profileId],
+    queryFn: () => fetchJobs(agentId, profileId),
+    enabled: !!agentId && !!profileId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
   if (isLoading) {
     return (
@@ -41,7 +53,7 @@ export function JobsTable({ agentId }: JobsTableProps) {
       <Alert variant="destructive" className="mx-auto max-w-2xl">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Failed to load jobs: {error.message}
+          Failed to load jobs: {(error as Error).message}
         </AlertDescription>
       </Alert>
     );
