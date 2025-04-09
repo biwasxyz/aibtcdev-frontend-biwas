@@ -14,7 +14,7 @@ import {
 import { DAOTable } from "./daos-table";
 import type { DAO, SortField } from "@/types/supabase";
 import {
-  fetchDAOs,
+  fetchDAOsWithExtension,
   fetchTokens,
   fetchTokenPrices,
   fetchTokenTrades,
@@ -28,7 +28,7 @@ export default function DAOs() {
   // Fetch DAOs with TanStack Query
   const { data: daos, isLoading: isLoadingDAOs } = useQuery({
     queryKey: ["daos"],
-    queryFn: fetchDAOs,
+    queryFn: fetchDAOsWithExtension,
   });
 
   // Fetch tokens with TanStack Query
