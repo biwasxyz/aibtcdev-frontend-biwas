@@ -37,7 +37,12 @@ export async function fetchWallets(userId: string | null) {
 export async function fetchWalletBalance(address: string): Promise<WalletBalance> {
     try {
         const network = process.env.NEXT_PUBLIC_STACKS_NETWORK
-        const response = await fetch(`https://api.${network}.hiro.so/extended/v1/address/${address}/balances`)
+        const response = await fetch(`https://api.${network}.hiro.so/extended/v1/address/${address}/balances`, {
+            // WILL FORCE-CACHE WORK WHEN DEPLOYING IN CLOUDFLARE ?
+            next: {
+                revalidate: 1200 // Cache for 20 minutes (1200 seconds)
+            }
+        })
 
         if (!response.ok) {
             throw new Error(`Failed to fetch balance for ${address}`)
