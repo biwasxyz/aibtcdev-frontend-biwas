@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Plus, Archive, Copy, Check } from "lucide-react";
 import { Heading } from "@/components/ui/heading";
 import { useQuery } from "@tanstack/react-query";
-import { fetchAgents } from "@/queries/agentQueries";
+import { fetchAgents } from "@/queries/agent-queries";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useWalletStore } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
 import { useToast } from "@/hooks/use-toast";
 import type { Agent } from "@/types/supabase";
+import { truncateAddress } from "@/helpers/format-utils";
+import { useClipboard } from "@/helpers/clipboard-utils";
 
 export default function AgentsPage() {
   const { data: agents, isLoading: isLoadingAgents } = useQuery({
@@ -24,7 +26,7 @@ export default function AgentsPage() {
   const { userId, accessToken } = useSessionStore();
   const { agentWallets, balances, fetchWallets } = useWalletStore();
   const { toast } = useToast();
-  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  const { copiedText, copyToClipboard } = useClipboard();
 
   useEffect(() => {
     if (userId) {
@@ -62,28 +64,8 @@ export default function AgentsPage() {
       : wallet.testnet_address;
   };
 
-  const truncateAddress = (address: string) => {
-    if (!address) return "";
-    return `${address.slice(0, 5)}...${address.slice(-5)}`;
-  };
-
   const formatBalance = (balance: string) => {
     return (Number(balance) / 1_000_000).toFixed(6);
-  };
-
-  const copyToClipboard = async (address: string) => {
-    try {
-      await navigator.clipboard.writeText(address);
-      setCopiedAddress(address);
-      setTimeout(() => setCopiedAddress(null), 2000);
-    } catch (err) {
-      console.error("Failed to copy to clipboard:", err);
-      toast({
-        title: "Failed to copy",
-        description: "Could not copy address to clipboard",
-        variant: "destructive",
-      });
-    }
   };
 
   const AgentCard = ({
@@ -155,7 +137,7 @@ export default function AgentsPage() {
                     copyToClipboard(walletAddress);
                   }}
                 >
-                  {copiedAddress === walletAddress ? (
+                  {copiedText === walletAddress ? (
                     <Check className="h-3 w-3" />
                   ) : (
                     <Copy className="h-3 w-3" />

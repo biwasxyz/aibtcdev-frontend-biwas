@@ -2,6 +2,7 @@ import { supabase } from "@/utils/supabase/client"
 import { sdkFaktory } from "@/lib/faktory-fun"
 import type { DAO, Holder, Token, Proposal, Extension } from "@/types/supabase"
 
+// Define structure for Market Statistics
 interface MarketStats {
     price: number
     marketCap: number
@@ -9,38 +10,42 @@ interface MarketStats {
     holderCount: number
 }
 
+// Define structure for tokens held in a treasury
 interface TreasuryToken {
-    type: "FT" | "NFT"
+    type: "FT" | "NFT" // Fungible Token or Non-Fungible Token
     name: string
     symbol: string
     amount: number
-    value: number
+    value: number // Estimated value (Note: FT value calculation might be simplified)
 }
 
+// Define structure for token balance details from Hiro API
 interface TokenBalance {
     balance: string
     total_sent: string
     total_received: string
 }
 
+// Define structure for token trade details
 interface TokenTrade {
     txId: string
     tokenContract: string
-    type: string
+    type: string // e.g., "buy" or "sell"
     tokensAmount: number
     ustxAmount: number
     pricePerToken: number
-    maker: string
-    timestamp: number
+    maker: string // Address of the trade maker
+    timestamp: number // Unix timestamp
 }
 
+// Define structure for the response from Hiro API for address balances
 interface HiroBalanceResponse {
     stx: TokenBalance
     fungible_tokens: {
-        [key: string]: TokenBalance
+        [key: string]: TokenBalance // Key is asset identifier (e.g., contract::token)
     }
     non_fungible_tokens: {
-        [key: string]: {
+        [key: string]: { // Key is asset identifier (e.g., contract::nft)
             count: number
             total_sent: number
             total_received: number
@@ -48,44 +53,37 @@ interface HiroBalanceResponse {
     }
 }
 
+// Define structure for the response from Hiro API for token holders
 interface HiroHolderResponse {
     total_supply: string
     limit: number
     offset: number
-    total: number
+    total: number // Total number of holders
     results: {
         address: string
         balance: string
     }[]
 }
 
+// Get Stacks network configuration from environment variables
 const STACKS_NETWORK = process.env.NEXT_PUBLIC_STACKS_NETWORK
 
-export const fetchXUsers = async () => {
-    const { data, error } = await supabase.from("x_users").select("id, user_id")
-
-    if (error) throw error
-    return data || []
-}
-
-export const fetchExtensions = async () => {
+// Internal helper to fetch all extensions
+const fetchExtensions = async () => {
     const { data, error } = await supabase.from("extensions").select("*")
-
     if (error) throw error
     return data || []
 }
 
-export const fetchDAOs = async (): Promise<DAO[]> => {
-    const [{ data: daosData, error: daosError }, xUsersData, extensionsData] = await Promise.all([
+// Fetches DAOs and extensions.
+export const fetchDAOsWithExtension = async (): Promise<DAO[]> => {
+    const [{ data: daosData, error: daosError }, extensionsData] = await Promise.all([
         supabase
             .from("daos")
             .select("*")
             .order("created_at", { ascending: false })
             .eq("is_broadcasted", true)
-            // SHOULD BE GOOD
-            // FETCH ONLY MEDIA3(FOR TESTNET REMOVE IN MAINNET LATER) AND FACES FOR MAINNET
             .in("name", ["MEDIA3", "FACES"]),
-        fetchXUsers(),
         fetchExtensions(),
     ])
 
@@ -93,23 +91,22 @@ export const fetchDAOs = async (): Promise<DAO[]> => {
     if (!daosData) return []
 
     return daosData.map((dao) => {
-        const xUser = xUsersData?.find((user) => user.id === dao.author_id)
         return {
             ...dao,
-            user_id: xUser?.user_id,
+            // Map the extensions and filter out based on the dao.id
             extensions: extensionsData?.filter((cap) => cap.dao_id === dao.id) || [],
         }
     })
 }
 
-export const fetchAllDAOs = async (): Promise<DAO[]> => {
+// Fetches specific DAOs. Remove .in when we need to fetch all the daos
+export const fetchDAOs = async (): Promise<DAO[]> => {
     const [{ data: daosData, error: daosError }] = await Promise.all([
         supabase
             .from("daos")
             .select("*")
             .order("created_at", { ascending: false })
             .eq("is_broadcasted", true)
-            // Add the same filter as in fetchDAOs
             .in("name", ["MEDIA3", "FACES"]),
     ])
 
@@ -117,26 +114,21 @@ export const fetchAllDAOs = async (): Promise<DAO[]> => {
     return daosData ?? []
 }
 
-export const fetchDAO = async (id: string): Promise<DAO> => {
-    const { data, error } = await supabase.from("daos").select("*").eq("id", id).single()
-
-    if (error) throw error
-    return data
-}
-
+// Fetches all token records from the 'tokens' table.
 export const fetchTokens = async (): Promise<Token[]> => {
     const { data, error } = await supabase.from("tokens").select("*")
     if (error) throw error
     return data || []
 }
 
+// Fetches a single token record based on the associated DAO ID.
 export const fetchToken = async (id: string): Promise<Token> => {
     const { data, error } = await supabase.from("tokens").select("*").eq("dao_id", id).single()
-
     if (error) throw error
     return data
 }
 
+// Fetches token price, market cap, holders, and 24h change via Faktory SDK.
 export const fetchTokenPrice = async (
     dex: string,
 ): Promise<{ price: number; marketCap: number; holders: number; price24hChanges: number | null }> => {
@@ -149,11 +141,13 @@ export const fetchTokenPrice = async (
     }
 }
 
+// Fetches recent trades for a specific token contract via Faktory SDK.
 export const fetchTokenTrades = async (tokenContract: string): Promise<TokenTrade[]> => {
     const { data } = await sdkFaktory.getTokenTrades(tokenContract)
     return data || []
 }
 
+// Fetches token prices for multiple DAOs concurrently via Faktory SDK using DAO extensions.
 export const fetchTokenPrices = async (
     daos: DAO[],
     tokens: Token[]
@@ -166,9 +160,9 @@ export const fetchTokenPrices = async (
             const extension = dao.extensions?.find((ext) => ext.type === "dex")
             const token = tokens?.find((t) => t.dao_id === dao.id)
 
-            if (extension && token) {
+            if (extension?.contract_principal && token) {
                 try {
-                    const { data } = await sdkFaktory.getToken(extension.contract_principal!)
+                    const { data } = await sdkFaktory.getToken(extension.contract_principal)
                     console.log(data)
                     prices[dao.id] = {
                         price: data.priceUsd ? Number(data.priceUsd) : 0,
@@ -192,12 +186,14 @@ export const fetchTokenPrices = async (
     return prices
 }
 
+// Fetches all extension records associated with a single, specific DAO ID.
 export const fetchDAOExtensions = async (id: string): Promise<Extension[]> => {
     const { data, error } = await supabase.from("extensions").select("*").eq("dao_id", id)
     if (error) throw error
-    return data
+    return data ?? []
 }
 
+// Fetches FT holders, supply, count, and calculates percentages via Hiro API.
 export const fetchHolders = async (
     contractPrincipal: string,
     tokenSymbol: string,
@@ -219,6 +215,7 @@ export const fetchHolders = async (
     }
 }
 
+// Fetches STX, FT, and NFT balances for a Stacks address via Hiro API.
 export const fetchTreasuryTokens = async (treasuryAddress: string, tokenPrice: number): Promise<TreasuryToken[]> => {
     const response = await fetch(`https://api.${STACKS_NETWORK}.hiro.so/extended/v1/address/${treasuryAddress}/balances`)
     const data = (await response.json()) as HiroBalanceResponse
@@ -263,6 +260,7 @@ export const fetchTreasuryTokens = async (treasuryAddress: string, tokenPrice: n
     return tokens
 }
 
+// Fetches and calculates combined market statistics for a DAO's token.
 export const fetchMarketStats = async (
     dex: string,
     contractPrincipal: string,
@@ -284,22 +282,28 @@ export const fetchMarketStats = async (
     }
 }
 
+// Fetches all proposals associated with a specific DAO ID, newest first.
 export const fetchProposals = async (daoId: string): Promise<Proposal[]> => {
     const { data, error } = await supabase
         .from("proposals")
         .select("*")
         .eq("dao_id", daoId)
-        .order("created_at", { ascending: false }) //newest first
+        .order("created_at", { ascending: false })
 
     if (error) throw error
     return data || []
 }
 
+// Fetches a single broadcasted DAO record based on its URL-decoded name.
 export const fetchDAOByName = async (encodedName: string): Promise<DAO | null> => {
     // Decode the URL-encoded name
     const name = decodeURIComponent(encodedName)
-
-    const { data } = await supabase.from("daos").select("*").eq("name", name).eq("is_broadcasted", true).single()
+    const { data } = await supabase
+        .from("daos")
+        .select("*")
+        .eq("name", name)
+        .eq("is_broadcasted", true)
+        .single()
 
     if (!data) {
         console.error("No DAO found with name:", name)
@@ -308,4 +312,3 @@ export const fetchDAOByName = async (encodedName: string): Promise<DAO | null> =
     console.log(data)
     return data
 }
-

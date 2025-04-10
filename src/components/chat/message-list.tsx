@@ -4,12 +4,19 @@ import { useRef } from "react";
 import type { Message } from "@/lib/chat/types";
 import { ChatMessageBubble } from "./chat-message-bubble";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TypingIndicator } from "./typing-indicator";
 
 interface MessageListProps {
   messages: Message[];
+  isTyping: boolean;
+  agentId?: string | null;
 }
 
-export function MessageList({ messages }: MessageListProps) {
+export function MessageList({
+  messages,
+  isTyping,
+  agentId = null,
+}: MessageListProps) {
   const lastMessageRef = useRef<HTMLDivElement>(null);
 
   // Group messages for streaming
@@ -82,6 +89,13 @@ export function MessageList({ messages }: MessageListProps) {
             <ChatMessageBubble message={message} />
           </div>
         ))}
+
+        {/* Show typing indicator when isTyping is true */}
+        {isTyping && (
+          <div className="w-full min-w-0 break-words">
+            <TypingIndicator agentId={agentId} />
+          </div>
+        )}
       </div>
     </ScrollArea>
   );

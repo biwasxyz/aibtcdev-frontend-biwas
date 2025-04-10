@@ -16,11 +16,17 @@ import AgentWalletSelector from "@/components/chat/agent-selector";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
 import { useWalletStore } from "@/store/wallet";
-import { fetchDAOExtensions, fetchToken } from "@/queries/daoQueries";
+import { fetchDAOExtensions, fetchToken } from "@/queries/dao-queries";
 import type { DAO, Token, Extension } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import type { WalletBalance, WalletWithAgent } from "@/store/wallet";
 import AuthButton from "../home/auth-button";
+import {
+  formatStxBalance,
+  formatTokenBalance,
+  satoshiToBTC,
+} from "@/helpers/format-utils";
+import { getWalletAddress } from "@/helpers/wallet-utils";
 
 interface DAOChatModalProps {
   daoId: string;
@@ -116,31 +122,15 @@ export function DAOBuyModal({
     // Don't close the modal immediately, let the user see the success state
   };
 
-  // Format the balance from microSTX to STX with 6 decimal places
-  const formatBalance = (balance: string) => {
-    if (!balance) return "0.000000";
-    return (Number(balance) / 1_000_000).toFixed(6);
-  };
-
-  // Convert satoshis to BTC
-  const satoshiToBTC = (satoshis: string) => {
-    if (!satoshis || isNaN(Number(satoshis))) return "0.00000000";
-    return (Number(satoshis) / 100000000).toFixed(8);
-  };
-
   // Get the current agent's wallet and balance
   const getCurrentAgentWallet = () => {
     if (!selectedAgentId && !userWallet) return null;
-
-    const isMainnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet";
 
     if (!selectedAgentId) {
       // User wallet selected
       if (!userWallet) return null;
 
-      const address = isMainnet
-        ? userWallet.mainnet_address
-        : userWallet.testnet_address;
+      const address = getWalletAddress(userWallet);
       if (!address) return null;
 
       return {
@@ -154,9 +144,7 @@ export function DAOBuyModal({
       ) as WalletWithAgent | undefined;
       if (!agentWallet) return null;
 
-      const address = isMainnet
-        ? agentWallet.mainnet_address
-        : agentWallet.testnet_address;
+      const address = getWalletAddress(agentWallet);
       if (!address) return null;
 
       return {
@@ -275,7 +263,9 @@ export function DAOBuyModal({
                   <div className="flex justify-between items-center border-b pb-3">
                     <span className="text-base">STX Balance</span>
                     <span className="font-medium text-base">
-                      {formatBalance(agentWalletData.walletBalance.stx.balance)}{" "}
+                      {formatStxBalance(
+                        agentWalletData.walletBalance.stx.balance
+                      )}{" "}
                       STX
                     </span>
                   </div>
@@ -297,7 +287,7 @@ export function DAOBuyModal({
                       >
                         <span className="text-base">{tokenSymbol}</span>
                         <span className="font-medium text-base">
-                          {formatBalance(token.balance)}
+                          {formatTokenBalance(token.balance)}
                         </span>
                       </div>
                     );

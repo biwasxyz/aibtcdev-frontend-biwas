@@ -1,3 +1,4 @@
+// FLAGGED FOR REMOVAL
 import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase/client";
 import { Extension, DAO, Holder, Token } from "@/types/supabase";

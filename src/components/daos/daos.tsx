@@ -14,12 +14,12 @@ import {
 import { DAOTable } from "./daos-table";
 import type { DAO, SortField } from "@/types/supabase";
 import {
-  fetchDAOs,
+  fetchDAOsWithExtension,
   fetchTokens,
   fetchTokenPrices,
   fetchTokenTrades,
   fetchHolders,
-} from "@/queries/daoQueries";
+} from "@/queries/dao-queries";
 
 export default function DAOs() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,7 +28,7 @@ export default function DAOs() {
   // Fetch DAOs with TanStack Query
   const { data: daos, isLoading: isLoadingDAOs } = useQuery({
     queryKey: ["daos"],
-    queryFn: fetchDAOs,
+    queryFn: fetchDAOsWithExtension,
   });
 
   // Fetch tokens with TanStack Query

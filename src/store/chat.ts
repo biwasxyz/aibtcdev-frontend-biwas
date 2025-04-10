@@ -20,6 +20,7 @@ interface ChatState {
   isLoading: boolean;
   error: string | null;
   ws: WebSocket | null;
+  isTyping: Record<string, boolean>; // Track typing state per thread
 
   // Connection
   connect: (accessToken: string) => void;
@@ -42,6 +43,7 @@ interface ChatState {
   setConnectionStatus: (isConnected: boolean) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
+  setTyping: (threadId: string, isTyping: boolean) => void;
 }
 
 // Helper function to get stored thread ID
@@ -59,6 +61,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isLoading: false,
   error: null,
   ws: globalWs,
+  isTyping: {}, // Initialize empty typing state
+
+  setTyping: (threadId, isTyping) => {
+    set((state) => ({
+      isTyping: {
+        ...state.isTyping,
+        [threadId]: isTyping
+      }
+    }));
+  },
 
   setSelectedAgent: (agentId) => {
     set({ selectedAgentId: agentId });
@@ -106,6 +118,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
         try {
           const data = JSON.parse(event.data);
           // console.log('Received message:', data);
+
+          // Set typing to false when receiving any message from the assistant
+          if (data.role === 'assistant' && data.thread_id) {
+            get().setTyping(data.thread_id, false);
+          }
 
           // Handle various message types with appropriate status
           if (data.type === "token") {
@@ -165,7 +182,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
         [threadId]: []
       },
       activeThreadId: null,
-      fetchedThreads: new Set(Array.from(state.fetchedThreads).filter(id => id !== threadId))
+      fetchedThreads: new Set(Array.from(state.fetchedThreads).filter(id => id !== threadId)),
+      isTyping: {
+        ...state.isTyping,
+        [threadId]: false
+      }
     }));
 
     // Clear from localStorage
@@ -257,6 +278,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return;
     }
 
+    // Set typing indicator to true when sending a message
+    get().setTyping(threadId, true);
+
     get().addMessage({
       agent_id: get().selectedAgentId,
       thread_id: threadId,
@@ -278,6 +302,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     } catch (error) {
       set({ error: "Failed to send message" });
       console.error("Send error:", error);
+      // Reset typing indicator if message fails
+      get().setTyping(threadId, false);
     }
   },
 

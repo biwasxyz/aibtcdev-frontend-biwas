@@ -19,7 +19,9 @@ import { AgentAvatar } from "../reusables/AgentAvatar";
 import { AgentBalance } from "../reusables/AgentBalance";
 import { TransferTokenModal } from "./TransferTokenModal";
 import { SuccessModal } from "../reusables/SuccessModal";
-import type { Wallet, DAO, Token } from "@/types/supabase";
+import type { DAO, Token } from "@/types/supabase";
+import { getWalletAddress } from "@/helpers/wallet-utils";
+import { truncateAddress } from "@/helpers/format-utils";
 
 interface AgentSelectorSheetProps {
   selectedAgentId: string | null;
@@ -84,12 +86,6 @@ export function AgentSelectorSheet({
     }
   }, [userId, fetchWallets]);
 
-  // Helper functions
-  const truncateAddress = (address: string) => {
-    if (!address) return "";
-    return `${address.slice(0, 5)}...${address.slice(-5)}`;
-  };
-
   const getDexPrincipal = (dao: DAO) => {
     const dexExtension = dao.extensions?.find((ext) => ext.type === "dex");
     return dexExtension?.contract_principal || "";
@@ -107,12 +103,6 @@ export function AgentSelectorSheet({
         variant: "destructive",
       });
     }
-  };
-
-  const getWalletAddress = (wallet: Wallet) => {
-    return process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
-      ? wallet.mainnet_address
-      : wallet.testnet_address;
   };
 
   const isAgentEligible = (

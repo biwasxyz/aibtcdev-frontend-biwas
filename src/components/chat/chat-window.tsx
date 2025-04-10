@@ -23,10 +23,14 @@ export function ChatWindow() {
     setSelectedAgent,
     connect,
     activeThreadId,
+    isTyping,
   } = useChatStore();
 
   const { accessToken } = useSessionStore();
   const threadMessages = activeThreadId ? messages[activeThreadId] || [] : [];
+  const isThreadTyping = activeThreadId
+    ? isTyping[activeThreadId] || false
+    : false;
 
   const memoizedConnect = useCallback(
     (token: string) => {
@@ -150,7 +154,10 @@ export function ChatWindow() {
                       <AlertDescription>{chatError}</AlertDescription>
                     </Alert>
                   )}
-                  <MessageList messages={threadMessages} />
+                  <MessageList
+                    messages={threadMessages}
+                    isTyping={isThreadTyping}
+                  />
                   {/* Add extra padding div at the bottom to ensure content isn't hidden */}
                 </div>
               </ScrollArea>

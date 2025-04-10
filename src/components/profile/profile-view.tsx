@@ -167,10 +167,13 @@ export function ProfileView() {
                             <Dialog>
                               <DialogTrigger className="cursor-pointer text-primary hover:underline">
                                 <div className="max-w-xs truncate">
-                                  {vote.reasoning
-                                    .substring(0, 40)
-                                    .replace(/[#*`_~[\]]/g, "")}
-                                  {vote.reasoning.length > 40 ? "..." : ""}
+                                  {vote.reasoning &&
+                                    vote.reasoning
+                                      .substring(0, 40)
+                                      .replace(/[#*`_~[\]]/g, "")}
+                                  {vote.reasoning && vote.reasoning.length > 40
+                                    ? "..."
+                                    : ""}
                                 </div>
                               </DialogTrigger>
                               <DialogContent className="w-[80vw] max-w-5xl">

@@ -16,6 +16,7 @@ import {
 import { DAOCreationDate } from "./dao-creation-date";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatNumber } from "@/helpers/format-utils";
 
 interface Holder {
   address: string;
@@ -57,19 +58,6 @@ function DAOOverview({
   proposals = [],
 }: DAOOverviewProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-
-  const formatNumber = (num: number, isPrice = false) => {
-    if (isPrice) {
-      if (num === 0) return "$0.00";
-      if (num < 0.01) return `$${num.toFixed(8)}`;
-      return `$${num.toFixed(2)}`;
-    }
-
-    if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
-    if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
-    if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}K`;
-    return `$${num.toFixed(2)}`;
-  };
 
   // Proposal statistics
   const proposalStats = {
@@ -127,7 +115,7 @@ function DAOOverview({
         <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
           <CardWithBadge
             title="Token Price"
-            value={formatNumber(marketStats.price, true)}
+            value={formatNumber(marketStats.price)}
           />
           <CardWithBadge
             title="Market Cap"

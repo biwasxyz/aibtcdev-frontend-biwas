@@ -1,9 +1,8 @@
 "use client";
 
 import type React from "react";
-
 import { useQuery } from "@tanstack/react-query";
-import { fetchProposalVotes } from "@/queries/vote-queries";
+import { fetchProposalVotes, Vote } from "@/queries/vote-queries";
 import { formatDistanceToNow } from "date-fns";
 import { ThumbsUp, ThumbsDown, ExternalLink } from "lucide-react";
 import {
@@ -26,113 +25,147 @@ import CopyButton from "./CopyButton";
 
 interface VotesTableProps {
   proposalId: string;
-  refreshing?: boolean;
 }
 
-const VotesTable: React.FC<VotesTableProps> = ({
-  proposalId,
-  refreshing = false,
-}) => {
-  // Use React Query to fetch and cache votes
+const VotesTable: React.FC<VotesTableProps> = ({ proposalId }) => {
   const {
     data: votes,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["proposalVotesTable", proposalId, refreshing],
+    isError,
+  } = useQuery<Vote[], Error>({
+    queryKey: ["proposalVotesTable", proposalId],
     queryFn: () => fetchProposalVotes(proposalId),
     enabled: !!proposalId,
     refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 1, // 1 minute stale time
+    gcTime: 1000 * 60 * 5, // 5 minutes garbage collection time
   });
 
+  // --- Loading State ---
   if (isLoading) {
     return (
-      <div className="space-y-2">
-        <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded-full animate-pulse"></div>
-        <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded-full animate-pulse"></div>
-        <div className="h-4 bg-gray-200 dark:bg-zinc-700 rounded-full animate-pulse"></div>
+      // Simple skeleton loader for the table body area
+      <div className="space-y-2 p-4 border border-zinc-700/50 rounded-lg bg-zinc-800/30">
+        <div className="h-4 bg-zinc-700 rounded-full animate-pulse w-full"></div>
+        <div className="h-4 bg-zinc-700 rounded-full animate-pulse w-5/6"></div>
+        <div className="h-4 bg-zinc-700 rounded-full animate-pulse w-full"></div>
       </div>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
-      <div className="text-red-500">Error: {(error as Error).message}</div>
+      <div className="text-red-400 p-4 text-center border border-red-700/50 rounded-lg bg-red-900/10">
+        Error loading votes: {error?.message || "Unknown error"}
+      </div>
     );
   }
 
+  // --- Empty State ---
   if (!votes || votes.length === 0) {
     return (
-      <div className="py-4 text-center bg-zinc-800 rounded-lg">
-        No votes recorded yet
+      <div className="py-6 text-center text-muted-foreground bg-zinc-800/50 rounded-lg border border-zinc-700/50">
+        No votes have been recorded for this proposal yet.
       </div>
     );
   }
 
-  // Helper function to get confidence color
-  const getConfidenceColor = (confidence: number | null) => {
-    if (confidence === null) return "bg-gray-300 dark:bg-gray-600";
+  // --- Helper function for confidence bar color ---
+  const getConfidenceColor = (confidence: number | null): string => {
+    if (confidence === null) return "bg-gray-500 dark:bg-gray-600"; // More distinct null color
     if (confidence >= 0.8) return "bg-green-500";
     if (confidence >= 0.6) return "bg-green-400";
     if (confidence >= 0.4) return "bg-yellow-400";
-    if (confidence >= 0.2) return "bg-yellow-500";
+    if (confidence >= 0.2) return "bg-orange-500";
     return "bg-red-500";
   };
 
+  // --- Render Votes Table ---
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto relative border border-zinc-700/50 rounded-lg">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead className="whitespace-nowrap">Vote</TableHead>
-            <TableHead className="whitespace-nowrap">Amount</TableHead>
-            <TableHead className="whitespace-nowrap">Date</TableHead>
-            <TableHead className="whitespace-nowrap">Confidence</TableHead>
-            <TableHead className="whitespace-nowrap">Reasoning</TableHead>
-            <TableHead className="whitespace-nowrap">Prompt</TableHead>
-            <TableHead className="whitespace-nowrap">TX</TableHead>
+          <TableRow className="bg-zinc-800/30 hover:bg-zinc-800/50">
+            <TableHead className="whitespace-nowrap px-3 py-2 text-muted-foreground">
+              Vote
+            </TableHead>
+            {/* Optional: <TableHead>Voter</TableHead> */}
+            <TableHead className="whitespace-nowrap px-3 py-2 text-muted-foreground">
+              Amount
+            </TableHead>
+            <TableHead className="whitespace-nowrap px-3 py-2 text-muted-foreground">
+              Date
+            </TableHead>
+            <TableHead className="whitespace-nowrap px-3 py-2 text-muted-foreground">
+              Confidence
+            </TableHead>
+            <TableHead className="whitespace-nowrap px-3 py-2 text-muted-foreground">
+              Reasoning
+            </TableHead>
+            <TableHead className="whitespace-nowrap px-3 py-2 text-muted-foreground">
+              Prompt
+            </TableHead>
+            <TableHead className="whitespace-nowrap px-3 py-2 text-center text-muted-foreground">
+              TX
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {votes.map((vote) => (
-            <TableRow key={vote.id}>
-              <TableCell>
+            <TableRow
+              key={vote.id}
+              className="hover:bg-zinc-800/40 border-b border-zinc-700/50 last:border-b-0"
+            >
+              {/* Vote Yes/No */}
+              <TableCell className="px-3 py-2">
                 {vote.answer ? (
-                  <span className="flex items-center text-green-500">
-                    <ThumbsUp className="h-4 w-4 mr-1" />
+                  <span className="flex items-center text-green-400">
+                    <ThumbsUp className="h-4 w-4 mr-1.5 flex-shrink-0" />
                     Yes
                   </span>
                 ) : (
-                  <span className="flex items-center text-red-500">
-                    <ThumbsDown className="h-4 w-4 mr-1" />
+                  <span className="flex items-center text-red-400">
+                    <ThumbsDown className="h-4 w-4 mr-1.5 flex-shrink-0" />
                     No
                   </span>
                 )}
               </TableCell>
-              <TableCell className="whitespace-nowrap">
-                {vote.amount ? (
-                  <span>{(vote.amount / 1_000_000_00).toFixed(2)}</span>
+
+              {/* Amount */}
+              <TableCell className="whitespace-nowrap px-3 py-2">
+                {vote.amount !== null ? (
+                  <span>
+                    {(vote.amount / 1e8).toLocaleString(undefined, {
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
                 ) : (
                   <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
-              <TableCell className="whitespace-nowrap">
+
+              {/* Date */}
+              <TableCell className="whitespace-nowrap px-3 py-2 text-xs text-muted-foreground">
                 {formatDistanceToNow(new Date(vote.created_at), {
                   addSuffix: true,
                 })}
               </TableCell>
-              <TableCell>
+
+              {/* Confidence */}
+              <TableCell className="px-3 py-2">
                 {vote.confidence !== null ? (
-                  <div className="flex items-center">
-                    <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full mr-2">
+                  <div
+                    className="flex items-center"
+                    title={`Confidence: ${Math.round(vote.confidence * 100)}%`}
+                  >
+                    <div className="w-16 h-2 bg-zinc-700 rounded-full mr-2 overflow-hidden">
                       <div
-                        className={`h-2 rounded-full ${getConfidenceColor(
-                          vote.confidence
-                        )}`}
+                        className={`h-2 ${getConfidenceColor(vote.confidence)}`}
                         style={{ width: `${vote.confidence * 100}%` }}
                       ></div>
                     </div>
-                    <span className="text-xs">
+                    <span className="text-xs tabular-nums">
                       {Math.round(vote.confidence * 100)}%
                     </span>
                   </div>
@@ -140,57 +173,65 @@ const VotesTable: React.FC<VotesTableProps> = ({
                   <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-1">
-                  <Dialog>
-                    <DialogTrigger className="cursor-pointer text-primary hover:underline">
-                      <div className="max-w-xs truncate">
-                        {vote.reasoning
-                          .substring(0, 40)
-                          .replace(/[#*`_~[\]]/g, "")}
-                        {vote.reasoning.length > 40 ? "..." : ""}
-                      </div>
-                    </DialogTrigger>
-                    <DialogContent className="w-[80vw] max-w-5xl max-h-[80vh] overflow-hidden flex flex-col">
-                      <DialogHeader>
-                        <DialogTitle>Vote Reasoning</DialogTitle>
-                      </DialogHeader>
-                      <div className="mt-4 prose prose-sm md:prose-base dark:prose-invert max-w-none px-2 overflow-y-auto flex-1">
-                        <ReactMarkdown>{vote.reasoning}</ReactMarkdown>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  <CopyButton text={vote.reasoning} />
-                </div>
-              </TableCell>
-              <TableCell>
-                {vote.prompt ? (
-                  <div className="flex items-center gap-1">
+
+              {/* Reasoning (Corrected for null) */}
+              <TableCell className="px-3 py-2">
+                {vote.reasoning ? (
+                  <div className="flex items-center gap-1 max-w-xs">
                     <Dialog>
-                      <DialogTrigger className="cursor-pointer text-primary hover:underline">
-                        <div className="max-w-xs truncate">
-                          {vote.prompt
-                            .substring(0, 40)
-                            .replace(/[#*`_~[\]]/g, "")}
-                          {vote.prompt.length > 40 ? "..." : ""}
-                        </div>
+                      <DialogTrigger className="cursor-pointer text-primary hover:underline truncate text-left">
+                        {(vote.reasoning || "")
+                          .substring(0, 40)
+                          .replace(/[#*`_~[\]()]/g, "")}
+                        {(vote.reasoning || "").length > 40 ? "..." : ""}
                       </DialogTrigger>
-                      <DialogContent className="w-[80vw] max-w-5xl max-h-[80vh] overflow-hidden flex flex-col">
+                      <DialogContent className="w-[90vw] sm:w-[80vw] max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
                         <DialogHeader>
-                          <DialogTitle>Vote Prompt</DialogTitle>
+                          <DialogTitle>Vote Reasoning</DialogTitle>
                         </DialogHeader>
-                        <div className="mt-4 prose prose-sm md:prose-base dark:prose-invert max-w-none px-2 overflow-y-auto flex-1">
-                          <ReactMarkdown>{vote.prompt}</ReactMarkdown>
+                        <div className="mt-4 prose prose-sm md:prose-base dark:prose-invert max-w-none px-1 overflow-y-auto flex-1 prose-p:my-2 prose-li:my-1">
+                          <ReactMarkdown>{vote.reasoning || ""}</ReactMarkdown>
                         </div>
                       </DialogContent>
                     </Dialog>
-                    <CopyButton text={vote.prompt} />
+                    {/* Pass empty string if reasoning is null */}
+                    <CopyButton text={vote.reasoning || ""} />
                   </div>
                 ) : (
                   <span className="text-muted-foreground">-</span>
                 )}
               </TableCell>
-              <TableCell>
+
+              {/* Prompt (Corrected for null) */}
+              <TableCell className="px-3 py-2">
+                {vote.prompt ? (
+                  <div className="flex items-center gap-1 max-w-xs">
+                    <Dialog>
+                      <DialogTrigger className="cursor-pointer text-primary hover:underline truncate text-left">
+                        {(vote.prompt || "")
+                          .substring(0, 40)
+                          .replace(/[#*`_~[\]()]/g, "")}
+                        {(vote.prompt || "").length > 40 ? "..." : ""}
+                      </DialogTrigger>
+                      <DialogContent className="w-[90vw] sm:w-[80vw] max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+                        <DialogHeader>
+                          <DialogTitle>Vote Prompt</DialogTitle>
+                        </DialogHeader>
+                        <div className="mt-4 prose prose-sm md:prose-base dark:prose-invert max-w-none px-1 overflow-y-auto flex-1 prose-p:my-2 prose-li:my-1">
+                          <ReactMarkdown>{vote.prompt || ""}</ReactMarkdown>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    {/* Pass empty string if prompt is null */}
+                    <CopyButton text={vote.prompt || ""} />
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
+              </TableCell>
+
+              {/* TX Link */}
+              <TableCell className="px-3 py-2 text-center">
                 {vote.tx_id ? (
                   <a
                     href={`https://explorer.stacks.co/txid/${
@@ -202,7 +243,8 @@ const VotesTable: React.FC<VotesTableProps> = ({
                     }`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-500 hover:text-blue-700"
+                    className="text-blue-400 hover:text-blue-300 inline-block"
+                    title={`View transaction ${vote.tx_id}`}
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>

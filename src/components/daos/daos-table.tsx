@@ -24,6 +24,7 @@ import {
 import { DAOBuyToken } from "./dao-buy-token";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
+import { formatNumber } from "@/helpers/format-utils";
 
 interface DAOTableProps {
   daos: DAO[];
@@ -58,14 +59,7 @@ interface DAOTableProps {
   >;
 }
 
-const formatNumber = (num: number) => {
-  if (num >= 1e9) return `${(num / 1e9).toFixed(2)}B`;
-  if (num >= 1e6) return `${(num / 1e6).toFixed(2)}M`;
-  if (num >= 1e3) return `${(num / 1e3).toFixed(2)}K`;
-  return num.toFixed(2);
-};
-
-const truncateName = (name: string, maxLength: number = 10) => {
+const truncateName = (name: string, maxLength = 10) => {
   return name.length > maxLength ? `${name.slice(0, maxLength)}...` : name;
 };
 
@@ -295,7 +289,7 @@ export const DAOTable = ({
                     {isFetchingPrice ? (
                       <Loader />
                     ) : tokenPrice?.price ? (
-                      `$${tokenPrice.price.toFixed(8)}`
+                      `${tokenPrice.price.toFixed(8)}`
                     ) : (
                       "—"
                     )}
@@ -317,7 +311,7 @@ export const DAOTable = ({
                     {isFetchingPrice ? (
                       <Loader />
                     ) : tokenPrice?.marketCap ? (
-                      `$${formatNumber(tokenPrice.marketCap)}`
+                      `${formatNumber(tokenPrice.marketCap)}`
                     ) : (
                       "—"
                     )}
@@ -481,7 +475,7 @@ export const DAOTable = ({
                       {isFetchingPrice ? (
                         <Loader />
                       ) : tokenPrice?.price ? (
-                        `$${tokenPrice.price.toFixed(8)}`
+                        `${tokenPrice.price.toFixed(8)}`
                       ) : (
                         "—"
                       )}
@@ -505,7 +499,7 @@ export const DAOTable = ({
                       {isFetchingPrice ? (
                         <Loader />
                       ) : tokenPrice?.marketCap ? (
-                        `$${formatNumber(tokenPrice.marketCap)}`
+                        `${formatNumber(tokenPrice.marketCap)}`
                       ) : (
                         "—"
                       )}
