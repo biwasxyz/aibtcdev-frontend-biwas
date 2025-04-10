@@ -203,9 +203,9 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
             >
               <div className="flex items-center justify-between w-full text-indigo-300">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 animate-pulse" />
+                  <Clock className="h-4 w-4" />
                   <span className="text-sm sm:text-base font-medium">
-                    Planning in progress
+                    Thought for few seconds
                   </span>
                 </div>
                 <ChevronDown

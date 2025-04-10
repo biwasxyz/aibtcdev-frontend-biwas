@@ -9,9 +9,14 @@ import { TypingIndicator } from "./typing-indicator";
 interface MessageListProps {
   messages: Message[];
   isTyping: boolean;
+  agentId?: string | null;
 }
 
-export function MessageList({ messages, isTyping }: MessageListProps) {
+export function MessageList({
+  messages,
+  isTyping,
+  agentId = null,
+}: MessageListProps) {
   const lastMessageRef = useRef<HTMLDivElement>(null);
 
   // Group messages for streaming
@@ -88,9 +93,7 @@ export function MessageList({ messages, isTyping }: MessageListProps) {
         {/* Show typing indicator when isTyping is true */}
         {isTyping && (
           <div className="w-full min-w-0 break-words">
-            <div className="flex justify-start">
-              <TypingIndicator className="ml-2" />
-            </div>
+            <TypingIndicator agentId={agentId} />
           </div>
         )}
       </div>
