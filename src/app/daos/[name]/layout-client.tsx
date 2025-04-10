@@ -38,8 +38,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { DAOCreationDate } from "@/components/daos/dao-creation-date";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   const params = useParams();
@@ -206,7 +206,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col">
       <div className="container mx-auto px-4 py-4 sm:py-6 flex-grow">
         {/* Breadcrumb */}
-        <div className="flex items-center text-xs sm:text-sm text-muted-foreground mb-4">
+        <nav className="flex items-center text-xs sm:text-sm text-muted-foreground mb-6">
           <Link
             href="/daos"
             className="hover:text-foreground transition-colors"
@@ -217,179 +217,186 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
           <span className="text-foreground font-medium truncate">
             {dao?.name || "Details"}
           </span>
-        </div>
+        </nav>
 
-        {/* DAO Header */}
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6">
-          {/* Token Image - Fixed size container with responsive image */}
-          {token?.image_url && (
-            <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0">
-              <Image
-                src={token.image_url || "/placeholder.svg"}
-                alt={`${dao?.name} token`}
-                fill
-                className="rounded-2xl object-cover"
-                sizes="(max-width: 640px) 96px, 128px"
-                priority
-              />
+        {/* DAO Header - Improved layout */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6">
+            {/* Token Image */}
+            {token?.image_url && (
+              <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-2xl overflow-hidden border border-border shadow-sm">
+                <Image
+                  src={token.image_url || "/placeholder.svg"}
+                  alt={`${dao?.name} token`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 96px, 128px"
+                  priority
+                />
+              </div>
+            )}
+
+            {/* DAO Info */}
+            <div className="flex-1 text-center sm:text-left">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                  {dao?.name}
+                </h1>
+
+                {/* Social links - Moved next to the title */}
+                <div className="flex gap-3 justify-center sm:justify-start">
+                  {dao.website_url && (
+                    <a
+                      href={dao.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Website"
+                    >
+                      <BsGlobe className="h-5 w-5" />
+                    </a>
+                  )}
+                  {dao.x_url && (
+                    <a
+                      href={dao.x_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="X (Twitter)"
+                    >
+                      <BsTwitterX className="h-5 w-5" />
+                    </a>
+                  )}
+                  {dao.telegram_url && (
+                    <a
+                      href={dao.telegram_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Telegram"
+                    >
+                      <BsTelegram className="h-5 w-5" />
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {dao?.mission && (
+                <p className="text-base sm:text-lg text-muted-foreground mb-4">
+                  {dao.mission}
+                </p>
+              )}
+
+              <div>
+                {dao?.name === "FACES" ||
+                dao?.name === "MEDIA2" ||
+                dao?.name === "MEDIA3" ? (
+                  <DAOChatButton daoId={id!} />
+                ) : (
+                  <Button className="cursor-not-allowed" disabled>
+                    Participate
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Key Metrics - Card-based layout */}
+          {isOverviewLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-24 rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <Card className="bg-background/50 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="text-muted-foreground text-sm">
+                    Token Price
+                  </div>
+                  <div className="text-xl font-semibold mt-1">
+                    {formatNumber(enhancedMarketStats.price, true)}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-background/50 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="text-muted-foreground text-sm">
+                    Market Cap
+                  </div>
+                  <div className="text-xl font-semibold mt-1">
+                    {formatNumber(enhancedMarketStats.marketCap)}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-background/50 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="text-muted-foreground text-sm">Treasury</div>
+                  <div className="text-xl font-semibold mt-1">
+                    {formatNumber(enhancedMarketStats.treasuryBalance)}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-background/50 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="text-muted-foreground text-sm">Holders</div>
+                  <div className="text-xl font-semibold mt-1">
+                    {enhancedMarketStats.holderCount.toLocaleString()}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-background/50 backdrop-blur-sm">
+                <CardContent className="p-4">
+                  <div className="text-muted-foreground text-sm">Proposals</div>
+                  <div className="text-xl font-semibold mt-1">
+                    {totalProposals}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
+        </div>
 
-          {/* DAO Info */}
-          <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2">
-              {dao?.name}
-            </h1>
-            {dao?.mission && (
-              <p className="text-base sm:text-lg text-muted-foreground">
-                {dao.mission}
-              </p>
-            )}
-            <div className="mt-3">
-              {dao?.name === "FACES" ||
-              dao?.name === "MEDIA2" ||
-              dao?.name === "MEDIA3" ? (
-                <DAOChatButton daoId={id!} />
-              ) : (
-                <Button className="cursor-not-allowed" disabled>
-                  Participate
+        {/* About section - Improved with card styling */}
+        {dao.description && (
+          <div className="space-y-4 rounded-lg border bg-background/50 backdrop-blur-sm p-4 mb-8">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-medium">About</h3>
+              {dao.description.length > 200 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    setIsDescriptionExpanded(!isDescriptionExpanded)
+                  }
+                  className="text-xs"
+                >
+                  {isDescriptionExpanded ? (
+                    <>
+                      Show Less <ChevronUp className="ml-1 h-3 w-3" />
+                    </>
+                  ) : (
+                    <>
+                      Show More <ChevronDown className="ml-1 h-3 w-3" />
+                    </>
+                  )}
                 </Button>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Overview Section - Now with badges in a single row */}
-        {isOverviewLoading ? (
-          <div className="flex flex-wrap gap-2 mb-8">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-8 w-24 rounded-full" />
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-6 mb-8">
-            {/* Social links */}
-            <div className="flex gap-3">
-              {dao.website_url && (
-                <a
-                  href={dao.website_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <BsGlobe className="h-5 w-5" />
-                </a>
-              )}
-              {dao.x_url && (
-                <a
-                  href={dao.x_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <BsTwitterX className="h-5 w-5" />
-                </a>
-              )}
-              {dao.telegram_url && (
-                <a
-                  href={dao.telegram_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <BsTelegram className="h-5 w-5" />
-                </a>
-              )}
-            </div>
-
-            {/* All stats as badges in a single row */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              <Badge
-                variant="outline"
-                className="py-1 px-3 text-sm bg-background"
-              >
-                <span className="text-muted-foreground mr-2">Token Price:</span>
-                <span className="font-semibold">
-                  {formatNumber(enhancedMarketStats.price, true)}
-                </span>
-              </Badge>
-
-              <Badge
-                variant="outline"
-                className="py-1 px-3 text-sm bg-background"
-              >
-                <span className="text-muted-foreground mr-2">Market Cap:</span>
-                <span className="font-semibold">
-                  {formatNumber(enhancedMarketStats.marketCap)}
-                </span>
-              </Badge>
-
-              <Badge
-                variant="outline"
-                className="py-1 px-3 text-sm bg-background"
-              >
-                <span className="text-muted-foreground mr-2">Treasury:</span>
-                <span className="font-semibold">
-                  {formatNumber(enhancedMarketStats.treasuryBalance)}
-                </span>
-              </Badge>
-
-              <Badge
-                variant="outline"
-                className="py-1 px-3 text-sm bg-background"
-              >
-                <span className="text-muted-foreground mr-2">Holders:</span>
-                <span className="font-semibold">
-                  {enhancedMarketStats.holderCount.toLocaleString()}
-                </span>
-              </Badge>
-
-              <Badge
-                variant="outline"
-                className="py-1 px-3 text-sm bg-background"
-              >
-                <span className="text-muted-foreground mr-2">Proposals:</span>
-                <span className="font-semibold">{totalProposals}</span>
-              </Badge>
-            </div>
-
-            {/* About section - only show if there's a description */}
-            {dao.description && (
-              <div className="space-y-4 rounded-lg border bg-background/50 backdrop-blur-sm p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-medium">About</h3>
-                  {dao.description.length > 200 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        setIsDescriptionExpanded(!isDescriptionExpanded)
-                      }
-                      className="text-xs"
-                    >
-                      {isDescriptionExpanded ? (
-                        <>
-                          Show Less <ChevronUp className="ml-1 h-3 w-3" />
-                        </>
-                      ) : (
-                        <>
-                          Show More <ChevronDown className="ml-1 h-3 w-3" />
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
-                <p
-                  className={`text-muted-foreground leading-relaxed ${
-                    !isDescriptionExpanded && dao.description.length > 200
-                      ? "line-clamp-4"
-                      : ""
-                  }`}
-                >
-                  {dao.description}
-                </p>
-              </div>
-            )}
+            <p
+              className={`text-muted-foreground leading-relaxed ${
+                !isDescriptionExpanded && dao.description.length > 200
+                  ? "line-clamp-4"
+                  : ""
+              }`}
+            >
+              {dao.description}
+            </p>
           </div>
         )}
 
@@ -476,11 +483,11 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Content */}
-        <main className="w-full">{children}</main>
+        <main className="w-full mb-8">{children}</main>
 
-        {/* Treasury Holdings - Moved to the bottom */}
+        {/* Treasury Holdings - Improved styling */}
         {!isOverviewLoading && treasuryTokens && treasuryTokens.length > 0 && (
-          <div className="space-y-4 mt-8">
+          <div className="space-y-4 mb-8">
             <h3 className="text-base font-medium">Treasury Holdings</h3>
             <div className="rounded-lg border bg-background/50 backdrop-blur-sm overflow-x-auto">
               <Table>
@@ -525,9 +532,9 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        {/* Creation Date */}
+        {/* Creation Date - Better positioned */}
         {!isOverviewLoading && (
-          <div className="p-4 mt-4">
+          <div className="text-center text-sm text-muted-foreground mt-8">
             <DAOCreationDate createdAt={dao.created_at} />
           </div>
         )}
