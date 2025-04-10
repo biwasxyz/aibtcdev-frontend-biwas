@@ -53,7 +53,7 @@ export function JobsTable({ agentId }: JobsTableProps) {
       <Alert variant="destructive" className="mx-auto max-w-2xl">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Failed to load jobs: {(error as Error).message}
+          Failed to load jobs: {error instanceof Error ? error.message : String(error)}
         </AlertDescription>
       </Alert>
     );
