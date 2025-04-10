@@ -61,11 +61,16 @@ export function DAOChatModal({
     setSelectedAgent,
     connect,
     activeThreadId,
+    isTyping,
   } = useChatStore();
 
   const threadMessages = useMemo(() => {
     return activeThreadId ? messages[activeThreadId] || [] : [];
   }, [activeThreadId, messages]);
+
+  const isThreadTyping = activeThreadId
+    ? isTyping[activeThreadId] || false
+    : false;
 
   const { accessToken } = useSessionStore();
 
@@ -171,6 +176,17 @@ export function DAOChatModal({
     }
   }, [threadMessages, open, scrollToBottom, activeTab]);
 
+  // Additional effect to scroll when typing indicator appears
+  useEffect(() => {
+    if (
+      open &&
+      isThreadTyping &&
+      (activeTab === "chat" || window.innerWidth >= 768)
+    ) {
+      scrollToBottom();
+    }
+  }, [isThreadTyping, open, scrollToBottom, activeTab]);
+
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
@@ -241,7 +257,7 @@ export function DAOChatModal({
                 <AlertDescription>{chatError}</AlertDescription>
               </Alert>
             )}
-            <MessageList messages={threadMessages} />
+            <MessageList messages={threadMessages} isTyping={isThreadTyping} />
           </div>
         </div>
 
