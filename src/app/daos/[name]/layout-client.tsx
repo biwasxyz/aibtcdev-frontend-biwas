@@ -288,15 +288,18 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               )}
 
               <div>
-                {dao?.name === "FACES" ||
-                dao?.name === "MEDIA2" ||
-                dao?.name === "MEDIA3" ? (
-                  <DAOChatButton daoId={id!} />
-                ) : (
-                  <Button className="cursor-not-allowed" disabled>
-                    Participate
-                  </Button>
-                )}
+                {
+                  //dao?.name === "FACES" ||
+                  //dao?.name === "MEDIA2" ||
+                  //dao?.name === "MEDIA3"
+                  dao?.name === "FACE3" ? (
+                    <DAOChatButton daoId={id!} />
+                  ) : (
+                    <Button className="cursor-not-allowed" disabled>
+                      Participate
+                    </Button>
+                  )
+                }
               </div>
             </div>
           </div>
