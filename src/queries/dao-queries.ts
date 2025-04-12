@@ -163,7 +163,7 @@ export const fetchTokenPrices = async (
             if (extension?.contract_principal && token) {
                 try {
                     const { data } = await sdkFaktory.getToken(extension.contract_principal)
-                    console.log(data)
+                    // console.log(data)
                     prices[dao.id] = {
                         price: data.priceUsd ? Number(data.priceUsd) : 0,
                         marketCap: data.marketCap ? Number(data.marketCap) : 0,
@@ -309,6 +309,6 @@ export const fetchDAOByName = async (encodedName: string): Promise<DAO | null> =
         console.error("No DAO found with name:", name)
         return null
     }
-    console.log(data)
+    // console.log(data)
     return data
 }

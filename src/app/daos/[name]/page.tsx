@@ -14,8 +14,8 @@ export const runtime = "edge";
 export default function ProposalsPage() {
   const params = useParams();
   const encodedName = params.name as string;
-  console.log(encodedName);
-  console.log("DAO name from URL:", encodedName); // Add this for debugging
+  // console.log(encodedName);
+  // console.log("DAO name from URL:", encodedName);
 
   // First, fetch the DAO by name to get its ID
   const {
@@ -34,8 +34,8 @@ export default function ProposalsPage() {
 
   const daoId = dao?.id;
 
-  console.log("Found DAO:", dao); // Add this for debugging
-  console.log("DAO ID:", daoId); // Add this for debugging
+  // console.log("Found DAO:", dao);
+  // console.log("DAO ID:", daoId);
 
   // Then use the ID to fetch proposals
   const {

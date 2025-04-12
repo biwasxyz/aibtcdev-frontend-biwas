@@ -135,7 +135,7 @@ export async function createDaoAgent() {
 
         if (updateError) throw updateError
 
-        console.log("DAO Manager agent and tasks created successfully")
+        // console.log("DAO Manager agent and tasks created successfully")
         return agentResult
     } catch (error) {
         console.error("Error creating DAO Manager agent and tasks:", error)
