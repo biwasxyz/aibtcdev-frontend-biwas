@@ -22,7 +22,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DAOBuyToken } from "./dao-buy-token";
-import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { formatNumber } from "@/helpers/format-utils";
 
@@ -236,8 +235,8 @@ export const DAOTable = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-                {/* WE NO LONGER NEED THE FILTER HERE CAUSE WE'RE ONLY FETCHING 3 DAOs from table */}
-                <DAOBuyToken daoId={dao.id} />
+              {/* WE NO LONGER NEED THE FILTER HERE CAUSE WE'RE ONLY FETCHING 3 DAOs from table */}
+              <DAOBuyToken daoId={dao.id} />
             </div>
           </div>
 
@@ -510,7 +509,7 @@ export const DAOTable = ({
                     >
                       <div className="flex justify-center">
                         {/* WE NO LONGER NEED THE FILTER HERE CAUSE WE'RE ONLY FETCHING 3 DAOs from table */}
-                            <DAOBuyToken daoId={dao.id} />
+                        <DAOBuyToken daoId={dao.id} />
                       </div>
                     </td>
                   </tr>
