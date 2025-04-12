@@ -236,19 +236,8 @@ export const DAOTable = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* WE NEED TO CHANGE IT BASED ON WHAT THE NAME WILL BE ON MAINNET. AS OF NOW SINCE WE ARE TESTING ON THESE TWO ON STAGING I HAVE ENABLED PARTICIPATION FOR THESE TWO ONLY */}
-              {
-                //dao?.name === "FACES" ||
-                //dao?.name === "MEDIA2" ||
-                //dao?.name === "MEDIA3"
-                dao?.name === "FACE3" ? (
-                  <DAOBuyToken daoId={encodeURIComponent(dao.name)} />
-                ) : (
-                  <Button className="cursor-not-allowed" disabled>
-                    Participate.
-                  </Button>
-                )
-              }
+                {/* WE NO LONGER NEED THE FILTER HERE CAUSE WE'RE ONLY FETCHING 3 DAOs from table */}
+                <DAOBuyToken daoId={dao.id} />
             </div>
           </div>
 
@@ -520,19 +509,8 @@ export const DAOTable = ({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex justify-center">
-                        {/* WE NEED TO CHANGE IT BASED ON WHAT THE NAME WILL BE ON MAINNET. AS OF NOW SINCE WE ARE TESTING ON THESE TWO ON STAGING I HAVE ENABLED PARTICIPATION FOR THESE TWO ONLY */}
-                        {
-                          //dao?.name === "FACES" ||
-                          //dao?.name === "MEDIA2" ||
-                          //dao?.name === "MEDIA3"
-                          dao?.name === "FACE3" ? (
+                        {/* WE NO LONGER NEED THE FILTER HERE CAUSE WE'RE ONLY FETCHING 3 DAOs from table */}
                             <DAOBuyToken daoId={dao.id} />
-                          ) : (
-                            <Button className="cursor-not-allowed" disabled>
-                              20k Sats
-                            </Button>
-                          )
-                        }
                       </div>
                     </td>
                   </tr>
