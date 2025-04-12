@@ -15,6 +15,7 @@ import {
   Loader2,
   ChevronDown,
   ChevronUp,
+  Info,
 } from "lucide-react";
 import { BsGlobe, BsTwitterX, BsTelegram } from "react-icons/bs";
 import {
@@ -40,12 +41,21 @@ import {
 } from "@/components/ui/table";
 import { DAOCreationDate } from "@/components/daos/dao-creation-date";
 import { Card, CardContent } from "@/components/ui/card";
+import { FormatMission } from "@/helpers/format-mission";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   const params = useParams();
   const encodedName = params.name as string; // Changed from id to name
   const pathname = usePathname();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [missionModalOpen, setMissionModalOpen] = useState(false);
 
   // First, fetch the DAO by name to get its ID
   const { data: dao, isLoading: isLoadingDAOByName } = useQuery({
@@ -282,24 +292,43 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               </div>
 
               {dao?.mission && (
-                <p className="text-base sm:text-lg text-muted-foreground mb-4">
-                  {dao.mission}
-                </p>
+                <div className="text-base sm:text-lg text-muted-foreground mb-4">
+                  <div className="flex items-center gap-2">
+                    <p className="flex-1">
+                      <FormatMission content={dao.mission} inline={true} />
+                    </p>
+                    <Dialog
+                      open={missionModalOpen}
+                      onOpenChange={setMissionModalOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-shrink-0 text-xs"
+                        >
+                          <Info className="h-3.5 w-3.5 mr-1" />
+                          Show Details
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="text-xl">
+                            {dao.name} Mission
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="mt-4">
+                          <FormatMission content={dao.mission} inline={false} />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
               )}
 
               <div>
-                {
-                  //dao?.name === "FACES" ||
-                  //dao?.name === "MEDIA2" ||
-                  //dao?.name === "MEDIA3"
-                  dao?.name === "FACE3" ? (
-                    <DAOChatButton daoId={id!} />
-                  ) : (
-                    <Button className="cursor-not-allowed" disabled>
-                      Participate
-                    </Button>
-                  )
-                }
+                {/* NO NEED TO FILTER IT OUT AS THE QUERY HANDLES AND FETCHES OUR REQURED DAO */}
+                <DAOChatButton daoId={id!} />
               </div>
             </div>
           </div>
