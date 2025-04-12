@@ -24,6 +24,7 @@ import {
 import { DAOBuyToken } from "./dao-buy-token";
 import { useRouter } from "next/navigation";
 import { formatNumber } from "@/helpers/format-utils";
+import { FormatMission } from "@/helpers/format-mission";
 
 interface DAOTableProps {
   daos: DAO[];
@@ -191,6 +192,8 @@ export const DAOTable = ({
                     token?.image_url ||
                     dao.image_url ||
                     "/placeholder.svg?height=40&width=40" ||
+                    "/placeholder.svg" ||
+                    "/placeholder.svg" ||
                     "/placeholder.svg"
                   }
                   alt={dao.name}
@@ -245,13 +248,17 @@ export const DAOTable = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <p className="text-xs text-muted-foreground line-clamp-2 cursor-help">
-                    {dao.mission || "No mission statement available"}
+                    <FormatMission
+                      content={dao.mission || "No mission statement available"}
+                      inline={true}
+                    />
                   </p>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-[400px]">
-                  <p className="text-xs">
-                    {dao.mission || "No mission statement available"}
-                  </p>
+                  <FormatMission
+                    content={dao.mission || "No mission statement available"}
+                    inline={true}
+                  />
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -386,6 +393,8 @@ export const DAOTable = ({
                               token?.image_url ||
                               dao.image_url ||
                               "/placeholder.svg?height=32&width=32" ||
+                              "/placeholder.svg" ||
+                              "/placeholder.svg" ||
                               "/placeholder.svg"
                             }
                             alt={dao.name}
@@ -440,13 +449,22 @@ export const DAOTable = ({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <p className="text-sm text-muted-foreground truncate">
-                              {dao.mission || "No mission statement available"}
+                              <FormatMission
+                                content={
+                                  dao.mission ||
+                                  "No mission statement available"
+                                }
+                                inline={true}
+                              />
                             </p>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-[400px]">
-                            <p className="text-xs">
-                              {dao.mission || "No mission statement available"}
-                            </p>
+                            <FormatMission
+                              content={
+                                dao.mission || "No mission statement available"
+                              }
+                              inline={true}
+                            />
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
