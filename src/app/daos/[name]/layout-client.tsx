@@ -293,40 +293,37 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
               {dao?.mission && (
                 <div className="text-base sm:text-lg text-muted-foreground mb-4">
-                  <div className="flex items-center gap-2">
-                    <p className="flex-1">
-                      <FormatMission content={dao.mission} inline={true} />
-                    </p>
-                    <Dialog
-                      open={missionModalOpen}
-                      onOpenChange={setMissionModalOpen}
-                    >
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-shrink-0 text-xs"
-                        >
-                          <Info className="h-3.5 w-3.5 mr-1" />
-                          Show Details
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle className="text-xl">
-                            {dao.name} Mission
-                          </DialogTitle>
-                        </DialogHeader>
-                        <div className="mt-4">
-                          <FormatMission content={dao.mission} inline={false} />
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
+                  <p>
+                    <FormatMission content={dao.mission} inline={true} />
+                  </p>
                 </div>
               )}
 
-              <div>
+              <div className="space-y-2 space-x-2">
+                {dao?.mission && (
+                  <Dialog
+                    open={missionModalOpen}
+                    onOpenChange={setMissionModalOpen}
+                  >
+                    <DialogTrigger asChild>
+                      <Button variant="outline">
+                        <Info className="h-3.5 w-3.5 mr-1" />
+                        Show Details
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="text-xl">
+                          {dao.name} Mission
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="mt-4">
+                        <FormatMission content={dao.mission} inline={false} />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                )}
+
                 {/* NO NEED TO FILTER IT OUT AS THE QUERY HANDLES AND FETCHES OUR REQURED DAO */}
                 <DAOChatButton daoId={id!} />
               </div>
