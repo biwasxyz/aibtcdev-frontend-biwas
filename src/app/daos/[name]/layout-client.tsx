@@ -290,6 +290,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               <div>
                 {dao?.name === "FACES" ||
                 dao?.name === "MEDIA2" ||
+                dao?.name === "FACE3" ||
                 dao?.name === "MEDIA3" ? (
                   <DAOChatButton daoId={id!} />
                 ) : (

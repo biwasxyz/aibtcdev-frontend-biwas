@@ -239,7 +239,8 @@ export const DAOTable = ({
               {/* WE NEED TO CHANGE IT BASED ON WHAT THE NAME WILL BE ON MAINNET. AS OF NOW SINCE WE ARE TESTING ON THESE TWO ON STAGING I HAVE ENABLED PARTICIPATION FOR THESE TWO ONLY */}
               {dao?.name === "FACES" ||
               dao?.name === "MEDIA2" ||
-              dao?.name === "MEDIA3" ? (
+              dao?.name === "MEDIA3" ||
+              dao?.name === "FACE3" ? (
                 <DAOBuyToken daoId={encodeURIComponent(dao.name)} />
               ) : (
                 <Button className="cursor-not-allowed" disabled>
@@ -520,7 +521,8 @@ export const DAOTable = ({
                         {/* WE NEED TO CHANGE IT BASED ON WHAT THE NAME WILL BE ON MAINNET. AS OF NOW SINCE WE ARE TESTING ON THESE TWO ON STAGING I HAVE ENABLED PARTICIPATION FOR THESE TWO ONLY */}
                         {dao?.name === "FACES" ||
                         dao?.name === "MEDIA2" ||
-                        dao?.name === "MEDIA3" ? (
+                        dao?.name === "MEDIA3" ||
+                        dao?.name === "FACE3" ? (
                           <DAOBuyToken daoId={dao.id} />
                         ) : (
                           <Button className="cursor-not-allowed" disabled>
