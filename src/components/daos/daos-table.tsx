@@ -22,9 +22,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DAOBuyToken } from "./dao-buy-token";
-import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
 import { formatNumber } from "@/helpers/format-utils";
+import { FormatMission } from "@/helpers/format-mission";
 
 interface DAOTableProps {
   daos: DAO[];
@@ -192,6 +192,8 @@ export const DAOTable = ({
                     token?.image_url ||
                     dao.image_url ||
                     "/placeholder.svg?height=40&width=40" ||
+                    "/placeholder.svg" ||
+                    "/placeholder.svg" ||
                     "/placeholder.svg"
                   }
                   alt={dao.name}
@@ -236,17 +238,8 @@ export const DAOTable = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {/* WE NEED TO CHANGE IT BASED ON WHAT THE NAME WILL BE ON MAINNET. AS OF NOW SINCE WE ARE TESTING ON THESE TWO ON STAGING I HAVE ENABLED PARTICIPATION FOR THESE TWO ONLY */}
-              {dao?.name === "FACES" ||
-              dao?.name === "MEDIA2" ||
-              dao?.name === "MEDIA3" ||
-              dao?.name === "FACE3" ? (
-                <DAOBuyToken daoId={encodeURIComponent(dao.name)} />
-              ) : (
-                <Button className="cursor-not-allowed" disabled>
-                  Participate.
-                </Button>
-              )}
+              {/* WE NO LONGER NEED THE FILTER HERE CAUSE WE'RE ONLY FETCHING 3 DAOs from table */}
+              <DAOBuyToken daoId={dao.id} />
             </div>
           </div>
 
@@ -255,13 +248,17 @@ export const DAOTable = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <p className="text-xs text-muted-foreground line-clamp-2 cursor-help">
-                    {dao.mission || "No mission statement available"}
+                    <FormatMission
+                      content={dao.mission || "No mission statement available"}
+                      inline={true}
+                    />
                   </p>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-[400px]">
-                  <p className="text-xs">
-                    {dao.mission || "No mission statement available"}
-                  </p>
+                  <FormatMission
+                    content={dao.mission || "No mission statement available"}
+                    inline={true}
+                  />
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -396,6 +393,8 @@ export const DAOTable = ({
                               token?.image_url ||
                               dao.image_url ||
                               "/placeholder.svg?height=32&width=32" ||
+                              "/placeholder.svg" ||
+                              "/placeholder.svg" ||
                               "/placeholder.svg"
                             }
                             alt={dao.name}
@@ -450,13 +449,22 @@ export const DAOTable = ({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <p className="text-sm text-muted-foreground truncate">
-                              {dao.mission || "No mission statement available"}
+                              <FormatMission
+                                content={
+                                  dao.mission ||
+                                  "No mission statement available"
+                                }
+                                inline={true}
+                              />
                             </p>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-[400px]">
-                            <p className="text-xs">
-                              {dao.mission || "No mission statement available"}
-                            </p>
+                            <FormatMission
+                              content={
+                                dao.mission || "No mission statement available"
+                              }
+                              inline={true}
+                            />
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -518,17 +526,8 @@ export const DAOTable = ({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex justify-center">
-                        {/* WE NEED TO CHANGE IT BASED ON WHAT THE NAME WILL BE ON MAINNET. AS OF NOW SINCE WE ARE TESTING ON THESE TWO ON STAGING I HAVE ENABLED PARTICIPATION FOR THESE TWO ONLY */}
-                        {dao?.name === "FACES" ||
-                        dao?.name === "MEDIA2" ||
-                        dao?.name === "MEDIA3" ||
-                        dao?.name === "FACE3" ? (
-                          <DAOBuyToken daoId={dao.id} />
-                        ) : (
-                          <Button className="cursor-not-allowed" disabled>
-                            20k Sats
-                          </Button>
-                        )}
+                        {/* WE NO LONGER NEED THE FILTER HERE CAUSE WE'RE ONLY FETCHING 3 DAOs from table */}
+                        <DAOBuyToken daoId={dao.id} />
                       </div>
                     </td>
                   </tr>
