@@ -141,7 +141,9 @@ const VotesTable: React.FC<VotesTableProps> = ({ proposalId }) => {
                     })}
                   </span>
                 ) : (
-                  <span className="text-muted-foreground">-</span>
+                  <span className="text-muted-foreground">
+                    Agent did not vote
+                  </span>
                 )}
               </TableCell>
 
@@ -249,7 +251,7 @@ const VotesTable: React.FC<VotesTableProps> = ({ proposalId }) => {
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 ) : (
-                  <span className="text-muted-foreground">-</span>
+                  <span className="text-muted-foreground">N/A</span>
                 )}
               </TableCell>
             </TableRow>
