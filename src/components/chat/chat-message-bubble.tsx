@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Clock, User, Terminal, ChevronDown, ExternalLink } from "lucide-react";
+import { Clock, User, Terminal, ChevronDown } from "lucide-react";
 import type { Message } from "@/lib/chat/types";
 import { useAgent } from "@/hooks/use-agent";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -92,7 +92,7 @@ export const MarkdownComponents: Components = {
       {children}
     </blockquote>
   ),
-  a: ({ node, children, ...props }) => (
+  a: ({ children, ...props }) => (
     <a
       className="text-blue-400 hover:text-blue-300 hover:underline"
       target="_blank"
@@ -114,7 +114,7 @@ const isTransactionOutput = (str: string) => {
       parsed.output.includes("txid") &&
       parsed.output.includes("link")
     );
-  } catch (e) {
+  } catch {
     return false;
   }
 };
@@ -221,17 +221,17 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
                   />
                 </div>
 
-                {/* Show transaction link outside the expanded section if available */}
+                {/* Show transaction link with a label */}
                 {txLink && !isExpanded && (
-                  <div className="mt-1">
+                  <div className="mt-1 text-xs sm:text-sm break-all">
+                    <span className="text-zinc-400">Transaction link: </span>
                     <a
                       href={txLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 bg-indigo-900/50 hover:bg-indigo-800/70 text-indigo-300 hover:text-indigo-200 px-3 py-1.5 rounded-md text-sm transition-colors"
+                      className="text-blue-400 hover:text-blue-300 hover:underline"
                     >
-                      View transaction on Explorer
-                      <ExternalLink className="h-3.5 w-3.5" />
+                      {txLink}
                     </a>
                   </div>
                 )}
