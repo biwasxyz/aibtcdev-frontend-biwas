@@ -115,7 +115,7 @@ export function ProfileView() {
                 <DialogTrigger asChild>
                   <Button>Voting History</Button>
                 </DialogTrigger>
-                <DialogContent className="w-[90vw] max-w-6xl max-h-[80vh] overflow-y-auto">
+                <DialogContent className="w-[90vw] max-w-full max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Voting History</DialogTitle>
                   </DialogHeader>

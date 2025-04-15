@@ -377,172 +377,124 @@ export function AgentPromptForm() {
 
   return (
     <div className="w-full space-y-4">
-      {daoManagerAgentId && (
-        <div className="mb-6">
-          <WalletInfoCard
-            walletAddress={daoManagerWalletAddress}
-            walletBalance={daoManagerWalletBalance}
-          />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Wallet Info - Left Side */}
+        <div className="md:col-span-1">
+          {daoManagerAgentId && (
+            <WalletInfoCard
+              walletAddress={daoManagerWalletAddress}
+              walletBalance={daoManagerWalletBalance}
+            />
+          )}
         </div>
-      )}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <h2 className="text-base sm:text-2xl font-medium">Agent Prompts</h2>
-      </div>
-      <div className="w-full overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-1/3">DAO</TableHead>
-              {/* <TableHead>Token Balances</TableHead> */}
-              <TableHead>Prompt Status</TableHead>
-              <TableHead>Prompt Text</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                </TableCell>
-              </TableRow>
-            ) : uniqueDaoIds.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center py-4">
-                  No DAOs found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              uniqueDaoIds.map((daoId) => {
-                const prompt = prompts.find((p) => p.dao_id === daoId);
-                const daoName = getDaoName(daoId);
 
-                // const daoTokens = walletTokens.filter(
-                //   (token) => token.dao_id === daoId
-                // );
-
-                // // Get tokens for this DAO from the wallet balance
-                // let tokenBalances: { name: string; balance: string }[] = [];
-
-                // if (
-                //   daoManagerWalletAddress &&
-                //   daoManagerWalletBalance?.fungible_tokens
-                // ) {
-                //   // Extract tokens from fungible_tokens that match this DAO
-                //   tokenBalances = Object.entries(
-                //     daoManagerWalletBalance.fungible_tokens
-                //   )
-                //     .map(([tokenId, tokenData]) => {
-                //       const tokenName = extractTokenName(tokenId);
-                //       return {
-                //         name: tokenName,
-                //         balance: tokenData.balance,
-                //       };
-                //     })
-                //     .filter((token) => {
-                //       return token.name
-                //         .toUpperCase()
-                //         .includes(daoName.toUpperCase());
-                //     });
-                // }
-
-                return (
-                  <TableRow key={daoId}>
-                    <TableCell className="font-medium">{daoName}</TableCell>
-                    {/*                    
-                    <TableCell>
-                      <div className="space-y-1">
-                        {tokenBalances.length > 0
-                          ? tokenBalances.map((token, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between text-sm"
-                              >
-                                <span>{formatTokenBalance(token.balance)}</span>
-                              </div>
-                            ))
-                          : daoTokens.map((token, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between text-sm"
-                              >
-                                <span>
-                                  {formatTokenBalance(token.amount || "0")}
-                                </span>
-                              </div>
-                            ))}
-                        {daoTokens.length === 0 &&
-                          tokenBalances.length === 0 && (
-                            <span className="text-muted-foreground">
-                              No tokens
-                            </span>
-                          )}
-                      </div>
-                    </TableCell>
-                     */}
-                    <TableCell>
-                      <Badge
-                        variant={prompt?.is_active ? "default" : "secondary"}
-                        className={
-                          prompt?.is_active
-                            ? "bg-green-500/20 text-green-700 hover:bg-green-500/20"
-                            : "bg-muted text-muted-foreground hover:bg-muted"
-                        }
-                      >
-                        {prompt?.is_active ? "Active" : "Disabled"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-md">
-                      <p className="truncate text-sm text-muted-foreground">
-                        {prompt?.prompt_text || "No prompt configured"}
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {prompt ? (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditPrompt(prompt.id, daoId)}
-                          >
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedPromptId(prompt.id);
-                              if (
-                                confirm(
-                                  "Are you sure you want to delete this prompt?"
-                                )
-                              ) {
-                                deleteMutation.mutate(prompt.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
-                        </>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEnablePrompt(daoId)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                      )}
+        {/* Agent Prompts - Right Side */}
+        <div className="md:col-span-1 space-y-4">
+          <div className="w-full overflow-x-auto border rounded-lg p-4 bg-card h-full">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+              <h2 className="text-base sm:text-2xl font-medium">
+                Agent Prompts
+              </h2>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-1/3">DAO</TableHead>
+                  <TableHead>Prompt Status</TableHead>
+                  <TableHead>Prompt Text</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-4">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                     </TableCell>
                   </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+                ) : uniqueDaoIds.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-4">
+                      No DAOs found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  uniqueDaoIds.map((daoId) => {
+                    const prompt = prompts.find((p) => p.dao_id === daoId);
+                    const daoName = getDaoName(daoId);
+
+                    return (
+                      <TableRow key={daoId}>
+                        <TableCell className="font-medium">{daoName}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              prompt?.is_active ? "default" : "secondary"
+                            }
+                            className={
+                              prompt?.is_active
+                                ? "bg-green-500/20 text-green-700 hover:bg-green-500/20"
+                                : "bg-muted text-muted-foreground hover:bg-muted"
+                            }
+                          >
+                            {prompt?.is_active ? "Active" : "Disabled"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="max-w-md">
+                          <p className="truncate text-sm text-muted-foreground">
+                            {prompt?.prompt_text || "No prompt configured"}
+                          </p>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {prompt ? (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleEditPrompt(prompt.id, daoId)
+                                }
+                              >
+                                <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedPromptId(prompt.id);
+                                  if (
+                                    confirm(
+                                      "Are you sure you want to delete this prompt?"
+                                    )
+                                  ) {
+                                    deleteMutation.mutate(prompt.id);
+                                  }
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                                <span className="sr-only">Delete</span>
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEnablePrompt(daoId)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

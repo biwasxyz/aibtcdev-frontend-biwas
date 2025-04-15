@@ -34,42 +34,44 @@ export function WalletInfoCard({
   };
 
   return (
-    <div className="w-full space-y-4">
-      <div className="flex flex-col gap-2">
+    <div className="w-full h-full p-4 border rounded-lg bg-card">
+      <div className="flex flex-col gap-4">
         <h2 className="text-base sm:text-2xl font-medium">Agent Wallet</h2>
 
         {walletAddress ? (
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs sm:text-sm">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-mono text-xs sm:text-sm truncate max-w-full">
               {walletAddress}
             </span>
-            <button
-              onClick={() => copyToClipboard(walletAddress)}
-              className="p-1 hover:bg-muted rounded-md"
-              title="Copy address"
-            >
-              {copiedText === walletAddress ? (
-                <Check className="h-4 w-4 text-green-500" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
-            </button>
-            <a
-              href={getAddressExplorerUrl(walletAddress)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1 hover:bg-muted rounded-md"
-              title="View on explorer"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </a>
+            <div className="flex items-center gap-1 ml-auto">
+              <button
+                onClick={() => copyToClipboard(walletAddress)}
+                className="p-1 hover:bg-muted rounded-md"
+                title="Copy address"
+              >
+                {copiedText === walletAddress ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </button>
+              <a
+                href={getAddressExplorerUrl(walletAddress)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1 hover:bg-muted rounded-md"
+                title="View on explorer"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </div>
           </div>
         ) : (
           <span className="text-muted-foreground">No wallet address</span>
         )}
       </div>
 
-      <div className="w-full overflow-x-auto">
+      <div className="w-full overflow-x-auto mt-4">
         <Table>
           <TableHeader>
             <TableRow>
