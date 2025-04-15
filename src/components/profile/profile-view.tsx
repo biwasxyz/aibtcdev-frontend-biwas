@@ -65,8 +65,8 @@ export function ProfileView() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+    <div className="w-full px-4 py-8">
+      <div className="w-full space-y-6 sm:space-y-8">
         {/* Wallet Information */}
         <Card className="border-none shadow-none bg-background/40 backdrop-blur mb-6">
           <CardHeader>
