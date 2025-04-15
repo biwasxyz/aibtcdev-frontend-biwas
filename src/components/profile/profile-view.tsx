@@ -184,9 +184,13 @@ export function ProfileView() {
                             )}
                           </TableCell>
                           <TableCell>
-                            {vote.amount !== null
-                              ? formatTokenBalance(vote.amount)
-                              : "-"}
+                            {vote.amount !== null ? (
+                              formatTokenBalance(vote.amount)
+                            ) : (
+                              <span className="text-muted-foreground">
+                                Agent did not vote
+                              </span>
+                            )}
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
                             {formatDistanceToNow(new Date(vote.created_at), {
