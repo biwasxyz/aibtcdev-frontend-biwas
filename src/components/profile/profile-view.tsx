@@ -8,7 +8,6 @@ import {
   ThumbsDown,
   Copy,
   Check,
-  History,
   HistoryIcon,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
