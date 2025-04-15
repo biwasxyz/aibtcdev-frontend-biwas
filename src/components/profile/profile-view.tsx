@@ -194,29 +194,49 @@ export function ProfileView() {
                             })}
                           </TableCell>
                           <TableCell>
-                            <Dialog>
-                              <DialogTrigger className="cursor-pointer text-primary hover:underline">
-                                <div className="max-w-xs truncate">
+                            <div className="flex items-center gap-2">
+                              <Dialog>
+                                <DialogTrigger className="cursor-pointer text-primary hover:underline">
+                                  <div className="max-w-xs truncate">
+                                    {vote.reasoning &&
+                                      vote.reasoning
+                                        .substring(0, 40)
+                                        .replace(/[#*`_~[\]]/g, "")}
+                                    {vote.reasoning &&
+                                    vote.reasoning.length > 40
+                                      ? "..."
+                                      : ""}
+                                  </div>
+                                </DialogTrigger>
+                                <DialogContent className="w-[80vw] max-w-5xl">
+                                  <DialogHeader>
+                                    <DialogTitle>Vote Reasoning</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="mt-4 prose prose-sm md:prose-base dark:prose-invert max-w-none px-2">
+                                    <ReactMarkdown>
+                                      {vote.reasoning || ""}
+                                    </ReactMarkdown>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                              {vote.reasoning && (
+                                <button
+                                  onClick={() =>
+                                    vote.reasoning &&
+                                    copyToClipboard(vote.reasoning)
+                                  }
+                                  className="p-1 hover:bg-muted rounded-md"
+                                  title="Copy reasoning"
+                                >
                                   {vote.reasoning &&
-                                    vote.reasoning
-                                      .substring(0, 40)
-                                      .replace(/[#*`_~[\]]/g, "")}
-                                  {vote.reasoning && vote.reasoning.length > 40
-                                    ? "..."
-                                    : ""}
-                                </div>
-                              </DialogTrigger>
-                              <DialogContent className="w-[80vw] max-w-5xl">
-                                <DialogHeader>
-                                  <DialogTitle>Vote Reasoning</DialogTitle>
-                                </DialogHeader>
-                                <div className="mt-4 prose prose-sm md:prose-base dark:prose-invert max-w-none px-2">
-                                  <ReactMarkdown>
-                                    {vote.reasoning}
-                                  </ReactMarkdown>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
+                                  copiedText === vote.reasoning ? (
+                                    <Check className="h-4 w-4 text-green-500" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                </button>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             {vote.tx_id ? (
