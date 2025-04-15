@@ -54,42 +54,47 @@ export function WalletInfoCard({
 
         {walletBalance && (
           <div className="grid gap-3">
-            <div className="flex items-center justify-between p-3 bg-muted/20 rounded-md">
-              <span className="text-sm font-medium">STX Balance</span>
-              <Badge variant="outline" className="font-mono">
-                {formatStxBalance(walletBalance.stx.balance)} STX
-              </Badge>
+            {/* Balances section (including STX and fungible tokens) */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Balances</h3>
+              <div className="grid gap-2">
+                {/* STX Balance */}
+                <div className="flex items-center justify-between p-3 bg-muted/20 rounded-md">
+                  <span className="text-xs">STX</span>
+                  <Badge variant="outline" className="font-mono">
+                    {formatStxBalance(walletBalance.stx.balance)} STX
+                  </Badge>
+                </div>
+
+                {/* Other Tokens */}
+                {Object.entries(walletBalance.fungible_tokens).map(
+                  ([tokenId, token]) => {
+                    const [, tokenSymbol] = tokenId.split("::");
+                    // Check if this is an sBTC token and display as BTC instead
+                    const displaySymbol = tokenId.includes("sbtc-token")
+                      ? "BTC"
+                      : tokenSymbol || "Token";
+
+                    return (
+                      <div
+                        key={tokenId}
+                        className="flex justify-between items-center p-3 bg-muted/20 rounded-md"
+                      >
+                        <span className="text-xs">{displaySymbol}</span>
+                        <Badge
+                          variant="secondary"
+                          className="font-mono text-xs"
+                        >
+                          {formatTokenBalance(token.balance)}
+                        </Badge>
+                      </div>
+                    );
+                  }
+                )}
+              </div>
             </div>
 
-            {Object.entries(walletBalance.fungible_tokens).length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium">Tokens</h3>
-                <div className="grid gap-2">
-                  {Object.entries(walletBalance.fungible_tokens).map(
-                    ([tokenId, token]) => {
-                      const [, tokenSymbol] = tokenId.split("::");
-                      return (
-                        <div
-                          key={tokenId}
-                          className="flex justify-between items-center p-3 bg-muted/20 rounded-md"
-                        >
-                          <span className="text-xs">
-                            {tokenSymbol || "Token"}
-                          </span>
-                          <Badge
-                            variant="secondary"
-                            className="font-mono text-xs"
-                          >
-                            {formatTokenBalance(token.balance)}
-                          </Badge>
-                        </div>
-                      );
-                    }
-                  )}
-                </div>
-              </div>
-            )}
-
+            {/* NFTs section */}
             {Object.entries(walletBalance.non_fungible_tokens).length > 0 && (
               <div className="space-y-2">
                 <h3 className="text-sm font-medium">NFTs</h3>
