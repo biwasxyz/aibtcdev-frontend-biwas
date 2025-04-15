@@ -14,6 +14,14 @@ import { NetworkIndicator } from "@/components/reusables/network-indicator";
 // import { getStacksAddress } from "@/lib/address";
 import AuthButton from "@/components/home/auth-button";
 import AssetTracker from "@/components/reusables/asset-tracker";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface ApplicationLayoutProps {
   children: React.ReactNode;
@@ -39,6 +47,7 @@ export default function ApplicationLayout({
   const [leftPanelOpen, setLeftPanelOpen] = React.useState(false);
   const [hasUser, setHasUser] = React.useState(false);
   // const [stacksAddress, setStacksAddress] = React.useState<string | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
 
   React.useEffect(() => {
     const checkUser = async () => {
@@ -65,8 +74,24 @@ export default function ApplicationLayout({
     };
   }, []);
 
+  React.useEffect(() => {
+    if (pathname === "/profile" && !hasUser) {
+      setIsAuthModalOpen(true);
+    } else {
+      setIsAuthModalOpen(false);
+    }
+  }, [pathname, hasUser]);
+
+  const closeModalAndRedirect = () => {
+    setIsAuthModalOpen(false);
+    if (pathname === "/profile") {
+      router.push("/daos");
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    setIsAuthModalOpen(false);
     router.push("/");
   };
 
@@ -245,6 +270,34 @@ export default function ApplicationLayout({
           />
         )}
       </div>
+
+      {/* Authentication Modal */}
+      <Dialog
+        open={isAuthModalOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeModalAndRedirect();
+          }
+          setIsAuthModalOpen(open);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Authentication Required</DialogTitle>
+            <DialogDescription>
+              Please connect your wallet or sign in to access your profile page.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-6 pt-4 flex justify-center">
+            <AuthButton />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeModalAndRedirect}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
