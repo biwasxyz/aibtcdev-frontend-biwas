@@ -5,11 +5,13 @@ import { ExternalLink } from "lucide-react";
 interface ToolOutputParserProps {
   toolOutput: string;
   className?: string;
+  showFullOutput?: boolean;
 }
 
 export function ToolOutputParser({
   toolOutput,
   className,
+  showFullOutput = true,
 }: ToolOutputParserProps) {
   try {
     // Parse the outer JSON
@@ -17,7 +19,9 @@ export function ToolOutputParser({
 
     // Check if we have an output string to parse
     if (!parsedOutput.output || typeof parsedOutput.output !== "string") {
-      return <pre className={className}>{toolOutput}</pre>;
+      return showFullOutput ? (
+        <pre className={className}>{toolOutput}</pre>
+      ) : null;
     }
 
     try {
@@ -27,25 +31,18 @@ export function ToolOutputParser({
       // Check if we have transaction data with a link
       if (innerJson.data?.link && typeof innerJson.data.link === "string") {
         const txLink = innerJson.data.link;
-        const txId = innerJson.data.txid || "";
 
         return (
-          <div className={`space-y-2 ${className}`}>
-            <div className="flex flex-col space-y-1">
-              <span className="text-green-400 font-medium">
-                ✓ Transaction Successful
-              </span>
-              <span className="text-zinc-300">{innerJson.message}</span>
-            </div>
+          <div className={className}>
+            {/* Only show the full JSON output if showFullOutput is true */}
+            {showFullOutput && (
+              <pre className="whitespace-pre-wrap break-words font-mono mb-2">
+                {toolOutput}
+              </pre>
+            )}
 
-            <div className="flex flex-col space-y-1">
-              <span className="text-zinc-400 text-sm">Transaction ID:</span>
-              <code className="bg-black/30 px-2 py-1 rounded text-amber-300 font-mono text-xs break-all">
-                {txId}
-              </code>
-            </div>
-
-            <div className="mt-2">
+            {/* Always show the explorer link button */}
+            <div className={showFullOutput ? "mt-2" : ""}>
               <a
                 href={txLink}
                 target="_blank"
@@ -60,14 +57,18 @@ export function ToolOutputParser({
         );
       }
     } catch (innerError) {
-      // If inner JSON parsing fails, fall back to displaying the output string
-      return <pre className={className}>{parsedOutput.output}</pre>;
+      // If inner JSON parsing fails, fall back to displaying the output string if showFullOutput is true
+      return showFullOutput ? (
+        <pre className={className}>{toolOutput}</pre>
+      ) : null;
     }
   } catch (error) {
-    // If JSON parsing fails completely, just show the original string
-    return <pre className={className}>{toolOutput}</pre>;
+    // If JSON parsing fails completely, just show the original string if showFullOutput is true
+    return showFullOutput ? (
+      <pre className={className}>{toolOutput}</pre>
+    ) : null;
   }
 
   // Default fallback
-  return <pre className={className}>{toolOutput}</pre>;
+  return showFullOutput ? <pre className={className}>{toolOutput}</pre> : null;
 }

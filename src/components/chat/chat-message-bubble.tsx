@@ -1,16 +1,17 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Clock, User, Terminal, ChevronDown } from "lucide-react";
+import { Clock, User, Terminal, ChevronDown, ExternalLink } from "lucide-react";
 import type { Message } from "@/lib/chat/types";
 import { useAgent } from "@/hooks/use-agent";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import Image from "next/image";
-import { memo, useState } from "react";
+import { memo, useState, useMemo } from "react";
 import type { Agent } from "@/types/supabase";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
+import { ToolOutputParser } from "./tool-output-parser";
 
 // Separate AgentAvatar into its own memoized component
 const AgentAvatar = memo(({ agent }: { agent: Agent | null }) => {
@@ -21,7 +22,7 @@ const AgentAvatar = memo(({ agent }: { agent: Agent | null }) => {
     <Avatar className="h-6 w-6 relative">
       {agent?.image_url ? (
         <AvatarImage
-          src={agent.image_url}
+          src={agent.image_url || "/placeholder.svg"}
           alt={agent?.name || "Bot"}
           className="object-cover"
         />
@@ -91,6 +92,31 @@ export const MarkdownComponents: Components = {
       {children}
     </blockquote>
   ),
+  a: ({ node, children, ...props }) => (
+    <a
+      className="text-blue-400 hover:text-blue-300 hover:underline"
+      target="_blank"
+      rel="noopener noreferrer"
+      {...props}
+    >
+      {children}
+    </a>
+  ),
+};
+
+// Function to check if a string might be a transaction output
+const isTransactionOutput = (str: string) => {
+  try {
+    const parsed = JSON.parse(str);
+    return (
+      parsed.output &&
+      typeof parsed.output === "string" &&
+      parsed.output.includes("txid") &&
+      parsed.output.includes("link")
+    );
+  } catch (e) {
+    return false;
+  }
 };
 
 // Memoize the entire ChatMessageBubble component
@@ -101,6 +127,35 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
       : null
   );
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Extract transaction link directly in the component
+  const txLink = useMemo(() => {
+    if (!message.tool_output || typeof message.tool_output !== "string") {
+      return null;
+    }
+
+    try {
+      const parsedOutput = JSON.parse(message.tool_output);
+
+      if (!parsedOutput.output || typeof parsedOutput.output !== "string") {
+        return null;
+      }
+
+      try {
+        const innerJson = JSON.parse(parsedOutput.output);
+
+        if (innerJson.data?.link && typeof innerJson.data.link === "string") {
+          return innerJson.data.link;
+        }
+      } catch {
+        return null;
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
+  }, [message.tool_output]);
 
   return (
     <div
@@ -146,22 +201,42 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
         >
           {message.type === "tool" && message.tool && (
             <>
-              <div
-                className={cn(
-                  "text-xs sm:text-sm font-medium mb-1 flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity",
-                  message.role === "user" ? "text-blue-100" : "text-indigo-400"
-                )}
-                onClick={() => setIsExpanded(!isExpanded)}
-              >
-                <Terminal className="h-3.5 w-3.5" />
-                <span>{message.tool}</span>
-                <ChevronDown
+              <div className="space-y-2">
+                <div
                   className={cn(
-                    "h-3.5 w-3.5 transition-transform duration-200",
-                    isExpanded ? "transform rotate-180" : ""
+                    "text-xs sm:text-sm font-medium mb-1 flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity",
+                    message.role === "user"
+                      ? "text-blue-100"
+                      : "text-indigo-400"
                   )}
-                />
+                  onClick={() => setIsExpanded(!isExpanded)}
+                >
+                  <Terminal className="h-3.5 w-3.5" />
+                  <span>{message.tool}</span>
+                  <ChevronDown
+                    className={cn(
+                      "h-3.5 w-3.5 transition-transform duration-200",
+                      isExpanded ? "transform rotate-180" : ""
+                    )}
+                  />
+                </div>
+
+                {/* Show transaction link outside the expanded section if available */}
+                {txLink && !isExpanded && (
+                  <div className="mt-1">
+                    <a
+                      href={txLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 bg-indigo-900/50 hover:bg-indigo-800/70 text-indigo-300 hover:text-indigo-200 px-3 py-1.5 rounded-md text-sm transition-colors"
+                    >
+                      View transaction on Explorer
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                )}
               </div>
+
               {isExpanded && (
                 <div className="mt-2 space-y-2 text-xs sm:text-sm">
                   {message.tool_input && (
@@ -184,11 +259,19 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
                         Output
                       </div>
                       <div className="bg-black/20 rounded p-2 overflow-x-auto">
-                        <pre className="text-xs text-zinc-300 whitespace-pre-wrap break-words font-mono">
-                          {typeof message.tool_output === "string"
-                            ? message.tool_output
-                            : JSON.stringify(message.tool_output, null, 2)}
-                        </pre>
+                        {typeof message.tool_output === "string" &&
+                        isTransactionOutput(message.tool_output) ? (
+                          <ToolOutputParser
+                            toolOutput={message.tool_output}
+                            className="text-xs text-zinc-300"
+                          />
+                        ) : (
+                          <pre className="text-xs text-zinc-300 whitespace-pre-wrap break-words font-mono">
+                            {typeof message.tool_output === "string"
+                              ? message.tool_output
+                              : JSON.stringify(message.tool_output, null, 2)}
+                          </pre>
+                        )}
                       </div>
                     </div>
                   )}
