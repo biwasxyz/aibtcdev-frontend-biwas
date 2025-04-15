@@ -1,8 +1,14 @@
 "use client";
 
-import { Copy, Check } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Copy, Check, ExternalLink } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatTokenBalance, formatStxBalance } from "@/helpers/format-utils";
 import { useClipboard } from "@/helpers/clipboard-utils";
 
@@ -21,22 +27,31 @@ export function WalletInfoCard({
 }: WalletInfoCardProps) {
   const { copiedText, copyToClipboard } = useClipboard();
 
+  const getAddressExplorerUrl = (address: string) => {
+    const baseUrl = "https://explorer.hiro.so/address";
+    const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet";
+    return `${baseUrl}/${address}${isTestnet ? "?chain=testnet" : ""}`;
+  };
+
   return (
-    <Card className="border-none shadow-none bg-background/40 backdrop-blur overflow-hidden">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base sm:text-2xl font-medium">
-          Agent Wallet
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-4 space-y-4">
+    <div className="w-full space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h2 className="text-base sm:text-2xl font-medium">Agent Wallet</h2>
+
         {walletAddress ? (
-          <div className="flex items-center justify-between gap-2 bg-muted/20 p-3 rounded-md">
-            <div className="truncate font-mono text-xs sm:text-sm">
+          <div className="flex items-center gap-2 bg-muted/20 p-2 rounded-md max-w-full">
+            <a
+              href={getAddressExplorerUrl(walletAddress)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 font-mono text-xs sm:text-sm truncate hover:underline"
+            >
               {walletAddress}
-            </div>
+              <ExternalLink className="h-3 w-3 flex-shrink-0" />
+            </a>
             <button
               onClick={() => copyToClipboard(walletAddress)}
-              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors ml-1"
               aria-label="Copy wallet address"
             >
               {copiedText === walletAddress ? (
@@ -47,85 +62,91 @@ export function WalletInfoCard({
             </button>
           </div>
         ) : (
-          <div className="text-sm text-muted-foreground p-3 bg-muted/20 rounded-md">
-            No wallet address
-          </div>
+          <span className="text-muted-foreground">No wallet address</span>
         )}
+      </div>
 
-        {walletBalance && (
-          <div className="grid gap-3">
-            {/* Balances section (including STX and fungible tokens) */}
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Balances</h3>
-              <div className="grid gap-2">
-                {/* STX Balance */}
-                <div className="flex items-center justify-between p-3 bg-muted/20 rounded-md">
-                  <span className="text-xs">STX</span>
-                  <Badge variant="outline" className="font-mono">
-                    {formatStxBalance(walletBalance.stx.balance)} STX
-                  </Badge>
-                </div>
-
-                {/* Other Tokens */}
-                {Object.entries(walletBalance.fungible_tokens).map(
-                  ([tokenId, token]) => {
-                    const [, tokenSymbol] = tokenId.split("::");
-                    // Check if this is an sBTC token and display as BTC instead
-                    const displaySymbol = tokenId.includes("sbtc-token")
-                      ? "BTC"
-                      : tokenSymbol || "Token";
-
-                    return (
-                      <div
-                        key={tokenId}
-                        className="flex justify-between items-center p-3 bg-muted/20 rounded-md"
-                      >
-                        <span className="text-xs">{displaySymbol}</span>
-                        <Badge
-                          variant="secondary"
-                          className="font-mono text-xs"
-                        >
-                          {formatTokenBalance(token.balance)}
-                        </Badge>
-                      </div>
-                    );
-                  }
-                )}
-              </div>
-            </div>
-
-            {/* NFTs section */}
-            {Object.entries(walletBalance.non_fungible_tokens).length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium">NFTs</h3>
-                <div className="grid gap-2">
-                  {Object.entries(walletBalance.non_fungible_tokens).map(
-                    ([tokenId, token]) => {
-                      const [, tokenSymbol] = tokenId.split("::");
-                      return (
-                        <div
-                          key={tokenId}
-                          className="flex justify-between items-center p-3 bg-muted/20 rounded-md"
-                        >
-                          <span className="text-xs">
-                            {tokenSymbol || "NFT"}
-                          </span>
-                          <Badge
-                            variant="secondary"
-                            className="font-mono text-xs"
-                          >
-                            {token.count}
-                          </Badge>
-                        </div>
-                      );
-                    }
-                  )}
-                </div>
-              </div>
+      <div className="w-full overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-1/3">Asset</TableHead>
+              <TableHead className="w-2/3">Balance</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {/* STX Balance */}
+            {walletBalance && (
+              <TableRow>
+                <TableCell className="font-medium">STX</TableCell>
+                <TableCell className="font-mono">
+                  {formatStxBalance(walletBalance.stx.balance)} STX
+                </TableCell>
+              </TableRow>
             )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+            {/* Fungible Tokens */}
+            {walletBalance &&
+              Object.entries(walletBalance.fungible_tokens).map(
+                ([tokenId, token]) => {
+                  const [, tokenSymbol] = tokenId.split("::");
+                  // Check if this is an sBTC token and display as BTC instead
+                  const displaySymbol = tokenId.includes("sbtc-token")
+                    ? "BTC"
+                    : tokenSymbol || "Token";
+                  const isBtc = tokenId.includes("sbtc-token");
+
+                  return (
+                    <TableRow key={tokenId}>
+                      <TableCell className="font-medium">
+                        {displaySymbol}
+                      </TableCell>
+                      <TableCell
+                        className={`font-mono ${
+                          isBtc ? "text-primary font-semibold" : ""
+                        }`}
+                      >
+                        {formatTokenBalance(token.balance)}
+                      </TableCell>
+                    </TableRow>
+                  );
+                }
+              )}
+
+            {/* NFTs */}
+            {walletBalance &&
+              Object.entries(walletBalance.non_fungible_tokens).map(
+                ([tokenId, token]) => {
+                  const [, tokenSymbol] = tokenId.split("::");
+                  return (
+                    <TableRow key={tokenId}>
+                      <TableCell className="font-medium">
+                        {tokenSymbol || "NFT"}
+                      </TableCell>
+                      <TableCell className="font-mono">{token.count}</TableCell>
+                    </TableRow>
+                  );
+                }
+              )}
+
+            {/* Show empty state if no balances */}
+            {(!walletBalance ||
+              (Object.entries(walletBalance.fungible_tokens).length === 0 &&
+                Object.entries(walletBalance.non_fungible_tokens).length ===
+                  0 &&
+                !walletBalance.stx)) && (
+              <TableRow>
+                <TableCell
+                  colSpan={2}
+                  className="text-center text-muted-foreground"
+                >
+                  No balances found
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
 }
