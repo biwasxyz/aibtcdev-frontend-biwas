@@ -1,15 +1,15 @@
 "use client";
-// import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import AuthButton from "@/components/home/auth-button";
-// import { Button } from "../ui/button";
 
 export function AuthModal({
   isOpen,
   onClose,
+  redirectUrl,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  redirectUrl?: string;
 }) {
   if (!isOpen) return null;
 
@@ -28,7 +28,7 @@ export function AuthModal({
 
         {/* Auth Button */}
         <div className="mb-6">
-          <AuthButton />
+          <AuthButton redirectUrl={redirectUrl} />
         </div>
       </div>
     </div>

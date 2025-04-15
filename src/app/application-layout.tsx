@@ -47,6 +47,9 @@ export default function ApplicationLayout({
       // If we're on the profile page and not authenticated, show the modal
       if (pathname === "/profile" && !user) {
         setShowAuthModal(true);
+      } else if (pathname === "/profile" && user) {
+        // If we're on the profile page and authenticated, make sure modal is closed
+        setShowAuthModal(false);
       }
     };
 
@@ -55,7 +58,13 @@ export default function ApplicationLayout({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setHasUser(!!session?.user);
+      const isAuthenticated = !!session?.user;
+      setHasUser(isAuthenticated);
+
+      // Close the auth modal when user becomes authenticated
+      if (isAuthenticated) {
+        setShowAuthModal(false);
+      }
     });
 
     return () => {
@@ -271,6 +280,7 @@ export default function ApplicationLayout({
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
+        redirectUrl="/profile"
       />
     </div>
   );
