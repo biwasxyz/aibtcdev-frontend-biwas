@@ -1,7 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, ExternalLink, ThumbsUp, ThumbsDown } from "lucide-react";
+import {
+  Loader2,
+  ExternalLink,
+  ThumbsUp,
+  ThumbsDown,
+  Copy,
+  Check,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getStacksAddress } from "@/lib/address";
 import {
@@ -24,8 +31,15 @@ import { formatDistanceToNow } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import { AgentPromptForm } from "./agent-prompt-form";
+import { useClipboard } from "@/helpers/clipboard-utils";
 
 const stacksAddress = getStacksAddress();
+
+const getAddressExplorerUrl = (address: string) => {
+  const baseUrl = "https://explorer.hiro.so/address";
+  const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet";
+  return `${baseUrl}/${address}${isTestnet ? "?chain=testnet" : ""}`;
+};
 
 export function ProfileView() {
   const {
@@ -38,6 +52,8 @@ export function ProfileView() {
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });
+
+  const { copyToClipboard, copiedText } = useClipboard();
 
   if (isLoading) {
     return (
@@ -54,19 +70,38 @@ export function ProfileView() {
         <Card className="border-none shadow-none bg-background/40 backdrop-blur mb-6">
           <CardHeader>
             <CardTitle className="text-base sm:text-2xl font-medium">
-              Wallet Information
+              Connected Wallet
             </CardTitle>
             <Separator className="my-2" />
           </CardHeader>
           <CardContent className="grid gap-6">
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">
-                Connected Wallet
-              </label>
-              <div className="font-mono text-sm bg-muted/30 p-2 rounded-md">
-                {stacksAddress}
+            {stacksAddress ? (
+              <div className="flex items-center gap-2">
+                <span className="font-mono">{stacksAddress}</span>
+                <button
+                  onClick={() => copyToClipboard(stacksAddress)}
+                  className="p-1 hover:bg-muted rounded-md"
+                  title="Copy address"
+                >
+                  {copiedText === stacksAddress ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+                <a
+                  href={getAddressExplorerUrl(stacksAddress)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1 hover:bg-muted rounded-md"
+                  title="View on explorer"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </a>
               </div>
-            </div>
+            ) : (
+              <div className="text-muted-foreground">No wallet connected</div>
+            )}
           </CardContent>
         </Card>
 
