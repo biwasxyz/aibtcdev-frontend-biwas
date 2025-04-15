@@ -32,6 +32,7 @@ import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import { AgentPromptForm } from "./agent-prompt-form";
 import { useClipboard } from "@/helpers/clipboard-utils";
+import { formatTokenBalance } from "@/helpers/format-utils";
 
 const stacksAddress = getStacksAddress();
 
@@ -184,7 +185,7 @@ export function ProfileView() {
                           </TableCell>
                           <TableCell>
                             {vote.amount !== null
-                              ? (vote.amount / 1_000_000_00).toFixed(2)
+                              ? formatTokenBalance(vote.amount)
                               : "-"}
                           </TableCell>
                           <TableCell className="whitespace-nowrap">
