@@ -1,17 +1,8 @@
 "use client";
-
-import { useRouter } from "next/navigation";
-import { LockKeyhole } from "lucide-react";
+// import { useRouter } from "next/navigation";
+import { X } from "lucide-react";
 import AuthButton from "@/components/home/auth-button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+// import { Button } from "../ui/button";
 
 export function AuthModal({
   isOpen,
@@ -20,27 +11,26 @@ export function AuthModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const router = useRouter();
+  if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="mx-auto bg-zinc-800 p-3 rounded-full w-fit mb-4">
-            <LockKeyhole className="h-6 w-6 text-zinc-300" />
-          </div>
-          <DialogTitle className="text-center text-xl">
-            Not Authenticated
-          </DialogTitle>
-          <DialogDescription className="text-center">
-            You need to be signed in to access this page.
-          </DialogDescription>
-        </DialogHeader>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-zinc-900 rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Not Authenticated</h2>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-full hover:bg-zinc-800"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
-        <div className="py-4 mx-auto">
+        {/* Auth Button */}
+        <div className="mb-6">
           <AuthButton />
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
