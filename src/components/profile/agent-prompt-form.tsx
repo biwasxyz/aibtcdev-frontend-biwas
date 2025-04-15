@@ -35,7 +35,7 @@ import {
   updateAgentPrompt,
   deleteAgentPrompt,
 } from "@/queries/agent-prompt-queries";
-import { fetchWalletTokens } from "@/queries/wallet-token-queries";
+// import { fetchWalletTokens } from "@/queries/wallet-token-queries";
 import { useWalletStore } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
 
@@ -90,10 +90,10 @@ export function AgentPromptForm() {
   });
 
   // Fetch wallet tokens
-  const { data: walletTokens = [], isLoading: isLoadingTokens } = useQuery({
-    queryKey: ["holders"],
-    queryFn: fetchWalletTokens,
-  });
+  // const { data: walletTokens = [], isLoading: isLoadingTokens } = useQuery({
+  //   queryKey: ["holders"],
+  //   queryFn: fetchWalletTokens,
+  // });
 
   // Fetch DAOs
   const { data: daos = [], isLoading: isLoadingDaos } = useQuery({
@@ -305,7 +305,7 @@ export function AgentPromptForm() {
     isLoadingDaos ||
     isLoadingAgents ||
     isLoadingPrompts ||
-    isLoadingTokens ||
+    // isLoadingTokens ||
     createMutation.isPending ||
     updateMutation.isPending ||
     deleteMutation.isPending;
