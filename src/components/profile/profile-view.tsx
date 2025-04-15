@@ -8,6 +8,8 @@ import {
   ThumbsDown,
   Copy,
   Check,
+  History,
+  HistoryIcon,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getStacksAddress } from "@/lib/address";
@@ -113,7 +115,10 @@ export function ProfileView() {
             <div className="flex justify-end mb-4">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button>Voting History</Button>
+                  <Button>
+                    <HistoryIcon />
+                    Voting History
+                  </Button>
                 </DialogTrigger>
                 <DialogContent className="w-[90vw] max-w-full max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
