@@ -3,12 +3,11 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { Loader2, Save, Edit, Trash2, Power } from "lucide-react";
+import { Loader2, Save, Edit, Trash2, Pencil } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -319,36 +318,6 @@ export function AgentPromptForm() {
     return dao ? dao.name : "";
   };
 
-  // Format token balance
-  const formatTokenBalance = (balance: string | number) => {
-    return (Number(balance) / 1_000_000).toFixed(2);
-  };
-
-  // Extract token name from full token identifier
-  const extractTokenName = (fullTokenId: string): string => {
-    if (!fullTokenId) return "";
-
-    // Try to extract the token name after the :: delimiter
-    if (fullTokenId.includes("::")) {
-      return fullTokenId.split("::")[1];
-    }
-
-    // If no :: delimiter, try to extract the token name after the last dot
-    if (fullTokenId.includes(".")) {
-      const parts = fullTokenId.split(".");
-      const lastPart = parts[parts.length - 1];
-
-      // If the last part contains a hyphen, extract the part after the hyphen
-      if (lastPart.includes("-")) {
-        return lastPart.split("-")[0];
-      }
-
-      return lastPart;
-    }
-
-    return fullTokenId;
-  };
-
   // Get wallet information for an agent
   const getAgentWalletInfo = (agentId: string) => {
     if (!agentId) return { walletAddress: null, walletBalance: null };
@@ -374,11 +343,19 @@ export function AgentPromptForm() {
     walletBalance: daoManagerWalletBalance,
   } = getAgentWalletInfo(daoManagerAgentId);
 
-  // Get all DAOs instead of filtering by wallet tokens
-  const uniqueDaoIds = daos.map((dao) => dao.id);
+  // Get unique DAOs from wallet tokens, but only include those that match our filtered DAOs
+  const uniqueDaoIds = Array.from(
+    new Set(
+      walletTokens
+        .map((token) => token.dao_id)
+        .filter(
+          (daoId) => daoId && daos.some((d) => d.id === daoId)
+        ) as string[]
+    )
+  );
 
   return (
-    <Card className="border-none shadow-none bg-background/40 backdrop-blur">
+    <div className="w-full space-y-4">
       {daoManagerAgentId && (
         <div className="mb-6">
           <WalletInfoCard
@@ -387,232 +364,176 @@ export function AgentPromptForm() {
           />
         </div>
       )}
-      <CardHeader>
-        <CardTitle className="text-base sm:text-2xl font-medium">
-          Agent Prompts
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border mt-2">
-          <Table>
-            <TableHeader>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h2 className="text-base sm:text-2xl font-medium">Agent Prompts</h2>
+      </div>
+      <div className="w-full overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-1/3">DAO</TableHead>
+              {/* Token balances column commented out as requested */}
+              {/* <TableHead>Token Balances</TableHead> */}
+              <TableHead>Prompt Status</TableHead>
+              <TableHead>Prompt Text</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
               <TableRow>
-                <TableHead>DAO</TableHead>
-                <TableHead> Token Balances</TableHead>
-                <TableHead>Prompt Status</TableHead>
-                <TableHead>Prompt Text</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableCell colSpan={4} className="text-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                  </TableCell>
-                </TableRow>
-              ) : (
-                uniqueDaoIds.map((daoId) => {
-                  const daoTokens = walletTokens.filter(
-                    (token) => token.dao_id === daoId
-                  );
-                  const prompt = prompts.find((p) => p.dao_id === daoId);
-                  const daoName = getDaoName(daoId);
+            ) : uniqueDaoIds.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-4">
+                  No DAOs with tokens found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              uniqueDaoIds.map((daoId) => {
+                const prompt = prompts.find((p) => p.dao_id === daoId);
+                const daoName = getDaoName(daoId);
 
-                  // Get tokens for this DAO from the wallet balance
-                  let tokenBalances: { name: string; balance: string }[] = [];
-
-                  if (
-                    daoManagerWalletAddress &&
-                    daoManagerWalletBalance?.fungible_tokens
-                  ) {
-                    // Extract tokens from fungible_tokens that match this DAO
-                    tokenBalances = Object.entries(
-                      daoManagerWalletBalance.fungible_tokens
-                    )
-                      .map(([tokenId, tokenData]) => {
-                        const tokenName = extractTokenName(tokenId);
-                        return {
-                          name: tokenName,
-                          balance: tokenData.balance,
-                        };
-                      })
-                      .filter((token) => {
-                        return token.name
-                          .toUpperCase()
-                          .includes(daoName.toUpperCase());
-                      });
-                  }
-
-                  return (
-                    <TableRow key={daoId}>
-                      <TableCell className="font-medium">{daoName}</TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          {tokenBalances.length > 0
-                            ? tokenBalances.map((token, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-center justify-between text-sm"
-                                >
-                                  <span>
-                                    {formatTokenBalance(token.balance)}
-                                  </span>
-                                </div>
-                              ))
-                            : daoTokens.map((token, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-center justify-between text-sm"
-                                >
-                                  <span>
-                                    {formatTokenBalance(token.amount || "0")}
-                                  </span>
-                                </div>
-                              ))}
-                          {daoTokens.length === 0 &&
-                            tokenBalances.length === 0 && (
-                              <span className="text-muted-foreground">
-                                No tokens
-                              </span>
-                            )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={prompt?.is_active ? "default" : "secondary"}
-                          className={
-                            prompt?.is_active
-                              ? "bg-green-500/20 text-green-700 hover:bg-green-500/20"
-                              : "bg-muted text-muted-foreground hover:bg-muted"
-                          }
-                        >
-                          {prompt?.is_active ? "Active" : "Disabled"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="max-w-md">
-                        <p className="truncate text-sm text-muted-foreground">
-                          {prompt?.prompt_text || "No prompt configured"}
-                        </p>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {prompt ? (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditPrompt(prompt.id, daoId)}
-                            >
-                              <Edit className="h-4 w-4" />
-                              <span className="sr-only">Edit</span>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedPromptId(prompt.id);
-                                if (
-                                  confirm(
-                                    "Are you sure you want to delete this prompt?"
-                                  )
-                                ) {
-                                  deleteMutation.mutate(prompt.id);
-                                }
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </>
-                        ) : (
+                return (
+                  <TableRow key={daoId}>
+                    <TableCell className="font-medium">{daoName}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={prompt?.is_active ? "default" : "secondary"}
+                        className={
+                          prompt?.is_active
+                            ? "bg-green-500/20 text-green-700 hover:bg-green-500/20"
+                            : "bg-muted text-muted-foreground hover:bg-muted"
+                        }
+                      >
+                        {prompt?.is_active ? "Active" : "Disabled"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="max-w-md">
+                      <p className="truncate text-sm text-muted-foreground">
+                        {prompt?.prompt_text || "No prompt configured"}
+                      </p>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {prompt ? (
+                        <>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleEnablePrompt(daoId)}
+                            onClick={() => handleEditPrompt(prompt.id, daoId)}
                           >
-                            <Power className="h-4 w-4" />
-                            <span className="sr-only">Enable</span>
+                            <Edit className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
                           </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedPromptId(prompt.id);
+                              if (
+                                confirm(
+                                  "Are you sure you want to delete this prompt?"
+                                )
+                              ) {
+                                deleteMutation.mutate(prompt.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEnablePrompt(daoId)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedPromptId ? "Edit Prompt" : "Create Prompt"}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">DAO</label>
+              <div className="text-sm text-muted-foreground">
+                {getDaoName(selectedDaoId)}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Prompt Text</label>
+              <Textarea
+                name="prompt_text"
+                value={formData.prompt_text}
+                onChange={handleInputChange}
+                placeholder="Enter the prompt text"
+                className="min-h-[150px]"
+              />
+              {errors.prompt_text && (
+                <p className="text-sm text-red-500">{errors.prompt_text}</p>
               )}
-            </TableBody>
-          </Table>
-        </div>
+            </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>
-                {selectedPromptId ? "Edit Prompt" : "Enable Prompt"}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">DAO</label>
-                <div className="text-sm text-muted-foreground">
-                  {getDaoName(selectedDaoId)}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Prompt Text</label>
-                <Textarea
-                  name="prompt_text"
-                  value={formData.prompt_text}
-                  onChange={handleInputChange}
-                  placeholder="Enter the prompt text"
-                  className="min-h-[150px]"
-                />
-                {errors.prompt_text && (
-                  <p className="text-sm text-red-500">{errors.prompt_text}</p>
-                )}
-              </div>
-
-              <DialogFooter>
-                {selectedPromptId && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={handleDelete}
-                    disabled={isLoading}
-                    className="mr-auto"
-                  >
-                    {deleteMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4 mr-2" />
-                    )}
-                    Delete
-                  </Button>
-                )}
+            <DialogFooter>
+              {selectedPromptId && (
                 <Button
                   type="button"
-                  variant="outline"
-                  onClick={() => {
-                    resetForm();
-                    setIsDialogOpen(false);
-                  }}
+                  variant="destructive"
+                  onClick={handleDelete}
                   disabled={isLoading}
+                  className="mr-auto"
                 >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? (
+                  {deleteMutation.isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
-                    <Save className="h-4 w-4 mr-2" />
+                    <Trash2 className="h-4 w-4 mr-2" />
                   )}
-                  Save
+                  Delete
                 </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </CardContent>
-    </Card>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  resetForm();
+                  setIsDialogOpen(false);
+                }}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                Save
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
