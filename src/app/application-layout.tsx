@@ -14,14 +14,7 @@ import { NetworkIndicator } from "@/components/reusables/network-indicator";
 // import { getStacksAddress } from "@/lib/address";
 import AuthButton from "@/components/home/auth-button";
 import AssetTracker from "@/components/reusables/asset-tracker";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { AuthModal } from "@/components/auth/auth-modal";
 
 interface ApplicationLayoutProps {
   children: React.ReactNode;
@@ -34,11 +27,6 @@ const navigation = [
   { id: "profile", name: "Profile", href: "/profile", icon: Users },
 ];
 
-// function truncateAddress(address: string | null) {
-//   if (!address) return "";
-//   return `${address.slice(0, 6)}...${address.slice(-4)}`;
-// }
-
 export default function ApplicationLayout({
   children,
 }: ApplicationLayoutProps) {
@@ -46,8 +34,8 @@ export default function ApplicationLayout({
   const router = useRouter();
   const [leftPanelOpen, setLeftPanelOpen] = React.useState(false);
   const [hasUser, setHasUser] = React.useState(false);
+  const [showAuthModal, setShowAuthModal] = React.useState(false);
   // const [stacksAddress, setStacksAddress] = React.useState<string | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
 
   React.useEffect(() => {
     const checkUser = async () => {
@@ -56,9 +44,10 @@ export default function ApplicationLayout({
       } = await supabase.auth.getUser();
       setHasUser(!!user);
 
-      // Get Stacks address
-      // const address = getStacksAddress();
-      // setStacksAddress(address);
+      // If we're on the profile page and not authenticated, show the modal
+      if (pathname === "/profile" && !user) {
+        setShowAuthModal(true);
+      }
     };
 
     checkUser();
@@ -72,27 +61,30 @@ export default function ApplicationLayout({
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
-
-  React.useEffect(() => {
-    if (pathname === "/profile" && !hasUser) {
-      setIsAuthModalOpen(true);
-    } else {
-      setIsAuthModalOpen(false);
-    }
-  }, [pathname, hasUser]);
-
-  const closeModalAndRedirect = () => {
-    setIsAuthModalOpen(false);
-    if (pathname === "/profile") {
-      router.push("/daos");
-    }
-  };
+  }, [pathname]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    setIsAuthModalOpen(false);
     router.push("/");
+  };
+
+  // Handle navigation to protected routes
+  const handleNavigation = async (href: string, e: React.MouseEvent) => {
+    // Only intercept navigation to profile page
+    if (href === "/profile") {
+      e.preventDefault();
+
+      // Check if user is authenticated
+      const { data } = await supabase.auth.getUser();
+
+      if (!data.user) {
+        // Show auth modal if not authenticated
+        setShowAuthModal(true);
+      } else {
+        // Navigate to profile if authenticated
+        router.push(href);
+      }
+    }
   };
 
   return (
@@ -153,9 +145,10 @@ export default function ApplicationLayout({
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
-                <Link
+                <a
                   key={item.id}
                   href={item.href}
+                  onClick={(e) => handleNavigation(item.href, e)}
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg transition-colors",
                     isActive
@@ -165,7 +158,7 @@ export default function ApplicationLayout({
                 >
                   {/* <item.icon className="h-5 w-5" /> */}
                   <span>{item.name}</span>
-                </Link>
+                </a>
               );
             })}
           </div>
@@ -237,20 +230,23 @@ export default function ApplicationLayout({
                 {navigation.map((item) => {
                   const isActive = pathname === item.href;
                   return (
-                    <Link
+                    <a
                       key={item.id}
                       href={item.href}
+                      onClick={(e) => {
+                        handleNavigation(item.href, e);
+                        setLeftPanelOpen(false);
+                      }}
                       className={cn(
                         "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                         isActive
                           ? "bg-zinc-800/50 text-white"
                           : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
                       )}
-                      onClick={() => setLeftPanelOpen(false)}
                     >
                       <item.icon className="h-5 w-5" />
                       <span>{item.name}</span>
-                    </Link>
+                    </a>
                   );
                 })}
               </div>
@@ -272,32 +268,10 @@ export default function ApplicationLayout({
       </div>
 
       {/* Authentication Modal */}
-      <Dialog
-        open={isAuthModalOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            closeModalAndRedirect();
-          }
-          setIsAuthModalOpen(open);
-        }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Authentication Required</DialogTitle>
-            <DialogDescription>
-              Please connect your wallet or sign in to access your profile page.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="p-6 pt-4 flex justify-center">
-            <AuthButton />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={closeModalAndRedirect}>
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
     </div>
   );
 }
