@@ -374,16 +374,8 @@ export function AgentPromptForm() {
     walletBalance: daoManagerWalletBalance,
   } = getAgentWalletInfo(daoManagerAgentId);
 
-  // Get unique DAOs from wallet tokens, but only include those that match our filtered DAOs
-  const uniqueDaoIds = Array.from(
-    new Set(
-      walletTokens
-        .map((token) => token.dao_id)
-        .filter(
-          (daoId) => daoId && daos.some((d) => d.id === daoId)
-        ) as string[]
-    )
-  );
+  // Get all DAOs instead of filtering by wallet tokens
+  const uniqueDaoIds = daos.map((dao) => dao.id);
 
   return (
     <Card className="border-none shadow-none bg-background/40 backdrop-blur">
@@ -417,12 +409,6 @@ export function AgentPromptForm() {
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-4">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                  </TableCell>
-                </TableRow>
-              ) : uniqueDaoIds.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-4">
-                    No DAOs with tokens found.
                   </TableCell>
                 </TableRow>
               ) : (
