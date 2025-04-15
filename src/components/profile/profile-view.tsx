@@ -260,7 +260,7 @@ export function ProfileView() {
                                 <ExternalLink className="h-4 w-4" />
                               </a>
                             ) : (
-                              <span className="text-muted-foreground">-</span>
+                              <span className="text-muted-foreground">N/A</span>
                             )}
                           </TableCell>
                         </TableRow>
