@@ -35,31 +35,34 @@ export function WalletInfoCard({
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div className="flex flex-col gap-2">
         <h2 className="text-base sm:text-2xl font-medium">Agent Wallet</h2>
 
         {walletAddress ? (
-          <div className="flex items-center gap-2 bg-muted/20 p-2 rounded-md max-w-full">
-            <a
-              href={getAddressExplorerUrl(walletAddress)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 font-mono text-xs sm:text-sm truncate hover:underline"
-            >
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs sm:text-sm">
               {walletAddress}
-              <ExternalLink className="h-3 w-3 flex-shrink-0" />
-            </a>
+            </span>
             <button
               onClick={() => copyToClipboard(walletAddress)}
-              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors ml-1"
-              aria-label="Copy wallet address"
+              className="p-1 hover:bg-muted rounded-md"
+              title="Copy address"
             >
               {copiedText === walletAddress ? (
-                <Check className="h-4 w-4" />
+                <Check className="h-4 w-4 text-green-500" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}
             </button>
+            <a
+              href={getAddressExplorerUrl(walletAddress)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1 hover:bg-muted rounded-md"
+              title="View on explorer"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </a>
           </div>
         ) : (
           <span className="text-muted-foreground">No wallet address</span>
