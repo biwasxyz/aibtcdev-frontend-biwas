@@ -15,7 +15,7 @@ export interface DepositParams {
 }
 
 export interface TransactionParams {
-    amount: string // This should be in satoshis
+    amount: string // BTC amount as string
     userAddress: string
     btcAddress: string
     feePriority: TransactionPriority
@@ -27,6 +27,19 @@ export interface ExecuteParams {
     preparedData: PreparedTransactionData
     walletProvider: WalletProvider
     btcAddress: string
+}
+
+// Define the return type for completeDepositFlow
+export interface DepositFlowResult {
+    success: boolean
+    depositId?: string
+    preparedData?: PreparedTransactionData
+    executionResult?: ExecuteTransactionResponse
+    error?: string
+    originalError?: any
+    step?: string
+    details?: any
+    isInscriptionError?: boolean
 }
 
 // Constants for BTC/satoshi conversion
@@ -48,6 +61,70 @@ export async function getFeeEstimates() {
     } catch (error: any) {
         console.error("Error getting fee estimates:", error)
         return { success: false, error }
+    }
+}
+
+/**
+ * Prepare a transaction with UTXOs and fee calculation
+ */
+export async function prepareTransaction(params: TransactionParams) {
+    try {
+        // Log the parameters for debugging
+        console.log("Preparing transaction with params:", {
+            amount: params.amount,
+            userAddress: params.userAddress,
+            btcAddress: params.btcAddress,
+            feePriority: params.feePriority,
+            walletProvider: params.walletProvider,
+        })
+
+        // Call the SDK to prepare transaction
+        console.log("Calling styxSDK.prepareTransaction")
+        const preparedData = await styxSDK.prepareTransaction({
+            amount: params.amount,
+            userAddress: params.userAddress,
+            btcAddress: params.btcAddress,
+            feePriority: params.feePriority,
+            walletProvider: params.walletProvider,
+        })
+
+        console.log("Transaction prepared successfully:", preparedData)
+        return { success: true, preparedData }
+    } catch (error: any) {
+        console.error("Error preparing transaction:", error)
+
+        // Log detailed error information
+        console.error("Error object:", JSON.stringify(error, null, 2))
+
+        // Check for specific error types but preserve original error
+        let isInscriptionError = false
+
+        if (error.response) {
+            console.error("Error response data:", error.response.data)
+            console.error("Error response status:", error.response.status)
+
+            // Check for inscription-related error
+            const errorData = error.response.data
+            const errorMessage = typeof errorData === "string" ? errorData : errorData?.message || JSON.stringify(errorData)
+
+            if (
+                errorMessage.includes("Insufficient funds after filtering") &&
+                errorMessage.includes("UTXOs with inscriptions")
+            ) {
+                console.log("Detected inscription-related error")
+                isInscriptionError = true
+            }
+        }
+
+        // Return the original error along with our analysis
+        return {
+            success: false,
+            error: error,
+            errorMessage: extractErrorMessage(error),
+            originalError: error,
+            isInscriptionError,
+            details: error.response?.data || error,
+        }
     }
 }
 
@@ -75,7 +152,106 @@ export async function createDeposit(params: DepositParams) {
         return {
             success: false,
             error: error,
-            errorMessage: error.response?.data || error.message || "Error creating deposit",
+            errorMessage: extractErrorMessage(error),
+        }
+    }
+}
+
+/**
+ * Execute a prepared transaction
+ */
+export async function executeTransaction(params: ExecuteParams) {
+    console.log("Executing transaction with params:", {
+        depositId: params.depositId,
+        preparedData: "...", // Don't log the full prepared data as it could be large
+        walletProvider: params.walletProvider,
+        btcAddress: params.btcAddress,
+    })
+
+    try {
+        const result = (await styxSDK.executeTransaction({
+            depositId: params.depositId,
+            preparedData: params.preparedData,
+            walletProvider: params.walletProvider,
+            btcAddress: params.btcAddress,
+        })) as ExecuteTransactionResponse
+        console.log("Transaction executed successfully:", result)
+        return { success: true, result }
+    } catch (error: any) {
+        console.error("Error executing transaction:", error)
+        if (error.response) {
+            console.error("Error response data:", error.response.data)
+            console.error("Error response status:", error.response.status)
+        }
+
+        // Return the original error
+        return {
+            success: false,
+            error: error,
+            errorMessage: extractErrorMessage(error),
+        }
+    }
+}
+
+/**
+ * Update deposit status
+ */
+export async function updateDepositStatus(depositId: string, txId: string) {
+    console.log("Updating deposit status for ID:", depositId, "with txId:", txId)
+    try {
+        const result = await styxSDK.updateDepositStatus({
+            id: depositId,
+            data: {
+                btcTxId: txId,
+                status: "broadcast",
+            },
+        })
+        console.log("Deposit status updated:", result)
+        return { success: true, result }
+    } catch (error: any) {
+        console.error("Error updating deposit status:", error)
+        return {
+            success: false,
+            error: error,
+            errorMessage: extractErrorMessage(error),
+        }
+    }
+}
+
+/**
+ * Get deposit history for a user
+ */
+export async function getDepositHistory(userAddress: string) {
+    console.log("Getting deposit history for address:", userAddress)
+    try {
+        const history = await styxSDK.getDepositHistory(userAddress)
+        console.log("Deposit history:", history)
+        return { success: true, history }
+    } catch (error: any) {
+        console.error("Error getting deposit history:", error)
+        return {
+            success: false,
+            error: error,
+            errorMessage: extractErrorMessage(error),
+        }
+    }
+}
+
+/**
+ * Get all deposits history (admin function)
+ */
+export async function getAllDepositsHistory() {
+    console.log("Getting all deposits history")
+    try {
+        const history = await styxSDK.getAllDepositsHistory()
+        console.log("All deposits history:", history)
+        return { success: true, history }
+    } catch (error: any) {
+        console.error("Error getting all deposits history:", error)
+        return {
+            success: false,
+            error: error,
+            errorMessage: extractErrorMessage(error),
         }
     }
 }
@@ -156,107 +332,11 @@ export function extractErrorMessage(error: any): string {
 }
 
 /**
- * Prepare a transaction with UTXOs and fee calculation
- */
-export async function prepareTransaction(params: TransactionParams) {
-    try {
-        // Log the parameters for debugging
-        console.log("Preparing transaction with params:", {
-            amount: params.amount, // This is already in satoshis
-            userAddress: params.userAddress,
-            btcAddress: params.btcAddress,
-            feePriority: params.feePriority,
-            walletProvider: params.walletProvider,
-        })
-
-        // Call the SDK with satoshi amount
-        console.log("Calling styxSDK.prepareTransaction")
-        const preparedData = await styxSDK.prepareTransaction({
-            amount: params.amount, // This is already in satoshis
-            userAddress: params.userAddress,
-            btcAddress: params.btcAddress,
-            feePriority: params.feePriority,
-            walletProvider: params.walletProvider,
-        })
-
-        console.log("Transaction prepared successfully:", preparedData)
-        return { success: true, preparedData }
-    } catch (error: any) {
-        console.error("Error preparing transaction:", error)
-
-        // Log detailed error information
-        console.error("Error object:", JSON.stringify(error, null, 2))
-
-        // Check for specific error types but preserve original error
-        let isInscriptionError = false
-
-        if (error.response) {
-            console.error("Error response data:", error.response.data)
-            console.error("Error response status:", error.response.status)
-
-            // Check for inscription-related error
-            const errorData = error.response.data
-            const errorMessage = typeof errorData === "string" ? errorData : errorData?.message || JSON.stringify(errorData)
-
-            if (
-                errorMessage.includes("Insufficient funds after filtering") &&
-                errorMessage.includes("UTXOs with inscriptions")
-            ) {
-                console.log("Detected inscription-related error")
-                isInscriptionError = true
-            }
-        }
-
-        // Return the original error along with our analysis
-        return {
-            success: false,
-            error: error,
-            errorMessage: extractErrorMessage(error),
-            originalError: error,
-            isInscriptionError,
-            details: error.response?.data || error,
-        }
-    }
-}
-
-/**
- * Execute a prepared transaction
- */
-export async function executeTransaction(params: ExecuteParams) {
-    console.log("Executing transaction with params:", {
-        depositId: params.depositId,
-        preparedData: params.preparedData, // Don't log the full prepared data as it could be large
-        walletProvider: params.walletProvider,
-        btcAddress: params.btcAddress,
-    })
-
-    try {
-        const result = (await styxSDK.executeTransaction({
-            depositId: params.depositId,
-            preparedData: params.preparedData,
-            walletProvider: params.walletProvider,
-            btcAddress: params.btcAddress,
-        })) as ExecuteTransactionResponse
-        console.log("Transaction executed successfully:", result)
-        return { success: true, result }
-    } catch (error: any) {
-        console.error("Error executing transaction:", error)
-        if (error.response) {
-            console.error("Error response data:", error.response.data)
-            console.error("Error response status:", error.response.status)
-        }
-
-        // Return the original error
-        return {
-            success: false,
-            error: error,
-            errorMessage: extractErrorMessage(error),
-        }
-    }
-}
-
-/**
- * Complete deposit flow - from preparation to execution
+ * Complete deposit flow - following the sequence:
+ * 1. Prepare Transaction
+ * 2. Create Deposit
+ * 3. Execute Transaction
+ * 4. Update Deposit Status
  */
 export async function completeDepositFlow({
     btcAmount,
@@ -270,7 +350,7 @@ export async function completeDepositFlow({
     btcSender: string
     walletProvider: WalletProvider
     feePriority?: TransactionPriority
-}) {
+}): Promise<DepositFlowResult> {
     console.log("Starting complete deposit flow with params:", {
         btcAmount,
         stxReceiver,
@@ -303,10 +383,32 @@ export async function completeDepositFlow({
             }
         }
 
-        // 1. Create deposit - use BTC amount directly
-        console.log("Step 1 - Creating deposit")
-        console.log(`Using ${btcAmount} BTC for deposit creation`)
+        // 1. Prepare transaction
+        console.log("Step 1 - Preparing transaction")
+        const prepareResult = await prepareTransaction({
+            amount: btcAmount.toString(), // BTC amount as string
+            userAddress: stxReceiver,
+            btcAddress: btcSender,
+            feePriority,
+            walletProvider,
+        })
 
+        if (!prepareResult.success) {
+            console.error("Transaction preparation failed")
+            return {
+                success: false,
+                error: prepareResult.errorMessage || "Failed to prepare transaction",
+                originalError: prepareResult.error,
+                step: "prepare_transaction",
+                details: prepareResult.details,
+                isInscriptionError: prepareResult.isInscriptionError,
+            }
+        }
+
+        console.log("Transaction prepared successfully")
+
+        // 2. Create deposit
+        console.log("Step 2 - Creating deposit")
         const depositResult = await createDeposit({
             btcAmount,
             stxReceiver,
@@ -331,71 +433,41 @@ export async function completeDepositFlow({
         }
         console.log("Deposit created with ID:", depositId)
 
-        // 2. Prepare transaction - convert BTC to satoshis
-        console.log("Step 2 - Preparing transaction")
-        try {
-            // Convert BTC to satoshis for the API
-            const satoshiAmount = btcToSatoshis(btcAmount)
-            console.log(`Converting ${btcAmount} BTC to ${satoshiAmount} satoshis for transaction preparation`)
+        // 3. Execute transaction
+        console.log("Step 3 - Executing transaction")
+        const executeResult = await executeTransaction({
+            depositId,
+            preparedData: prepareResult.preparedData,
+            walletProvider,
+            btcAddress: btcSender,
+        })
 
-            const prepareResult = await prepareTransaction({
-                amount: satoshiAmount.toString(), // Pass the satoshi amount
-                userAddress: stxReceiver,
-                btcAddress: btcSender,
-                feePriority,
-                walletProvider,
-            })
-
-            if (!prepareResult.success) {
-                console.error("Transaction preparation failed")
-                return {
-                    success: false,
-                    error: prepareResult.errorMessage || "Failed to prepare transaction",
-                    originalError: prepareResult.error,
-                    step: "prepare_transaction",
-                    details: prepareResult.details,
-                    isInscriptionError: prepareResult.isInscriptionError,
-                }
-            }
-
-            console.log("Transaction prepared successfully")
-
-            // 3. Execute transaction
-            console.log("Step 3 - Executing transaction")
-            const executeResult = await executeTransaction({
-                depositId,
-                preparedData: prepareResult.preparedData,
-                walletProvider,
-                btcAddress: btcSender,
-            })
-
-            if (!executeResult.success) {
-                console.error("Transaction execution failed")
-                return {
-                    success: false,
-                    error: executeResult.errorMessage || "Failed to execute transaction",
-                    originalError: executeResult.error,
-                    step: "execute_transaction",
-                }
-            }
-
-            console.log("Transaction executed successfully")
-
-            console.log("Complete deposit flow finished successfully")
-            return {
-                success: true,
-                depositId,
-                preparedData: prepareResult.preparedData,
-                executionResult: executeResult.result,
-            }
-        } catch (error: any) {
-            console.error("Error in transaction preparation or execution:", error)
+        if (!executeResult.success) {
+            console.error("Transaction execution failed")
             return {
                 success: false,
-                error: extractErrorMessage(error) || "Error processing transaction",
-                originalError: error,
-                step: "prepare_transaction",
+                error: executeResult.errorMessage || "Failed to execute transaction",
+                originalError: executeResult.error,
+                step: "execute_transaction",
             }
+        }
+
+        console.log("Transaction executed successfully")
+
+        // Extract the transaction ID from the UTXO
+        let txId = ""
+        if (executeResult.result && executeResult.result.utxos && executeResult.result.utxos.length > 0) {
+            txId = executeResult.result.utxos[0].txid
+            console.log("Extracted txId from UTXO:", txId)
+        }
+
+        console.log("Complete deposit flow finished successfully")
+
+        return {
+            success: true,
+            depositId,
+            preparedData: prepareResult.preparedData,
+            executionResult: executeResult.result,
         }
     } catch (error: any) {
         console.error("Error in complete deposit flow:", error)
