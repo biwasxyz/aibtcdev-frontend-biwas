@@ -35,14 +35,9 @@ import { AgentPromptForm } from "./agent-prompt-form";
 import { useClipboard } from "@/helpers/clipboard-utils";
 import { formatTokenBalance } from "@/helpers/format-utils";
 import { Button } from "../ui/button";
+import { getAddressExplorerUrl } from "@/helpers/explorer";
 
 const stacksAddress = getStacksAddress();
-
-const getAddressExplorerUrl = (address: string) => {
-  const baseUrl = "https://explorer.hiro.so/address";
-  const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet";
-  return `${baseUrl}/${address}${isTestnet ? "?chain=testnet" : ""}`;
-};
 
 export function ProfileView() {
   const {

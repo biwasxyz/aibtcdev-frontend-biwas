@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { formatTokenBalance, formatStxBalance } from "@/helpers/format-utils";
 import { useClipboard } from "@/helpers/clipboard-utils";
+import { getAddressExplorerUrl } from "@/helpers/explorer";
 
 interface WalletInfoCardProps {
   walletAddress?: string | null;
@@ -26,12 +27,6 @@ export function WalletInfoCard({
   walletBalance,
 }: WalletInfoCardProps) {
   const { copiedText, copyToClipboard } = useClipboard();
-
-  const getAddressExplorerUrl = (address: string) => {
-    const baseUrl = "https://explorer.hiro.so/address";
-    const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet";
-    return `${baseUrl}/${address}${isTestnet ? "?chain=testnet" : ""}`;
-  };
 
   return (
     <div className="w-full h-full p-4 border rounded-lg bg-card">
