@@ -127,7 +127,7 @@ const AssetTracker = () => {
               href="https://app.bitflow.finance/trade"
               className="underline font-medium"
             >
-              Bitflow or velar
+              Bitflow or Velar
             </a>{" "}
             to deposite sBTC in your wallet.
           </p>
