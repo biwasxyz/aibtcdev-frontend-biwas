@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { getStacksAddress } from "@/lib/address";
 import { useWalletStore } from "@/store/wallet";
+import { useSessionStore } from "@/store/session"; // Import the session store
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import type { WalletBalance } from "@/store/wallet";
 
 const AssetTracker = () => {
   const { balances, fetchSingleBalance } = useWalletStore();
+  const { userId, isLoading: isSessionLoading } = useSessionStore(); // Get session state
   const [hasSbtc, setHasSbtc] = useState<boolean | null>(null);
   const [currentAddress, setCurrentAddress] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -37,7 +39,7 @@ const AssetTracker = () => {
   const fetchData = useCallback(
     async (address: string) => {
       try {
-        console.log("Fetching balance for:", address);
+        // console.log("Fetching balance for:", address);
         await fetchSingleBalance(address);
       } catch (err) {
         console.error("Error fetching balance:", err);
@@ -49,25 +51,30 @@ const AssetTracker = () => {
 
   // Initialize and check for data
   useEffect(() => {
-    console.log("AssetTracker component mounted");
+    // Only proceed if user is logged in
+    if (!userId) return;
+
+    // console.log("AssetTracker component mounted");
 
     const address = getStacksAddress();
     if (address) {
-      console.log("Address found:", address);
+      // console.log("Address found:", address);
       setCurrentAddress(address);
 
       // Fetch fresh data if no valid cache
-      console.log("Fetching fresh data");
+      // console.log("Fetching fresh data");
       fetchData(address);
     } else {
-      console.log("No address found");
+      // console.log("No address found");
       // Show something even if no address is found
       setIsLoaded(true);
     }
-  }, [fetchData]); // fetchData is now memoized with useCallback
+  }, [fetchData, userId]); // Add userId to dependencies
 
   // Update when balances change
   useEffect(() => {
+    if (!userId) return; // Skip if no user session
+
     if (currentAddress && balances[currentAddress] && !isLoaded) {
       //   console.log("Balances updated:", balances[currentAddress]);
       const hasSbtcToken = findSbtcToken(
@@ -77,14 +84,23 @@ const AssetTracker = () => {
       setHasSbtc(!!hasSbtcToken);
       setIsLoaded(true);
     }
-  }, [balances, currentAddress, isLoaded]);
+  }, [balances, currentAddress, isLoaded, userId]);
 
   const openDepositModal = () => {
-    console.log("Opening deposit modal");
+    // console.log("Opening deposit modal");
     setIsDepositModalOpen(true);
   };
 
-  // Always render something
+  // Return nothing if there's no user session or if session is still loading
+  if (isSessionLoading) {
+    return null;
+  }
+
+  if (!userId) {
+    return null;
+  }
+
+  // Only render content if user is logged in
   return (
     <>
       <div className="w-full border-b border-border py-3 px-4 shadow-sm">
@@ -107,8 +123,11 @@ const AssetTracker = () => {
         {isLoaded && hasSbtc === false && (
           <p className="text-center text-primary">
             You don&apos;t have sBTC in your wallet. Visit{" "}
-            <a href="https://bitflow.app" className="underline font-medium">
-              Bitflow or velar
+            <a
+              href="https://app.bitflow.finance/trade"
+              className="underline font-medium"
+            >
+              Bitflow or Velar
             </a>{" "}
             to deposite sBTC in your wallet.
           </p>

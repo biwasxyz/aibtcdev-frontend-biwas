@@ -14,6 +14,7 @@ import { NetworkIndicator } from "@/components/reusables/network-indicator";
 // import { getStacksAddress } from "@/lib/address";
 import AuthButton from "@/components/home/auth-button";
 import AssetTracker from "@/components/reusables/asset-tracker";
+import { AuthModal } from "@/components/auth/auth-modal";
 
 interface ApplicationLayoutProps {
   children: React.ReactNode;
@@ -26,11 +27,6 @@ const navigation = [
   { id: "profile", name: "Profile", href: "/profile", icon: Users },
 ];
 
-// function truncateAddress(address: string | null) {
-//   if (!address) return "";
-//   return `${address.slice(0, 6)}...${address.slice(-4)}`;
-// }
-
 export default function ApplicationLayout({
   children,
 }: ApplicationLayoutProps) {
@@ -38,6 +34,7 @@ export default function ApplicationLayout({
   const router = useRouter();
   const [leftPanelOpen, setLeftPanelOpen] = React.useState(false);
   const [hasUser, setHasUser] = React.useState(false);
+  const [showAuthModal, setShowAuthModal] = React.useState(false);
   // const [stacksAddress, setStacksAddress] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -47,9 +44,13 @@ export default function ApplicationLayout({
       } = await supabase.auth.getUser();
       setHasUser(!!user);
 
-      // Get Stacks address
-      // const address = getStacksAddress();
-      // setStacksAddress(address);
+      // If we're on the profile page and not authenticated, show the modal
+      if (pathname === "/profile" && !user) {
+        setShowAuthModal(true);
+      } else if (pathname === "/profile" && user) {
+        // If we're on the profile page and authenticated, make sure modal is closed
+        setShowAuthModal(false);
+      }
     };
 
     checkUser();
@@ -57,17 +58,43 @@ export default function ApplicationLayout({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setHasUser(!!session?.user);
+      const isAuthenticated = !!session?.user;
+      setHasUser(isAuthenticated);
+
+      // Close the auth modal when user becomes authenticated
+      if (isAuthenticated) {
+        setShowAuthModal(false);
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [pathname]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/");
+    window.location.reload();
+  };
+
+  // Handle navigation to protected routes
+  const handleNavigation = async (href: string, e: React.MouseEvent) => {
+    // Only intercept navigation to profile page
+    if (href === "/profile") {
+      e.preventDefault();
+
+      // Check if user is authenticated
+      const { data } = await supabase.auth.getUser();
+
+      if (!data.user) {
+        // Show auth modal if not authenticated
+        setShowAuthModal(true);
+      } else {
+        // Navigate to profile if authenticated
+        router.push(href);
+      }
+    }
   };
 
   return (
@@ -128,9 +155,10 @@ export default function ApplicationLayout({
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
-                <Link
+                <a
                   key={item.id}
                   href={item.href}
+                  onClick={(e) => handleNavigation(item.href, e)}
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg transition-colors",
                     isActive
@@ -140,7 +168,7 @@ export default function ApplicationLayout({
                 >
                   {/* <item.icon className="h-5 w-5" /> */}
                   <span>{item.name}</span>
-                </Link>
+                </a>
               );
             })}
           </div>
@@ -212,20 +240,23 @@ export default function ApplicationLayout({
                 {navigation.map((item) => {
                   const isActive = pathname === item.href;
                   return (
-                    <Link
+                    <a
                       key={item.id}
                       href={item.href}
+                      onClick={(e) => {
+                        handleNavigation(item.href, e);
+                        setLeftPanelOpen(false);
+                      }}
                       className={cn(
                         "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                         isActive
                           ? "bg-zinc-800/50 text-white"
                           : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
                       )}
-                      onClick={() => setLeftPanelOpen(false)}
                     >
                       <item.icon className="h-5 w-5" />
                       <span>{item.name}</span>
-                    </Link>
+                    </a>
                   );
                 })}
               </div>
@@ -245,6 +276,13 @@ export default function ApplicationLayout({
           />
         )}
       </div>
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        redirectUrl="/profile"
+      />
     </div>
   );
 }

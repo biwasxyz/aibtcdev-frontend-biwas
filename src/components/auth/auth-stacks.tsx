@@ -16,19 +16,21 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import dynamic from "next/dynamic";
 import { connectWallet, requestSignature } from "./stacks-provider";
 import { createDaoAgent } from "../agents/dao-agent";
+import { useRouter } from "next/navigation";
 
 // Dynamically import StacksProvider component
 const StacksProvider = dynamic(() => import("./stacks-provider"), {
   ssr: false,
 });
 
-export default function StacksAuth() {
+export default function StacksAuth({ redirectUrl }: { redirectUrl?: string }) {
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [userData, setUserData] = useState<any>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -148,7 +150,12 @@ export default function StacksAuth() {
       const success = await handleAuthentication(stxAddress, signature);
 
       if (success) {
-        window.location.reload();
+        if (redirectUrl) {
+          router.push(redirectUrl);
+          setIsLoading(false);
+        } else {
+          window.location.reload();
+        }
       }
     } catch (error) {
       console.error("Authentication error:", error);
