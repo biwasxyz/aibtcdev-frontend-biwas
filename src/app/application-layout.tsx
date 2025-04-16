@@ -75,6 +75,7 @@ export default function ApplicationLayout({
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/");
+    window.location.reload();
   };
 
   // Handle navigation to protected routes
