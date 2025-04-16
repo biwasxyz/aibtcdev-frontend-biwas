@@ -230,6 +230,11 @@ export async function completeDepositFlow({
         }
 
         const depositId = depositResult.depositId
+        // Add this check to ensure depositId is defined
+        if (!depositId) {
+            console.error("Deposit ID is undefined")
+            return { success: false, error: "Failed to get deposit ID", step: "create_deposit" }
+        }
         console.log("Deposit created with ID:", depositId)
 
         // 2. Prepare transaction - convert to satoshis
