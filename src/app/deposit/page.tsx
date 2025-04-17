@@ -1,8 +1,9 @@
-import { DepositForm } from "@/components/btc-deposit/DepositForm";
+import BitcoinDeposit from "@/components/btc-deposit";
+
 const page = () => {
   return (
     <div>
-      <DepositForm />
+      <BitcoinDeposit />
     </div>
   );
 };

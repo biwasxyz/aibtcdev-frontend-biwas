@@ -1,56 +1,66 @@
 "use client";
 
-import type React from "react";
-
-import { useState } from "react";
-import { Bitcoin, Info, Copy, Check } from "lucide-react";
+import { useState, type ChangeEvent, useEffect } from "react";
+import { getStacksAddress, getBitcoinAddress } from "@/lib/address";
+import { styxSDK } from "@faktoryfun/styx-sdk";
+import { MIN_DEPOSIT_SATS, MAX_DEPOSIT_SATS } from "@faktoryfun/styx-sdk";
 import { useToast } from "@/hooks/use-toast";
+import { Bitcoin, Loader2 } from "lucide-react";
+import AuthButton from "@/components/home/auth-button";
+import { useSessionStore } from "@/store/session";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { getStacksAddress, getBitcoinAddress } from "@/lib/address";
-import { styxSDK, StyxSDK } from "@faktoryfun/styx-sdk";
 
-export enum TransactionPriority {
-  Low = "low",
-  Medium = "medium",
-  High = "high",
+interface DepositFormProps {
+  btcUsdPrice: number | null;
+  poolStatus: any;
+  setConfirmationData: (data: ConfirmationData) => void;
+  setShowConfirmation: (show: boolean) => void;
 }
 
-export type ConfirmationData = {
+export interface ConfirmationData {
   depositAmount: string;
   depositAddress: string;
   stxAddress: string;
   opReturnHex: string;
-};
+}
 
-export function DepositForm() {
+export default function DepositForm({
+  btcUsdPrice,
+  poolStatus,
+  setConfirmationData,
+  setShowConfirmation,
+}: DepositFormProps) {
   const [amount, setAmount] = useState<string>("0.0001");
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [confirmationData, setConfirmationData] =
-    useState<ConfirmationData | null>(null);
-  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
   const { toast } = useToast();
 
-  // Mock BTC price for USD conversion
-  const btcUsdPrice = 65000;
+  // Get session state from Zustand store
+  const { accessToken, userId, isLoading, initialize } = useSessionStore();
 
-  // Helper functions
+  // Initialize session on component mount
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  const [btcBalance, setBtcBalance] = useState<number | null>(0.05);
+  const [activeWalletProvider, setActiveWalletProvider] = useState<
+    "leather" | "xverse" | null
+  >(null);
+
+  // Get addresses from the lib - only if we have a session
+  const userAddress = accessToken ? getStacksAddress() : null;
+  const btcAddress = accessToken ? getBitcoinAddress() : null;
+
   const formatUsdValue = (amount: number): string => {
     if (!amount || amount <= 0) return "$0.00";
     return new Intl.NumberFormat("en-US", {
@@ -62,7 +72,7 @@ export function DepositForm() {
   };
 
   const calculateUsdValue = (btcAmount: string): number => {
-    if (!btcAmount) return 0;
+    if (!btcAmount || !btcUsdPrice) return 0;
     const numAmount = Number.parseFloat(btcAmount);
     return isNaN(numAmount) ? 0 : numAmount * btcUsdPrice;
   };
@@ -70,11 +80,12 @@ export function DepositForm() {
   const calculateFee = (btcAmount: string): string => {
     if (!btcAmount || Number.parseFloat(btcAmount) <= 0) return "0.00000000";
     const numAmount = Number.parseFloat(btcAmount);
-    if (isNaN(numAmount)) return "0.00000600";
+    if (isNaN(numAmount)) return "0.00003000";
+
     return numAmount <= 0.002 ? "0.00003000" : "0.00006000";
   };
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAmountChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       setAmount(value);
@@ -82,288 +93,309 @@ export function DepositForm() {
     }
   };
 
-  const handlePresetClick = (presetAmount: string) => {
+  const handlePresetClick = (presetAmount: string): void => {
     setAmount(presetAmount);
     setSelectedPreset(presetAmount);
   };
 
-  const handleMaxClick = () => {
-    // In a real implementation, this would calculate the max amount based on the user's BTC balance
-    // For now, we'll just set a mock value
-    const maxAmount = "0.05";
-    setAmount(maxAmount);
-    setSelectedPreset("max");
-  };
+  const handleMaxClick = async (): Promise<void> => {
+    if (btcBalance !== null) {
+      try {
+        const feeRates = await styxSDK.getFeeEstimates();
+        const selectedRate = feeRates.medium;
+        const estimatedSize = 1 * 70 + 2 * 33 + 12;
+        const networkFeeSats = estimatedSize * selectedRate;
+        const networkFee = networkFeeSats / 100000000;
+        const maxAmount = Math.max(0, btcBalance - networkFee);
+        const formattedMaxAmount = maxAmount.toFixed(8);
 
-  const handleCopyToClipboard = (text: string, field: string) => {
-    navigator.clipboard.writeText(text).then(
-      () => {
-        setCopiedField(field);
-        setTimeout(() => setCopiedField(null), 2000);
-      },
-      (err) => {
-        console.error("Could not copy text: ", err);
+        setAmount(formattedMaxAmount);
+        setSelectedPreset("max");
+      } catch (error) {
+        console.error("Error calculating max amount:", error);
+        const networkFee = 0.000006;
+        const maxAmount = Math.max(0, btcBalance - networkFee);
+        setAmount(maxAmount.toFixed(8));
+        setSelectedPreset("max");
       }
-    );
-  };
-
-  const prepareTransaction = async () => {
-    try {
-      setIsLoading(true);
-
-      // Get user addresses
-      const userAddress = getStacksAddress();
-      const btcAddress = getBitcoinAddress();
-
-      if (!userAddress || !btcAddress) {
-        throw new Error("Wallet not connected or addresses not found");
-      }
-
-      // This would be your actual SDK call
-      const transactionData = await styxSDK.prepareTransaction({
-        amount: amount, // BTC amount as string
-        userAddress: userAddress, // STX address
-        btcAddress: btcAddress, // BTC address
-        feePriority: TransactionPriority.Medium,
-        walletProvider: "xverse", // "leather" or "xverse"
-      });
-
-      console.log("Transaction prepared:", transactionData);
-
-      // Set confirmation data
-      setConfirmationData({
-        depositAmount: amount,
-        depositAddress: transactionData.depositAddress,
-        stxAddress: userAddress,
-        opReturnHex: transactionData.opReturnData,
-      });
-
-      // Show confirmation screen
-      setShowConfirmation(true);
-
-      return transactionData;
-    } catch (error) {
-      console.error("Error preparing transaction:", error);
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to prepare transaction",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleBackToDeposit = () => {
-    setShowConfirmation(false);
-    setConfirmationData(null);
+  const handleDepositConfirm = async (): Promise<void> => {
+    if (maintenanceMode) {
+      toast({
+        title: "Scheduled Maintenance",
+        description:
+          "We know you're eager to test this feature! We're working diligently to implement support for both legacy and segwit addresses ahead of schedule. Deposits will be back online in just a few hours. Thank you for your patience.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!amount || Number.parseFloat(amount) <= 0) {
+      toast({
+        title: "Invalid amount",
+        description: "Please enter a valid BTC amount greater than 0",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!accessToken || !userAddress) {
+      toast({
+        title: "Not connected",
+        description: "Please connect your wallet first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      if (!btcAddress) {
+        throw new Error("No Bitcoin address found in your wallet");
+      }
+
+      const amountInSats = Math.round(Number.parseFloat(amount) * 100000000);
+
+      console.log(MIN_DEPOSIT_SATS, MAX_DEPOSIT_SATS);
+      if (amountInSats < MIN_DEPOSIT_SATS) {
+        toast({
+          title: "Minimum deposit required",
+          description: `Please deposit at least ${
+            MIN_DEPOSIT_SATS / 100000000
+          } BTC`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (amountInSats > MAX_DEPOSIT_SATS) {
+        toast({
+          title: "Beta limitation",
+          description: `During beta, the maximum deposit amount is ${
+            MAX_DEPOSIT_SATS / 100000000
+          } BTC. Thank you for your understanding.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (poolStatus && amountInSats > poolStatus.estimatedAvailable) {
+        toast({
+          title: "Insufficient liquidity",
+          description: `The pool currently has ${
+            poolStatus.estimatedAvailable / 100000000
+          } BTC available. Please try a smaller amount.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const amountInBTC = Number.parseFloat(amount);
+      const networkFeeInBTC = 0.000006;
+      const totalRequiredBTC = amountInBTC + networkFeeInBTC;
+
+      if ((btcBalance || 0) < totalRequiredBTC) {
+        const shortfallBTC = totalRequiredBTC - (btcBalance || 0);
+        throw new Error(
+          `Insufficient funds. You need ${shortfallBTC.toFixed(
+            8
+          )} BTC more to complete this transaction.`
+        );
+      }
+
+      try {
+        console.log("Preparing transaction with SDK...");
+
+        const transactionData = await styxSDK.prepareTransaction({
+          amount,
+          userAddress,
+          btcAddress,
+          feePriority: "medium",
+          walletProvider: activeWalletProvider,
+        });
+
+        console.log("Transaction prepared:", transactionData);
+
+        setConfirmationData({
+          depositAmount: amount,
+          depositAddress: transactionData.depositAddress,
+          stxAddress: userAddress,
+          opReturnHex: transactionData.opReturnData,
+        });
+
+        setShowConfirmation(true);
+      } catch (err: any) {
+        console.error("Error preparing transaction:", err);
+
+        if (isInscriptionError(err)) {
+          handleInscriptionError(err);
+        } else if (isUtxoCountError(err)) {
+          handleUtxoCountError(err);
+        } else if (isAddressTypeError(err)) {
+          handleAddressTypeError(err, activeWalletProvider);
+        } else {
+          toast({
+            title: "Error",
+            description:
+              err.message || "Failed to prepare transaction. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (err: any) {
+      console.error("Error preparing Bitcoin transaction:", err);
+
+      toast({
+        title: "Error",
+        description:
+          err.message ||
+          "Failed to prepare Bitcoin transaction. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const presetAmounts = ["0.001", "0.005", "0.01"];
-  const presetLabels = ["0.001 BTC", "0.005 BTC", "0.01 BTC"];
-
-  if (showConfirmation && confirmationData) {
+  // Helper functions for error handling
+  function isAddressTypeError(error: Error): boolean {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bitcoin className="h-5 w-5" />
-            <span>Deposit Confirmation</span>
-          </CardTitle>
-          <CardDescription>
-            Please review your deposit details below
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Amount:</span>
-              <span className="font-medium">
-                {confirmationData.depositAmount} BTC
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">USD Value:</span>
-              <span className="font-medium">
-                {formatUsdValue(
-                  calculateUsdValue(confirmationData.depositAmount)
-                )}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">
-                STX Address:
-              </span>
-              <div className="flex items-center">
-                <span className="font-medium truncate max-w-[150px]">
-                  {confirmationData.stxAddress}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 ml-1"
-                  onClick={() =>
-                    handleCopyToClipboard(
-                      confirmationData.stxAddress,
-                      "stxAddress"
-                    )
-                  }
-                >
-                  {copiedField === "stxAddress" ? (
-                    <Check className="h-3 w-3" />
-                  ) : (
-                    <Copy className="h-3 w-3" />
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
+      error.message.includes("inputType: sh without redeemScript") ||
+      error.message.includes("P2SH") ||
+      error.message.includes("redeem script")
+    );
+  }
 
-          <div className="space-y-2 bg-muted p-3 rounded-md">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Deposit Address:</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2"
-                onClick={() =>
-                  handleCopyToClipboard(
-                    confirmationData.depositAddress,
-                    "depositAddress"
-                  )
-                }
-              >
-                {copiedField === "depositAddress" ? (
-                  <Check className="h-3 w-3 mr-1" />
-                ) : (
-                  <Copy className="h-3 w-3 mr-1" />
-                )}
-                Copy
-              </Button>
-            </div>
-            <div className="text-xs break-all bg-background p-2 rounded">
-              {confirmationData.depositAddress}
-            </div>
-          </div>
+  function handleAddressTypeError(
+    error: Error,
+    walletProvider: "leather" | "xverse" | null
+  ): void {
+    if (walletProvider === "leather") {
+      toast({
+        title: "Unsupported Address Type",
+        description:
+          "Leather wallet does not support P2SH addresses (starting with '3'). Please use a SegWit address (starting with 'bc1') instead.",
+        variant: "destructive",
+      });
+    } else if (walletProvider === "xverse") {
+      toast({
+        title: "P2SH Address Error",
+        description:
+          "There was an issue with the P2SH address. This might be due to wallet limitations. Try using a SegWit address (starting with 'bc1') instead.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "P2SH Address Not Supported",
+        description:
+          "Your wallet doesn't provide the necessary information for your P2SH address. Please try using a SegWit address (starting with bc1) instead.",
+        variant: "destructive",
+      });
+    }
+  }
 
-          <div className="space-y-2 bg-muted p-3 rounded-md">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">OP_RETURN Data:</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2"
-                onClick={() =>
-                  handleCopyToClipboard(
-                    confirmationData.opReturnHex,
-                    "opReturnHex"
-                  )
-                }
-              >
-                {copiedField === "opReturnHex" ? (
-                  <Check className="h-3 w-3 mr-1" />
-                ) : (
-                  <Copy className="h-3 w-3 mr-1" />
-                )}
-                Copy
-              </Button>
-            </div>
-            <div className="text-xs break-all bg-background p-2 rounded">
-              {confirmationData.opReturnHex}
-            </div>
-          </div>
+  function isInscriptionError(error: Error): boolean {
+    return error.message.includes("with inscriptions");
+  }
 
-          <div className="bg-amber-50 text-amber-800 p-3 rounded-md text-sm">
-            <p>
-              Please send exactly {confirmationData.depositAmount} BTC to the
-              deposit address above.
-            </p>
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <Button
-            className="w-full"
-            onClick={() => {
-              toast({
-                title: "Transaction Initiated",
-                description:
-                  "Your deposit transaction has been initiated. Please check your wallet for confirmation.",
-              });
-            }}
-          >
-            Complete Transaction
-          </Button>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleBackToDeposit}
-          >
-            Back to Deposit Form
-          </Button>
-        </CardFooter>
-      </Card>
+  function handleInscriptionError(error: Error): void {
+    toast({
+      title: "Inscriptions Detected",
+      description: error.message,
+      variant: "destructive",
+    });
+  }
+
+  function isUtxoCountError(error: Error): boolean {
+    return error.message.includes("small UTXOs");
+  }
+
+  function handleUtxoCountError(error: Error): void {
+    toast({
+      title: "Too Many UTXOs",
+      description: error.message,
+      variant: "destructive",
+    });
+  }
+
+  const presetAmounts: string[] = ["0.001", "0.005", "0.01"];
+  const presetLabels: string[] = ["0.001 BTC", "0.005 BTC", "0.01 BTC"];
+
+  // Set wallet provider when authenticated
+  const handleWalletSelect = (walletType: "leather" | "xverse") => {
+    setActiveWalletProvider(walletType);
+  };
+
+  // Render loading state while initializing session
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center space-y-4 py-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading your session...</p>
+      </div>
     );
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bitcoin className="h-5 w-5" />
-          <span>Bitcoin Deposit</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Bitcoin className="h-4 w-4" />
-              <span className="font-medium">Bitcoin</span>
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {formatUsdValue(calculateUsdValue(amount))}
-            </span>
+    <div className="flex flex-col space-y-4 md:space-y-6 w-full max-w-md mx-auto">
+      {/* From: Bitcoin */}
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center gap-2">
+            <Bitcoin className="h-5 w-5" />
+            <span className="font-medium">Bitcoin</span>
           </div>
-
-          <div className="relative">
-            <Input
-              value={amount}
-              onChange={handleAmountChange}
-              placeholder="0.00000000"
-              className="text-right pr-16 h-14 text-xl"
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-              BTC
-            </span>
-          </div>
-
-          <div className="flex gap-2 mt-3">
-            {presetAmounts.map((presetAmount, index) => (
-              <Button
-                key={presetAmount}
-                size="sm"
-                variant={
-                  selectedPreset === presetAmount ? "default" : "outline"
-                }
-                onClick={() => handlePresetClick(presetAmount)}
-              >
-                {presetLabels[index]}
-              </Button>
-            ))}
-            <Button
-              size="sm"
-              variant={selectedPreset === "max" ? "default" : "outline"}
-              onClick={handleMaxClick}
-            >
-              MAX
-            </Button>
-          </div>
+          <span className="text-sm text-muted-foreground">
+            {formatUsdValue(calculateUsdValue(amount))}
+          </span>
         </div>
 
-        <div className="bg-muted rounded-lg p-4 space-y-2">
+        <div className="relative">
+          <Input
+            value={amount}
+            onChange={handleAmountChange}
+            placeholder="0.00000000"
+            className="text-right pr-16 pl-16 h-[60px] text-xl bg-secondary"
+          />
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-md pointer-events-none">
+            BTC
+          </span>
+        </div>
+
+        {/* Preset amounts */}
+        <div className="flex gap-2 mt-3">
+          {presetAmounts.map((presetAmount, index) => (
+            <Button
+              key={presetAmount}
+              size="sm"
+              variant={selectedPreset === presetAmount ? "default" : "outline"}
+              className={
+                selectedPreset === presetAmount
+                  ? "bg-orange-500 hover:bg-orange-600 text-black"
+                  : ""
+              }
+              onClick={() => handlePresetClick(presetAmount)}
+            >
+              {presetLabels[index]}
+            </Button>
+          ))}
+          <Button
+            size="sm"
+            variant={selectedPreset === "max" ? "default" : "outline"}
+            className={
+              selectedPreset === "max"
+                ? "bg-orange-500 hover:bg-orange-600 text-black"
+                : ""
+            }
+            onClick={handleMaxClick}
+          >
+            MAX
+          </Button>
+        </div>
+      </div>
+
+      {/* Fee Information Box */}
+      <Card className="bg-secondary border-border/30">
+        <CardContent className="p-4">
           <div className="flex justify-between items-center">
             <span className="text-xs text-muted-foreground">
               Estimated time
@@ -372,53 +404,71 @@ export function DepositForm() {
               1 Block ~ 10 min
             </span>
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mt-2">
             <span className="text-xs text-muted-foreground">Service fee</span>
             <span className="text-xs text-muted-foreground">
               {amount && Number.parseFloat(amount) > 0 && btcUsdPrice
-                ? `${formatUsdValue(
+                ? formatUsdValue(
                     Number.parseFloat(calculateFee(amount)) * btcUsdPrice
-                  )} ~ ${calculateFee(amount)} BTC`
-                : "$0.00 ~ 0.00000000 BTC"}
+                  )
+                : "$0.00"}{" "}
+              ~ {calculateFee(amount)} BTC
             </span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-muted-foreground">
-              Pool liquidity
-            </span>
-            <span className="text-xs text-muted-foreground">
-              $650,000 ~ 10.00000000 BTC
-            </span>
+
+          {/* Add Pool Liquidity information */}
+          {poolStatus && (
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-xs text-muted-foreground">
+                Pool liquidity
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {formatUsdValue(
+                  (poolStatus.estimatedAvailable / 100000000) *
+                    (btcUsdPrice || 0)
+                )}{" "}
+                ~ {(poolStatus.estimatedAvailable / 100000000).toFixed(8)} BTC
+              </span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Accordion with Additional Info */}
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="how-it-works" className="border-none">
+          <div className="flex justify-end">
+            <AccordionTrigger className="py-0 text-xs text-muted-foreground">
+              How it works
+            </AccordionTrigger>
+          </div>
+          <AccordionContent className="text-xs text-muted-foreground leading-relaxed">
+            Your BTC deposit unlocks sBTC via Clarity's direct Bitcoin state
+            reading. No intermediaries or multi-signature scheme needed.
+            Trustless. Fast. Secure.
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      {/* Action Button */}
+      {!accessToken ? (
+        <div className="space-y-4">
+          <p className="text-center text-sm text-muted-foreground mb-2">
+            Connect your wallet to continue
+          </p>
+          <div className="flex justify-center">
+            <AuthButton redirectUrl="/deposit" />
           </div>
         </div>
-
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="how-it-works" className="border-none">
-            <AccordionTrigger className="py-0 justify-end">
-              <div className="flex items-center text-xs text-muted-foreground">
-                <span>How it works</span>
-                <Info className="h-3 w-3 ml-1" />
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <p className="text-xs text-muted-foreground">
-                Your BTC deposit unlocks sBTC via Clarity's direct Bitcoin state
-                reading. No intermediaries or multi-signature scheme needed.
-                Trustless. Fast. Secure.
-              </p>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </CardContent>
-      <CardFooter>
+      ) : (
         <Button
-          className="w-full h-14 text-lg"
-          onClick={prepareTransaction}
-          disabled={isLoading}
+          size="lg"
+          className="h-[60px] text-xl bg-teal-500 hover:bg-teal-600 text-black shadow-md w-full"
+          onClick={handleDepositConfirm}
         >
-          {isLoading ? "Processing..." : "Confirm Deposit"}
+          Confirm Deposit
         </Button>
-      </CardFooter>
-    </Card>
+      )}
+    </div>
   );
 }

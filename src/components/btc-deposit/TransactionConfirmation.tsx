@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { hex } from "@scure/base";
 import * as btc from "@scure/btc-signer";
 import { styxSDK, TransactionPriority } from "@faktoryfun/styx-sdk";
 import { request as xverseRequest } from "sats-connect";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Copy, Check, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Copy, Check, AlertTriangle, Loader2 } from "lucide-react";
+import { useSessionStore } from "@/store/session";
 
 import {
   Dialog,
@@ -69,6 +70,14 @@ export default function TransactionConfirmation({
   const [currentDepositId, setCurrentDepositId] = useState<string | null>(null);
   const [copied, setCopied] = useState<Record<string, boolean>>({});
 
+  // Get session state from Zustand store
+  const { accessToken, userId, isLoading, initialize } = useSessionStore();
+
+  // Initialize session on component mount
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   const [feeEstimates, setFeeEstimates] = useState({
     low: { rate: 1, fee: 0, time: "30 min" },
     medium: { rate: 3, fee: 0, time: "~20 min" },
@@ -107,6 +116,16 @@ export default function TransactionConfirmation({
       "Starting transaction with activeWalletProvider:",
       activeWalletProvider
     );
+
+    // Check if user is authenticated
+    if (!accessToken) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in before proceeding with the transaction",
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Check if wallet is connected
     if (!activeWalletProvider) {
@@ -610,6 +629,22 @@ export default function TransactionConfirmation({
     return `${address.slice(0, 8)}...${address.slice(-8)}`;
   };
 
+  // Render loading state while initializing session
+  if (isLoading) {
+    return (
+      <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-slate-900 text-white border-slate-700">
+          <div className="flex flex-col items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
+            <p className="mt-4 text-sm text-slate-300">
+              Loading your session...
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-slate-900 text-white border-slate-700">
@@ -628,6 +663,20 @@ export default function TransactionConfirmation({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Authentication status */}
+          {!accessToken && (
+            <Alert
+              variant="destructive"
+              className="bg-red-900/30 border-red-800 text-white"
+            >
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Authentication required. Please sign in before proceeding with
+                the transaction.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Wallet connection status */}
           {!activeWalletProvider && (
             <Alert
@@ -777,7 +826,9 @@ export default function TransactionConfirmation({
           <Button
             className="bg-blue-600 hover:bg-blue-700 text-white"
             onClick={executeBitcoinTransaction}
-            disabled={btcTxStatus === "pending" || !activeWalletProvider}
+            disabled={
+              btcTxStatus === "pending" || !activeWalletProvider || !accessToken
+            }
           >
             {btcTxStatus === "pending" ? "Processing..." : "Proceed to Wallet"}
           </Button>
