@@ -26,6 +26,15 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { WalletInfoCard } from "./agent-wallet-info";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { fetchDAOs } from "@/queries/dao-queries";
 import { fetchAgents } from "@/queries/agent-queries";
@@ -46,6 +55,8 @@ export interface AgentPrompt {
   profile_id: string;
   prompt_text: string;
   is_active: boolean;
+  model: string;
+  temperature: number;
   created_at: string;
   updated_at: string;
 }
@@ -59,6 +70,8 @@ export function AgentPromptForm() {
   // Form state
   const [formData, setFormData] = useState({
     prompt_text: "",
+    model: "gpt-4o",
+    temperature: 0.1,
   });
 
   // Selection state
@@ -205,6 +218,8 @@ export function AgentPromptForm() {
   const resetForm = () => {
     setFormData({
       prompt_text: "",
+      model: "gpt-4o",
+      temperature: 0.1,
     });
     setSelectedPromptId(null);
     setSelectedDaoId("");
@@ -225,6 +240,12 @@ export function AgentPromptForm() {
 
     if (!daoManagerAgentId) {
       newErrors.agent_id = "DAO Manager agent not found";
+    }
+
+    // Validate temperature
+    const temp = parseFloat(formData.temperature.toString());
+    if (isNaN(temp) || temp < 0 || temp > 2) {
+      newErrors.temperature = "Temperature must be between 0 and 2";
     }
 
     setErrors(newErrors);
@@ -274,6 +295,8 @@ export function AgentPromptForm() {
       setSelectedDaoId(daoId);
       setFormData({
         prompt_text: selectedPrompt.prompt_text,
+        model: selectedPrompt.model || "gpt-4o",
+        temperature: selectedPrompt.temperature || 0.1,
       });
       setErrors({});
       setIsDialogOpen(true);
@@ -286,6 +309,8 @@ export function AgentPromptForm() {
     setSelectedPromptId(null);
     setFormData({
       prompt_text: "",
+      model: "gpt-4o",
+      temperature: 0.1,
     });
     setErrors({});
     setIsDialogOpen(true);
@@ -399,22 +424,24 @@ export function AgentPromptForm() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-1/3">DAO</TableHead>
-                  <TableHead>Prompt Status</TableHead>
-                  <TableHead>Prompt Text</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-1/4">DAO</TableHead>
+                  <TableHead className="w-1/6">Prompt Status</TableHead>
+                  <TableHead className="w-1/6">Model</TableHead>
+                  <TableHead className="w-1/6">Temperature</TableHead>
+                  <TableHead className="w-1/3">Prompt Text</TableHead>
+                  <TableHead className="w-1/12 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-4">
+                    <TableCell colSpan={6} className="text-center py-4">
                       <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                     </TableCell>
                   </TableRow>
                 ) : uniqueDaoIds.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-4">
+                    <TableCell colSpan={6} className="text-center py-4">
                       No DAOs found.
                     </TableCell>
                   </TableRow>
@@ -440,6 +467,8 @@ export function AgentPromptForm() {
                             {prompt?.is_active ? "Active" : "Disabled"}
                           </Badge>
                         </TableCell>
+                        <TableCell>{prompt?.model || "gpt-4o"}</TableCell>
+                        <TableCell>{prompt?.temperature || 0.1}</TableCell>
                         <TableCell className="max-w-md">
                           <p className="truncate text-sm text-muted-foreground">
                             {prompt?.prompt_text || "No prompt configured"}
@@ -523,6 +552,46 @@ export function AgentPromptForm() {
               />
               {errors.prompt_text && (
                 <p className="text-sm text-red-500">{errors.prompt_text}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="model">Model</Label>
+              <Select
+                value={formData.model}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, model: value })
+                }
+              >
+                <SelectTrigger id="model">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gpt-4o">GPT-4o</SelectItem>
+                  <SelectItem value="gpt-41">GPT-41</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="temperature">Temperature</Label>
+              <Input
+                id="temperature"
+                type="number"
+                min="0"
+                max="2"
+                step="0.1"
+                value={formData.temperature}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+                  if (!isNaN(value) && value >= 0 && value <= 2) {
+                    setFormData({ ...formData, temperature: value });
+                  }
+                }}
+                placeholder="Enter temperature (0-2)"
+              />
+              {errors.temperature && (
+                <p className="text-sm text-red-500">{errors.temperature}</p>
               )}
             </div>
 
