@@ -377,9 +377,9 @@ export function AgentPromptForm() {
 
   return (
     <div className="w-full space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Wallet Info - Left Side */}
-        <div className="md:col-span-1">
+        <div className="lg:col-span-1">
           {daoManagerAgentId && (
             <WalletInfoCard
               walletAddress={daoManagerWalletAddress}
@@ -389,10 +389,10 @@ export function AgentPromptForm() {
         </div>
 
         {/* Agent Prompts - Right Side */}
-        <div className="md:col-span-1 space-y-4">
+        <div className="lg:col-span-1 space-y-4">
           <div className="w-full overflow-x-auto border rounded-lg p-4 bg-card h-full">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-              <h2 className="text-base sm:text-2xl font-medium">
+              <h2 className="text-base sm:text-lg lg:text-2xl font-medium">
                 Agent Prompts
               </h2>
             </div>
@@ -440,8 +440,8 @@ export function AgentPromptForm() {
                             {prompt?.is_active ? "Active" : "Disabled"}
                           </Badge>
                         </TableCell>
-                        <TableCell className="max-w-md">
-                          <p className="truncate text-sm text-muted-foreground">
+                        <TableCell className="max-w-[150px] sm:max-w-md">
+                          <p className="truncate text-xs sm:text-sm text-muted-foreground">
                             {prompt?.prompt_text || "No prompt configured"}
                           </p>
                         </TableCell>
