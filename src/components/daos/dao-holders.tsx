@@ -122,7 +122,7 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
                   <TableRow key={holder.address}>
                     <TableCell className="font-medium">{index + 1}</TableCell>
                     <TableCell className="max-w-[120px] sm:max-w-[200px] truncate">
-                      <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                      <code className="text-xs px-1.5 py-0.5 rounded">
                         {holder.address}
                       </code>
                     </TableCell>
