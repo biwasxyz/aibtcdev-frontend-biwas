@@ -87,6 +87,7 @@ export interface Extension {
 }
 
 export interface Proposal {
+  token_symbol: string | undefined;
   id: string;
   created_at: string;
   title: string;

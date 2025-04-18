@@ -5,6 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import { getProposalVotes } from "@/lib/vote-utils";
 import { useMemo, useState, useEffect } from "react";
 import { TokenBalance } from "@/components/reusables/balance-display";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
 interface VoteProgressProps {
   votesFor?: string;
@@ -13,6 +20,7 @@ interface VoteProgressProps {
   proposalId?: string | number;
   refreshing?: boolean;
   tokenSymbol?: string;
+  liquidTokens: string | number | null; // Required, but can be null
 }
 
 const VoteProgress: React.FC<VoteProgressProps> = ({
@@ -22,6 +30,7 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   proposalId,
   refreshing = false,
   tokenSymbol = "",
+  liquidTokens = "0", // Default to "0" if null
 }) => {
   // Memoize initial votes parsing
   const initialParsedVotes = useMemo(() => {
@@ -67,18 +76,36 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
     const votesForNum = Number(parsedVotes.votesFor) || 0;
     const votesAgainstNum = Number(parsedVotes.votesAgainst) || 0;
     const totalVotes = votesForNum + votesAgainstNum;
+    const liquidTokensNum = Number(liquidTokens) || 0;
 
-    const percentageFor = totalVotes > 0 ? (votesForNum / totalVotes) * 100 : 0;
-    const percentageAgainst = 100 - percentageFor;
+    // Calculate percentages based on total liquid tokens
+    const percentageFor =
+      liquidTokensNum > 0 ? (votesForNum / liquidTokensNum) * 100 : 0;
+    const percentageAgainst =
+      liquidTokensNum > 0 ? (votesAgainstNum / liquidTokensNum) * 100 : 0;
+    const percentageRemaining = Math.max(
+      0,
+      100 - percentageFor - percentageAgainst
+    );
+
+    // Also calculate percentages of cast votes for the tooltip
+    const castPercentageFor =
+      totalVotes > 0 ? (votesForNum / totalVotes) * 100 : 0;
+    const castPercentageAgainst =
+      totalVotes > 0 ? (votesAgainstNum / totalVotes) * 100 : 0;
 
     return {
       votesForNum,
       votesAgainstNum,
+      totalVotes,
+      liquidTokensNum,
       percentageFor,
       percentageAgainst,
-      totalVotes,
+      percentageRemaining,
+      castPercentageFor,
+      castPercentageAgainst,
     };
-  }, [parsedVotes]);
+  }, [parsedVotes, liquidTokens]);
 
   // Update parsed votes when data changes
   useEffect(() => {
@@ -110,32 +137,84 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
 
   return (
     <div className="space-y-4">
-      {voteCalculations.votesForNum === 0 &&
-      voteCalculations.votesAgainstNum === 0 ? (
+      {voteCalculations.totalVotes === 0 ? (
         <div className="py-4 text-center bg-zinc-800 rounded-lg">
           Awaiting first vote from agent
         </div>
       ) : (
         <>
-          <div className="relative h-6 bg-zinc-800 rounded-full overflow-hidden">
+          <div className="flex items-center gap-2 mb-1">
+            <h4 className="text-sm font-medium">Voting Progress</h4>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p>
+                    This bar shows votes relative to total liquid tokens.
+                    <br />
+                    <span className="text-green-500">■</span> For:{" "}
+                    {voteCalculations.percentageFor.toFixed(1)}% of liquid
+                    tokens
+                    <br />
+                    <span className="text-red-500">■</span> Against:{" "}
+                    {voteCalculations.percentageAgainst.toFixed(1)}% of liquid
+                    tokens
+                    <br />
+                    <span className="text-zinc-500">■</span> Remaining:{" "}
+                    {voteCalculations.percentageRemaining.toFixed(1)}% of liquid
+                    tokens
+                    <br />
+                    <br />
+                    Of cast votes:{" "}
+                    {voteCalculations.castPercentageFor.toFixed(1)}% For,{" "}
+                    {voteCalculations.castPercentageAgainst.toFixed(1)}% Against
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+
+          <div className="relative h-6 bg-zinc-700/30 rounded-full overflow-hidden">
+            {/* For votes */}
             <div
-              className="absolute h-full bg-green-500 rounded-l-full"
+              className="absolute h-full bg-green-500/80 left-0"
               style={{ width: `${voteCalculations.percentageFor}%` }}
             ></div>
+
+            {/* Against votes */}
             <div
-              className="absolute h-full bg-red-500 rounded-r-full right-0"
-              style={{ width: `${voteCalculations.percentageAgainst}%` }}
+              className="absolute h-full bg-red-500/80"
+              style={{
+                width: `${voteCalculations.percentageAgainst}%`,
+                left: `${voteCalculations.percentageFor}%`,
+              }}
             ></div>
 
-            {/* Percentage labels */}
+            {/* Remaining votes */}
+            <div
+              className="absolute h-full bg-zinc-600/50 right-0"
+              style={{ width: `${voteCalculations.percentageRemaining}%` }}
+            ></div>
+
+            {/* Percentage labels - only show if there's enough space */}
             {voteCalculations.percentageFor > 10 && (
-              <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white text-xs font-medium">
+              <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-white text-xs font-medium z-10">
                 {voteCalculations.percentageFor.toFixed(1)}%
               </span>
             )}
 
             {voteCalculations.percentageAgainst > 10 && (
-              <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white text-xs font-medium">
+              <span
+                className="absolute top-1/2 transform -translate-y-1/2 text-white text-xs font-medium z-10"
+                style={{
+                  left: `${
+                    voteCalculations.percentageFor +
+                    voteCalculations.percentageAgainst / 2
+                  }%`,
+                }}
+              >
                 {voteCalculations.percentageAgainst.toFixed(1)}%
               </span>
             )}
@@ -143,21 +222,42 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
         </>
       )}
 
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col">
-          <span className="text-sm text-gray-500">For</span>
-          <TokenBalance
-            value={parsedVotes.votesFor}
-            symbol={tokenSymbol}
-            decimals={8}
-            variant="abbreviated"
-          />
+      <div className="flex justify-between items-start">
+        <div className="flex gap-6">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <span className="text-sm text-gray-500">For</span>
+            </div>
+            <TokenBalance
+              value={parsedVotes.votesFor}
+              symbol={tokenSymbol}
+              decimals={8}
+              variant="abbreviated"
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <span className="text-sm text-gray-500">Against</span>
+            </div>
+            <TokenBalance
+              value={parsedVotes.votesAgainst}
+              symbol={tokenSymbol}
+              decimals={8}
+              variant="abbreviated"
+            />
+          </div>
         </div>
 
         <div className="flex flex-col items-end">
-          <span className="text-sm text-gray-500">Against</span>
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded-full bg-zinc-600"></div>
+            <span className="text-sm text-gray-500">Total Available</span>
+          </div>
           <TokenBalance
-            value={parsedVotes.votesAgainst}
+            value={liquidTokens || "0"}
             symbol={tokenSymbol}
             decimals={8}
             variant="abbreviated"

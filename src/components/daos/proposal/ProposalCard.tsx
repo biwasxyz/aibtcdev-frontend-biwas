@@ -173,18 +173,16 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
           </div>
 
           <div className="flex items-center gap-2 w-full justify-between">
-            <div className="flex items-center gap-2">
-              {renderBadges}
+            <div className="flex items-center gap-2">{renderBadges}</div>
 
-              {isActive && (
-                <span className="flex items-center gap-1 text-xs">
-                  <Timer className="h-3.5 w-3.5 text-blue-500" />
-                  <span className="text-blue-500 font-medium">
-                    Voting in progress
-                  </span>
+            {isActive && (
+              <span className="flex items-center gap-1 text-xs">
+                <Timer className="h-3.5 w-3.5 text-blue-500" />
+                <span className="text-blue-500 font-medium">
+                  Voting in progress
                 </span>
-              )}
-            </div>
+              </span>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -237,6 +235,8 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             votesFor={proposal.votes_for}
             votesAgainst={proposal.votes_against}
             refreshing={refreshing}
+            tokenSymbol={proposal.token_symbol || ""}
+            liquidTokens={proposal.liquid_tokens || "0"} // Provide a default of "0" if null
           />
         </div>
 
