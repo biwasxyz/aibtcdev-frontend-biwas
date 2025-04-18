@@ -243,7 +243,7 @@ export function AgentPromptForm() {
     }
 
     // Validate temperature
-    const temp = parseFloat(formData.temperature.toString());
+    const temp = Number.parseFloat(formData.temperature.toString());
     if (isNaN(temp) || temp < 0 || temp > 2) {
       newErrors.temperature = "Temperature must be between 0 and 2";
     }
@@ -467,15 +467,10 @@ export function AgentPromptForm() {
                             {prompt?.is_active ? "Active" : "Disabled"}
                           </Badge>
                         </TableCell>
-
-                        <TableCell className="max-w-[150px] sm:max-w-md">
-                          <p className="truncate text-xs sm:text-sm text-muted-foreground">
-                            
                         <TableCell>{prompt?.model || "gpt-4o"}</TableCell>
                         <TableCell>{prompt?.temperature || 0.1}</TableCell>
                         <TableCell className="max-w-md">
                           <p className="truncate text-sm text-muted-foreground">
-
                             {prompt?.prompt_text || "No prompt configured"}
                           </p>
                         </TableCell>
@@ -590,7 +585,7 @@ export function AgentPromptForm() {
                 step="0.1"
                 value={formData.temperature}
                 onChange={(e) => {
-                  const value = parseFloat(e.target.value);
+                  const value = Number.parseFloat(e.target.value);
                   if (!isNaN(value) && value >= 0 && value <= 2) {
                     setFormData({ ...formData, temperature: value });
                   }
