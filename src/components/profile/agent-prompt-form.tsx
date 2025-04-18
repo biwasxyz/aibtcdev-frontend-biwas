@@ -243,7 +243,7 @@ export function AgentPromptForm() {
     }
 
     // Validate temperature
-    const temp = parseFloat(formData.temperature.toString());
+    const temp = Number.parseFloat(formData.temperature.toString());
     if (isNaN(temp) || temp < 0 || temp > 2) {
       newErrors.temperature = "Temperature must be between 0 and 2";
     }
@@ -402,9 +402,9 @@ export function AgentPromptForm() {
 
   return (
     <div className="w-full space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Wallet Info - Left Side */}
-        <div className="md:col-span-1">
+        <div className="lg:col-span-1">
           {daoManagerAgentId && (
             <WalletInfoCard
               walletAddress={daoManagerWalletAddress}
@@ -414,10 +414,10 @@ export function AgentPromptForm() {
         </div>
 
         {/* Agent Prompts - Right Side */}
-        <div className="md:col-span-1 space-y-4">
+        <div className="lg:col-span-1 space-y-4">
           <div className="w-full overflow-x-auto border rounded-lg p-4 bg-card h-full">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-              <h2 className="text-base sm:text-2xl font-medium">
+              <h2 className="text-base sm:text-lg lg:text-2xl font-medium">
                 Agent Prompts
               </h2>
             </div>
@@ -585,7 +585,7 @@ export function AgentPromptForm() {
                 step="0.1"
                 value={formData.temperature}
                 onChange={(e) => {
-                  const value = parseFloat(e.target.value);
+                  const value = Number.parseFloat(e.target.value);
                   if (!isNaN(value) && value >= 0 && value <= 2) {
                     setFormData({ ...formData, temperature: value });
                   }

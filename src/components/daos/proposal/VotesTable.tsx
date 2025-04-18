@@ -119,7 +119,12 @@ const VotesTable: React.FC<VotesTableProps> = ({ proposalId }) => {
             >
               {/* Vote Yes/No */}
               <TableCell className="px-3 py-2">
-                {vote.answer ? (
+                {vote.amount === null ? (
+                  <span className="flex items-center text-zinc-500">
+                    <span className="h-4 w-4 mr-1.5 flex-shrink-0 rounded-full border border-zinc-500"></span>
+                    No vote
+                  </span>
+                ) : vote.answer ? (
                   <span className="flex items-center text-green-400">
                     <ThumbsUp className="h-4 w-4 mr-1.5 flex-shrink-0" />
                     Yes
