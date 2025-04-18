@@ -29,28 +29,30 @@ export function BalanceDisplay({
   // Convert value to number and handle potential errors
   const numericValue =
     typeof value === "string" ? Number.parseFloat(value) : value;
+  const divisor = Math.pow(10, decimals);
+  const displayValue = numericValue / divisor;
 
-  if (isNaN(numericValue)) {
+  if (isNaN(displayValue)) {
     return <span className={className}>0 {symbol}</span>;
   }
 
-  // Format the raw balance (always used in tooltips)
-  const rawBalance = numericValue.toLocaleString(undefined, {
+  // Format the full value with all decimals (used for raw display and tooltips)
+  const fullFormattedValue = displayValue.toLocaleString(undefined, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
 
-  const rawDisplay = `${rawBalance} ${symbol}`;
+  const fullDisplay = `${fullFormattedValue}${symbol ? ` ${symbol}` : ""}`;
 
-  // For raw variant, just return the formatted value
+  // For raw variant, just return the full formatted value
   if (variant === "raw") {
-    return <span className={`font-mono ${className}`}>{rawDisplay}</span>;
+    return <span className={`font-mono ${className}`}>{fullDisplay}</span>;
   }
 
   // For rounded variant, show fewer decimal places
   if (variant === "rounded") {
-    const roundedBalance = numericValue.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
+    const roundedValue = displayValue.toLocaleString(undefined, {
+      minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     });
 
@@ -59,11 +61,12 @@ export function BalanceDisplay({
         <Tooltip>
           <TooltipTrigger asChild>
             <span className={`font-mono ${className}`}>
-              {roundedBalance} {symbol}
+              {roundedValue}
+              {symbol ? ` ${symbol}` : ""}
             </span>
           </TooltipTrigger>
           <TooltipContent>
-            <p className="font-mono">{rawDisplay}</p>
+            <p className="font-mono">{fullDisplay}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -72,18 +75,19 @@ export function BalanceDisplay({
 
   // For abbreviated variant, use K, M, B suffixes
   if (variant === "abbreviated") {
-    const abbreviatedBalance = formatNumber(numericValue);
+    const abbreviatedValue = formatNumber(displayValue);
 
     return (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <span className={`font-mono ${className}`}>
-              {abbreviatedBalance} {symbol}
+              {abbreviatedValue}
+              {symbol ? ` ${symbol}` : ""}
             </span>
           </TooltipTrigger>
           <TooltipContent>
-            <p className="font-mono">{rawDisplay}</p>
+            <p className="font-mono">{fullDisplay}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -91,7 +95,7 @@ export function BalanceDisplay({
   }
 
   // Fallback
-  return <span className={`font-mono ${className}`}>{rawDisplay}</span>;
+  return <span className={`font-mono ${className}`}>{fullDisplay}</span>;
 }
 
 /**
@@ -102,15 +106,9 @@ export function StxBalance({
   variant = "raw",
   className = "",
 }: Omit<BalanceDisplayProps, "symbol" | "decimals">) {
-  // Convert from microSTX to STX
-  const stxValue =
-    typeof value === "string"
-      ? Number.parseFloat(value) / 1_000_000
-      : value / 1_000_000;
-
   return (
     <BalanceDisplay
-      value={stxValue}
+      value={value}
       symbol="STX"
       decimals={6}
       variant={variant}
@@ -127,15 +125,9 @@ export function BtcBalance({
   variant = "raw",
   className = "",
 }: Omit<BalanceDisplayProps, "symbol" | "decimals">) {
-  // Convert from satoshis to BTC
-  const btcValue =
-    typeof value === "string"
-      ? Number.parseFloat(value) / 100_000_000
-      : value / 100_000_000;
-
   return (
     <BalanceDisplay
-      value={btcValue}
+      value={value}
       symbol="BTC"
       decimals={8}
       variant={variant}
@@ -156,16 +148,9 @@ export function TokenBalance({
   variant = "raw",
   className = "",
 }: BalanceDisplayProps) {
-  // Convert from microunits to token units (default divisor for most tokens)
-  const divisor = Math.pow(10, decimals);
-  const tokenValue =
-    typeof value === "string"
-      ? Number.parseFloat(value) / divisor
-      : value / divisor;
-
   return (
     <BalanceDisplay
-      value={tokenValue}
+      value={value}
       symbol={symbol}
       decimals={decimals}
       variant={variant}
