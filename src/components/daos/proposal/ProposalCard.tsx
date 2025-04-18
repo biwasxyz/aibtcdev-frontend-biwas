@@ -200,7 +200,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-green-500" />
-              <h4 className="font-medium text-base">Voting Progress</h4>
+              <h4 className="font-medium text-base">Votes</h4>
             </div>
 
             <div className="flex items-center gap-2">

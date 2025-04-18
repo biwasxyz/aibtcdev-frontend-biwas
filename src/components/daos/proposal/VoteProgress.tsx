@@ -4,6 +4,7 @@ import type React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getProposalVotes } from "@/lib/vote-utils";
 import { useMemo, useState, useEffect } from "react";
+import { TokenBalance } from "@/components/reusables/balance-display";
 
 interface VoteProgressProps {
   votesFor?: string;
@@ -11,18 +12,8 @@ interface VoteProgressProps {
   contractAddress?: string;
   proposalId?: string | number;
   refreshing?: boolean;
+  tokenSymbol?: string;
 }
-
-// Utility function to format numbers with K, M suffixes
-const formatNumber = (num: number): string => {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + "M";
-  } else if (num >= 1000) {
-    return (num / 1000).toFixed(1) + "K";
-  } else {
-    return num.toString();
-  }
-};
 
 const VoteProgress: React.FC<VoteProgressProps> = ({
   votesFor: initialVotesFor,
@@ -30,6 +21,7 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   contractAddress,
   proposalId,
   refreshing = false,
+  tokenSymbol = "",
 }) => {
   // Memoize initial votes parsing
   const initialParsedVotes = useMemo(() => {
@@ -38,19 +30,9 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
       ? initialVotesAgainst.replace(/n$/, "")
       : "0";
 
-    const votesForNum = !isNaN(Number(parsedFor)) ? Number(parsedFor) : 0;
-    const votesAgainstNum = !isNaN(Number(parsedAgainst))
-      ? Number(parsedAgainst)
-      : 0;
-
-    const formattedVotesFor = formatNumber(votesForNum / 1e8);
-    const formattedVotesAgainst = formatNumber(votesAgainstNum / 1e8);
-
     return {
       votesFor: parsedFor,
       votesAgainst: parsedAgainst,
-      formattedVotesFor,
-      formattedVotesAgainst,
     };
   }, [initialVotesFor, initialVotesAgainst]);
 
@@ -101,18 +83,9 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
   // Update parsed votes when data changes
   useEffect(() => {
     if (data) {
-      const formattedVotesFor = formatNumber(
-        Number(data.votesFor || "0") / 1e8
-      );
-      const formattedVotesAgainst = formatNumber(
-        Number(data.votesAgainst || "0") / 1e8
-      );
-
       setParsedVotes({
         votesFor: data.votesFor || "0",
         votesAgainst: data.votesAgainst || "0",
-        formattedVotesFor,
-        formattedVotesAgainst,
       });
     }
   }, [data]);
@@ -173,14 +146,22 @@ const VoteProgress: React.FC<VoteProgressProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <span className="text-sm text-gray-500">For</span>
-          <span className="font-medium">{parsedVotes.formattedVotesFor}</span>
+          <TokenBalance
+            value={parsedVotes.votesFor}
+            symbol={tokenSymbol}
+            decimals={8}
+            variant="abbreviated"
+          />
         </div>
 
         <div className="flex flex-col items-end">
           <span className="text-sm text-gray-500">Against</span>
-          <span className="font-medium">
-            {parsedVotes.formattedVotesAgainst}
-          </span>
+          <TokenBalance
+            value={parsedVotes.votesAgainst}
+            symbol={tokenSymbol}
+            decimals={8}
+            variant="abbreviated"
+          />
         </div>
       </div>
     </div>
