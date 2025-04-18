@@ -9,9 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatTokenBalance, formatStxBalance } from "@/helpers/format-utils";
 import { useClipboard } from "@/helpers/clipboard-utils";
 import { getAddressExplorerUrl } from "@/helpers/explorer";
+import {
+  StxBalance,
+  BtcBalance,
+  TokenBalance,
+} from "@/components/reusables/balance-display";
 
 interface WalletInfoCardProps {
   walletAddress?: string | null;
@@ -79,8 +83,11 @@ export function WalletInfoCard({
             {walletBalance && (
               <TableRow>
                 <TableCell className="font-medium">STX</TableCell>
-                <TableCell className="font-mono">
-                  {formatStxBalance(walletBalance.stx.balance)} STX
+                <TableCell>
+                  <StxBalance
+                    value={walletBalance.stx.balance}
+                    variant="rounded"
+                  />
                 </TableCell>
               </TableRow>
             )}
@@ -91,22 +98,24 @@ export function WalletInfoCard({
                 ([tokenId, token]) => {
                   const [, tokenSymbol] = tokenId.split("::");
                   // Check if this is an sBTC token and display as BTC instead
-                  const displaySymbol = tokenId.includes("sbtc-token")
-                    ? "BTC"
-                    : tokenSymbol || "Token";
                   const isBtc = tokenId.includes("sbtc-token");
+                  const displaySymbol = isBtc ? "BTC" : tokenSymbol || "Token";
 
                   return (
                     <TableRow key={tokenId}>
                       <TableCell className="font-medium">
                         {displaySymbol}
                       </TableCell>
-                      <TableCell
-                        className={`font-mono ${
-                          isBtc ? "text-primary font-semibold" : ""
-                        }`}
-                      >
-                        {formatTokenBalance(token.balance)}
+                      <TableCell>
+                        {isBtc ? (
+                          <BtcBalance value={token.balance} variant="rounded" />
+                        ) : (
+                          <TokenBalance
+                            value={token.balance}
+                            symbol={displaySymbol}
+                            variant="rounded"
+                          />
+                        )}
                       </TableCell>
                     </TableRow>
                   );
@@ -118,10 +127,11 @@ export function WalletInfoCard({
               Object.entries(walletBalance.non_fungible_tokens).map(
                 ([tokenId, token]) => {
                   const [, tokenSymbol] = tokenId.split("::");
+                  const displaySymbol = tokenSymbol || "NFT";
                   return (
                     <TableRow key={tokenId}>
                       <TableCell className="font-medium">
-                        {tokenSymbol || "NFT"}
+                        {displaySymbol}
                       </TableCell>
                       <TableCell className="font-mono">{token.count}</TableCell>
                     </TableRow>

@@ -33,9 +33,9 @@ import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import { AgentPromptForm } from "./agent-prompt-form";
 import { useClipboard } from "@/helpers/clipboard-utils";
-import { formatTokenBalance } from "@/helpers/format-utils";
 import { Button } from "../ui/button";
 import { getAddressExplorerUrl } from "@/helpers/explorer";
+import { TokenBalance } from "@/components/reusables/balance-display";
 
 const stacksAddress = getStacksAddress();
 
@@ -186,7 +186,10 @@ export function ProfileView() {
                               </TableCell>
                               <TableCell>
                                 {vote.amount !== null ? (
-                                  formatTokenBalance(vote.amount)
+                                  <TokenBalance
+                                    value={vote.amount}
+                                    variant="rounded"
+                                  />
                                 ) : (
                                   <span className="text-muted-foreground">
                                     Agent did not vote
