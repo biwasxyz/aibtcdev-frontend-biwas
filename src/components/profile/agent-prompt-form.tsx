@@ -402,9 +402,9 @@ export function AgentPromptForm() {
 
   return (
     <div className="w-full space-y-4">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Wallet Info - Left Side */}
-        <div className="lg:col-span-1">
+      <div className="space-y-4">
+        {/* Wallet Info Section */}
+        <div className="w-full">
           {daoManagerAgentId && (
             <WalletInfoCard
               walletAddress={daoManagerWalletAddress}
@@ -413,9 +413,9 @@ export function AgentPromptForm() {
           )}
         </div>
 
-        {/* Agent Prompts - Right Side */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="w-full overflow-x-auto border rounded-lg p-4 bg-card h-full">
+        {/* Agent Prompts Section */}
+        <div className="w-full space-y-4">
+          <div className="w-full overflow-x-auto border rounded-lg p-4 bg-card">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
               <h2 className="text-base sm:text-lg lg:text-2xl font-medium">
                 Agent Prompts
