@@ -122,7 +122,7 @@ const AssetTracker = () => {
 
         {isLoaded && hasSbtc === false && (
           <p className="text-center text-primary">
-            You don&apos;t have sBTC in your wallet. Visit{" "}
+            You don&apos;t have BTC in your wallet. Visit{" "}
             <a
               href="https://app.bitflow.finance/trade"
               className="underline font-medium"
