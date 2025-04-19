@@ -35,7 +35,7 @@ export function WalletInfoCard({
   return (
     <div className="w-full h-full p-4 border rounded-lg bg-card">
       <div className="flex flex-col gap-4">
-        <h2 className="text-base sm:text-2xl font-medium">Agent Wallet</h2>
+        <h2 className="text-base sm:text-2xl font-medium">Agent Account</h2>
 
         {walletAddress ? (
           <div className="flex items-center gap-2 flex-wrap">

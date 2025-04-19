@@ -68,7 +68,7 @@ export function ProfileView() {
         <Card className="border-none shadow-none bg-background/40 backdrop-blur mb-6">
           <CardHeader>
             <CardTitle className="text-base sm:text-2xl font-medium">
-              Connected Wallet
+              Connected Account
             </CardTitle>
             <Separator className="my-2" />
           </CardHeader>
