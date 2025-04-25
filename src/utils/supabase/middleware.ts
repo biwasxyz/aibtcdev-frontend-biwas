@@ -1,5 +1,5 @@
-import { createServerClient } from "@supabase/ssr";
-import { type NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr"
+import { type NextRequest, NextResponse } from "next/server"
 
 export const updateSession = async (request: NextRequest) => {
   try {
@@ -8,46 +8,40 @@ export const updateSession = async (request: NextRequest) => {
       request: {
         headers: request.headers,
       },
-    });
+    })
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error(
-        "middleware: missing supabase url or supabase anon key in env vars"
-      );
+      throw new Error("middleware: missing supabase url or supabase anon key in env vars")
     }
 
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
-          return request.cookies.getAll();
+          return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           response = NextResponse.next({
             request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
+          })
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
         },
       },
-    });
+    })
 
     // Get the user
     const {
       data: { user },
       error: userError,
-    } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser()
 
     // If trying to access admin route
     if (request.nextUrl.pathname.startsWith("/admin")) {
       if (userError || !user) {
         // If no user, redirect to login
-        return NextResponse.redirect(new URL("/daos", request.url));
+        return NextResponse.redirect(new URL("/", request.url))
       }
 
       // Check user role in profiles table
@@ -55,11 +49,11 @@ export const updateSession = async (request: NextRequest) => {
         .from("profiles")
         .select("role")
         .eq("id", user.id)
-        .single();
+        .single()
 
       if (profileError || !profileData || profileData.role !== "Admin") {
         // If not admin, redirect to dashboard
-        return NextResponse.redirect(new URL("/chat", request.url));
+        return NextResponse.redirect(new URL("/chat", request.url))
       }
     }
 
@@ -74,25 +68,30 @@ export const updateSession = async (request: NextRequest) => {
     // }
 
     // Redirect root route to /daos
-    if (request.nextUrl.pathname === "/") {
-      return NextResponse.redirect(new URL("/daos", request.url));
-    }
+    // if (request.nextUrl.pathname === "/") {
+    //   return NextResponse.redirect(new URL("/daos", request.url));
+    // }
 
     if (request.nextUrl.pathname.startsWith("/profile") && (userError || !user)) {
       return NextResponse.redirect(new URL("/", request.url))
     }
 
     if (request.nextUrl.pathname === "/" && !userError) {
-      return NextResponse.redirect(new URL("/daos", request.url));
+      return NextResponse.redirect(new URL("/daos", request.url))
     }
 
-    return response;
+    return response
   } catch (error) {
-    console.error(error);
+    console.error(error)
     return NextResponse.next({
       request: {
         headers: request.headers,
       },
-    });
+    })
   }
-};
+}
+
+// See "Matching Paths" below to learn more
+export const config = {
+  matcher: ["/", "/admin", "/profile"],
+}
