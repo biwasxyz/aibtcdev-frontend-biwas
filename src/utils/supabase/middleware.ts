@@ -37,10 +37,13 @@ export const updateSession = async (request: NextRequest) => {
     })
 
     // Get the user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser()
+    // const {
+    //   data: { user },
+    //   error: userError,
+    // } = await supabase.auth.getUser()
+
+    // Still call getUser() to refresh the session, but don't store the result
+    await supabase.auth.getUser()
 
     // ORIGINAL ROUTE PROTECTION LOGIC (COMMENTED OUT)
     /*
