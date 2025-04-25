@@ -3,6 +3,11 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export const updateSession = async (request: NextRequest) => {
   try {
+    // If the path is not the root path, redirect to root
+    if (request.nextUrl.pathname !== "/") {
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+
     // Create an unmodified response
     let response = NextResponse.next({
       request: {
@@ -37,6 +42,8 @@ export const updateSession = async (request: NextRequest) => {
       error: userError,
     } = await supabase.auth.getUser()
 
+    // ORIGINAL ROUTE PROTECTION LOGIC (COMMENTED OUT)
+    /*
     // If trying to access admin route
     if (request.nextUrl.pathname.startsWith("/admin")) {
       if (userError || !user) {
@@ -79,6 +86,7 @@ export const updateSession = async (request: NextRequest) => {
     if (request.nextUrl.pathname === "/" && !userError) {
       return NextResponse.redirect(new URL("/daos", request.url))
     }
+    */
 
     return response
   } catch (error) {
@@ -89,9 +97,4 @@ export const updateSession = async (request: NextRequest) => {
       },
     })
   }
-}
-
-// See "Matching Paths" below to learn more
-export const config = {
-  matcher: ["/", "/admin", "/profile"],
 }
