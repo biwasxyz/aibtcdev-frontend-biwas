@@ -17,6 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useQuery } from "@tanstack/react-query";
 
 interface DepositFormProps {
   btcUsdPrice: number | null;
@@ -40,18 +41,16 @@ export default function DepositForm({
 }: DepositFormProps) {
   const [amount, setAmount] = useState<string>("0.0001");
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
   const { toast } = useToast();
 
   // Get session state from Zustand store
-  const { accessToken, userId, isLoading, initialize } = useSessionStore();
+  const { accessToken, isLoading, initialize } = useSessionStore();
 
   // Initialize session on component mount
   useEffect(() => {
     initialize();
   }, [initialize]);
 
-  const [btcBalance, setBtcBalance] = useState<number | null>(0.05);
   const [activeWalletProvider, setActiveWalletProvider] = useState<
     "leather" | "xverse" | null
   >(null);
@@ -59,6 +58,34 @@ export default function DepositForm({
   // Get addresses from the lib - only if we have a session
   const userAddress = accessToken ? getStacksAddress() : null;
   const btcAddress = accessToken ? getBitcoinAddress() : null;
+
+  // Fetch BTC balance using React Query with 40-minute cache
+  const { data: btcBalance, isLoading: isBalanceLoading } = useQuery<
+    number | null
+  >({
+    queryKey: ["btcBalance", btcAddress],
+    queryFn: async () => {
+      if (!btcAddress) return null;
+
+      const blockstreamUrl = `https://blockstream.info/api/address/${btcAddress}/utxo`;
+      const response = await fetch(blockstreamUrl);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const utxos = await response.json();
+      const totalSats = utxos.reduce(
+        (sum: number, utxo: any) => sum + utxo.value,
+        0
+      );
+      return totalSats / 100000000; // Convert satoshis to BTC
+    },
+    enabled: !!btcAddress, // Only run query when btcAddress is available
+    staleTime: 40 * 60 * 1000, // 40 minutes in milliseconds
+    retry: 2,
+    refetchOnWindowFocus: false,
+  });
 
   const formatUsdValue = (amount: number): string => {
     if (!amount || amount <= 0) return "$0.00";
@@ -98,7 +125,7 @@ export default function DepositForm({
   };
 
   const handleMaxClick = async (): Promise<void> => {
-    if (btcBalance !== null) {
+    if (btcBalance !== null && btcBalance !== undefined) {
       try {
         const feeRates = await styxSDK.getFeeEstimates();
         const selectedRate = feeRates.medium;
@@ -117,20 +144,17 @@ export default function DepositForm({
         setAmount(maxAmount.toFixed(8));
         setSelectedPreset("max");
       }
+    } else {
+      toast({
+        title: "Balance not available",
+        description:
+          "Your BTC balance is not available. Please try again later.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleDepositConfirm = async (): Promise<void> => {
-    if (maintenanceMode) {
-      toast({
-        title: "Scheduled Maintenance",
-        description:
-          "We know you're eager to test this feature! We're working diligently to implement support for both legacy and segwit addresses ahead of schedule. Deposits will be back online in just a few hours. Thank you for your patience.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!amount || Number.parseFloat(amount) <= 0) {
       toast({
         title: "Invalid amount",
@@ -194,8 +218,10 @@ export default function DepositForm({
       const networkFeeInBTC = 0.000006;
       const totalRequiredBTC = amountInBTC + networkFeeInBTC;
 
-      if ((btcBalance || 0) < totalRequiredBTC) {
-        const shortfallBTC = totalRequiredBTC - (btcBalance || 0);
+      // Check if btcBalance is available and sufficient
+      const currentBalance = btcBalance ?? 0;
+      if (currentBalance < totalRequiredBTC) {
+        const shortfallBTC = totalRequiredBTC - currentBalance;
         throw new Error(
           `Insufficient funds. You need ${shortfallBTC.toFixed(
             8
@@ -316,8 +342,8 @@ export default function DepositForm({
     });
   }
 
-  const presetAmounts: string[] = ["0.001", "0.005", "0.01"];
-  const presetLabels: string[] = ["0.001 BTC", "0.005 BTC", "0.01 BTC"];
+  const presetAmounts: string[] = ["0.0001", "0.0002"];
+  const presetLabels: string[] = ["0.0001 BTC", "0.0002 BTC"];
 
   // Set wallet provider when authenticated
   const handleWalletSelect = (walletType: "leather" | "xverse") => {
@@ -360,6 +386,24 @@ export default function DepositForm({
           </span>
         </div>
 
+        {/* Display user's BTC balance */}
+        {accessToken && (
+          <div className="flex justify-end mt-1">
+            <span className="text-xs text-muted-foreground">
+              Balance:{" "}
+              {isBalanceLoading
+                ? "Loading..."
+                : btcBalance !== null && btcBalance !== undefined
+                ? `${btcBalance.toFixed(8)} BTC${
+                    btcUsdPrice
+                      ? ` (${formatUsdValue(btcBalance * (btcUsdPrice || 0))})`
+                      : ""
+                  }`
+                : "Unable to load balance"}
+            </span>
+          </div>
+        )}
+
         {/* Preset amounts */}
         <div className="flex gap-2 mt-3">
           {presetAmounts.map((presetAmount, index) => (
@@ -386,6 +430,7 @@ export default function DepositForm({
                 : ""
             }
             onClick={handleMaxClick}
+            disabled={btcBalance === null || btcBalance === undefined}
           >
             MAX
           </Button>
