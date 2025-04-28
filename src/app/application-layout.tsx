@@ -155,7 +155,7 @@ export default function ApplicationLayout({
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
-                <a
+                <Link
                   key={item.id}
                   href={item.href}
                   onClick={(e) => handleNavigation(item.href, e)}
@@ -168,7 +168,7 @@ export default function ApplicationLayout({
                 >
                   {/* <item.icon className="h-5 w-5" /> */}
                   <span>{item.name}</span>
-                </a>
+                </Link>
               );
             })}
           </div>
@@ -240,7 +240,7 @@ export default function ApplicationLayout({
                 {navigation.map((item) => {
                   const isActive = pathname === item.href;
                   return (
-                    <a
+                    <Link
                       key={item.id}
                       href={item.href}
                       onClick={(e) => {
@@ -256,7 +256,7 @@ export default function ApplicationLayout({
                     >
                       <item.icon className="h-5 w-5" />
                       <span>{item.name}</span>
-                    </a>
+                    </Link>
                   );
                 })}
               </div>

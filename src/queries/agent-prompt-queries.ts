@@ -9,6 +9,8 @@ export interface AgentPrompt {
     is_active: boolean;
     created_at: string;
     updated_at: string;
+    model: string;
+    temperature: number;
 }
 
 // Fetch all agent prompts

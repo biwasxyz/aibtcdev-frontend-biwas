@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, ArrowUpDown } from "lucide-react";
-import { formatTokenBalance } from "@/helpers/format-utils";
+import { TokenBalance } from "@/components/reusables/balance-display";
 
 interface Holder {
   address: string;
@@ -122,12 +124,16 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
                   <TableRow key={holder.address}>
                     <TableCell className="font-medium">{index + 1}</TableCell>
                     <TableCell className="max-w-[120px] sm:max-w-[200px] truncate">
-                      <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                      <code className="text-xs px-1.5 py-0.5 rounded">
                         {holder.address}
                       </code>
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
-                      {formatTokenBalance(holder.balance)} {tokenSymbol}
+                      <TokenBalance
+                        value={holder.balance}
+                        symbol={tokenSymbol}
+                        variant="rounded"
+                      />
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
                       {holder.percentage.toFixed(2)}%

@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Extension } from "@/types/supabase";
@@ -15,6 +17,12 @@ function truncateString(str: string): string {
 
 // Function to format extension type for display
 function formatExtensionType(type: string): string {
+  // Replace hyphens with spaces
+  return type.replace(/-/g, " ");
+}
+
+// Function to format extension type for mobile display
+function formatExtensionTypeMobile(type: string): string {
   // Replace hyphens with spaces and limit length
   const formattedType = type.replace(/-/g, " ");
 
@@ -118,7 +126,13 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-3 mb-2">
                       <h3 className="text-base font-medium capitalize break-all sm:break-normal">
-                        {formatExtensionType(extension.type)}
+                        {/* Show truncated on mobile, full on desktop */}
+                        <span className="sm:hidden">
+                          {formatExtensionTypeMobile(extension.type)}
+                        </span>
+                        <span className="hidden sm:inline">
+                          {formatExtensionType(extension.type)}
+                        </span>
                       </h3>
                       <Badge
                         variant="secondary"
@@ -132,7 +146,12 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                     {extension.contract_principal && (
                       <div className="flex items-center gap-2 mb-2">
                         <code className="text-xs bg-muted px-2 py-1 rounded overflow-hidden text-ellipsis">
-                          {truncateString(extension.contract_principal)}
+                          <span className="sm:hidden">
+                            {truncateString(extension.contract_principal)}
+                          </span>
+                          <span className="hidden sm:inline">
+                            {extension.contract_principal}
+                          </span>
                         </code>
                       </div>
                     )}
@@ -144,7 +163,12 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors break-all"
                         >
-                          <span>TX: {truncateString(extension.tx_id)}</span>
+                          <span className="sm:hidden">
+                            TX: {truncateString(extension.tx_id)}
+                          </span>
+                          <span className="hidden sm:inline">
+                            TX: {extension.tx_id}
+                          </span>
                         </a>
                         <CopyButton text={extension.tx_id} />
                       </div>

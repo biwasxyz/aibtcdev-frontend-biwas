@@ -3,6 +3,7 @@ import type React from "react";
 import type { Proposal } from "@/types/supabase";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useVotingStatus } from "./TimeStatus";
+import { TokenBalance } from "@/components/reusables/balance-display";
 
 interface ProposalMetricsProps {
   proposal: Proposal;
@@ -18,15 +19,6 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
   // Check if voting has not started yet (start block not found)
   const votingNotStarted = startBlockTime === null;
 
-  const formatNumber = (num: number): string => {
-    return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
-  const liquidTokens =
-    proposal.liquid_tokens !== null
-      ? formatNumber(proposal.liquid_tokens / 1e8)
-      : "No data available";
-
   return (
     <div className="p-3 sm:p-4 rounded-lg border border-zinc-800 bg-zinc-900/50">
       <h4 className="text-sm font-medium mb-3">Proposal Metrics</h4>
@@ -40,7 +32,17 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
           <div className="text-xs text-muted-foreground">
             Tokens available for trading and voting.
           </div>
-          <div className="font-medium text-sm">{liquidTokens}</div>
+          <div className="font-medium text-sm">
+            {proposal.liquid_tokens !== null ? (
+              <TokenBalance
+                value={proposal.liquid_tokens}
+                decimals={8}
+                variant="rounded"
+              />
+            ) : (
+              "No data available"
+            )}
+          </div>
         </div>
 
         {/* Quorum */}

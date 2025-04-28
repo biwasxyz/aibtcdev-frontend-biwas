@@ -308,7 +308,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                     <DialogTrigger asChild>
                       <Button variant="outline">
                         <Info className="h-3.5 w-3.5 mr-1" />
-                        Show Details
+                        Show Mission
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">

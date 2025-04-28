@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchProposalVotes, Vote } from "@/queries/vote-queries";
+import { fetchProposalVotes, type Vote } from "@/queries/vote-queries";
 import { formatDistanceToNow } from "date-fns";
 import { ThumbsUp, ThumbsDown, ExternalLink } from "lucide-react";
 import {
@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import ReactMarkdown from "react-markdown";
 import CopyButton from "./CopyButton";
+import { TokenBalance } from "@/components/reusables/balance-display";
 
 interface VotesTableProps {
   proposalId: string;
@@ -119,7 +120,12 @@ const VotesTable: React.FC<VotesTableProps> = ({ proposalId }) => {
             >
               {/* Vote Yes/No */}
               <TableCell className="px-3 py-2">
-                {vote.answer ? (
+                {vote.amount === null ? (
+                  <span className="flex items-center text-zinc-500">
+                    <span className="h-4 w-4 mr-1.5 flex-shrink-0 rounded-full border border-zinc-500"></span>
+                    No vote
+                  </span>
+                ) : vote.answer ? (
                   <span className="flex items-center text-green-400">
                     <ThumbsUp className="h-4 w-4 mr-1.5 flex-shrink-0" />
                     Yes
@@ -135,11 +141,11 @@ const VotesTable: React.FC<VotesTableProps> = ({ proposalId }) => {
               {/* Amount */}
               <TableCell className="whitespace-nowrap px-3 py-2">
                 {vote.amount !== null ? (
-                  <span>
-                    {(vote.amount / 1e8).toLocaleString(undefined, {
-                      maximumFractionDigits: 2,
-                    })}
-                  </span>
+                  <TokenBalance
+                    value={vote.amount}
+                    decimals={8}
+                    variant="rounded"
+                  />
                 ) : (
                   <span className="text-muted-foreground">
                     Agent did not vote
