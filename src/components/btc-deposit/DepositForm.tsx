@@ -463,7 +463,7 @@ export default function DepositForm({
       ) : (
         <Button
           size="lg"
-          className="h-[60px] text-xl bg-teal-500 hover:bg-teal-600 text-black shadow-md w-full"
+          className="h-[60px] text-xl bg-primary w-full"
           onClick={handleDepositConfirm}
         >
           Confirm Deposit

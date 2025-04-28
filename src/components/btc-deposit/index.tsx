@@ -4,56 +4,54 @@ import { useState, useEffect } from "react";
 import { TransactionPriority } from "@faktoryfun/styx-sdk";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2 } from "lucide-react";
 import DepositForm, { type ConfirmationData } from "./DepositForm";
 import TransactionConfirmation from "./TransactionConfirmation";
 import { getStacksAddress, getBitcoinAddress } from "@/lib/address";
 import { useSessionStore } from "@/store/session";
 import AuthButton from "@/components/home/auth-button";
-
-// These would be replaced with actual hooks in a real implementation
-const useFormattedBtcPrice = () => {
-  return { price: 65000 };
-};
-
-const useSdkPoolStatus = () => {
-  return {
-    data: {
-      estimatedAvailable: 500000000, // 5 BTC in satoshis
-    },
-    isLoading: false,
-  };
-};
-
-const useSdkDepositHistory = (userAddress: string | null) => {
-  return {
-    data: [],
-    isLoading: false,
-  };
-};
-
-const useSdkAllDepositsHistory = () => {
-  return {
-    data: [],
-    isLoading: false,
-  };
-};
+import { useFormattedBtcPrice } from "@/hooks/deposit/useSdkBtcPrice";
+import useSdkPoolStatus from "@/hooks/deposit/useSdkPoolStatus";
+import useSdkDepositHistory from "@/hooks/deposit/useSdkDepositHistory";
+import useSdkAllDepositsHistory from "@/hooks/deposit/useSdkAllDepositsHistory";
 
 // Placeholder components for history tabs
 const MyHistory = ({ depositHistory, isLoading, btcUsdPrice }: any) => (
-  <div className="p-4 text-center text-muted-foreground">
-    <p>Your deposit history will appear here</p>
+  <div className="p-4 text-center">
+    {isLoading ? (
+      <div className="space-y-3">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    ) : depositHistory?.length > 0 ? (
+      <p>Your deposit history will appear here</p>
+    ) : (
+      <p className="text-muted-foreground">No deposit history found</p>
+    )}
   </div>
 );
 
 const AllDeposits = ({ allDepositsHistory, isLoading, btcUsdPrice }: any) => (
-  <div className="p-4 text-center text-muted-foreground">
-    <p>All deposits history will appear here</p>
+  <div className="p-4 text-center">
+    {isLoading ? (
+      <div className="space-y-3">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    ) : allDepositsHistory?.length > 0 ? (
+      <p>All deposits history will appear here</p>
+    ) : (
+      <p className="text-muted-foreground">No deposits history found</p>
+    )}
   </div>
 );
 
 export default function BitcoinDeposit() {
   // Get session state from Zustand store
-  const { accessToken, userId, isLoading } = useSessionStore();
+  const { accessToken } = useSessionStore();
 
   // State management
   const [activeTab, setActiveTab] = useState("deposit");
@@ -78,17 +76,22 @@ export default function BitcoinDeposit() {
   const userAddress = accessToken ? getStacksAddress() : null;
   const btcAddress = accessToken ? getBitcoinAddress() : null;
 
-  // Data fetching hooks
-  const { price: btcUsdPrice } = useFormattedBtcPrice();
-  const { data: poolStatus } = useSdkPoolStatus();
+  // Data fetching hooks - now using the actual implementations
+  const {
+    price: btcUsdPrice,
+    isLoading: isBtcPriceLoading,
+    error: btcPriceError,
+  } = useFormattedBtcPrice();
+  const { data: poolStatus, isLoading: isPoolStatusLoading } =
+    useSdkPoolStatus();
   const { data: depositHistory, isLoading: isDepositHistoryLoading } =
     useSdkDepositHistory(userAddress);
   const { data: allDepositsHistory, isLoading: isAllDepositsHistoryLoading } =
     useSdkAllDepositsHistory();
 
-  // Determine if we should show the auth prompt
-  // If we have a userAddress, we're connected
-  //   const isConnected = !!userAddress;
+  // Determine if we're still loading critical data
+  const isDataLoading =
+    isBtcPriceLoading || isPoolStatusLoading || btcUsdPrice === undefined;
 
   // Render authentication prompt if not connected
   if (!accessToken) {
@@ -122,6 +125,11 @@ export default function BitcoinDeposit() {
         <p className="text-sm text-muted-foreground">
           Fast, secure, and trustless
         </p>
+        {btcUsdPrice && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Current BTC price: ${btcUsdPrice.toLocaleString()}
+          </p>
+        )}
       </div>
 
       <Card className="bg-card border-border/30">
@@ -133,19 +141,34 @@ export default function BitcoinDeposit() {
           </TabsList>
 
           <TabsContent value="deposit" className="p-4">
-            <DepositForm
-              btcUsdPrice={btcUsdPrice || null}
-              poolStatus={poolStatus}
-              setConfirmationData={setConfirmationData}
-              setShowConfirmation={setShowConfirmation}
-            />
+            {isDataLoading ? (
+              <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  Loading deposit data...
+                </p>
+              </div>
+            ) : btcPriceError ? (
+              <div className="p-4 text-center">
+                <p className="text-red-500">
+                  Error loading BTC price data. Please try again later.
+                </p>
+              </div>
+            ) : (
+              <DepositForm
+                btcUsdPrice={btcUsdPrice ?? null}
+                poolStatus={poolStatus}
+                setConfirmationData={setConfirmationData}
+                setShowConfirmation={setShowConfirmation}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="my-history" className="p-4">
             <MyHistory
               depositHistory={depositHistory}
               isLoading={isDepositHistoryLoading}
-              btcUsdPrice={btcUsdPrice || 100000}
+              btcUsdPrice={btcUsdPrice}
             />
           </TabsContent>
 
@@ -153,7 +176,7 @@ export default function BitcoinDeposit() {
             <AllDeposits
               allDepositsHistory={allDepositsHistory}
               isLoading={isAllDepositsHistoryLoading}
-              btcUsdPrice={btcUsdPrice || 100000}
+              btcUsdPrice={btcUsdPrice}
             />
           </TabsContent>
         </Tabs>
