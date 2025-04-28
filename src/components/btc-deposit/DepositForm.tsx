@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Bitcoin, Loader2 } from "lucide-react";
 import AuthButton from "@/components/home/auth-button";
 import { useSessionStore } from "@/store/session";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";

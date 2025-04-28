@@ -624,11 +624,6 @@ export default function TransactionConfirmation({
     }
   };
 
-  const formatAddress = (address: string): string => {
-    if (!address) return "";
-    return `${address.slice(0, 8)}...${address.slice(-8)}`;
-  };
-
   // Render loading state while initializing session
   if (isLoading) {
     return (
