@@ -8,6 +8,7 @@ import { request as xverseRequest } from "sats-connect";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Copy, Check, AlertTriangle, Loader2 } from "lucide-react";
 import { useSessionStore } from "@/store/session";
+import { useClipboard } from "@/helpers/clipboard-utils";
 
 import {
   Dialog,
@@ -68,7 +69,7 @@ export default function TransactionConfirmation({
   >("idle");
   const [btcTxId, setBtcTxId] = useState<string>("");
   const [currentDepositId, setCurrentDepositId] = useState<string | null>(null);
-  const [copied, setCopied] = useState<Record<string, boolean>>({});
+  const { copiedText, copyToClipboard } = useClipboard();
 
   // Get session state from Zustand store
   const { accessToken, userId, isLoading, initialize } = useSessionStore();
@@ -86,29 +87,6 @@ export default function TransactionConfirmation({
 
   const isP2SHAddress = (address: string): boolean => {
     return address.startsWith("3");
-  };
-
-  const copyToClipboard = async (text: string, field: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied({ ...copied, [field]: true });
-
-      toast({
-        title: "Copied",
-        description: "The information has been copied to your clipboard",
-      });
-
-      setTimeout(() => {
-        setCopied({ ...copied, [field]: false });
-      }, 2000);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-      toast({
-        title: "Failed to copy",
-        description: "Please try again or copy manually",
-        variant: "destructive",
-      });
-    }
   };
 
   const executeBitcoinTransaction = async (): Promise<void> => {
@@ -628,12 +606,10 @@ export default function TransactionConfirmation({
   if (isLoading) {
     return (
       <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-slate-900 text-white border-slate-700">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-aut">
           <div className="flex flex-col items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-white" />
-            <p className="mt-4 text-sm text-slate-300">
-              Loading your session...
-            </p>
+            <Loader2 className="h-8 w-8 animate-spin " />
+            <p className="mt-4 text-s">Loading your session...</p>
           </div>
         </DialogContent>
       </Dialog>
@@ -642,7 +618,7 @@ export default function TransactionConfirmation({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-slate-900 text-white border-slate-700">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center">
             <Button
@@ -660,10 +636,7 @@ export default function TransactionConfirmation({
         <div className="space-y-4">
           {/* Authentication status */}
           {!accessToken && (
-            <Alert
-              variant="destructive"
-              className="bg-red-900/30 border-red-800 text-white"
-            >
+            <Alert variant="destructive" className="border-destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
                 Authentication required. Please sign in before proceeding with
@@ -674,10 +647,7 @@ export default function TransactionConfirmation({
 
           {/* Wallet connection status */}
           {!activeWalletProvider && (
-            <Alert
-              variant="destructive"
-              className="bg-red-900/30 border-red-800 text-white"
-            >
+            <Alert variant="destructive" className="border-destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
                 No wallet connected. Please connect a wallet before proceeding
@@ -687,36 +657,38 @@ export default function TransactionConfirmation({
           )}
 
           {/* Transaction details */}
-          <div className="bg-slate-800 p-4 rounded-md">
+          <div className="bg-zinc-900 p-4 rounded-md">
             <div className="grid grid-cols-3 gap-x-2 gap-y-3">
-              <div className="text-xs font-medium text-slate-300">Amount:</div>
-              <div className="col-span-2 font-mono text-xs">
-                {confirmationData.depositAmount} BTC
+              <div className="text-xs font-medium text-zinc-300">Amount:</div>
+              <div className="col-span-2 relative">
+                <div className="bg-zinc-800 p-2 rounded-md font-mono text-xs break-all whitespace-normal leading-tight">
+                  {confirmationData.depositAmount} BTC
+                </div>
               </div>
 
-              <div className="text-xs font-medium text-slate-300">
+              <div className="text-xs font-medium text-zinc-300">
                 STX Address:
               </div>
-              <div className="col-span-2 font-mono text-xs break-all">
-                {confirmationData.stxAddress}
+              <div className="col-span-2 relative">
+                <div className="bg-zinc-800 p-2 rounded-md font-mono text-xs break-all whitespace-normal leading-tight">
+                  {confirmationData.stxAddress}
+                </div>
               </div>
 
-              <div className="text-xs font-medium text-slate-300 self-start">
+              <div className="text-xs font-medium text-zinc-300 self-start ">
                 OP_RETURN:
               </div>
               <div className="col-span-2 relative">
-                <div className="bg-slate-700 p-2 rounded-md max-h-[60px] overflow-y-auto overflow-x-hidden font-mono text-xs break-all whitespace-normal leading-tight">
+                <div className="bg-zinc-800 p-2 rounded-md max-h-[60px] overflow-y-auto overflow-x-hidden font-mono text-xs break-all whitespace-normal leading-tight">
                   {confirmationData.opReturnHex}
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-1 right-1 h-6 w-6 bg-slate-600 hover:bg-slate-500"
-                  onClick={() =>
-                    copyToClipboard(confirmationData.opReturnHex, "opReturn")
-                  }
+                  className="absolute top-1 right-1 h-6 w-6 bg-primary"
+                  onClick={() => copyToClipboard(confirmationData.opReturnHex)}
                 >
-                  {copied.opReturn ? (
+                  {copiedText === confirmationData.opReturnHex ? (
                     <Check className="h-3 w-3" />
                   ) : (
                     <Copy className="h-3 w-3" />
@@ -727,10 +699,10 @@ export default function TransactionConfirmation({
           </div>
 
           {/* Wallet provider info */}
-          <div className="bg-slate-800 p-4 rounded-md">
+          <div className="bg-zinc-900 p-4 rounded-md">
             <p className="text-sm mb-2 font-medium">Wallet Provider</p>
             <div className="flex items-center">
-              <div className="px-3 py-1 bg-slate-700 rounded-md text-sm">
+              <div className="px-3 py-1 bg-zinc-800 rounded-md text-sm">
                 {activeWalletProvider
                   ? activeWalletProvider.charAt(0).toUpperCase() +
                     activeWalletProvider.slice(1)
@@ -740,33 +712,33 @@ export default function TransactionConfirmation({
           </div>
 
           {/* Fee selection */}
-          <div className="bg-slate-800 p-4 rounded-md">
+          <div className="bg-zinc-900 p-4 rounded-md">
             <p className="text-sm mb-3 font-medium">Select priority</p>
 
             <div className="grid grid-cols-3 gap-3">
               <Card
                 className={cn(
-                  "rounded-lg overflow-hidden border border-slate-700 hover:border-yellow-300 cursor-pointer",
-                  feePriority === "low" ? "bg-yellow-900/40" : "bg-slate-800"
+                  "rounded-lg overflow-hidden border border-zinc-700 hover:border-primary cursor-pointer",
+                  feePriority === "low" ? "bg-primary/20" : "bg-zinc-900"
                 )}
                 onClick={() => setFeePriority(TransactionPriority.Low as any)}
               >
                 <CardContent className="p-3 text-center">
                   <p className="text-white text-sm font-medium mb-1">Low</p>
-                  <p className="text-slate-300 text-xs">
+                  <p className="text-zinc-300 text-xs">
                     {feeEstimates.low.fee} sats
                   </p>
-                  <p className="text-slate-400 text-xs">
+                  <p className="text-zinc-400 text-xs">
                     ({feeEstimates.low.rate} sat/vB)
                   </p>
-                  <p className="text-slate-400 text-xs">30 min</p>
+                  <p className="text-zinc-400 text-xs">30 min</p>
                 </CardContent>
               </Card>
 
               <Card
                 className={cn(
-                  "rounded-lg overflow-hidden border border-slate-700 hover:border-yellow-300 cursor-pointer",
-                  feePriority === "medium" ? "bg-yellow-900/40" : "bg-slate-800"
+                  "rounded-lg overflow-hidden border border-zinc-700 hover:border-primary cursor-pointer",
+                  feePriority === "medium" ? "bg-primary/20" : "bg-zinc-900"
                 )}
                 onClick={() =>
                   setFeePriority(TransactionPriority.Medium as any)
@@ -774,37 +746,37 @@ export default function TransactionConfirmation({
               >
                 <CardContent className="p-3 text-center">
                   <p className="text-white text-sm font-medium mb-1">Medium</p>
-                  <p className="text-slate-300 text-xs">
+                  <p className="text-zinc-300 text-xs">
                     {feeEstimates.medium.fee} sats
                   </p>
-                  <p className="text-slate-400 text-xs">
+                  <p className="text-zinc-400 text-xs">
                     ({feeEstimates.medium.rate} sat/vB)
                   </p>
-                  <p className="text-slate-400 text-xs">~20 min</p>
+                  <p className="text-zinc-400 text-xs">~20 min</p>
                 </CardContent>
               </Card>
 
               <Card
                 className={cn(
-                  "rounded-lg overflow-hidden border border-slate-700 hover:border-yellow-300 cursor-pointer",
-                  feePriority === "high" ? "bg-yellow-900/40" : "bg-slate-800"
+                  "rounded-lg overflow-hidden border border-zinc-700 hover:border-primary cursor-pointer",
+                  feePriority === "high" ? "bg-primary/20" : "bg-zinc-900"
                 )}
                 onClick={() => setFeePriority(TransactionPriority.High as any)}
               >
                 <CardContent className="p-3 text-center">
                   <p className="text-white text-sm font-medium mb-1">High</p>
-                  <p className="text-slate-300 text-xs">
+                  <p className="text-zinc-300 text-xs">
                     {feeEstimates.high.fee} sats
                   </p>
-                  <p className="text-slate-400 text-xs">
+                  <p className="text-zinc-400 text-xs">
                     ({feeEstimates.high.rate} sat/vB)
                   </p>
-                  <p className="text-slate-400 text-xs">~10 min</p>
+                  <p className="text-zinc-400 text-xs">~10 min</p>
                 </CardContent>
               </Card>
             </div>
 
-            <p className="text-xs text-slate-300 mt-4 text-left">
+            <p className="text-xs text-zinc-300 mt-4 text-left">
               Fees are estimated based on current network conditions.
             </p>
           </div>
@@ -814,12 +786,12 @@ export default function TransactionConfirmation({
           <Button
             variant="outline"
             onClick={onClose}
-            className="border-slate-700 text-white hover:bg-slate-800 hover:text-white"
+            className="border-zinc-700 text-white hover:bg-zinc-800 hover:text-white"
           >
             Cancel
           </Button>
           <Button
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            variant="primary"
             onClick={executeBitcoinTransaction}
             disabled={
               btcTxStatus === "pending" || !activeWalletProvider || !accessToken

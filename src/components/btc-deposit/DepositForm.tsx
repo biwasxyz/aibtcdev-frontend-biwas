@@ -379,7 +379,7 @@ export default function DepositForm({
             value={amount}
             onChange={handleAmountChange}
             placeholder="0.00000000"
-            className="text-right pr-16 pl-16 h-[60px] text-xl bg-secondary"
+            className="text-right pr-16 pl-16 h-[60px] text-xl"
           />
           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-md pointer-events-none">
             BTC
@@ -438,7 +438,7 @@ export default function DepositForm({
       </div>
 
       {/* Fee Information Box */}
-      <Card className="bg-secondary border-border/30">
+      <Card className=" border-border/30">
         <CardContent className="p-4">
           <div className="flex justify-between items-center">
             <span className="text-xs text-muted-foreground">
