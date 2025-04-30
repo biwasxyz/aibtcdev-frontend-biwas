@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { TransactionPriority } from "@faktoryfun/styx-sdk";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DepositForm, { type ConfirmationData } from "./DepositForm";
 import TransactionConfirmation from "./TransactionConfirmation";
+import MyHistory from "./my-history";
 import { getStacksAddress, getBitcoinAddress } from "@/lib/address";
 import { useSessionStore } from "@/store/session";
 import AuthButton from "@/components/home/auth-button";
 import { useFormattedBtcPrice } from "@/hooks/deposit/useSdkBtcPrice";
 import useSdkPoolStatus from "@/hooks/deposit/useSdkPoolStatus";
+import useSdkDepositHistory from "@/hooks/deposit/useSdkDepositHistory";
 
 export default function BitcoinDeposit() {
   // Get session state from Zustand store
@@ -26,19 +29,13 @@ export default function BitcoinDeposit() {
   const [activeWalletProvider, setActiveWalletProvider] = useState<
     "leather" | "xverse" | null
   >("xverse");
-
-  useEffect(() => {
-    // When accessToken becomes available, set the wallet provider to Xverse
-    if (accessToken) {
-      setActiveWalletProvider("xverse");
-    }
-  }, [accessToken]);
+  const [activeTab, setActiveTab] = useState<string>("deposit");
 
   // Get addresses directly
   const userAddress = accessToken ? getStacksAddress() : null;
   const btcAddress = accessToken ? getBitcoinAddress() : null;
 
-  // Data fetching hooks - now using the actual implementations
+  // Data fetching hooks
   const {
     price: btcUsdPrice,
     isLoading: isBtcPriceLoading,
@@ -46,6 +43,13 @@ export default function BitcoinDeposit() {
   } = useFormattedBtcPrice();
   const { data: poolStatus, isLoading: isPoolStatusLoading } =
     useSdkPoolStatus();
+
+  // Use the provided deposit history hook
+  const {
+    data: depositHistory,
+    isLoading: isHistoryLoading,
+    isRefetching: isHistoryRefetching,
+  } = useSdkDepositHistory(userAddress);
 
   // Determine if we're still loading critical data
   const isDataLoading =
@@ -90,29 +94,47 @@ export default function BitcoinDeposit() {
         )}
       </div>
 
-      <Card className="bg-card border-border/30 p-4">
-        {isDataLoading ? (
-          <div className="flex flex-col items-center justify-center py-8 space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">
-              Loading deposit data...
-            </p>
-          </div>
-        ) : btcPriceError ? (
-          <div className="p-4 text-center">
-            <p className="text-red-500">
-              Error loading BTC price data. Please try again later.
-            </p>
-          </div>
-        ) : (
-          <DepositForm
-            btcUsdPrice={btcUsdPrice ?? null}
-            poolStatus={poolStatus}
-            setConfirmationData={setConfirmationData}
-            setShowConfirmation={setShowConfirmation}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-2 mb-4">
+          <TabsTrigger value="deposit">Deposit</TabsTrigger>
+          <TabsTrigger value="history">My History</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="deposit">
+          <Card className="bg-card border-border/30 p-4">
+            {isDataLoading ? (
+              <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  Loading deposit data...
+                </p>
+              </div>
+            ) : btcPriceError ? (
+              <div className="p-4 text-center">
+                <p className="text-red-500">
+                  Error loading BTC price data. Please try again later.
+                </p>
+              </div>
+            ) : (
+              <DepositForm
+                btcUsdPrice={btcUsdPrice ?? null}
+                poolStatus={poolStatus}
+                setConfirmationData={setConfirmationData}
+                setShowConfirmation={setShowConfirmation}
+              />
+            )}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="history">
+          <MyHistory
+            depositHistory={depositHistory}
+            isLoading={isHistoryLoading}
+            btcUsdPrice={btcUsdPrice}
+            isRefetching={isHistoryRefetching}
           />
-        )}
-      </Card>
+        </TabsContent>
+      </Tabs>
 
       {showConfirmation && confirmationData && (
         <TransactionConfirmation
