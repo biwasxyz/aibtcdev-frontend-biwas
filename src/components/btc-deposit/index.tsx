@@ -8,12 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DepositForm, { type ConfirmationData } from "./DepositForm";
 import TransactionConfirmation from "./TransactionConfirmation";
 import MyHistory from "./my-history";
+import AllDeposits from "./all-deposits";
 import { getStacksAddress, getBitcoinAddress } from "@/lib/address";
 import { useSessionStore } from "@/store/session";
 import AuthButton from "@/components/home/auth-button";
 import { useFormattedBtcPrice } from "@/hooks/deposit/useSdkBtcPrice";
 import useSdkPoolStatus from "@/hooks/deposit/useSdkPoolStatus";
 import useSdkDepositHistory from "@/hooks/deposit/useSdkDepositHistory";
+import useSdkAllDepositsHistory from "@/hooks/deposit/useSdkAllDepositsHistory";
 
 export default function BitcoinDeposit() {
   // Get session state from Zustand store
@@ -44,12 +46,19 @@ export default function BitcoinDeposit() {
   const { data: poolStatus, isLoading: isPoolStatusLoading } =
     useSdkPoolStatus();
 
-  // Use the provided deposit history hook
+  // User's deposit history
   const {
     data: depositHistory,
     isLoading: isHistoryLoading,
     isRefetching: isHistoryRefetching,
   } = useSdkDepositHistory(userAddress);
+
+  // All network deposits - using the provided hook
+  const {
+    data: allDepositsHistory,
+    isLoading: isAllDepositsLoading,
+    isRefetching: isAllDepositsRefetching,
+  } = useSdkAllDepositsHistory();
 
   // Determine if we're still loading critical data
   const isDataLoading =
@@ -95,9 +104,10 @@ export default function BitcoinDeposit() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-2 mb-4">
+        <TabsList className="grid grid-cols-3 mb-4">
           <TabsTrigger value="deposit">Deposit</TabsTrigger>
           <TabsTrigger value="history">My History</TabsTrigger>
+          <TabsTrigger value="all">All Deposits</TabsTrigger>
         </TabsList>
 
         <TabsContent value="deposit">
@@ -132,6 +142,15 @@ export default function BitcoinDeposit() {
             isLoading={isHistoryLoading}
             btcUsdPrice={btcUsdPrice}
             isRefetching={isHistoryRefetching}
+          />
+        </TabsContent>
+
+        <TabsContent value="all">
+          <AllDeposits
+            allDepositsHistory={allDepositsHistory}
+            isLoading={isAllDepositsLoading}
+            btcUsdPrice={btcUsdPrice}
+            isRefetching={isAllDepositsRefetching}
           />
         </TabsContent>
       </Tabs>
