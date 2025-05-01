@@ -1,7 +1,7 @@
 "use client";
 
-import type React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchProposalVotes, type Vote } from "@/queries/vote-queries";
 import { formatDistanceToNow } from "date-fns";
 import { ThumbsUp, ThumbsDown, ExternalLink } from "lucide-react";
@@ -23,12 +23,14 @@ import {
 import ReactMarkdown from "react-markdown";
 import CopyButton from "./CopyButton";
 import { TokenBalance } from "@/components/reusables/balance-display";
+import { supabase } from "@/utils/supabase/client";
 
 interface VotesTableProps {
   proposalId: string;
 }
 
 const VotesTable: React.FC<VotesTableProps> = ({ proposalId }) => {
+  const queryClient = useQueryClient();
   const {
     data: votes,
     isLoading,
@@ -42,6 +44,35 @@ const VotesTable: React.FC<VotesTableProps> = ({ proposalId }) => {
     staleTime: 1000 * 60 * 1, // 1 minute stale time
     gcTime: 1000 * 60 * 5, // 5 minutes garbage collection time
   });
+
+  useEffect(() => {
+    if (!proposalId) return;
+
+    // Subscribe to changes on the votes table for this proposal
+    const channel = supabase
+      .channel("votes-table-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // listen to INSERT, UPDATE, DELETE
+          schema: "public",
+          table: "votes",
+          filter: `proposal_id=eq.${proposalId}`,
+        },
+        () => {
+          // Invalidate or refetch the query to get fresh data
+          queryClient.invalidateQueries({
+            queryKey: ["proposalVotesTable", proposalId],
+          });
+        }
+      )
+      .subscribe();
+
+    // Cleanup on unmount or proposalId change
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [proposalId, queryClient]);
 
   // --- Loading State ---
   if (isLoading) {
