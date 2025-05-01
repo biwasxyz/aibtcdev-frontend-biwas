@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { BsGithub, BsTwitterX, BsDiscord } from "react-icons/bs";
+import { LiaBookSolid } from "react-icons/lia";
 
 export default function LandingPage() {
   return (
@@ -51,6 +53,50 @@ export default function LandingPage() {
             </Link>
           </div>
         </div>
+
+        {/* Footer overlay */}
+        <footer className="absolute bottom-0 left-0 right-0 py-6 px-6">
+          <div className="container mx-auto flex justify-center">
+            <div className="flex items-center space-x-4 sm:space-x-8">
+              <Link
+                href="https://docs.aibtc.dev/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="backdrop-blur-sm bg-white/10 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full transition-colors hover:bg-primary hover:text-white"
+                aria-label="Documentation"
+              >
+                <LiaBookSolid className="w-5 h-5 sm:w-6 sm:h-6 transition-colors" />
+              </Link>
+              <Link
+                href="https://github.com/aibtcdev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="backdrop-blur-sm bg-white/10 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full transition-colors hover:bg-primary hover:text-white"
+                aria-label="GitHub"
+              >
+                <BsGithub className="w-5 h-5 sm:w-6 sm:h-6 transition-colors" />
+              </Link>
+              <Link
+                href="https://discord.com/invite/Z59Z3FNbEX"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="backdrop-blur-sm bg-white/10 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full transition-colors hover:bg-primary hover:text-white"
+                aria-label="Discord"
+              >
+                <BsDiscord className="w-5 h-5 sm:w-6 sm:h-6 transition-colors" />
+              </Link>
+              <Link
+                href="https://x.com/aibtcdev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="backdrop-blur-sm bg-white/10 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full transition-colors hover:bg-primary hover:text-white"
+                aria-label="Twitter"
+              >
+                <BsTwitterX className="w-5 h-5 sm:w-6 sm:h-6 transition-colors" />
+              </Link>
+            </div>
+          </div>
+        </footer>
       </section>
     </div>
   );
