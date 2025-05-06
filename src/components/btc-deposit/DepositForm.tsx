@@ -5,7 +5,7 @@ import { getStacksAddress, getBitcoinAddress } from "@/lib/address";
 import { styxSDK } from "@faktoryfun/styx-sdk";
 import { MIN_DEPOSIT_SATS, MAX_DEPOSIT_SATS } from "@faktoryfun/styx-sdk";
 import { useToast } from "@/hooks/use-toast";
-import { Bitcoin, Loader2 } from "lucide-react";
+import { Bitcoin, Loader2, Zap } from "lucide-react";
 import AuthButton from "@/components/home/auth-button";
 import { useSessionStore } from "@/store/session";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface DepositFormProps {
   btcUsdPrice: number | null;
@@ -31,6 +34,7 @@ export interface ConfirmationData {
   depositAddress: string;
   stxAddress: string;
   opReturnHex: string;
+  isBlaze?: boolean;
 }
 
 export default function DepositForm({
@@ -39,9 +43,15 @@ export default function DepositForm({
   setConfirmationData,
   setShowConfirmation,
 }: DepositFormProps) {
-  const [amount, setAmount] = useState<string>("0.0001");
+  const [amount, setAmount] = useState<string>("0.001");
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const { toast } = useToast();
+  const [useBlazeSubnet, setUseBlazeSubnet] = useState<boolean>(false);
+  const [feeEstimates, setFeeEstimates] = useState({
+    low: { rate: 1, fee: 0, time: "30 min" },
+    medium: { rate: 3, fee: 0, time: "~20 min" },
+    high: { rate: 5, fee: 0, time: "~10 min" },
+  });
 
   // Get session state from Zustand store
   const { accessToken, isLoading, initialize } = useSessionStore();
@@ -86,6 +96,66 @@ export default function DepositForm({
     retry: 2,
     refetchOnWindowFocus: false,
   });
+
+  // Fetch fee estimates from mempool.space
+  const fetchMempoolFeeEstimates = async () => {
+    try {
+      console.log("Fetching fee estimates directly from mempool.space");
+      const response = await fetch(
+        "https://mempool.space/api/v1/fees/recommended"
+      );
+      const data = await response.json();
+
+      // Log the raw values to help with debugging
+      console.log("Raw mempool.space fee data:", data);
+
+      // Map to the correct fee estimate fields
+      const lowRate = data.hourFee;
+      const mediumRate = data.halfHourFee;
+      const highRate = data.fastestFee;
+
+      // Don't modify the rates, use them as-is
+      return {
+        low: {
+          rate: lowRate,
+          fee: Math.round(lowRate * 148),
+          time: "~1 hour",
+        },
+        medium: {
+          rate: mediumRate,
+          fee: Math.round(mediumRate * 148),
+          time: "~30 min",
+        },
+        high: {
+          rate: highRate,
+          fee: Math.round(highRate * 148),
+          time: "~10 min",
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching fee estimates from mempool.space:", error);
+      // Fallback to default values that better reflect current network conditions
+      return {
+        low: { rate: 3, fee: 444, time: "~1 hour" },
+        medium: { rate: 3, fee: 444, time: "~30 min" },
+        high: { rate: 5, fee: 740, time: "~10 min" },
+      };
+    }
+  };
+
+  // Fetch fee estimates on component mount
+  useEffect(() => {
+    const getFeeEstimates = async () => {
+      try {
+        const estimates = await fetchMempoolFeeEstimates();
+        setFeeEstimates(estimates);
+      } catch (error) {
+        console.error("Error fetching initial fee estimates:", error);
+      }
+    };
+
+    getFeeEstimates();
+  }, []);
 
   const formatUsdValue = (amount: number): string => {
     if (!amount || amount <= 0) return "$0.00";
@@ -178,6 +248,38 @@ export default function DepositForm({
         throw new Error("No Bitcoin address found in your wallet");
       }
 
+      // IMPORTANT: Calculate the total amount including service fee
+      const userInputAmount = Number.parseFloat(amount);
+      const serviceFee = Number.parseFloat(calculateFee(amount));
+      const totalAmount = (userInputAmount + serviceFee).toFixed(8);
+
+      console.log("Transaction amounts:", {
+        userInputAmount,
+        serviceFee,
+        totalAmount,
+      });
+
+      // Always fetch fresh fee estimates before transaction
+      let currentFeeRates;
+      try {
+        console.log(
+          "Fetching fresh fee estimates before transaction preparation"
+        );
+        const estimatesResult = await fetchMempoolFeeEstimates();
+        currentFeeRates = {
+          low: estimatesResult.low.rate,
+          medium: estimatesResult.medium.rate,
+          high: estimatesResult.high.rate,
+        };
+
+        // Update the UI fee display
+        setFeeEstimates(estimatesResult);
+        console.log("Using fee rates:", currentFeeRates);
+      } catch (error) {
+        console.warn("Error fetching fee estimates, using defaults:", error);
+        currentFeeRates = { low: 1, medium: 3, high: 5 };
+      }
+
       const amountInSats = Math.round(Number.parseFloat(amount) * 100000000);
 
       console.log(MIN_DEPOSIT_SATS, MAX_DEPOSIT_SATS);
@@ -233,20 +335,22 @@ export default function DepositForm({
         console.log("Preparing transaction with SDK...");
 
         const transactionData = await styxSDK.prepareTransaction({
-          amount,
+          amount: totalAmount, // Now includes service fee
           userAddress,
           btcAddress,
           feePriority: "medium",
           walletProvider: activeWalletProvider,
+          feeRates: currentFeeRates,
         });
 
         console.log("Transaction prepared:", transactionData);
 
         setConfirmationData({
-          depositAmount: amount,
+          depositAmount: totalAmount,
           depositAddress: transactionData.depositAddress,
           stxAddress: userAddress,
           opReturnHex: transactionData.opReturnData,
+          isBlaze: useBlazeSubnet,
         });
 
         setShowConfirmation(true);
@@ -345,9 +449,10 @@ export default function DepositForm({
   const presetAmounts: string[] = ["0.0001", "0.0002"];
   const presetLabels: string[] = ["0.0001 BTC", "0.0002 BTC"];
 
-  // Set wallet provider when authenticated
-  const handleWalletSelect = (walletType: "leather" | "xverse") => {
-    setActiveWalletProvider(walletType);
+  // Determine button text based on connection state
+  const getButtonText = () => {
+    if (!accessToken) return "Connect Wallet";
+    return "Confirm Deposit";
   };
 
   // Render loading state while initializing session
@@ -438,14 +543,14 @@ export default function DepositForm({
       </div>
 
       {/* Fee Information Box */}
-      <Card className=" border-border/30">
+      <Card className="border-border/30">
         <CardContent className="p-4">
           <div className="flex justify-between items-center">
             <span className="text-xs text-muted-foreground">
               Estimated time
             </span>
             <span className="text-xs text-muted-foreground">
-              1 Block ~ 10 min
+              {feeEstimates.medium.time}
             </span>
           </div>
           <div className="flex justify-between items-center mt-2">
@@ -478,6 +583,46 @@ export default function DepositForm({
         </CardContent>
       </Card>
 
+      {/* Blaze Fast Subnet Option NOT SURE IF I SHOULD ADD IT BUT KEEPING IT FOR LATER JUST IN CASE */}
+      {/* <div
+        className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+        onClick={() => setUseBlazeSubnet(!useBlazeSubnet)}
+      >
+        <div className="flex items-center space-x-3">
+          <div className="relative">
+            <Switch
+              checked={useBlazeSubnet}
+              onCheckedChange={setUseBlazeSubnet}
+              className="data-[state=checked]:bg-orange-500"
+            />
+            {useBlazeSubnet && (
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full" />
+            )}
+          </div>
+          <div className="space-y-0.5">
+            <Label className="text-sm font-medium cursor-pointer">
+              Use Blaze Fast Subnet
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Near-instant confirmations with high throughput
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Badge
+            variant="outline"
+            className="bg-orange-500 text-black font-bold"
+          >
+            BETA
+          </Badge>
+          {useBlazeSubnet && (
+            <div className="p-1 rounded bg-teal-500/10">
+              <Zap className="h-4 w-4 text-teal-500" />
+            </div>
+          )}
+        </div>
+      </div> */}
+
       {/* Accordion with Additional Info */}
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="how-it-works" className="border-none">
@@ -487,9 +632,11 @@ export default function DepositForm({
             </AccordionTrigger>
           </div>
           <AccordionContent className="text-xs text-muted-foreground leading-relaxed">
-            Your BTC deposit unlocks sBTC via Clarity's direct Bitcoin state
-            reading. No intermediaries or multi-signature scheme needed.
-            Trustless. Fast. Secure.
+            <p>
+              Your BTC deposit unlocks sBTC via Clarity's direct Bitcoin state
+              reading. No intermediaries or multi-signature scheme needed.
+              Trustless. Fast. Secure.
+            </p>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -510,7 +657,7 @@ export default function DepositForm({
           className="h-[60px] text-xl bg-primary w-full"
           onClick={handleDepositConfirm}
         >
-          Confirm Deposit
+          {getButtonText()}
         </Button>
       )}
     </div>

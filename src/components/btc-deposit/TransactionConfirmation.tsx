@@ -39,6 +39,9 @@ interface TransactionConfirmationProps {
   userAddress: string;
   btcAddress: string;
   activeWalletProvider: "leather" | "xverse" | null;
+  refetchDepositHistory: () => Promise<any>;
+  refetchAllDeposits: () => Promise<any>;
+  setIsRefetching: (isRefetching: boolean) => void;
 }
 
 interface XverseSignPsbtResponse {
@@ -62,13 +65,16 @@ export default function TransactionConfirmation({
   userAddress,
   btcAddress,
   activeWalletProvider,
+  refetchDepositHistory,
+  refetchAllDeposits,
+  setIsRefetching,
 }: TransactionConfirmationProps) {
   const { toast } = useToast();
   const [btcTxStatus, setBtcTxStatus] = useState<
     "idle" | "pending" | "success" | "error"
   >("idle");
-  const [btcTxId, setBtcTxId] = useState<string>("");
-  const [currentDepositId, setCurrentDepositId] = useState<string | null>(null);
+  // const [btcTxId, setBtcTxId] = useState<string>("");
+  // const [currentDepositId, setCurrentDepositId] = useState<string | null>(null);
   const { copiedText, copyToClipboard } = useClipboard();
 
   // Get session state from Zustand store
@@ -85,9 +91,66 @@ export default function TransactionConfirmation({
     high: { rate: 5, fee: 0, time: "~10 min" },
   });
 
+  const [loadingFees, setLoadingFees] = useState(true);
+
   const isP2SHAddress = (address: string): boolean => {
     return address.startsWith("3");
   };
+
+  const calculateFeeEstimate = (rate: number, txSize = 148): number => {
+    return Math.round(txSize * rate);
+  };
+
+  // Fetch fee rates as soon as the modal opens
+  useEffect(() => {
+    const fetchFeeEstimates = async () => {
+      if (open) {
+        setLoadingFees(true);
+        try {
+          // Get fee rate estimates from SDK or API
+          const feeRates = await styxSDK.getFeeEstimates();
+
+          // Ensure proper separation between tiers
+          const lowRate = feeRates.low || 1;
+          const mediumRate = Math.max(lowRate + 1, feeRates.medium || 2);
+          const highRate = Math.max(mediumRate + 1, feeRates.high || 5);
+
+          // Calculate fees for a standard transaction (~148 vBytes)
+          const txSize = 148;
+
+          setFeeEstimates({
+            low: {
+              rate: lowRate,
+              fee: calculateFeeEstimate(lowRate, txSize),
+              time: "30 min",
+            },
+            medium: {
+              rate: mediumRate,
+              fee: calculateFeeEstimate(mediumRate, txSize),
+              time: "~20 min",
+            },
+            high: {
+              rate: highRate,
+              fee: calculateFeeEstimate(highRate, txSize),
+              time: "~10 min",
+            },
+          });
+        } catch (error) {
+          console.error("Error fetching fee estimates:", error);
+          // Fallback to default estimates with proper separation
+          setFeeEstimates({
+            low: { rate: 1, fee: 148, time: "30 min" },
+            medium: { rate: 2, fee: 296, time: "~20 min" },
+            high: { rate: 5, fee: 740, time: "~10 min" },
+          });
+        } finally {
+          setLoadingFees(false);
+        }
+      }
+    };
+
+    fetchFeeEstimates();
+  }, [open]);
 
   const executeBitcoinTransaction = async (): Promise<void> => {
     console.log(
@@ -146,11 +209,12 @@ export default function TransactionConfirmation({
         btcAmount: Number.parseFloat(confirmationData.depositAmount),
         stxReceiver: userAddress || "",
         btcSender: btcAddress || "",
+        isBlaze: confirmationData.isBlaze || false,
       });
       console.log("Create deposit depositId:", depositId);
 
       // Store deposit ID for later use
-      setCurrentDepositId(depositId);
+      // setCurrentDepositId(depositId);
 
       try {
         if (
@@ -555,7 +619,7 @@ export default function TransactionConfirmation({
 
         // Update state with success
         setBtcTxStatus("success");
-        setBtcTxId(txid);
+        // setBtcTxId(txid);
 
         // Show success message
         toast({
@@ -568,6 +632,19 @@ export default function TransactionConfirmation({
 
         // Close confirmation dialog
         onClose();
+
+        // Trigger data refetch with loading indicator
+        setIsRefetching(true);
+        Promise.all([refetchDepositHistory(), refetchAllDeposits()]).finally(
+          () => {
+            setIsRefetching(false);
+            // Optionally show a toast to confirm refresh
+            toast({
+              title: "Data Refreshed",
+              description: "Your transaction history has been updated",
+            });
+          }
+        );
       } catch (err: any) {
         const error = err as Error;
         console.error("Error in Bitcoin transaction process:", error);
@@ -726,7 +803,11 @@ export default function TransactionConfirmation({
                 <CardContent className="p-3 text-center">
                   <p className="text-white text-sm font-medium mb-1">Low</p>
                   <p className="text-zinc-300 text-xs">
-                    {feeEstimates.low.fee} sats
+                    {loadingFees ? (
+                      <Loader2 className="h-3 w-3 animate-spin mx-auto" />
+                    ) : (
+                      `${feeEstimates.low.fee} sats`
+                    )}
                   </p>
                   <p className="text-zinc-400 text-xs">
                     ({feeEstimates.low.rate} sat/vB)
@@ -747,7 +828,11 @@ export default function TransactionConfirmation({
                 <CardContent className="p-3 text-center">
                   <p className="text-white text-sm font-medium mb-1">Medium</p>
                   <p className="text-zinc-300 text-xs">
-                    {feeEstimates.medium.fee} sats
+                    {loadingFees ? (
+                      <Loader2 className="h-3 w-3 animate-spin mx-auto" />
+                    ) : (
+                      `${feeEstimates.medium.fee} sats`
+                    )}
                   </p>
                   <p className="text-zinc-400 text-xs">
                     ({feeEstimates.medium.rate} sat/vB)
@@ -766,7 +851,11 @@ export default function TransactionConfirmation({
                 <CardContent className="p-3 text-center">
                   <p className="text-white text-sm font-medium mb-1">High</p>
                   <p className="text-zinc-300 text-xs">
-                    {feeEstimates.high.fee} sats
+                    {loadingFees ? (
+                      <Loader2 className="h-3 w-3 animate-spin mx-auto" />
+                    ) : (
+                      `${feeEstimates.high.fee} sats`
+                    )}
                   </p>
                   <p className="text-zinc-400 text-xs">
                     ({feeEstimates.high.rate} sat/vB)

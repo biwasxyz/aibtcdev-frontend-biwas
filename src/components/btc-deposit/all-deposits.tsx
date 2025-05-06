@@ -16,7 +16,16 @@ import { Badge } from "@/components/ui/badge";
 import useResolveBnsOrAddress from "@/hooks/deposit/useResolveBnsOrAddress";
 
 interface AllDepositsProps {
-  allDepositsHistory: Deposit[] | undefined;
+  allDepositsHistory:
+    | {
+        aggregateData: {
+          totalDeposits: number;
+          totalVolume: string;
+          uniqueUsers: number;
+        };
+        recentDeposits: Deposit[];
+      }
+    | undefined;
   isLoading: boolean;
   btcUsdPrice: number | null | undefined;
   isRefetching?: boolean;
@@ -26,9 +35,10 @@ interface AllDepositsProps {
 const AddressCell = ({ address }: { address: string }) => {
   const { data } = useResolveBnsOrAddress(address);
 
-  const displayAddress = data?.resolvedValue
-    ? data.resolvedValue
-    : formatAddress(address);
+  const displayAddress =
+    data?.resolvedValue && !data.resolvedValue.startsWith("SP")
+      ? data.resolvedValue // Show BNS names
+      : formatAddress(address);
 
   const bgColor = getBackgroundColor(address);
 
@@ -102,13 +112,13 @@ export default function AllDeposits({
   ): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
       case "broadcast":
-        return "secondary";
+        return "secondary"; // yellow equivalent
       case "processing":
-        return "default";
+        return "default"; // blue equivalent
       case "confirmed":
-        return "outline";
+        return "outline"; // green equivalent
       default:
-        return "destructive";
+        return "destructive"; // gray equivalent
     }
   };
 
@@ -138,37 +148,40 @@ export default function AllDeposits({
     }
   };
 
-  // Calculate stats
-  const totalDeposits = allDepositsHistory?.length || 0;
-  const totalVolume =
-    allDepositsHistory?.reduce((sum, deposit) => sum + deposit.btcAmount, 0) ||
-    0;
-  const uniqueUsers = allDepositsHistory
-    ? new Set(allDepositsHistory.map((deposit) => deposit.stxReceiver)).size
-    : 0;
+  // Check if we have data to display
+  const hasData =
+    allDepositsHistory &&
+    allDepositsHistory.recentDeposits &&
+    allDepositsHistory.recentDeposits.length > 0;
 
   return (
     <div className="w-full max-w-md mx-auto mt-8">
       <h3 className="text-lg font-medium mb-4">Recent Network Activity</h3>
 
       {/* Stats summary box */}
-      {!isLoading && allDepositsHistory && allDepositsHistory.length > 0 && (
+      {!isLoading && hasData && (
         <Card className="bg-card border-border/30 p-4 mb-4">
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Total Deposits</p>
-              <p className="text-xl font-bold text-primary">{totalDeposits}</p>
+              <p className="text-xl font-bold text-primary">
+                {allDepositsHistory.aggregateData.totalDeposits}
+              </p>
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Total Volume</p>
               <p className="text-xl font-bold text-primary">
-                {formatBtcAmount(totalVolume)}
+                {Number.parseFloat(
+                  allDepositsHistory.aggregateData.totalVolume
+                ).toFixed(8)}
               </p>
               <p className="text-xs text-muted-foreground">BTC</p>
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Unique Users</p>
-              <p className="text-xl font-bold text-primary">{uniqueUsers}</p>
+              <p className="text-xl font-bold text-primary">
+                {allDepositsHistory.aggregateData.uniqueUsers}
+              </p>
             </div>
           </div>
         </Card>
@@ -181,14 +194,14 @@ export default function AllDeposits({
             Loading network activity...
           </p>
         </div>
-      ) : allDepositsHistory && allDepositsHistory.length > 0 ? (
+      ) : hasData ? (
         <Card className="bg-card border-border/30 relative overflow-hidden">
           {/* Add refetching overlay */}
           {isRefetching && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10 rounded-md">
               <div className="flex flex-col items-center space-y-2">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                <p className="text-sm">Updating data...</p>
+                <p className="text-sm">Updating history...</p>
               </div>
             </div>
           )}
@@ -204,7 +217,7 @@ export default function AllDeposits({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {allDepositsHistory.map((deposit: Deposit) => (
+                {allDepositsHistory.recentDeposits.map((deposit: Deposit) => (
                   <TableRow key={deposit.id}>
                     <TableCell className="py-3 text-xs">
                       {formatTimeAgo(deposit.createdAt)}
