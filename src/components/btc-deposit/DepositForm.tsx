@@ -17,10 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 
 interface DepositFormProps {
   btcUsdPrice: number | null;
@@ -43,7 +40,7 @@ export default function DepositForm({
   setConfirmationData,
   setShowConfirmation,
 }: DepositFormProps) {
-  const [amount, setAmount] = useState<string>("0.001");
+  const [amount, setAmount] = useState<string>("0.0001");
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const { toast } = useToast();
   const [useBlazeSubnet, setUseBlazeSubnet] = useState<boolean>(false);

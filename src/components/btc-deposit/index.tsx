@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TransactionPriority } from "@faktoryfun/styx-sdk";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DepositForm, { type ConfirmationData } from "./DepositForm";
+import DepositForm from "./DepositForm";
 import TransactionConfirmation from "./TransactionConfirmation";
 import MyHistory from "./my-history";
 import AllDeposits from "./all-deposits";
@@ -16,6 +16,15 @@ import { useFormattedBtcPrice } from "@/hooks/deposit/useSdkBtcPrice";
 import useSdkPoolStatus from "@/hooks/deposit/useSdkPoolStatus";
 import useSdkDepositHistory from "@/hooks/deposit/useSdkDepositHistory";
 import useSdkAllDepositsHistory from "@/hooks/deposit/useSdkAllDepositsHistory";
+
+// Define the ConfirmationData type
+export type ConfirmationData = {
+  depositAmount: string;
+  depositAddress: string;
+  stxAddress: string;
+  opReturnHex: string;
+  isBlaze?: boolean;
+};
 
 export default function BitcoinDeposit() {
   // Get session state from Zustand store
@@ -30,8 +39,48 @@ export default function BitcoinDeposit() {
   );
   const [activeWalletProvider, setActiveWalletProvider] = useState<
     "leather" | "xverse" | null
-  >("xverse");
+  >(null);
   const [activeTab, setActiveTab] = useState<string>("deposit");
+  const [isRefetching, setIsRefetching] = useState(false);
+  console.log(activeWalletProvider);
+  // Add this useEffect hook after the state declarations
+  useEffect(() => {
+    if (accessToken) {
+      // Detect wallet provider based on the structure of btcAddress
+      let detectedWalletProvider: "xverse" | "leather" | null = null;
+
+      // Get user data from localStorage
+      const blockstackSession = JSON.parse(
+        localStorage.getItem("blockstack-session") || "{}"
+      );
+      const userData = blockstackSession.userData;
+
+      if (userData?.profile) {
+        // Check structure of btcAddress to determine wallet type
+        if (typeof userData.profile.btcAddress === "string") {
+          // Xverse stores btcAddress as a direct string
+          detectedWalletProvider = "xverse";
+        } else if (
+          userData.profile.btcAddress?.p2wpkh?.mainnet ||
+          userData.profile.btcAddress?.p2tr?.mainnet
+        ) {
+          // Leather stores addresses in a structured object
+          detectedWalletProvider = "leather";
+        } else {
+          // If no BTC address in profile, check localStorage
+          const storedBtcAddress = localStorage.getItem("btcAddress");
+          if (storedBtcAddress) {
+            detectedWalletProvider = "leather"; // Assume Leather if using localStorage
+          }
+        }
+
+        // Update the wallet provider if detected
+        if (detectedWalletProvider !== activeWalletProvider) {
+          setActiveWalletProvider(detectedWalletProvider);
+        }
+      }
+    }
+  }, [accessToken, activeWalletProvider]);
 
   // Get addresses directly
   const userAddress = accessToken ? getStacksAddress() : null;
@@ -51,6 +100,7 @@ export default function BitcoinDeposit() {
     data: depositHistory,
     isLoading: isHistoryLoading,
     isRefetching: isHistoryRefetching,
+    refetch: refetchDepositHistory,
   } = useSdkDepositHistory(userAddress);
 
   // All network deposits - using the provided hook
@@ -58,6 +108,7 @@ export default function BitcoinDeposit() {
     data: allDepositsHistory,
     isLoading: isAllDepositsLoading,
     isRefetching: isAllDepositsRefetching,
+    refetch: refetchAllDeposits,
   } = useSdkAllDepositsHistory();
 
   // Determine if we're still loading critical data
@@ -104,7 +155,7 @@ export default function BitcoinDeposit() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-4">
+        <TabsList className="grid grid-cols-4 mb-4">
           <TabsTrigger value="deposit">Deposit</TabsTrigger>
           <TabsTrigger value="history">My History</TabsTrigger>
           <TabsTrigger value="all">All Deposits</TabsTrigger>
@@ -139,18 +190,29 @@ export default function BitcoinDeposit() {
         <TabsContent value="history">
           <MyHistory
             depositHistory={depositHistory}
-            isLoading={isHistoryLoading}
+            isLoading={isHistoryLoading || isRefetching}
             btcUsdPrice={btcUsdPrice}
-            isRefetching={isHistoryRefetching}
+            isRefetching={isHistoryRefetching || isRefetching}
           />
         </TabsContent>
 
         <TabsContent value="all">
           <AllDeposits
-            allDepositsHistory={allDepositsHistory}
-            isLoading={isAllDepositsLoading}
+            allDepositsHistory={
+              allDepositsHistory
+                ? {
+                    aggregateData: {
+                      ...allDepositsHistory.aggregateData,
+                      totalVolume:
+                        allDepositsHistory.aggregateData.totalVolume.toString(),
+                    },
+                    recentDeposits: allDepositsHistory.recentDeposits,
+                  }
+                : undefined
+            }
+            isLoading={isAllDepositsLoading || isRefetching}
             btcUsdPrice={btcUsdPrice}
-            isRefetching={isAllDepositsRefetching}
+            isRefetching={isAllDepositsRefetching || isRefetching}
           />
         </TabsContent>
       </Tabs>
@@ -165,6 +227,9 @@ export default function BitcoinDeposit() {
           userAddress={userAddress || ""}
           btcAddress={btcAddress || ""}
           activeWalletProvider={activeWalletProvider}
+          refetchDepositHistory={refetchDepositHistory}
+          refetchAllDeposits={refetchAllDeposits}
+          setIsRefetching={setIsRefetching}
         />
       )}
     </div>
