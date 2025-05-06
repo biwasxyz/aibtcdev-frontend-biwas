@@ -1,0 +1,148 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+You are working on a Next.js 14 application for a DAO proposal voting dashboard. This is a comprehensive guide for maintaining consistent patterns across the codebase.
+
+# Project Overview
+This is a React-based web application built with Next.js 14, TypeScript, and Tailwind CSS. The application allows users to interact with DAO proposals, view AI agent recommendations, and manage voting processes.
+
+# Key Technologies
+- Next.js 14 with App Router
+- TypeScript for type safety
+- Tailwind CSS with class-variance-authority (CVA) for styling
+- Radix UI for accessible components
+- TanStack Query for data fetching
+- Zustand for state management
+- Supabase for backend services
+
+# Component Structure
+Components should follow these patterns:
+
+1. UI Components (/src/components/ui):
+```tsx
+import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
+
+// Use CVA for variant styling
+const componentVariants = cva("base-styles", {
+  variants: {
+    variant: { /* variants */ },
+    size: { /* sizes */ }
+  },
+  defaultVariants: { /* defaults */ }
+});
+
+// Use TypeScript interfaces with clear naming
+export interface ComponentProps extends HTMLAttributes<HTMLElement> {
+  // Props with JSDoc comments
+}
+
+// Use forwardRef for components that need ref forwarding
+const Component = React.forwardRef<HTMLElement, ComponentProps>((
+  { className, ...props },
+  ref
+) => {
+  return (/* JSX */);
+});
+```
+
+2. Feature Components (/src/components/[feature]):
+```tsx
+"use client"; // When using client-side features
+
+import type { FC } from "react";
+import { useState, useCallback, useMemo } from "react";
+
+// Props interface at the top
+interface FeatureProps {
+  // Clear prop definitions
+}
+
+// Memoize complex calculations
+const FeatureComponent: FC<FeatureProps> = ({ prop }) => {
+  // State management at the top
+  const [state, setState] = useState();
+
+  // Memoized callbacks
+  const handleAction = useCallback(() => {
+    // Logic
+  }, [dependencies]);
+
+  // Memoized values
+  const computedValue = useMemo(() => {
+    // Computation
+  }, [dependencies]);
+
+  return (/* JSX */);
+};
+```
+
+# Styling Patterns
+1. Use Tailwind CSS with CVA for component variants
+2. Follow consistent class ordering:
+   - Layout (flex, grid, position)
+   - Spacing (padding, margin)
+   - Sizing (width, height)
+   - Typography
+   - Colors
+   - Effects (shadows, transitions)
+3. Use the cn() utility for class merging
+
+# State Management
+1. Zustand Stores (/src/store):
+```tsx
+interface StoreState {
+  // State interface
+}
+
+export const useStore = create<StoreState>((set) => ({
+  // State and actions
+}));
+```
+
+# Data Fetching
+1. TanStack Query Patterns:
+```tsx
+const { data, isLoading } = useQuery({
+  queryKey: ['key', params],
+  queryFn: () => fetchData(params)
+});
+```
+
+# Type Safety
+1. Use TypeScript strictly
+2. Define interfaces for all props
+3. Use type inference where possible
+4. Export types from feature-specific type files
+
+# File Naming and Organization
+1. Components: PascalCase.tsx
+2. Hooks: useFeatureName.ts
+3. Utils: kebab-case.ts
+4. Types: feature-types.ts
+
+# Error Handling
+1. Use error boundaries for component-level errors
+2. Implement proper loading and error states
+3. Provide meaningful error messages
+
+# Performance Considerations
+1. Use React.memo() for expensive renders
+2. Implement proper dependency arrays in hooks
+3. Lazy load components when appropriate
+4. Use Image component for optimized images
+
+# Accessibility
+1. Use semantic HTML elements
+2. Implement ARIA attributes where needed
+3. Ensure keyboard navigation works
+4. Maintain color contrast ratios
+
+# Documentation
+1. Add JSDoc comments for components and functions
+2. Document complex business logic
+3. Include usage examples for reusable components
+
+When reviewing or modifying code, ensure it follows these patterns and maintains consistency with the existing codebase. Pay special attention to type safety, performance optimizations, and accessibility considerations.
