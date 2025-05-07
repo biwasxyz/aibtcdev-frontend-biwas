@@ -192,7 +192,7 @@ const AssetTracker = () => {
             <Link href="/deposit" className="font-medium underline">
               Click here
             </Link>{" "}
-            to deposit BTC to your agent account.
+            to make a deposit.
           </p>
         )}
 
