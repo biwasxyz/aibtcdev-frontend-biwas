@@ -93,7 +93,7 @@ export default function TransactionConfirmation({
   const { copiedText, copyToClipboard } = useClipboard();
 
   // Get session state from Zustand store
-  const { accessToken, userId, isLoading, initialize } = useSessionStore();
+  const { accessToken, isLoading, initialize } = useSessionStore();
 
   // Initialize session on component mount
   useEffect(() => {
@@ -380,9 +380,7 @@ export default function TransactionConfirmation({
                 walletAccount.result.addresses
               ) {
                 // Find the payment address that matches our sender address
-                const paymentAddress = (
-                  walletAccount.result as any
-                ).addresses.find(
+                const paymentAddress = walletAccount.result.addresses.find(
                   (addr: any) =>
                     addr.address === senderBtcAddress &&
                     addr.purpose === "payment"
@@ -685,7 +683,7 @@ export default function TransactionConfirmation({
           variant: "destructive",
         });
       }
-    } catch (err: any) {
+    } catch (err) {
       const error = err as Error;
       console.error("Error creating deposit record:", error);
       setBtcTxStatus("error");
@@ -817,7 +815,7 @@ export default function TransactionConfirmation({
                   "rounded-lg overflow-hidden border border-zinc-700 hover:border-primary cursor-pointer",
                   feePriority === "low" ? "bg-primary/20" : "bg-zinc-900"
                 )}
-                onClick={() => setFeePriority(TransactionPriority.Low as any)}
+                onClick={() => setFeePriority(TransactionPriority.Low)}
               >
                 <CardContent className="p-3 text-center">
                   <p className="text-white text-sm font-medium mb-1">Low</p>
@@ -840,9 +838,7 @@ export default function TransactionConfirmation({
                   "rounded-lg overflow-hidden border border-zinc-700 hover:border-primary cursor-pointer",
                   feePriority === "medium" ? "bg-primary/20" : "bg-zinc-900"
                 )}
-                onClick={() =>
-                  setFeePriority(TransactionPriority.Medium as any)
-                }
+                onClick={() => setFeePriority(TransactionPriority.Medium)}
               >
                 <CardContent className="p-3 text-center">
                   <p className="text-white text-sm font-medium mb-1">Medium</p>
@@ -865,7 +861,7 @@ export default function TransactionConfirmation({
                   "rounded-lg overflow-hidden border border-zinc-700 hover:border-primary cursor-pointer",
                   feePriority === "high" ? "bg-primary/20" : "bg-zinc-900"
                 )}
-                onClick={() => setFeePriority(TransactionPriority.High as any)}
+                onClick={() => setFeePriority(TransactionPriority.High)}
               >
                 <CardContent className="p-3 text-center">
                   <p className="text-white text-sm font-medium mb-1">High</p>

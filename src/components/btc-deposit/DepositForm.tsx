@@ -50,7 +50,7 @@ export default function DepositForm({
   const [amount, setAmount] = useState<string>("0.0001");
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const { toast } = useToast();
-  const [useBlazeSubnet, setUseBlazeSubnet] = useState<boolean>(false);
+  // const [useBlazeSubnet, setUseBlazeSubnet] = useState<boolean>(false);
   const [feeEstimates, setFeeEstimates] = useState<{
     low: { rate: number; fee: number; time: string };
     medium: { rate: number; fee: number; time: string };
@@ -69,9 +69,23 @@ export default function DepositForm({
     initialize();
   }, [initialize]);
 
+  // Use the activeWalletProvider state with a default value
   const [activeWalletProvider, setActiveWalletProvider] = useState<
     "leather" | "xverse" | null
   >(null);
+
+  // Set the wallet provider based on the session when initialized
+  useEffect(() => {
+    if (accessToken) {
+      // Determine which wallet is being used based on available information
+      // This is a placeholder - implement your actual wallet detection logic here
+      const detectedProvider = localStorage.getItem("walletProvider") as
+        | "leather"
+        | "xverse"
+        | null;
+      setActiveWalletProvider(detectedProvider);
+    }
+  }, [accessToken]);
 
   // Get addresses from the lib - only if we have a session
   const userAddress = accessToken ? getStacksAddress() : null;
@@ -362,7 +376,7 @@ export default function DepositForm({
           depositAddress: transactionData.depositAddress,
           stxAddress: userAddress,
           opReturnHex: transactionData.opReturnData,
-          isBlaze: useBlazeSubnet,
+          // isBlaze: useBlazeSubnet,
         });
 
         setShowConfirmation(true);
@@ -663,8 +677,8 @@ export default function DepositForm({
           </div>
           <AccordionContent className="text-xs text-muted-foreground leading-relaxed">
             <p>
-              Your BTC deposit unlocks sBTC via Clarity's direct Bitcoin state
-              reading. No intermediaries or multi-signature scheme needed.
+              Your BTC deposit unlocks sBTC via Clarity&apos;s direct Bitcoin
+              state reading. No intermediaries or multi-signature scheme needed.
               Trustless. Fast. Secure.
             </p>
           </AccordionContent>
