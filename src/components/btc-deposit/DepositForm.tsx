@@ -3,6 +3,13 @@
 import { useState, type ChangeEvent, useEffect } from "react";
 import { getStacksAddress, getBitcoinAddress } from "@/lib/address";
 import { styxSDK } from "@faktoryfun/styx-sdk";
+import {
+  FeeEstimates,
+  PoolStatus,
+  TransactionPrepareParams,
+  TransactionPriority,
+  UTXO,
+} from "@faktoryfun/styx-sdk";
 import { MIN_DEPOSIT_SATS, MAX_DEPOSIT_SATS } from "@faktoryfun/styx-sdk";
 import { useToast } from "@/hooks/use-toast";
 import { Bitcoin, Loader2, Zap } from "lucide-react";
@@ -21,7 +28,7 @@ import { useQuery } from "@tanstack/react-query";
 
 interface DepositFormProps {
   btcUsdPrice: number | null;
-  poolStatus: any;
+  poolStatus: PoolStatus | null;
   setConfirmationData: (data: ConfirmationData) => void;
   setShowConfirmation: (show: boolean) => void;
 }
@@ -44,7 +51,11 @@ export default function DepositForm({
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const { toast } = useToast();
   const [useBlazeSubnet, setUseBlazeSubnet] = useState<boolean>(false);
-  const [feeEstimates, setFeeEstimates] = useState({
+  const [feeEstimates, setFeeEstimates] = useState<{
+    low: { rate: number; fee: number; time: string };
+    medium: { rate: number; fee: number; time: string };
+    high: { rate: number; fee: number; time: string };
+  }>({
     low: { rate: 1, fee: 0, time: "30 min" },
     medium: { rate: 3, fee: 0, time: "~20 min" },
     high: { rate: 5, fee: 0, time: "~10 min" },
@@ -83,7 +94,7 @@ export default function DepositForm({
 
       const utxos = await response.json();
       const totalSats = utxos.reduce(
-        (sum: number, utxo: any) => sum + utxo.value,
+        (sum: number, utxo: UTXO) => sum + utxo.value,
         0
       );
       return totalSats / 100000000; // Convert satoshis to BTC
@@ -95,7 +106,11 @@ export default function DepositForm({
   });
 
   // Fetch fee estimates from mempool.space
-  const fetchMempoolFeeEstimates = async () => {
+  const fetchMempoolFeeEstimates = async (): Promise<{
+    low: { rate: number; fee: number; time: string };
+    medium: { rate: number; fee: number; time: string };
+    high: { rate: number; fee: number; time: string };
+  }> => {
     try {
       console.log("Fetching fee estimates directly from mempool.space");
       const response = await fetch(
@@ -257,7 +272,7 @@ export default function DepositForm({
       });
 
       // Always fetch fresh fee estimates before transaction
-      let currentFeeRates;
+      let currentFeeRates: FeeEstimates;
       try {
         console.log(
           "Fetching fresh fee estimates before transaction preparation"
@@ -335,10 +350,10 @@ export default function DepositForm({
           amount: totalAmount, // Now includes service fee
           userAddress,
           btcAddress,
-          feePriority: "medium",
+          feePriority: "medium" as TransactionPriority,
           walletProvider: activeWalletProvider,
           feeRates: currentFeeRates,
-        });
+        } as TransactionPrepareParams);
 
         console.log("Transaction prepared:", transactionData);
 

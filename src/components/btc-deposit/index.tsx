@@ -179,7 +179,7 @@ export default function BitcoinDeposit() {
             ) : (
               <DepositForm
                 btcUsdPrice={btcUsdPrice ?? null}
-                poolStatus={poolStatus}
+                poolStatus={poolStatus ?? null}
                 setConfirmationData={setConfirmationData}
                 setShowConfirmation={setShowConfirmation}
               />
