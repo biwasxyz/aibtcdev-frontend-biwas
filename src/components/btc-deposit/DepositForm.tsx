@@ -3,7 +3,7 @@
 import { useState, type ChangeEvent, useEffect } from "react";
 import { getStacksAddress, getBitcoinAddress } from "@/lib/address";
 import { styxSDK } from "@faktoryfun/styx-sdk";
-import {
+import type {
   FeeEstimates,
   PoolStatus,
   TransactionPrepareParams,
@@ -12,7 +12,7 @@ import {
 } from "@faktoryfun/styx-sdk";
 import { MIN_DEPOSIT_SATS, MAX_DEPOSIT_SATS } from "@faktoryfun/styx-sdk";
 import { useToast } from "@/hooks/use-toast";
-import { Bitcoin, Loader2, Zap } from "lucide-react";
+import { Bitcoin, Loader2 } from "lucide-react";
 import AuthButton from "@/components/home/auth-button";
 import { useSessionStore } from "@/store/session";
 import { Button } from "@/components/ui/button";
@@ -366,34 +366,52 @@ export default function DepositForm({
         });
 
         setShowConfirmation(true);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error preparing transaction:", err);
 
-        if (isInscriptionError(err)) {
-          handleInscriptionError(err);
-        } else if (isUtxoCountError(err)) {
-          handleUtxoCountError(err);
-        } else if (isAddressTypeError(err)) {
-          handleAddressTypeError(err, activeWalletProvider);
+        if (err instanceof Error) {
+          if (isInscriptionError(err)) {
+            handleInscriptionError(err);
+          } else if (isUtxoCountError(err)) {
+            handleUtxoCountError(err);
+          } else if (isAddressTypeError(err)) {
+            handleAddressTypeError(err, activeWalletProvider);
+          } else {
+            toast({
+              title: "Error",
+              description:
+                err.message ||
+                "Failed to prepare transaction. Please try again.",
+              variant: "destructive",
+            });
+          }
         } else {
           toast({
             title: "Error",
-            description:
-              err.message || "Failed to prepare transaction. Please try again.",
+            description: "Failed to prepare transaction. Please try again.",
             variant: "destructive",
           });
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error preparing Bitcoin transaction:", err);
 
-      toast({
-        title: "Error",
-        description:
-          err.message ||
-          "Failed to prepare Bitcoin transaction. Please try again.",
-        variant: "destructive",
-      });
+      if (err instanceof Error) {
+        toast({
+          title: "Error",
+          description:
+            err.message ||
+            "Failed to prepare Bitcoin transaction. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description:
+            "Failed to prepare Bitcoin transaction. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 

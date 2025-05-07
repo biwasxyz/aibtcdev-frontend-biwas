@@ -340,7 +340,7 @@ export default function TransactionConfirmation({
             try {
               // First, try to get the account (which might fail if we don't have permission)
               console.log("Trying to get wallet account...");
-              let walletAccount = await (xverseRequest as any)(
+              let walletAccount = await xverseRequest(
                 "wallet_getAccount",
                 null
               );
@@ -353,7 +353,7 @@ export default function TransactionConfirmation({
                 console.log("Access denied. Requesting permissions...");
 
                 // Request permissions using wallet_requestPermissions as shown in the docs
-                const permissionResponse = await (xverseRequest as any)(
+                const permissionResponse = await xverseRequest(
                   "wallet_requestPermissions",
                   null
                 );
@@ -364,7 +364,7 @@ export default function TransactionConfirmation({
                   console.log(
                     "Permission granted. Trying to get wallet account again..."
                   );
-                  walletAccount = await (xverseRequest as any)(
+                  walletAccount = await xverseRequest(
                     "wallet_getAccount",
                     null
                   );
