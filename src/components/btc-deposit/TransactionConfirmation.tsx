@@ -9,6 +9,10 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Copy, Check, AlertTriangle, Loader2 } from "lucide-react";
 import { useSessionStore } from "@/store/session";
 import { useClipboard } from "@/helpers/clipboard-utils";
+import type {
+  QueryObserverResult,
+  RefetchOptions,
+} from "@tanstack/react-query";
 
 import {
   Dialog,
@@ -22,6 +26,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import type { ConfirmationData } from "./DepositForm";
+import type {
+  TransactionPrepareParams,
+  PreparedTransactionData,
+  DepositStatus,
+  DepositHistoryResponse,
+  Deposit,
+} from "@faktoryfun/styx-sdk";
 
 // Add this to fix the window.LeatherProvider type error
 declare global {
@@ -39,8 +50,12 @@ interface TransactionConfirmationProps {
   userAddress: string;
   btcAddress: string;
   activeWalletProvider: "leather" | "xverse" | null;
-  refetchDepositHistory: () => Promise<any>;
-  refetchAllDeposits: () => Promise<any>;
+  refetchDepositHistory: (
+    options?: RefetchOptions
+  ) => Promise<QueryObserverResult<Deposit[], Error>>;
+  refetchAllDeposits: (
+    options?: RefetchOptions
+  ) => Promise<QueryObserverResult<DepositHistoryResponse, Error>>;
   setIsRefetching: (isRefetching: boolean) => void;
 }
 
@@ -85,7 +100,11 @@ export default function TransactionConfirmation({
     initialize();
   }, [initialize]);
 
-  const [feeEstimates, setFeeEstimates] = useState({
+  const [feeEstimates, setFeeEstimates] = useState<{
+    low: { rate: number; fee: number; time: string };
+    medium: { rate: number; fee: number; time: string };
+    high: { rate: number; fee: number; time: string };
+  }>({
     low: { rate: 1, fee: 0, time: "30 min" },
     medium: { rate: 3, fee: 0, time: "~20 min" },
     high: { rate: 5, fee: 0, time: "~10 min" },
@@ -254,7 +273,7 @@ export default function TransactionConfirmation({
           btcAddress,
           feePriority,
           walletProvider: activeWalletProvider,
-        });
+        } as TransactionPrepareParams);
 
         // Here, update fee estimates from the prepared transaction
         setFeeEstimates({
@@ -290,7 +309,7 @@ export default function TransactionConfirmation({
             inputCount: preparedTransaction.inputCount,
             outputCount: preparedTransaction.outputCount,
             inscriptionCount: preparedTransaction.inscriptionCount,
-          },
+          } as PreparedTransactionData,
           walletProvider: activeWalletProvider,
           btcAddress: senderBtcAddress,
         });
@@ -599,7 +618,7 @@ export default function TransactionConfirmation({
             id: depositId,
             data: {
               btcTxId: txid,
-              status: "broadcast",
+              status: "broadcast" as DepositStatus,
             },
           });
 
@@ -654,7 +673,7 @@ export default function TransactionConfirmation({
         await styxSDK.updateDepositStatus({
           id: depositId,
           data: {
-            status: "canceled",
+            status: "canceled" as DepositStatus,
           },
         });
 
