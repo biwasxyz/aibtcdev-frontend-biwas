@@ -182,6 +182,7 @@ export default function BitcoinDeposit() {
                 poolStatus={poolStatus ?? null}
                 setConfirmationData={setConfirmationData}
                 setShowConfirmation={setShowConfirmation}
+                activeWalletProvider={activeWalletProvider}
               />
             )}
           </Card>

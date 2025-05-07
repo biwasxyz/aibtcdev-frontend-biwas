@@ -31,6 +31,7 @@ interface DepositFormProps {
   poolStatus: PoolStatus | null;
   setConfirmationData: (data: ConfirmationData) => void;
   setShowConfirmation: (show: boolean) => void;
+  activeWalletProvider: "leather" | "xverse" | null;
 }
 
 export interface ConfirmationData {
@@ -46,6 +47,7 @@ export default function DepositForm({
   poolStatus,
   setConfirmationData,
   setShowConfirmation,
+  activeWalletProvider,
 }: DepositFormProps) {
   const [amount, setAmount] = useState<string>("0.0001");
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
@@ -70,22 +72,22 @@ export default function DepositForm({
   }, [initialize]);
 
   // Use the activeWalletProvider state with a default value
-  const [activeWalletProvider, setActiveWalletProvider] = useState<
-    "leather" | "xverse" | null
-  >(null);
+  // const [activeWalletProvider, setActiveWalletProvider] = useState<
+  //   "leather" | "xverse" | null
+  // >(null);
 
   // Set the wallet provider based on the session when initialized
-  useEffect(() => {
-    if (accessToken) {
-      // Determine which wallet is being used based on available information
-      // This is a placeholder - implement your actual wallet detection logic here
-      const detectedProvider = localStorage.getItem("walletProvider") as
-        | "leather"
-        | "xverse"
-        | null;
-      setActiveWalletProvider(detectedProvider);
-    }
-  }, [accessToken]);
+  // useEffect(() => {
+  //   if (accessToken) {
+  //     // Determine which wallet is being used based on available information
+  //     // This is a placeholder - implement your actual wallet detection logic here
+  //     const detectedProvider = localStorage.getItem("walletProvider") as
+  //       | "leather"
+  //       | "xverse"
+  //       | null;
+  //     setActiveWalletProvider(detectedProvider);
+  //   }
+  // }, [accessToken]);
 
   // Get addresses from the lib - only if we have a session
   const userAddress = accessToken ? getStacksAddress() : null;
