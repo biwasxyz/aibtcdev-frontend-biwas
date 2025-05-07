@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import { hex } from "@scure/base";
 import * as btc from "@scure/btc-signer";
 import { styxSDK, TransactionPriority } from "@faktoryfun/styx-sdk";
-import { request as xverseRequest } from "sats-connect";
+import {
+  AddressPurpose,
+  AddressType,
+  request as xverseRequest,
+} from "sats-connect";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Copy, Check, AlertTriangle, Loader2 } from "lucide-react";
 import { useSessionStore } from "@/store/session";
@@ -381,7 +385,13 @@ export default function TransactionConfirmation({
               ) {
                 // Find the payment address that matches our sender address
                 const paymentAddress = walletAccount.result.addresses.find(
-                  (addr: any) =>
+                  (addr: {
+                    address: string;
+                    walletType: "software" | "ledger" | "keystone";
+                    publicKey: string;
+                    purpose: AddressPurpose;
+                    addressType: AddressType;
+                  }) =>
                     addr.address === senderBtcAddress &&
                     addr.purpose === "payment"
                 );
