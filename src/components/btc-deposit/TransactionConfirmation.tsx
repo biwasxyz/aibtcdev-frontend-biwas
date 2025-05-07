@@ -5,8 +5,8 @@ import { hex } from "@scure/base";
 import * as btc from "@scure/btc-signer";
 import { styxSDK, TransactionPriority } from "@faktoryfun/styx-sdk";
 import {
-  AddressPurpose,
-  AddressType,
+  type AddressPurpose,
+  type AddressType,
   request as xverseRequest,
 } from "sats-connect";
 import { useToast } from "@/hooks/use-toast";
@@ -38,10 +38,35 @@ import type {
   Deposit,
 } from "@faktoryfun/styx-sdk";
 
+export interface LeatherSignPsbtRequestParams {
+  hex: string;
+  network: string;
+  broadcast: boolean;
+  allowedSighash?: number[];
+  allowUnknownOutputs?: boolean;
+}
+
+export interface LeatherSignPsbtResponse {
+  result?: {
+    hex: string;
+  };
+  error?: {
+    code?: string;
+    message?: string;
+  };
+}
+
+export interface LeatherProvider {
+  request(
+    method: "signPsbt",
+    params: LeatherSignPsbtRequestParams
+  ): Promise<LeatherSignPsbtResponse>;
+}
+
 // Add this to fix the window.LeatherProvider type error
 declare global {
   interface Window {
-    LeatherProvider: any;
+    LeatherProvider?: LeatherProvider;
   }
 }
 
@@ -672,9 +697,8 @@ export default function TransactionConfirmation({
             });
           }
         );
-      } catch (err: any) {
-        const error = err as Error;
-        console.error("Error in Bitcoin transaction process:", error);
+      } catch (err: unknown) {
+        console.error("Error in Bitcoin transaction process:", err);
         setBtcTxStatus("error");
 
         // Update deposit as canceled if wallet interaction failed
@@ -685,17 +709,19 @@ export default function TransactionConfirmation({
           },
         });
 
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to process Bitcoin transaction. Please try again.";
+
         toast({
           title: "Error",
-          description:
-            error.message ||
-            "Failed to process Bitcoin transaction. Please try again.",
+          description: errorMessage,
           variant: "destructive",
         });
       }
-    } catch (err) {
-      const error = err as Error;
-      console.error("Error creating deposit record:", error);
+    } catch (err: unknown) {
+      console.error("Error creating deposit record:", err);
       setBtcTxStatus("error");
 
       toast({
