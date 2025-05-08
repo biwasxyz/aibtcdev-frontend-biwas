@@ -120,7 +120,7 @@ const AssetTracker = () => {
       console.log(
         "Agent wallets with BTC:",
         Object.entries(statusMap)
-          .filter(([_, hasSbtc]) => hasSbtc)
+          .filter(([hasSbtc]) => hasSbtc)
           .map(([address]) => address)
       );
 
@@ -148,7 +148,7 @@ const AssetTracker = () => {
     <div className="w-full border-b border-border py-3 px-4 shadow-sm">
       {!isLoaded && (
         <p className="text-center text-foreground">
-          Checking your agents' BTC status...
+          Checking your agents&apos; BTC status...
         </p>
       )}
 
