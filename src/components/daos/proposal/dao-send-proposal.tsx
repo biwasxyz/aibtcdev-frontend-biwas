@@ -21,8 +21,6 @@ interface DAOChatButtonProps extends ButtonProps {
 
 export function DAOSendProposal({
   daoId,
-  dao,
-  token,
   size = "default",
   className,
   ...props

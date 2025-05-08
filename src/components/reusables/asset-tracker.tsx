@@ -3,16 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useWalletStore } from "@/store/wallet";
 import { useSessionStore } from "@/store/session";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import type { WalletBalance } from "@/store/wallet";
 import Link from "next/link";
+import type { WalletBalance } from "@/store/wallet";
 
 const AssetTracker = () => {
   const { balances, agentWallets, fetchSingleBalance, fetchWallets } =
@@ -22,12 +14,8 @@ const AssetTracker = () => {
     Record<string, boolean>
   >({});
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
-  const [selectedAgentAddress, setSelectedAgentAddress] = useState<
-    string | null
-  >(null);
 
-  // Function to find BTC token in fungible tokens (still looking for sbtc-token in the code)
+  // Function to find BTC token in fungible tokens
   const findSbtcToken = (
     fungibleTokens: WalletBalance["fungible_tokens"] | undefined
   ) => {
@@ -143,15 +131,6 @@ const AssetTracker = () => {
     checkAgentWallets();
   }, [userId, agentWallets, balances, fetchData]);
 
-  // const handleDepositClick = () => {
-  //   router.push("/deposit");
-  // };
-
-  // const openDepositModal = (address: string) => {
-  //   setSelectedAgentAddress(address);
-  //   setIsDepositModalOpen(true);
-  // };
-
   // Return nothing if there's no user session or if session is still loading
   if (isSessionLoading) {
     return null;
@@ -164,83 +143,38 @@ const AssetTracker = () => {
   // Check if any agent wallet has BTC
   const hasAnySbtc = Object.values(agentSbtcStatus).some((status) => status);
 
-  // Get the first agent address with BTC (if any)
-  // const agentWithSbtc = Object.entries(agentSbtcStatus).find(
-  //   ([_, hasSbtc]) => hasSbtc
-  // )?.[0];
-
   // Only render content if user is logged in
   return (
-    <>
-      <div className="w-full border-b border-border py-3 px-4 shadow-sm">
-        {!isLoaded && (
-          <p className="text-center text-foreground">
-            Checking your agents' BTC status...
-          </p>
-        )}
+    <div className="w-full border-b border-border py-3 px-4 shadow-sm">
+      {!isLoaded && (
+        <p className="text-center text-foreground">
+          Checking your agents' BTC status...
+        </p>
+      )}
 
-        {isLoaded && hasAnySbtc && (
-          <p className="text-center text-primary font-medium">
-            Your agent account has BTC! You can buy FACES and start sending
-            proposals.
-          </p>
-        )}
+      {isLoaded && hasAnySbtc && (
+        <p className="text-center text-primary font-medium">
+          Your agent account has BTC! You can buy FACES and start sending
+          proposals.
+        </p>
+      )}
 
-        {isLoaded && !hasAnySbtc && agentWallets.length > 0 && (
-          <p className="text-center text-primary">
-            Your agent account does not have BTC.{" "}
-            <Link href="/deposit" className="font-medium underline">
-              Click here
-            </Link>{" "}
-            to make a deposit.
-          </p>
-        )}
+      {isLoaded && !hasAnySbtc && agentWallets.length > 0 && (
+        <p className="text-center text-primary">
+          Your agent account does not have BTC.{" "}
+          <Link href="/deposit" className="font-medium underline">
+            Click here
+          </Link>{" "}
+          to make a deposit.
+        </p>
+      )}
 
-        {isLoaded && agentWallets.length === 0 && (
-          <p className="text-center text-primary">
-            No agent wallets found. Create an agent to check for BTC.
-          </p>
-        )}
-      </div>
-
-      {/* Deposit Modal - Keeping this for future functionality */}
-      <Dialog
-        open={isDepositModalOpen}
-        onOpenChange={(open) => {
-          setIsDepositModalOpen(open);
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Deposit Agent BTC</DialogTitle>
-            <DialogDescription>
-              Transfer BTC from your agent wallet to your smart wallet
-            </DialogDescription>
-          </DialogHeader>
-          <div className="p-4 text-center">
-            <p className="text-lg font-medium">Feature Coming Soon</p>
-            <p className="mt-2">
-              The ability to deposit BTC from your agent wallet into your smart
-              wallet will be available in a future update.
-            </p>
-            {selectedAgentAddress && (
-              <p className="mt-2 text-sm text-muted-foreground">
-                Agent address: {selectedAgentAddress.substring(0, 8)}...
-                {selectedAgentAddress.substring(
-                  selectedAgentAddress.length - 8
-                )}
-              </p>
-            )}
-            <Button
-              className="mt-4"
-              onClick={() => setIsDepositModalOpen(false)}
-            >
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+      {isLoaded && agentWallets.length === 0 && (
+        <p className="text-center text-primary">
+          No agent wallets found. Create an agent to check for BTC.
+        </p>
+      )}
+    </div>
   );
 };
 
