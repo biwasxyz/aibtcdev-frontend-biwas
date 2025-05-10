@@ -1,12 +1,11 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { useState, useCallback } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import MessageDisplay from "./MessageDisplay";
 import VoteProgress from "./VoteProgress";
-import LabeledField from "./LabeledField";
 import TimeStatus, { useVotingStatus } from "./TimeStatus";
 import ProposalMetrics from "./ProposalMetrics";
 import BlockVisual from "./BlockVisual";
@@ -21,16 +20,18 @@ import {
   Hash,
   FileText,
   Calendar,
-  ChevronDown,
-  ChevronUp,
   RefreshCw,
   MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import { truncateString, formatAction, getExplorerLink } from "./helper";
 import type { Proposal } from "@/types/supabase";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import LabeledField from "./LabeledField";
 
 const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   const [expanded, setExpanded] = useState(false);
@@ -38,14 +39,14 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   const [nextRefreshIn, setNextRefreshIn] = useState(60);
   const queryClient = useQueryClient();
 
-  // Memoize voting status to prevent unnecessary recalculations
+  // Get voting status
   const { isActive, isEnded, isLoading } = useVotingStatus(
     proposal.status,
     proposal.start_block,
     proposal.end_block
   );
 
-  // Memoize refresh function to prevent unnecessary re-creation
+  // Refresh votes data
   const refreshVotesData = useCallback(async () => {
     setRefreshing(true);
     setNextRefreshIn(60);
@@ -66,212 +67,260 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
     }
   }, [queryClient, proposal.contract_principal, proposal.proposal_id]);
 
-  // Memoize badge rendering to prevent unnecessary re-renders
-  const renderBadges = useMemo(() => {
-    if (isLoading) return null;
-
-    return (
-      <>
-        {isActive && (
-          <Badge className="bg-blue-500 text-white hover:bg-blue-600">
-            Active
-          </Badge>
-        )}
-        {isEnded && (
-          <>
-            <Badge variant="destructive" className="text-xs">
-              Voting Period has Ended
-            </Badge>
-            <Badge
-              className={`text-xs ${
-                proposal.passed
-                  ? "bg-green-500 text-white hover:bg-green-600"
-                  : "bg-red-500 text-white hover:bg-red-600"
-              }`}
-            >
-              {proposal.passed ? "Passed" : "Failed"}
-            </Badge>
-          </>
-        )}
-      </>
-    );
-  }, [isLoading, isActive, isEnded, proposal.passed]);
-
-  // Auto-refresh votes every 60 seconds if voting is in progress
-  useEffect(() => {
-    if (isActive) {
-      setNextRefreshIn(60);
-
-      const countdownInterval = setInterval(() => {
-        setNextRefreshIn((prev) => {
-          if (prev <= 1) {
-            return 60;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      const refreshInterval = setInterval(() => {
-        refreshVotesData();
-      }, 60000);
-
-      return () => {
-        clearInterval(countdownInterval);
-        clearInterval(refreshInterval);
-      };
-    }
-  }, [isActive, refreshVotesData]);
-
   return (
-    <Card className="transition-all duration-200 hover:shadow-md overflow-hidden bg-zinc-900 border-zinc-800 mb-6 w-full max-w-full">
-      <CardHeader className="space-y-3 pb-3 px-4 sm:px-6">
-        <div className="flex flex-col items-start justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2 w-full justify-between">
-            <h3 className="text-lg sm:text-xl font-bold">{proposal.title}</h3>
+    <Card className="overflow-hidden bg-zinc-900 border-zinc-800 mb-6 w-full">
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-zinc-900 to-zinc-800 p-4 sm:p-6 border-b border-zinc-800">
+        <div className="flex flex-col gap-3">
+          {/* Title and Status */}
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h3 className="text-xl font-bold">{proposal.title}</h3>
 
-            <div className="flex flex-col items-start sm:items-end sm:flex-row gap-1.5 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <User className="h-3.5 w-3.5" />
-                <span>Created by:</span>
-                <a
-                  href={getExplorerLink("address", proposal.creator)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline text-foreground"
+            <div className="flex flex-wrap gap-2">
+              {isLoading ? (
+                <Badge variant="outline" className="animate-pulse">
+                  Loading...
+                </Badge>
+              ) : isActive ? (
+                <Badge className="bg-blue-500 text-white hover:bg-blue-600">
+                  Active
+                </Badge>
+              ) : isEnded ? (
+                <Badge
+                  className={
+                    proposal.passed
+                      ? "bg-green-500 text-white hover:bg-green-600"
+                      : "bg-red-500 text-white hover:bg-red-600"
+                  }
                 >
-                  {truncateString(proposal.creator, 4, 4)}
-                </a>
-              </div>
+                  {proposal.passed ? "Passed" : "Failed"}
+                </Badge>
+              ) : (
+                <Badge variant="outline">Pending</Badge>
+              )}
 
-              <span className="hidden sm:inline mx-1">•</span>
-
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5" />
-                <span>
-                  {format(new Date(proposal.created_at), "MMM d, yyyy")}
-                </span>
-              </div>
-
-              {proposal.concluded_by && (
-                <>
-                  <span className="hidden sm:inline mx-1">•</span>
-                  <div className="flex items-center gap-1.5">
-                    <User className="h-3.5 w-3.5" />
-                    <span>Concluded by:</span>
-                    <a
-                      href={getExplorerLink("address", proposal.concluded_by)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline text-foreground"
-                    >
-                      {truncateString(proposal.concluded_by, 4, 4)}
-                    </a>
-                  </div>
-                </>
+              {proposal.status === "FAILED" && (
+                <Badge variant="destructive">Execution Failed</Badge>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full justify-between">
-            <div className="flex items-center gap-2">{renderBadges}</div>
+          {/* Creator and Date */}
+          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <User className="h-4 w-4" />
+              <a
+                href={getExplorerLink("address", proposal.creator)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+              >
+                {truncateString(proposal.creator, 6, 4)}
+              </a>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4" />
+              <span>
+                {format(new Date(proposal.created_at), "MMM d, yyyy")}
+              </span>
+            </div>
 
             {isActive && (
-              <span className="flex items-center gap-1 text-xs">
-                <Timer className="h-3.5 w-3.5 text-blue-500" />
-                <span className="text-blue-500 font-medium">
-                  Voting in progress
-                </span>
-              </span>
+              <div className="flex items-center gap-1.5 ml-auto text-blue-400">
+                <Timer className="h-4 w-4" />
+                <span>Voting in progress</span>
+              </div>
             )}
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6 pt-1">
-        {proposal.parameters && (
-          <div className="rounded-lg border-2 border-blue-500/30 p-3 sm:p-4 bg-blue-500/5">
-            <MessageDisplay message={proposal.parameters} />
+      {/* Main Content */}
+      <CardContent className="p-0">
+        <Tabs defaultValue="overview" className="w-full">
+          <div className="border-b border-zinc-800">
+            <TabsList className="h-12 w-full rounded-none bg-zinc-900 border-b border-zinc-800">
+              <TabsTrigger
+                value="overview"
+                className="data-[state=active]:bg-zinc-800"
+              >
+                Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="votes"
+                className="data-[state=active]:bg-zinc-800"
+              >
+                Detailed Vote Record
+              </TabsTrigger>
+              <TabsTrigger
+                value="details"
+                className="data-[state=active]:bg-zinc-800"
+              >
+                Blockchain Details
+              </TabsTrigger>
+            </TabsList>
           </div>
-        )}
 
-        <div className="rounded-lg border-2 border-green-500/30 p-3 sm:p-4 bg-green-500/5">
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-green-500" />
-              <h4 className="font-medium text-base">Votes</h4>
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="p-4 sm:p-6 space-y-6">
+            {/* Proposal Message/Parameters */}
+            {proposal.parameters && (
+              <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
+                <MessageDisplay message={proposal.parameters} />
+              </div>
+            )}
+
+            {/* Voting Progress */}
+            <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-blue-500" />
+                  <h4 className="font-medium">Voting Progress</h4>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {isActive && (
+                    <span className="text-xs text-muted-foreground">
+                      {refreshing ? (
+                        <span className="text-blue-400 flex items-center">
+                          <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                          Updating...
+                        </span>
+                      ) : (
+                        <span>Updating in {nextRefreshIn}s</span>
+                      )}
+                    </span>
+                  )}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8"
+                    onClick={refreshVotesData}
+                    disabled={refreshing}
+                  >
+                    <RefreshCw
+                      className={`h-3.5 w-3.5 mr-1.5 ${
+                        refreshing ? "animate-spin" : ""
+                      }`}
+                    />
+                    Refresh
+                  </Button>
+                </div>
+              </div>
+
+              <VoteProgress
+                contractAddress={proposal.contract_principal}
+                proposalId={proposal.proposal_id}
+                votesFor={proposal.votes_for}
+                votesAgainst={proposal.votes_against}
+                refreshing={refreshing}
+                tokenSymbol={proposal.token_symbol || ""}
+                liquidTokens={proposal.liquid_tokens || "0"}
+              />
             </div>
 
-            <div className="flex items-center gap-2">
-              {isActive && (
-                <span className="text-xs text-muted-foreground">
-                  {refreshing ? (
-                    <span className="text-blue-400 flex items-center">
-                      <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-                      Updating...
-                    </span>
+            {/* Time Status */}
+            <TimeStatus
+              createdAt={proposal.created_at}
+              concludedBy={proposal.concluded_by}
+              status={proposal.status}
+              start_block={proposal.start_block}
+              end_block={proposal.end_block}
+            />
+
+            {/* Proposal Metrics */}
+            <ProposalMetrics proposal={proposal} />
+
+            {/* Execution Status */}
+            {isEnded && (
+              <div
+                className={`rounded-lg border p-4 ${
+                  proposal.passed
+                    ? "border-green-500/30 bg-green-500/5"
+                    : "border-red-500/30 bg-red-500/5"
+                }`}
+              >
+                <h4 className="font-medium text-base mb-3 flex items-center gap-2">
+                  {proposal.passed ? (
+                    <ThumbsUp className="h-5 w-5 text-green-500" />
                   ) : (
-                    <span>Updating in {nextRefreshIn}s</span>
+                    <ThumbsDown className="h-5 w-5 text-red-500" />
                   )}
-                </span>
-              )}
+                  <span>Execution Status</span>
+                </h4>
+
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    {proposal.passed
+                      ? "This proposal has passed and " +
+                        (proposal.executed
+                          ? "has been executed."
+                          : "is pending execution.")
+                      : "This proposal has failed and will not be executed."}
+                  </p>
+
+                  {proposal.concluded_by && (
+                    <div className="flex items-center gap-1.5 text-sm">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        Concluded by:
+                      </span>
+                      <a
+                        href={getExplorerLink("address", proposal.concluded_by)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {truncateString(proposal.concluded_by, 6, 4)}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Votes Tab */}
+          <TabsContent value="votes" className="p-4 sm:p-6 space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-purple-500" />
+                <h4 className="font-medium text-lg">Detailed Vote Record</h4>
+              </div>
 
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="h-7 px-2"
                 onClick={refreshVotesData}
                 disabled={refreshing}
               >
                 <RefreshCw
-                  className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
+                  className={`h-3.5 w-3.5 mr-1.5 ${
+                    refreshing ? "animate-spin" : ""
+                  }`}
                 />
+                Refresh Votes
               </Button>
             </div>
-          </div>
 
-          <VoteProgress
-            contractAddress={proposal.contract_principal}
-            proposalId={proposal.proposal_id}
-            votesFor={proposal.votes_for}
-            votesAgainst={proposal.votes_against}
-            refreshing={refreshing}
-            tokenSymbol={proposal.token_symbol || ""}
-            liquidTokens={proposal.liquid_tokens || "0"} // Provide a default of "0" if null
-          />
-        </div>
-
-        {/* Votes Table */}
-        <div className="rounded-lg border-2 border-purple-500/30 p-3 sm:p-4 bg-purple-500/5">
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-purple-500" />
-              <h4 className="font-medium text-base">Votes</h4>
+            <div className="rounded-lg border border-zinc-700 overflow-hidden">
+              <VotesTable proposalId={proposal.id} />
             </div>
-          </div>
+          </TabsContent>
 
-          <VotesTable proposalId={proposal.id} />
-        </div>
-
-        <TimeStatus
-          createdAt={proposal.created_at}
-          concludedBy={proposal.concluded_by}
-          status={proposal.status}
-          start_block={proposal.start_block}
-          end_block={proposal.end_block}
-        />
-
-        {expanded && (
-          <>
-            <ProposalMetrics proposal={proposal} />
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              <div className="space-y-1 rounded-lg border border-zinc-800 p-3 sm:p-4 bg-zinc-900/50">
-                <h4 className="font-medium text-sm mb-2 sm:mb-3 flex items-center gap-2">
-                  <Layers className="h-4 w-4 text-muted-foreground" />
+          {/* Details Tab */}
+          <TabsContent value="details" className="p-4 sm:p-6 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Block Information */}
+              <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
+                <h4 className="font-medium text-base mb-4 flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-blue-500" />
                   <span>Block Information</span>
                 </h4>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <LabeledField
                     icon={Layers}
                     label="Snapshot block"
@@ -302,13 +351,14 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                 </div>
               </div>
 
-              <div className="space-y-1 rounded-lg border border-zinc-800 p-3 sm:p-4 bg-zinc-900/50">
-                <h4 className="font-medium text-sm mb-2 sm:mb-3 flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
+              {/* Blockchain Details */}
+              <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
+                <h4 className="font-medium text-base mb-4 flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-blue-500" />
                   <span>Blockchain Details</span>
                 </h4>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <LabeledField
                     icon={Wallet}
                     label="Principal"
@@ -342,22 +392,8 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                 </div>
               </div>
             </div>
-          </>
-        )}
-
-        <Button onClick={() => setExpanded(!expanded)} className="w-full">
-          {expanded ? (
-            <>
-              <ChevronUp className="mr-2 h-4 w-4" />
-              See less
-            </>
-          ) : (
-            <>
-              <ChevronDown className="mr-2 h-4 w-4" />
-              See more
-            </>
-          )}
-        </Button>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
