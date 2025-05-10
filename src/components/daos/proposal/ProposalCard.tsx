@@ -311,29 +311,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
           <TabsContent value="overview" className="p-4 sm:p-6 space-y-6">
             {/* Proposal Metrics - Redesigned as horizontal pills */}
             <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <BarChart3 className="h-5 w-5 text-blue-500" />
-                <h3 className="text-lg font-medium">Proposal Metrics</h3>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 -mt-0.5"
-                      >
-                        <Info className="h-4 w-4 text-zinc-400" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p className="text-sm">
-                        Key metrics about this proposal's status and outcome.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-
               <ProposalMetrics proposal={proposal} />
             </div>
 
