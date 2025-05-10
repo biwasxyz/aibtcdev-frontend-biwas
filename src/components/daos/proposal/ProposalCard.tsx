@@ -4,7 +4,6 @@ import type React from "react";
 import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
@@ -65,28 +64,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   const isPending = proposal.passed && proposal.executed !== true;
   const isFailed = isEnded && !proposal.passed;
 
-  // Implement countdown timer
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    if (isActive && !refreshing) {
-      interval = setInterval(() => {
-        setNextRefreshIn((prev) => {
-          if (prev <= 1) {
-            // When countdown reaches 0, trigger refresh
-            refreshVotesData();
-            return 60;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isActive, refreshing]);
-
   // Refresh votes data
   const refreshVotesData = useCallback(async () => {
     setRefreshing(true);
@@ -107,6 +84,28 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
       setNextRefreshIn(60);
     }
   }, [queryClient, proposal.contract_principal, proposal.proposal_id]);
+
+  // Implement countdown timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (isActive && !refreshing) {
+      interval = setInterval(() => {
+        setNextRefreshIn((prev) => {
+          if (prev <= 1) {
+            // When countdown reaches 0, trigger refresh
+            refreshVotesData();
+            return 60;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isActive, refreshing, refreshVotesData]); // Added refreshVotesData to the dependency array
 
   // Get card opacity based on execution status
   const getCardOpacity = () => {
@@ -435,7 +434,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                     </TooltipTrigger>
                     <TooltipContent side="top">
                       <p className="text-sm">
-                        The timeline for this proposal's voting period.
+                        The timeline for this proposal&apos;s voting period.
                       </p>
                     </TooltipContent>
                   </Tooltip>
