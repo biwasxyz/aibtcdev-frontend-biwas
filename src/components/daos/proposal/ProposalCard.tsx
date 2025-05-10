@@ -337,8 +337,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
               <ProposalMetrics proposal={proposal} />
             </div>
 
-            <Separator className="my-6" />
-
             {/* Proposal Message/Parameters */}
             {proposal.parameters && (
               <>
@@ -367,8 +365,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                   </div>
                   <MessageDisplay message={proposal.parameters} />
                 </div>
-
-                <Separator className="my-6" />
               </>
             )}
 
@@ -443,8 +439,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
                 }
               />
             </div>
-
-            <Separator className="my-6" />
 
             {/* Time Status */}
             <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
@@ -654,8 +648,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             {/* Execution Details */}
             {isEnded && (
               <>
-                <Separator className="my-6" />
-
                 <div
                   className={`rounded-lg border p-4 ${
                     proposal.passed
