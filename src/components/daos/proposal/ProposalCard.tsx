@@ -185,29 +185,35 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
           {getExecutionBadge()}
         </div>
 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Info className="h-4 w-4 text-zinc-400" />
-                <span className="sr-only">Status Information</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs">
-              <p className="text-sm">
-                {isActive
-                  ? "This proposal is currently being voted on."
-                  : isExecuted
-                  ? "This proposal has passed and has been executed on-chain."
-                  : isPending
-                  ? "This proposal has passed but has not been executed yet."
-                  : isFailed
-                  ? "This proposal has failed and will not be executed."
-                  : "This proposal is waiting for the voting period to begin."}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <User className="h-4 w-4 text-zinc-400" />
+            <span className="text-sm text-zinc-400">Creator:</span>
+            <a
+              href={getExplorerLink("address", proposal.creator)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm hover:underline"
+            >
+              {truncateString(proposal.creator, 6, 4)}
+            </a>
+          </div>
+
+          {proposal.concluded_by && (
+            <div className="flex items-center gap-1.5">
+              <User className="h-4 w-4 text-zinc-400" />
+              <span className="text-sm text-zinc-400">Concluded by:</span>
+              <a
+                href={getExplorerLink("address", proposal.concluded_by)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm hover:underline"
+              >
+                {truncateString(proposal.concluded_by, 6, 4)}
+              </a>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Header Section */}
@@ -248,18 +254,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
 
           {/* Creator and Date */}
           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <User className="h-4 w-4" />
-              <a
-                href={getExplorerLink("address", proposal.creator)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline"
-              >
-                {truncateString(proposal.creator, 6, 4)}
-              </a>
-            </div>
-
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
               <span>
