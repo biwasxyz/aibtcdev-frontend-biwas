@@ -3,11 +3,11 @@
 import { useParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Suspense } from "react";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import DAOProposals from "@/components/daos/proposal/DAOProposal";
 import { fetchProposals, fetchDAOByName } from "@/queries/dao-queries";
-import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
+// import { Button } from "@/components/ui/button";
+// import { format } from "date-fns";
 import { supabase } from "@/utils/supabase/client";
 import React from "react";
 
@@ -44,9 +44,9 @@ export default function ProposalsPage() {
   const {
     data: proposals,
     isLoading,
-    refetch,
-    isRefetching,
-    dataUpdatedAt,
+    // refetch,
+    // isRefetching,
+    // dataUpdatedAt,
     error: proposalsError,
   } = useQuery({
     queryKey: ["proposals", daoId],
@@ -60,13 +60,13 @@ export default function ProposalsPage() {
     console.error("Error fetching proposals:", proposalsError);
   }
 
-  const lastUpdated = dataUpdatedAt
-    ? format(dataUpdatedAt, "HH:mm:ss")
-    : "never";
+  // const lastUpdated = dataUpdatedAt
+  //   ? format(dataUpdatedAt, "HH:mm:ss")
+  //   : "never";
 
-  const handleRefetch = () => {
-    refetch();
-  };
+  // const handleRefetch = () => {
+  //   refetch();
+  // };
 
   // --- Supabase Realtime subscription for proposals ---
   React.useEffect(() => {
