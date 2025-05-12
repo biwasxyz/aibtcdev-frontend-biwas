@@ -293,36 +293,40 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                   )}
 
                   {/* Improved Action Buttons Layout */}
-                  <div className="flex flex-wrap items-center gap-3 pt-1">
-                    {dao?.mission && (
-                      <Dialog
-                        open={missionModalOpen}
-                        onOpenChange={setMissionModalOpen}
-                      >
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm" className="h-9">
-                            <Info className="h-4 w-4 mr-1.5" />
-                            <span>Mission</span>
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle className="text-xl">
-                              {dao.name} Mission
-                            </DialogTitle>
-                          </DialogHeader>
-                          <div className="mt-4">
-                            <FormatMission
-                              content={dao.mission}
-                              inline={false}
-                            />
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    )}
-
+                  <div className="flex flex-col space-y-3 pt-1">
                     <div className="flex items-center gap-3">
+                      {dao?.mission && (
+                        <Dialog
+                          open={missionModalOpen}
+                          onOpenChange={setMissionModalOpen}
+                        >
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-9">
+                              <Info className="h-4 w-4 mr-1.5" />
+                              <span>Mission</span>
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle className="text-xl">
+                                {dao.name} Mission
+                              </DialogTitle>
+                            </DialogHeader>
+                            <div className="mt-4">
+                              <FormatMission
+                                content={dao.mission}
+                                inline={false}
+                              />
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+
                       <DAOChatButton daoId={id!} />
+                    </div>
+
+                    {/* Send Proposal moved to bottom */}
+                    <div>
                       <DAOSendProposal daoId={id!} />
                     </div>
                   </div>

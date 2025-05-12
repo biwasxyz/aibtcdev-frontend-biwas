@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface DAOChatButtonProps {
+interface DAOSendProposalProps {
   daoId: string;
   dao?: DAO;
   token?: Token;
@@ -30,9 +30,10 @@ export function DAOSendProposal({
   size = "default",
   className,
   ...props
-}: DAOChatButtonProps) {
+}: DAOSendProposalProps) {
   const [inputValue, setInputValue] = useState("");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [inputError, setInputError] = useState<string | null>(null);
   const { activeThreadId, sendMessage } = useChatStore();
 
   // Fetch DAO extensions
@@ -43,7 +44,16 @@ export function DAOSendProposal({
   });
 
   const handleSendMessage = () => {
+    // Validate message length - changed from 100 to 50
+    if (inputValue.trim().length < 50) {
+      setInputError("Message should have at least 50 characters");
+      return;
+    }
+
     if (!inputValue.trim() || !activeThreadId) return;
+
+    // Clear any previous errors
+    setInputError(null);
 
     // Find the relevant extensions
     const relevantExtensions =
@@ -85,22 +95,42 @@ export function DAOSendProposal({
 
   return (
     <>
-      <div className={`flex w-full gap-2 ${className}`}>
-        <Input
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Send on-chain message"
-          className="flex-grow"
-          onKeyDown={handleKeyDown}
-        />
-        <Button
-          variant="primary"
-          size={size}
-          onClick={handleSendMessage}
-          disabled={!inputValue.trim()}
-        >
-          <Send className="h-4 w-4" />
-        </Button>
+      <div className={`flex w-full gap-2 flex-col ${className}`}>
+        <div className="flex w-full gap-2">
+          <Input
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              // Clear error when user starts typing again
+              if (inputError) setInputError(null);
+            }}
+            placeholder="Send on-chain message"
+            className={`flex-grow ${
+              inputError ? "border-red-500 focus-visible:ring-red-500" : ""
+            }`}
+            onKeyDown={handleKeyDown}
+          />
+          <Button
+            variant="primary"
+            size={size}
+            onClick={handleSendMessage}
+            disabled={!inputValue.trim() || inputValue.trim().length < 50}
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+        {inputError && (
+          <p className="text-sm text-red-500 mt-1">{inputError}</p>
+        )}
+        {!inputError &&
+          inputValue.trim().length > 0 &&
+          inputValue.trim().length < 50 && (
+            <p className="text-sm text-red-500 mt-1">
+              {`Message needs ${
+                50 - inputValue.trim().length
+              } more characters (minimum 50)`}
+            </p>
+          )}
       </div>
 
       {/* Success Dialog */}
