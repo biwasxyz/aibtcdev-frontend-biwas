@@ -22,7 +22,6 @@ import {
   Users2,
   FileText,
 } from "lucide-react";
-import { BsGlobe, BsTwitterX, BsTelegram } from "react-icons/bs";
 import {
   fetchToken,
   fetchDAOExtensions,
@@ -242,7 +241,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
         {/* DAO Header - Grid layout with metrics on the right */}
         <div className="mb-4 px-4">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] gap-4 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-6 items-start">
             {/* Left column: DAO Info */}
             <div className="flex items-start gap-3">
               {/* Token Image - Increased size */}
@@ -369,71 +368,61 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
             {/* Right column: Key Metrics */}
             <div className="flex items-center">
               {isOverviewLoading ? (
-                <div className="flex gap-1.5">
+                <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                   {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-8 w-20 rounded-md" />
+                    <Skeleton key={i} className="h-16 w-full rounded-md" />
                   ))}
                 </div>
               ) : (
-                <div className="flex gap-1.5">
-                  <div className="flex items-center bg-zinc-800 rounded-md px-2 py-3">
-                    <div className="text-right">
-                      <CoinIcon className="h-3 w-3 text-zinc-400 mr-1.5" />
-                      <span className="text-md text-zinc-400 block leading-none">
-                        Token Price
-                      </span>
-                      <span className="text-md font-medium">
-                        {formatNumber(enhancedMarketStats.price, true)}
-                      </span>
+                <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                  <div className="bg-zinc-800 rounded-md p-3 flex flex-col justify-between h-full">
+                    <div className="flex items-center mb-1">
+                      <CoinIcon className="h-4 w-4 text-zinc-400 mr-1.5" />
+                      <span className="text-sm text-zinc-400">Token Price</span>
                     </div>
+                    <span className="text-lg font-medium">
+                      {formatNumber(enhancedMarketStats.price, true)}
+                    </span>
                   </div>
 
-                  <div className="flex items-center bg-zinc-800 rounded-md px-2 py-1">
-                    <Wallet className="h-3 w-3 text-zinc-400 mr-1.5" />
-                    <div className="text-right">
-                      <span className="text-md text-zinc-400 block leading-none">
-                        MC
-                      </span>
-                      <span className="text-md font-medium">
-                        {formatNumber(enhancedMarketStats.marketCap)}
-                      </span>
+                  <div className="bg-zinc-800 rounded-md p-3 flex flex-col justify-between h-full">
+                    <div className="flex items-center mb-1">
+                      <Wallet className="h-4 w-4 text-zinc-400 mr-1.5" />
+                      <span className="text-sm text-zinc-400">Market Cap</span>
                     </div>
+                    <span className="text-lg font-medium">
+                      {formatNumber(enhancedMarketStats.marketCap)}
+                    </span>
                   </div>
 
-                  <div className="flex items-center bg-zinc-800 rounded-md px-2 py-1">
-                    <Building2 className="h-3 w-3 text-zinc-400 mr-1.5" />
-                    <div className="text-right">
-                      <span className="text-md text-zinc-400 block leading-none">
-                        Treasury
-                      </span>
-                      <span className="text-md font-medium">
-                        {formatNumber(enhancedMarketStats.treasuryBalance)}
-                      </span>
+                  <div className="bg-zinc-800 rounded-md p-3 flex flex-col justify-between h-full">
+                    <div className="flex items-center mb-1">
+                      <Building2 className="h-4 w-4 text-zinc-400 mr-1.5" />
+                      <span className="text-sm text-zinc-400">Treasury</span>
                     </div>
+                    <span className="text-lg font-medium">
+                      {formatNumber(enhancedMarketStats.treasuryBalance)}
+                    </span>
                   </div>
 
-                  <div className="flex items-center bg-zinc-800 rounded-md px-2 py-1">
-                    <Users2 className="h-3 w-3 text-zinc-400 mr-1.5" />
-                    <div className="text-right">
-                      <span className="text-md text-zinc-400 block leading-none">
-                        Holders
-                      </span>
-                      <span className="text-md font-medium">
-                        {enhancedMarketStats.holderCount.toLocaleString()}
-                      </span>
+                  <div className="bg-zinc-800 rounded-md p-3 flex flex-col justify-between h-full">
+                    <div className="flex items-center mb-1">
+                      <Users2 className="h-4 w-4 text-zinc-400 mr-1.5" />
+                      <span className="text-sm text-zinc-400">Holders</span>
                     </div>
+                    <span className="text-lg font-medium">
+                      {enhancedMarketStats.holderCount.toLocaleString()}
+                    </span>
                   </div>
 
-                  <div className="flex items-center bg-zinc-800 rounded-md px-2 py-1">
-                    <FileText className="h-3 w-3 text-zinc-400 mr-1.5" />
-                    <div className="text-right">
-                      <span className="text-md text-zinc-400 block leading-none">
-                        Proposals
-                      </span>
-                      <span className="text-md font-medium">
-                        {totalProposals}
-                      </span>
+                  <div className="bg-zinc-800 rounded-md p-3 flex flex-col justify-between h-full">
+                    <div className="flex items-center mb-1">
+                      <FileText className="h-4 w-4 text-zinc-400 mr-1.5" />
+                      <span className="text-sm text-zinc-400">Proposals</span>
                     </div>
+                    <span className="text-lg font-medium">
+                      {totalProposals}
+                    </span>
                   </div>
                 </div>
               )}
