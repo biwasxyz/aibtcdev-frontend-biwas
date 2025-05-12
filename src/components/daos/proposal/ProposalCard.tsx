@@ -165,7 +165,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   return (
     <Card
       className={cn(
-        "overflow-hidden bg-zinc-900 border-zinc-800 mb-6 w-full transition-all duration-200 shadow-md hover:shadow-lg",
+        "overflow-hidden bg-zinc-900 mb-6 w-full transition-all duration-200 shadow-md hover:shadow-lg",
         getCardOpacity(),
         isExecuted
           ? "border-l-4 border-l-green-500"
@@ -217,7 +217,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
       </div>
 
       {/* Header Section */}
-      <CardHeader className="bg-gradient-to-r from-zinc-900 to-zinc-800 p-4 sm:p-6 border-b border-zinc-800">
+      <CardHeader className="bg-gradient-to-r from-zinc-900 to-zinc-800 p-4 sm:p-6">
         <div className="flex flex-col gap-4">
           {/* Title and Status */}
           <div className="flex flex-wrap items-start justify-between gap-2">
@@ -273,30 +273,12 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
 
       {/* Proposal Message/Parameters - Always visible */}
       {proposal.parameters && (
-        <div className="px-4 sm:px-6 pt-4 pb-2">
-          <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
-            <div className="flex items-center gap-2 mb-3">
+        <div className="px-4 sm:p-6">
+          <div className=" rounded-md">
+            <h3 className="text-lg font-medium flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-blue-500" />
-              <h3 className="text-lg font-medium">Proposal Message</h3>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 -mt-0.5"
-                    >
-                      <Info className="h-4 w-4 text-zinc-400" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p className="text-sm">
-                      The on-chain message associated with this proposal.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+              <span>Message:</span>
+            </h3>
             <MessageDisplay message={proposal.parameters} />
           </div>
         </div>
@@ -305,7 +287,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
       {/* Main Content */}
       <CardContent className="p-0">
         <Tabs defaultValue="overview" className="w-full">
-          <div className="border-b border-zinc-800 bg-zinc-800/30">
+          <div className="bg-zinc-800/30">
             <TabsList className="h-14 w-full rounded-none bg-transparent">
               <TabsTrigger
                 value="overview"
@@ -339,7 +321,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             </div>
 
             {/* Voting Progress */}
-            <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
+            <div className="p-4 bg-zinc-800/30 rounded-md">
               <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
                   <Activity className="h-5 w-5 text-blue-500" />
@@ -411,7 +393,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             </div>
 
             {/* Time Status */}
-            <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
+            <div className="p-4 bg-zinc-800/30 rounded-md">
               <div className="flex items-center gap-2 mb-3">
                 <Timer className="h-5 w-5 text-blue-500" />
                 <h3 className="text-lg font-medium">Voting Timeline</h3>
@@ -491,7 +473,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
               </div>
             </div>
 
-            <div className="rounded-lg border border-zinc-700 overflow-hidden">
+            <div className="overflow-hidden bg-zinc-800/30 rounded-md">
               <VotesTable proposalId={proposal.id} />
             </div>
           </TabsContent>
@@ -500,7 +482,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
           <TabsContent value="details" className="p-4 sm:p-6 space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Block Information */}
-              <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
+              <div className="p-4 bg-zinc-800/30 rounded-md">
                 <h4 className="font-medium text-base mb-4 flex items-center gap-2">
                   <Layers className="h-5 w-5 text-blue-500" />
                   <span>Block Information</span>
@@ -556,7 +538,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
               </div>
 
               {/* Blockchain Details */}
-              <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
+              <div className="p-4 bg-zinc-800/30 rounded-md">
                 <h4 className="font-medium text-base mb-4 flex items-center gap-2">
                   <FileText className="h-5 w-5 text-blue-500" />
                   <span>Blockchain Details</span>
@@ -619,10 +601,8 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             {isEnded && (
               <>
                 <div
-                  className={`rounded-lg border p-4 ${
-                    proposal.passed
-                      ? "border-green-500/30 bg-green-500/5"
-                      : "border-red-500/30 bg-red-500/5"
+                  className={`p-4 rounded-md ${
+                    proposal.passed ? "bg-green-500/5" : "bg-red-500/5"
                   }`}
                 >
                   <h4 className="font-medium text-base mb-3 flex items-center gap-2">
