@@ -271,6 +271,37 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
         </div>
       </CardHeader>
 
+      {/* Proposal Message/Parameters - Always visible */}
+      {proposal.parameters && (
+        <div className="px-4 sm:px-6 pt-4 pb-2">
+          <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
+            <div className="flex items-center gap-2 mb-3">
+              <MessageSquare className="h-5 w-5 text-blue-500" />
+              <h3 className="text-lg font-medium">Proposal Message</h3>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 -mt-0.5"
+                    >
+                      <Info className="h-4 w-4 text-zinc-400" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p className="text-sm">
+                      The on-chain message associated with this proposal.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <MessageDisplay message={proposal.parameters} />
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <CardContent className="p-0">
         <Tabs defaultValue="overview" className="w-full">
@@ -306,37 +337,6 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             <div className="mb-6">
               <ProposalMetrics proposal={proposal} />
             </div>
-
-            {/* Proposal Message/Parameters */}
-            {proposal.parameters && (
-              <>
-                <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
-                  <div className="flex items-center gap-2 mb-3">
-                    <MessageSquare className="h-5 w-5 text-blue-500" />
-                    <h3 className="text-lg font-medium">Proposal Message</h3>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 -mt-0.5"
-                          >
-                            <Info className="h-4 w-4 text-zinc-400" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top">
-                          <p className="text-sm">
-                            The on-chain message associated with this proposal.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <MessageDisplay message={proposal.parameters} />
-                </div>
-              </>
-            )}
 
             {/* Voting Progress */}
             <div className="rounded-lg border border-zinc-700 p-4 bg-zinc-800/30">
