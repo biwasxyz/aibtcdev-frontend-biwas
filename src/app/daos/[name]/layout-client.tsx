@@ -58,7 +58,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-// import { DAOSendProposal } from "@/components/daos/proposal/dao-send-proposal";
+import { DAOSendProposal } from "@/components/daos/proposal/dao-send-proposal";
 
 export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   const params = useParams();
@@ -323,7 +323,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
                     <div className="flex items-center gap-3">
                       <DAOChatButton daoId={id!} />
-                      {/* <DAOSendProposal daoId={id!} /> */}
+                      <DAOSendProposal daoId={id!} />
                     </div>
                   </div>
                 </div>
