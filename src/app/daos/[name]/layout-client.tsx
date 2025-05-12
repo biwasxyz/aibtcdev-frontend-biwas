@@ -16,6 +16,11 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
+  Wallet,
+  CoinsIcon as CoinIcon,
+  Building2,
+  Users2,
+  FileText,
 } from "lucide-react";
 import { BsGlobe, BsTwitterX, BsTelegram } from "react-icons/bs";
 import {
@@ -40,7 +45,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DAOCreationDate } from "@/components/daos/dao-creation-date";
-import { Card, CardContent } from "@/components/ui/card";
 import { FormatMission } from "@/helpers/format-mission";
 import {
   Dialog,
@@ -49,11 +53,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 // import { DAOSendProposal } from "@/components/daos/proposal/dao-send-proposal";
 
 export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   const params = useParams();
-  const encodedName = params.name as string; // Changed from id to name
+  const encodedName = params.name as string;
   const pathname = usePathname();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [missionModalOpen, setMissionModalOpen] = useState(false);
@@ -214,10 +224,10 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex flex-col">
-      <div className="container mx-auto px-4 py-4 sm:py-6 flex-grow">
+    <div className="flex flex-col w-full">
+      <div className="w-full py-2 flex-grow">
         {/* Breadcrumb */}
-        <nav className="flex items-center text-xs sm:text-sm text-muted-foreground mb-6">
+        <nav className="flex items-center text-xs sm:text-sm text-muted-foreground mb-2 px-4">
           <Link
             href="/daos"
             className="hover:text-foreground transition-colors"
@@ -230,174 +240,212 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
           </span>
         </nav>
 
-        {/* DAO Header - Improved layout */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-6">
-            {/* Token Image */}
-            {token?.image_url && (
-              <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-2xl overflow-hidden border border-border shadow-sm">
-                <Image
-                  src={token.image_url || "/placeholder.svg"}
-                  alt={`${dao?.name} token`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 96px, 128px"
-                  priority
-                />
-              </div>
-            )}
-
-            {/* DAO Info */}
-            <div className="flex-1 text-center sm:text-left">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                  {dao?.name}
-                </h1>
-
-                {/* Social links - Moved next to the title */}
-                <div className="flex gap-3 justify-center sm:justify-start">
-                  {dao.website_url && (
-                    <a
-                      href={dao.website_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="Website"
-                    >
-                      <BsGlobe className="h-5 w-5" />
-                    </a>
-                  )}
-                  {dao.x_url && (
-                    <a
-                      href={dao.x_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="X (Twitter)"
-                    >
-                      <BsTwitterX className="h-5 w-5" />
-                    </a>
-                  )}
-                  {dao.telegram_url && (
-                    <a
-                      href={dao.telegram_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="Telegram"
-                    >
-                      <BsTelegram className="h-5 w-5" />
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              {dao?.mission && (
-                <div className="text-base sm:text-lg text-muted-foreground mb-4">
-                  <p>
-                    <FormatMission content={dao.mission} inline={true} />
-                  </p>
+        {/* DAO Header - Grid layout with metrics on the right */}
+        <div className="mb-4 px-4">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] gap-4 items-center">
+            {/* Left column: DAO Info */}
+            <div className="flex items-start gap-3">
+              {/* Token Image - Increased size */}
+              {token?.image_url && (
+                <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden border border-border shadow-sm">
+                  <Image
+                    src={token.image_url || "/placeholder.svg"}
+                    alt={`${dao?.name} token`}
+                    fill
+                    className="object-cover"
+                    sizes="64px"
+                    priority
+                  />
                 </div>
               )}
 
-              <div className="space-y-2 space-x-2">
-                {dao?.mission && (
-                  <Dialog
-                    open={missionModalOpen}
-                    onOpenChange={setMissionModalOpen}
-                  >
-                    <DialogTrigger asChild>
-                      <Button variant="outline">
-                        <Info className="h-3.5 w-3.5 mr-1" />
-                        Show Mission
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle className="text-xl">
-                          {dao.name} Mission
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="mt-4">
-                        <FormatMission content={dao.mission} inline={false} />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                )}
+              {/* DAO Info - Horizontal layout */}
+              <div className="flex-1">
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-lg font-bold tracking-tight">
+                      {dao?.name}
+                    </h1>
 
-                {/* NO NEED TO FILTER IT OUT AS THE QUERY HANDLES AND FETCHES OUR REQURED DAO */}
-                <DAOChatButton daoId={id!} />
-                {/* <DAOSendProposal daoId={id!} /> */}
+                    {/* Social links - Inline with title */}
+                    {/* THESE ARE NOT BEING USED SO COMMENTING OUT FOR NOW */}
+                    {/* <div className="flex gap-2">
+                      {dao.website_url && (
+                        <a
+                          href={dao.website_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label="Website"
+                        >
+                          <BsGlobe className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                      {dao.x_url && (
+                        <a
+                          href={dao.x_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label="X (Twitter)"
+                        >
+                          <BsTwitterX className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                      {dao.telegram_url && (
+                        <a
+                          href={dao.telegram_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label="Telegram"
+                        >
+                          <BsTelegram className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                    </div> */}
+                  </div>
+
+                  {dao?.mission && (
+                    <div className="text-md text-muted-foreground mb-2 line-clamp-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="cursor-pointer">
+                              <FormatMission
+                                content={dao.mission}
+                                inline={true}
+                              />
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-sm">
+                            <p className="text-xs">
+                              <FormatMission
+                                content={dao.mission}
+                                inline={true}
+                              />
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-2">
+                    {dao?.mission && (
+                      <Dialog
+                        open={missionModalOpen}
+                        onOpenChange={setMissionModalOpen}
+                      >
+                        <DialogTrigger asChild>
+                          <Button variant="outline">
+                            <Info className="h-3 w-3 mr-1" />
+                            Show Mission
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="text-xl">
+                              {dao.name} Mission
+                            </DialogTitle>
+                          </DialogHeader>
+                          <div className="mt-4">
+                            <FormatMission
+                              content={dao.mission}
+                              inline={false}
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+
+                    <DAOChatButton daoId={id!} />
+                    {/* <DAOSendProposal daoId={id!} /> */}
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* Right column: Key Metrics */}
+            <div className="flex items-center">
+              {isOverviewLoading ? (
+                <div className="flex gap-1.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Skeleton key={i} className="h-8 w-20 rounded-md" />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex gap-1.5">
+                  <div className="flex items-center bg-zinc-800 rounded-md px-2 py-3">
+                    <div className="text-right">
+                      <CoinIcon className="h-3 w-3 text-zinc-400 mr-1.5" />
+                      <span className="text-md text-zinc-400 block leading-none">
+                        Token Price
+                      </span>
+                      <span className="text-md font-medium">
+                        {formatNumber(enhancedMarketStats.price, true)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center bg-zinc-800 rounded-md px-2 py-1">
+                    <Wallet className="h-3 w-3 text-zinc-400 mr-1.5" />
+                    <div className="text-right">
+                      <span className="text-md text-zinc-400 block leading-none">
+                        MC
+                      </span>
+                      <span className="text-md font-medium">
+                        {formatNumber(enhancedMarketStats.marketCap)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center bg-zinc-800 rounded-md px-2 py-1">
+                    <Building2 className="h-3 w-3 text-zinc-400 mr-1.5" />
+                    <div className="text-right">
+                      <span className="text-md text-zinc-400 block leading-none">
+                        Treasury
+                      </span>
+                      <span className="text-md font-medium">
+                        {formatNumber(enhancedMarketStats.treasuryBalance)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center bg-zinc-800 rounded-md px-2 py-1">
+                    <Users2 className="h-3 w-3 text-zinc-400 mr-1.5" />
+                    <div className="text-right">
+                      <span className="text-md text-zinc-400 block leading-none">
+                        Holders
+                      </span>
+                      <span className="text-md font-medium">
+                        {enhancedMarketStats.holderCount.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center bg-zinc-800 rounded-md px-2 py-1">
+                    <FileText className="h-3 w-3 text-zinc-400 mr-1.5" />
+                    <div className="text-right">
+                      <span className="text-md text-zinc-400 block leading-none">
+                        Proposals
+                      </span>
+                      <span className="text-md font-medium">
+                        {totalProposals}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-
-          {/* Key Metrics - Card-based layout */}
-          {isOverviewLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-24 rounded-lg" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <Card className="bg-background/50 backdrop-blur-sm">
-                <CardContent className="p-4">
-                  <div className="text-muted-foreground text-sm">
-                    Token Price
-                  </div>
-                  <div className="text-xl font-semibold mt-1">
-                    {formatNumber(enhancedMarketStats.price, true)}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-background/50 backdrop-blur-sm">
-                <CardContent className="p-4">
-                  <div className="text-muted-foreground text-sm">
-                    Market Cap
-                  </div>
-                  <div className="text-xl font-semibold mt-1">
-                    {formatNumber(enhancedMarketStats.marketCap)}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-background/50 backdrop-blur-sm">
-                <CardContent className="p-4">
-                  <div className="text-muted-foreground text-sm">Treasury</div>
-                  <div className="text-xl font-semibold mt-1">
-                    {formatNumber(enhancedMarketStats.treasuryBalance)}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-background/50 backdrop-blur-sm">
-                <CardContent className="p-4">
-                  <div className="text-muted-foreground text-sm">Holders</div>
-                  <div className="text-xl font-semibold mt-1">
-                    {enhancedMarketStats.holderCount.toLocaleString()}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-background/50 backdrop-blur-sm">
-                <CardContent className="p-4">
-                  <div className="text-muted-foreground text-sm">Proposals</div>
-                  <div className="text-xl font-semibold mt-1">
-                    {totalProposals}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
         </div>
 
         {/* About section - Improved with card styling */}
         {dao.description && (
-          <div className="space-y-4 rounded-lg border bg-background/50 backdrop-blur-sm p-4 mb-8">
+          <div className="space-y-2 rounded-lg border bg-background/50 backdrop-blur-sm p-3 mb-4 mx-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-medium">About</h3>
+              <h3 className="text-sm font-medium">About</h3>
               {dao.description.length > 200 && (
                 <Button
                   variant="ghost"
@@ -405,7 +453,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                   onClick={() =>
                     setIsDescriptionExpanded(!isDescriptionExpanded)
                   }
-                  className="text-xs"
+                  className="text-xs h-6 px-2"
                 >
                   {isDescriptionExpanded ? (
                     <>
@@ -420,9 +468,9 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               )}
             </div>
             <p
-              className={`text-muted-foreground leading-relaxed ${
+              className={`text-muted-foreground text-sm leading-relaxed ${
                 !isDescriptionExpanded && dao.description.length > 200
-                  ? "line-clamp-4"
+                  ? "line-clamp-3"
                   : ""
               }`}
             >
@@ -432,7 +480,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Navigation Tabs - Mobile */}
-        <div className="block sm:hidden border-b border-border overflow-x-auto mb-4">
+        <div className="block sm:hidden border-b border-border overflow-x-auto mb-4 px-4">
           <div className="flex whitespace-nowrap">
             <Link href={`/daos/${encodedName}`} className="mr-4">
               <div
@@ -474,7 +522,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation Tabs - Desktop */}
-        <div className="hidden sm:flex border-b border-border mb-4">
+        <div className="hidden sm:flex border-b border-border mb-4 px-4">
           <Link href={`/daos/${encodedName}`} className="mr-6">
             <div
               className={`flex items-center gap-2 pb-2 ${
@@ -514,12 +562,12 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Content */}
-        <main className="w-full mb-8">{children}</main>
+        <main className="w-full mb-6 px-4">{children}</main>
 
         {/* Treasury Holdings - Improved styling */}
         {!isOverviewLoading && treasuryTokens && treasuryTokens.length > 0 && (
-          <div className="space-y-4 mb-8">
-            <h3 className="text-base font-medium">Treasury Holdings</h3>
+          <div className="space-y-3 mb-6 px-4">
+            <h3 className="text-sm font-medium">Treasury Holdings</h3>
             <div className="rounded-lg border bg-background/50 backdrop-blur-sm overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -538,20 +586,20 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                 <TableBody>
                   {treasuryTokens.map((token, index) => (
                     <TableRow key={index}>
-                      <TableCell className="font-medium whitespace-nowrap">
+                      <TableCell className="font-medium whitespace-nowrap py-2">
                         {token.type}
                       </TableCell>
-                      <TableCell className="max-w-[120px] sm:max-w-none truncate">
+                      <TableCell className="max-w-[120px] sm:max-w-none truncate py-2">
                         {token.name}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">
+                      <TableCell className="whitespace-nowrap py-2">
                         {token.symbol}
                       </TableCell>
-                      <TableCell className="text-right whitespace-nowrap">
+                      <TableCell className="text-right whitespace-nowrap py-2">
                         {formatNumber(token.amount)}
                       </TableCell>
                       {treasuryTokens.some((token) => token.value > 0) && (
-                        <TableCell className="text-right whitespace-nowrap">
+                        <TableCell className="text-right whitespace-nowrap py-2">
                           {token.value > 0 ? formatNumber(token.value) : "-"}
                         </TableCell>
                       )}
@@ -565,7 +613,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
         {/* Creation Date - Better positioned */}
         {!isOverviewLoading && (
-          <div className="text-center text-sm text-muted-foreground mt-8">
+          <div className="text-center text-xs text-muted-foreground mt-6">
             <DAOCreationDate createdAt={dao.created_at} />
           </div>
         )}
