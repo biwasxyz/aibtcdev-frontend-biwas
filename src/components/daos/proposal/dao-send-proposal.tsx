@@ -1,22 +1,22 @@
-// QUICK WAY TO SEND A PROPOSAL.....
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
-import { Button, type ButtonProps } from "@/components/ui/button";
-import { Bot, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { DAO, Token } from "@/types/supabase";
 import { useChatStore } from "@/store/chat";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDAOExtensions } from "@/queries/dao-queries";
+import { useToast } from "@/hooks/use-toast";
 
-interface DAOChatButtonProps extends ButtonProps {
+interface DAOChatButtonProps {
   daoId: string;
   dao?: DAO;
   token?: Token;
   size?: "sm" | "default";
+  className?: string;
 }
 
 export function DAOSendProposal({
@@ -25,9 +25,9 @@ export function DAOSendProposal({
   className,
   ...props
 }: DAOChatButtonProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const { activeThreadId, sendMessage } = useChatStore();
+  const { toast } = useToast();
 
   // Fetch DAO extensions
   const { data: daoExtensions } = useQuery({
@@ -63,9 +63,17 @@ export function DAOSendProposal({
     // Send the message with hidden extension types
     sendMessage(activeThreadId, messageWithExtensions);
 
-    // Reset input and collapse the input field
+    // Reset input
     setInputValue("");
-    setIsExpanded(false);
+
+    // Show toast notification after 3 seconds
+    setTimeout(() => {
+      toast({
+        title: "Success",
+        description: "Proposal sent on-chain successfully",
+        variant: "default",
+      });
+    }, 3000);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -75,39 +83,23 @@ export function DAOSendProposal({
     }
   };
 
-  if (isExpanded) {
-    return (
-      <div className="flex w-full gap-2">
-        <Input
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Type your proposal..."
-          className="flex-grow"
-          autoFocus
-          onKeyDown={handleKeyDown}
-        />
-        <Button
-          variant="primary"
-          size={size}
-          onClick={handleSendMessage}
-          disabled={!inputValue.trim()}
-        >
-          <Send className="h-4 w-4" />
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <Button
-      variant="primary"
-      size={size}
-      className={`gap-2 ${className}`}
-      onClick={() => setIsExpanded(true)}
-      {...props}
-    >
-      <Bot className="h-4 w-4" />
-      <span>Send Proposal</span>
-    </Button>
+    <div className={`flex w-full gap-2 ${className}`}>
+      <Input
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        placeholder="Send on-chain message"
+        className="flex-grow"
+        onKeyDown={handleKeyDown}
+      />
+      <Button
+        variant="primary"
+        size={size}
+        onClick={handleSendMessage}
+        disabled={!inputValue.trim()}
+      >
+        <Send className="h-4 w-4" />
+      </Button>
+    </div>
   );
 }

@@ -246,13 +246,13 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
             <div className="flex items-start gap-3">
               {/* Token Image - Increased size */}
               {token?.image_url && (
-                <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden border border-border shadow-sm">
+                <div className="relative w-20 h-20 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden border border-border shadow-sm">
                   <Image
                     src={token.image_url || "/placeholder.svg"}
                     alt={`${dao?.name} token`}
                     fill
                     className="object-cover"
-                    sizes="64px"
+                    sizes="(max-width: 640px) 80px, 128px"
                     priority
                   />
                 </div>
@@ -260,53 +260,15 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
               {/* DAO Info - Horizontal layout */}
               <div className="flex-1">
-                <div className="flex flex-col">
+                <div className="flex flex-col space-y-2">
                   <div className="flex items-center gap-2">
                     <h1 className="text-lg font-bold tracking-tight">
                       {dao?.name}
                     </h1>
-
-                    {/* Social links - Inline with title */}
-                    {/* THESE ARE NOT BEING USED SO COMMENTING OUT FOR NOW */}
-                    {/* <div className="flex gap-2">
-                      {dao.website_url && (
-                        <a
-                          href={dao.website_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label="Website"
-                        >
-                          <BsGlobe className="h-3.5 w-3.5" />
-                        </a>
-                      )}
-                      {dao.x_url && (
-                        <a
-                          href={dao.x_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label="X (Twitter)"
-                        >
-                          <BsTwitterX className="h-3.5 w-3.5" />
-                        </a>
-                      )}
-                      {dao.telegram_url && (
-                        <a
-                          href={dao.telegram_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label="Telegram"
-                        >
-                          <BsTelegram className="h-3.5 w-3.5" />
-                        </a>
-                      )}
-                    </div> */}
                   </div>
 
                   {dao?.mission && (
-                    <div className="text-md text-muted-foreground mb-2 line-clamp-2">
+                    <div className="text-md text-muted-foreground line-clamp-2">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -330,16 +292,17 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                     </div>
                   )}
 
-                  <div className="flex flex-wrap gap-2">
+                  {/* Improved Action Buttons Layout */}
+                  <div className="flex flex-wrap items-center gap-3 pt-1">
                     {dao?.mission && (
                       <Dialog
                         open={missionModalOpen}
                         onOpenChange={setMissionModalOpen}
                       >
                         <DialogTrigger asChild>
-                          <Button variant="outline">
-                            <Info className="h-3 w-3 mr-1" />
-                            Show Mission
+                          <Button variant="outline" size="sm" className="h-9">
+                            <Info className="h-4 w-4 mr-1.5" />
+                            <span>Mission</span>
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -358,8 +321,10 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                       </Dialog>
                     )}
 
-                    <DAOChatButton daoId={id!} />
-                    {/* <DAOSendProposal daoId={id!} /> */}
+                    <div className="flex items-center gap-3">
+                      <DAOChatButton daoId={id!} />
+                      {/* <DAOSendProposal daoId={id!} /> */}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -368,14 +333,14 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
             {/* Right column: Key Metrics */}
             <div className="flex items-center">
               {isOverviewLoading ? (
-                <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                   {[...Array(5)].map((_, i) => (
                     <Skeleton key={i} className="h-16 w-full rounded-md" />
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  <div className="bg-zinc-800 rounded-md p-3 flex flex-col justify-between h-full">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                  <div className="bg-zinc-800/90 rounded-md p-3 flex flex-col justify-between h-full shadow-sm border border-zinc-700/50">
                     <div className="flex items-center mb-1">
                       <CoinIcon className="h-4 w-4 text-zinc-400 mr-1.5" />
                       <span className="text-sm text-zinc-400">Token Price</span>
@@ -385,7 +350,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                     </span>
                   </div>
 
-                  <div className="bg-zinc-800 rounded-md p-3 flex flex-col justify-between h-full">
+                  <div className="bg-zinc-800/90 rounded-md p-3 flex flex-col justify-between h-full shadow-sm border border-zinc-700/50">
                     <div className="flex items-center mb-1">
                       <Wallet className="h-4 w-4 text-zinc-400 mr-1.5" />
                       <span className="text-sm text-zinc-400">Market Cap</span>
@@ -395,7 +360,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                     </span>
                   </div>
 
-                  <div className="bg-zinc-800 rounded-md p-3 flex flex-col justify-between h-full">
+                  <div className="bg-zinc-800/90 rounded-md p-3 flex flex-col justify-between h-full shadow-sm border border-zinc-700/50">
                     <div className="flex items-center mb-1">
                       <Building2 className="h-4 w-4 text-zinc-400 mr-1.5" />
                       <span className="text-sm text-zinc-400">Treasury</span>
@@ -405,7 +370,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                     </span>
                   </div>
 
-                  <div className="bg-zinc-800 rounded-md p-3 flex flex-col justify-between h-full">
+                  <div className="bg-zinc-800/90 rounded-md p-3 flex flex-col justify-between h-full shadow-sm border border-zinc-700/50">
                     <div className="flex items-center mb-1">
                       <Users2 className="h-4 w-4 text-zinc-400 mr-1.5" />
                       <span className="text-sm text-zinc-400">Holders</span>
@@ -415,7 +380,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                     </span>
                   </div>
 
-                  <div className="bg-zinc-800 rounded-md p-3 flex flex-col justify-between h-full">
+                  <div className="bg-zinc-800/90 rounded-md p-3 flex flex-col justify-between h-full shadow-sm border border-zinc-700/50">
                     <div className="flex items-center mb-1">
                       <FileText className="h-4 w-4 text-zinc-400 mr-1.5" />
                       <span className="text-sm text-zinc-400">Proposals</span>
@@ -432,7 +397,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
         {/* About section - Improved with card styling */}
         {dao.description && (
-          <div className="space-y-2 rounded-lg border bg-background/50 backdrop-blur-sm p-3 mb-4 mx-4">
+          <div className="space-y-2 rounded-lg border bg-background/50 backdrop-blur-sm p-4 mb-4 mx-4 shadow-sm">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-medium">About</h3>
               {dao.description.length > 200 && (
@@ -442,7 +407,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                   onClick={() =>
                     setIsDescriptionExpanded(!isDescriptionExpanded)
                   }
-                  className="text-xs h-6 px-2"
+                  className="text-xs h-7 px-2"
                 >
                   {isDescriptionExpanded ? (
                     <>
@@ -517,7 +482,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               className={`flex items-center gap-2 pb-2 ${
                 isProposals
                   ? "border-b-2 border-primary text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground transition-colors"
               }`}
             >
               <Activity className="h-4 w-4" />
@@ -529,7 +494,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               className={`flex items-center gap-2 pb-2 ${
                 isExtensions
                   ? "border-b-2 border-primary text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground transition-colors"
               }`}
             >
               <Blocks className="h-4 w-4" />
@@ -541,7 +506,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               className={`flex items-center gap-2 pb-2 ${
                 isHolders
                   ? "border-b-2 border-primary text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground transition-colors"
               }`}
             >
               <Users className="h-4 w-4" />
@@ -557,7 +522,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         {!isOverviewLoading && treasuryTokens && treasuryTokens.length > 0 && (
           <div className="space-y-3 mb-6 px-4">
             <h3 className="text-sm font-medium">Treasury Holdings</h3>
-            <div className="rounded-lg border bg-background/50 backdrop-blur-sm overflow-x-auto">
+            <div className="rounded-lg border bg-background/50 backdrop-blur-sm overflow-x-auto shadow-sm">
               <Table>
                 <TableHeader>
                   <TableRow>
