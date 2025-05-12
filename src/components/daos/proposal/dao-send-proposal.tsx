@@ -29,7 +29,6 @@ export function DAOSendProposal({
   daoId,
   size = "default",
   className,
-  ...props
 }: DAOSendProposalProps) {
   const [inputValue, setInputValue] = useState("");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
