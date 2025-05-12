@@ -116,7 +116,8 @@ export default function ProposalsPage() {
 
   return (
     <div className="w-full px-4 sm:px-0">
-      <div className="flex justify-between items-center mb-4">
+      {/* DON'T NEED THIS */}
+      {/* <div className="flex justify-between items-center mb-4">
         <p className="text-sm text-muted-foreground">
           Last updated: {lastUpdated}
         </p>
@@ -138,7 +139,7 @@ export default function ProposalsPage() {
             </>
           )}
         </Button>
-      </div>
+      </div> */}
       <Suspense
         fallback={
           <div className="flex justify-center items-center min-h-[200px] w-full">

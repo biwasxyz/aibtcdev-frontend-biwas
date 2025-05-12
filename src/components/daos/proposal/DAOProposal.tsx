@@ -13,19 +13,12 @@ const DAOProposals: React.FC<DAOProposalsProps> = ({ proposals }) => {
   const proposalsRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="space-y-8">
-        <div>
-          <h2 className="text-2xl font-bold">Proposals</h2>
-          <p className="mt-2">
-            View and manage your DAO&apos;s governance proposals.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"></div>
-        <div ref={proposalsRef} className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="text-lg font-semibold">All Proposals</h3>
-          </div>
+    <div className="w-full py-8">
+      <div className="space-y-3">
+        <h3 className="text-lg font-semibold">
+          Total Proposals: {proposals.length}
+        </h3>
+        <div ref={proposalsRef}>
           {proposals.length === 0 ? (
             <Card className="p-8 text-center">
               <CardDescription>No proposals found.</CardDescription>
