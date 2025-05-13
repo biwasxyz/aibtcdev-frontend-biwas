@@ -1,12 +1,13 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { DAO, Token } from "@/types/supabase";
 import { useChatStore } from "@/store/chat";
+import { useSessionStore } from "@/store/session";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDAOExtensions } from "@/queries/dao-queries";
 import {
@@ -33,7 +34,8 @@ export function DAOSendProposal({
   const [inputValue, setInputValue] = useState("");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [inputError, setInputError] = useState<string | null>(null);
-  const { activeThreadId, sendMessage } = useChatStore();
+  const { activeThreadId, sendMessage, connect, isConnected } = useChatStore();
+  const { accessToken, isLoading: isSessionLoading } = useSessionStore();
 
   // Fetch DAO extensions
   const { data: daoExtensions } = useQuery({
@@ -42,8 +44,15 @@ export function DAOSendProposal({
     staleTime: 600000, // 10 minutes
   });
 
+  // Connect WebSocket when component mounts using the token from session store
+  useEffect(() => {
+    if (accessToken && !isConnected && !isSessionLoading) {
+      connect(accessToken);
+    }
+  }, [accessToken, isConnected, connect, isSessionLoading]);
+
   const handleSendMessage = () => {
-    // Validate message length - changed from 100 to 50
+    // Validate message length
     if (inputValue.trim().length < 50) {
       setInputError("Message should have at least 50 characters");
       return;
@@ -75,6 +84,12 @@ export function DAOSendProposal({
     ${extensionsList}
 `;
 
+    // Check if WebSocket is connected before sending
+    if (!isConnected) {
+      setInputError("WebSocket not connected. Please try again.");
+      return;
+    }
+
     // Send the message with hidden extension types
     sendMessage(activeThreadId, messageWithExtensions);
 
@@ -95,6 +110,11 @@ export function DAOSendProposal({
   return (
     <>
       <div className={`flex w-full gap-2 flex-col ${className}`}>
+        {!isConnected && (
+          <p className="text-sm text-amber-500 mb-2">
+            Connecting to messaging service...
+          </p>
+        )}
         <div className="flex w-full gap-2">
           <Input
             value={inputValue}
@@ -113,7 +133,11 @@ export function DAOSendProposal({
             variant="primary"
             size={size}
             onClick={handleSendMessage}
-            disabled={!inputValue.trim() || inputValue.trim().length < 50}
+            disabled={
+              !inputValue.trim() ||
+              inputValue.trim().length < 50 ||
+              !isConnected
+            }
           >
             <Send className="h-4 w-4" />
           </Button>

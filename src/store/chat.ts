@@ -7,6 +7,7 @@ import { getStacksAddress } from "@/lib/address";
 // Local storage key for active thread
 const address = getStacksAddress()
 const ACTIVE_THREAD_KEY = `${address}_activeThreadId`;
+const SELECTED_AGENT_KEY = `${address}_selectedAgentId`
 
 // Global WebSocket instance
 let globalWs: WebSocket | null = null;
@@ -52,11 +53,17 @@ const getStoredThreadId = (): string | null => {
   return localStorage.getItem(ACTIVE_THREAD_KEY);
 };
 
+// Helper function to get stored agent ID
+const getStoredAgentId = (): string | null => {
+  if (typeof window === "undefined") return null
+  return localStorage.getItem(SELECTED_AGENT_KEY)
+}
+
 export const useChatStore = create<ChatState>((set, get) => ({
   messages: {},
   fetchedThreads: new Set(),
   activeThreadId: getStoredThreadId(), // Initialize from localStorage
-  selectedAgentId: null,
+  selectedAgentId: getStoredAgentId(),
   isConnected: false,
   isLoading: false,
   error: null,
