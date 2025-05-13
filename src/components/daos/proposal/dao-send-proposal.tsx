@@ -107,14 +107,21 @@ export function DAOSendProposal({
     }
   };
 
+  // Check if user has an access token
+  const hasAccessToken = !!accessToken && !isSessionLoading;
+
   return (
     <>
       <div className={`flex w-full gap-2 flex-col ${className}`}>
-        {!isConnected && (
+        {!hasAccessToken ? (
+          <p className="text-sm text-amber-500 mb-2">
+            Connect your wallet to send proposal
+          </p>
+        ) : !isConnected ? (
           <p className="text-sm text-amber-500 mb-2">
             Connecting to messaging service...
           </p>
-        )}
+        ) : null}
         <div className="flex w-full gap-2">
           <Input
             value={inputValue}
@@ -128,12 +135,14 @@ export function DAOSendProposal({
               inputError ? "border-red-500 focus-visible:ring-red-500" : ""
             }`}
             onKeyDown={handleKeyDown}
+            disabled={!hasAccessToken}
           />
           <Button
             variant="primary"
             size={size}
             onClick={handleSendMessage}
             disabled={
+              !hasAccessToken ||
               !inputValue.trim() ||
               inputValue.trim().length < 50 ||
               !isConnected
@@ -146,6 +155,7 @@ export function DAOSendProposal({
           <p className="text-sm text-red-500 mt-1">{inputError}</p>
         )}
         {!inputError &&
+          hasAccessToken &&
           inputValue.trim().length > 0 &&
           inputValue.trim().length < 50 && (
             <p className="text-sm text-red-500 mt-1">
