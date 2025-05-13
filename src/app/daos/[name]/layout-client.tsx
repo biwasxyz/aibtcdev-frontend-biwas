@@ -322,7 +322,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                         </Dialog>
                       )}
 
-                      <DAOChatButton daoId={id!} />
+                      {/* <DAOChatButton daoId={id!} /> */}
                     </div>
 
                     {/* Send Proposal moved to bottom */}

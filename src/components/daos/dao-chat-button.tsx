@@ -34,7 +34,7 @@ export function DAOChatButton({
           {...props}
         >
           <Bot className="h-4 w-4" />
-          <span>Participate</span>
+          <span>Send Message</span>
         </Button>
       }
     />
