@@ -145,6 +145,7 @@ const AssetTracker = () => {
 
   // Only render content if user is logged in
   return (
+
     <div className="w-full border-b border-border py-3 px-4 shadow-sm">
       {!isLoaded && (
         <p className="text-center text-foreground">
