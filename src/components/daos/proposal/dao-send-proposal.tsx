@@ -1,5 +1,5 @@
 "use client";
-
+// TODO: ADD VALIDATION IF AGENT HAS THE TOKEN ENABLE THE BUTTON TO SEND MESSAGE OR ELSE SHOW THEM BUY TOKEN BUTTON..
 import type React from "react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
