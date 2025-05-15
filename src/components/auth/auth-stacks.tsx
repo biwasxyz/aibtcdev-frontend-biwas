@@ -17,6 +17,7 @@ import dynamic from "next/dynamic";
 import { connectWallet, requestSignature } from "./stacks-provider";
 import { createDaoAgent } from "../agents/dao-agent";
 import { useRouter } from "next/navigation";
+import { runAutoInit } from "./runAutoInit";
 
 // Dynamically import StacksProvider component
 const StacksProvider = dynamic(() => import("./stacks-provider"), {
@@ -150,6 +151,16 @@ export default function StacksAuth({ redirectUrl }: { redirectUrl?: string }) {
       const success = await handleAuthentication(stxAddress, signature);
 
       if (success) {
+        // get the user ID from Supabase
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        const userId = user?.id;
+        if (userId) {
+          await runAutoInit(userId); // ✅ auto select agent + create thread
+        }
+
         if (redirectUrl) {
           router.push(redirectUrl);
           setIsLoading(false);
