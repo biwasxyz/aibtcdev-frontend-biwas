@@ -32,7 +32,7 @@ const BlockVisual = ({ value, type }: BlockVisualProps) => {
       <div className="flex items-center gap-1.5 flex-wrap">
         <Badge
           variant="outline"
-          className={`${getTypeColor()} font-medium text-xs h-5`}
+          className={`${getTypeColor()} font-medium text-xs h-5 border-none`}
         >
           {type === "bitcoin" ? "BTC" : "STX"}
         </Badge>

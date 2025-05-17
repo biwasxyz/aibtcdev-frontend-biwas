@@ -357,10 +357,6 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
             {/* Time Status */}
             <div className="space-y-2">
-              <div className="flex items-center gap-1.5">
-                <Timer className="h-4 w-4 " />
-                <h4 className="text-sm font-medium">Voting Timeline</h4>
-              </div>
               <TimeStatus
                 createdAt={proposal.created_at}
                 concludedBy={proposal.concluded_by}

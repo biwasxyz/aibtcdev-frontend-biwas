@@ -226,7 +226,7 @@ const TimeStatus = ({ status, start_block, end_block }: TimeStatusProps) => {
 
   if (isLoading) {
     return (
-      <div className="rounded-md p-2 w-full">
+      <div className="border border-border rounded-md p-2 w-full">
         <div className="flex items-center gap-1.5">
           <Timer className="h-3.5 w-3.5 text-muted-foreground animate-pulse" />
           <span className="text-xs">Loading block times...</span>
@@ -238,14 +238,16 @@ const TimeStatus = ({ status, start_block, end_block }: TimeStatusProps) => {
   // 2. Handle SPECIFIC case: Start time is null AFTER loading (API returned null or error occurred)
   if (startBlockTime === null) {
     return (
-      <div className="rounded-md p-2 w-full">
+      <div className="border border-amber-500/20 rounded-md p-2 w-full">
         <div className="flex items-center gap-1.5 text-amber-500">
           <AlertTriangle className="h-3.5 w-3.5" />
-          <span className="text-xs font-medium">Start Time Unavailable</span>
+          {/* I SEE IT NOW...THE START BLOCK TIME IS NOT AVAILABLE BECAUSE IT STARTS THE VOTING STARTS IN NEXT BLOCK I.E. START_BLOCK + 1. SO IT SHOULD BE VOTING HAS NOT STARTED */}
+          <span className="text-xs font-medium">
+            Voting has not started yet
+          </span>
         </div>
         <p className="text-xs text-amber-500/80 mt-1">
-          The timestamp for the starting block (#{start_block}) could not be
-          retrieved from the API.
+          Voting will start from (#{start_block + 1}) block.
         </p>
       </div>
     );
@@ -258,23 +260,26 @@ const TimeStatus = ({ status, start_block, end_block }: TimeStatusProps) => {
       : null;
 
   return (
-    <div className="border border-border rounded-md p-2 w-full">
+    <div className="bg-zinc-800/30 rounded-md p-2 w-full">
       {/* Header (Active/Ended status) */}
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-1.5">
-          <Timer className="h-3.5 w-3.5 text-muted-foreground" />
+          {/* <Timer className="h-3.5 w-3.5 text-muted-foreground" /> */}
           {isActive ? (
             <span className="text-xs font-medium text-blue-500">
               Voting in progress
             </span>
           ) : (
             <span className="text-xs font-medium">
-              {isEnded ? "Voting Period" : "Voting Starts Soon"}
+              {isEnded ? "" : "Voting Starts Soon"}
             </span>
           )}
         </div>
         {isEnded && (
-          <Badge variant="outline" className="text-xs h-5 px-1.5">
+          <Badge
+            variant="outline"
+            className="text-xs h-5 px-1.5 border-none bg-zinc-700/50"
+          >
             Ended
           </Badge>
         )}
@@ -286,7 +291,7 @@ const TimeStatus = ({ status, start_block, end_block }: TimeStatusProps) => {
         <div className="flex items-start gap-1.5">
           <Calendar className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
           <div>
-            <div className="text-muted-foreground">Started</div>
+            <div className="text-muted-foreground">Voting Started</div>
             <div>{formattedStart}</div>
           </div>
         </div>
@@ -295,7 +300,7 @@ const TimeStatus = ({ status, start_block, end_block }: TimeStatusProps) => {
         <div className="flex items-start gap-1.5">
           <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
           <div>
-            <div className="text-muted-foreground">Ends</div>
+            <div className="text-muted-foreground">Voting Ends</div>
             <div>
               {formattedEnd ? (
                 <span className="flex items-center flex-wrap gap-1">
@@ -303,7 +308,7 @@ const TimeStatus = ({ status, start_block, end_block }: TimeStatusProps) => {
                   {isEndTimeEstimated && (
                     <Badge
                       variant="outline"
-                      className="text-[10px] h-4 px-1 ml-1"
+                      className="text-[10px] h-4 px-1 ml-1 border-none bg-zinc-700/50"
                     >
                       Est.
                     </Badge>

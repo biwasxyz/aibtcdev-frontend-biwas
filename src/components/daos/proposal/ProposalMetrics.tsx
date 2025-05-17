@@ -23,11 +23,11 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
   // Check if the proposal has failed
   const isFailed = isEnded && !proposal.passed;
 
-  // Simplified metrics display
+  // Simplified metrics display without borders
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
       {/* Liquid Tokens */}
-      <div className="border border-border rounded-md px-3 py-2">
+      <div className="bg-zinc-800/30 rounded-md px-3 py-2">
         <div className="text-xs text-muted-foreground mb-1">Liquid Tokens</div>
         <div className="font-medium text-sm">
           {proposal.liquid_tokens !== null ? (
@@ -46,12 +46,12 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
       {/* Quorum */}
       <div
         className={cn(
-          "rounded-md px-3 py-2 border",
+          "rounded-md px-3 py-2",
           votingNotStarted || isActive
-            ? "border-blue-500/20"
+            ? "bg-blue-500/5"
             : proposal.met_quorum
-            ? "border-green-500/20"
-            : "border-red-500/20"
+            ? "bg-green-500/5"
+            : "bg-red-500/5"
         )}
       >
         <div className="text-xs text-muted-foreground mb-1">Quorum</div>
@@ -75,12 +75,12 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
       {/* Threshold */}
       <div
         className={cn(
-          "rounded-md px-3 py-2 border",
+          "rounded-md px-3 py-2",
           votingNotStarted || isActive
-            ? "border-blue-500/20"
+            ? "bg-blue-500/5"
             : proposal.met_threshold
-            ? "border-green-500/20"
-            : "border-red-500/20"
+            ? "bg-green-500/5"
+            : "bg-red-500/5"
         )}
       >
         <div className="text-xs text-muted-foreground mb-1">Threshold</div>
@@ -104,12 +104,12 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
       {/* Outcome */}
       <div
         className={cn(
-          "rounded-md px-3 py-2 border",
+          "rounded-md px-3 py-2",
           votingNotStarted || isActive
-            ? "border-blue-500/20"
+            ? "bg-blue-500/5"
             : proposal.passed
-            ? "border-green-500/20"
-            : "border-red-500/20"
+            ? "bg-green-500/5"
+            : "bg-red-500/5"
         )}
       >
         <div className="text-xs text-muted-foreground mb-1">Outcome</div>
@@ -133,14 +133,14 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
       {/* Execution Status */}
       <div
         className={cn(
-          "rounded-md px-3 py-2 border",
+          "rounded-md px-3 py-2",
           votingNotStarted || isActive
-            ? "border-blue-500/20"
+            ? "bg-blue-500/5"
             : isFailed
-            ? "border-red-500/20"
+            ? "bg-red-500/5"
             : proposal.executed === true
-            ? "border-green-500/20"
-            : "border-amber-500/20"
+            ? "bg-green-500/5"
+            : "bg-amber-500/5"
         )}
       >
         <div className="text-xs text-muted-foreground mb-1">Execution</div>

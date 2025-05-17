@@ -77,7 +77,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
   // --- Loading State ---
   if (isLoading) {
     return (
-      <div className="space-y-2 p-3 border border-border rounded-md">
+      <div className="space-y-2 p-3 bg-zinc-800/30 rounded-md">
         <div className="h-4 bg-zinc-700 rounded-full animate-pulse w-full"></div>
         <div className="h-4 bg-zinc-700 rounded-full animate-pulse w-5/6"></div>
       </div>
@@ -86,7 +86,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
 
   if (isError) {
     return (
-      <div className="text-red-400 p-3 text-center border border-red-500/20 rounded-md bg-red-500/5 text-sm">
+      <div className="text-red-400 p-3 text-center bg-red-500/5 rounded-md text-sm">
         Error loading votes: {error?.message || "Unknown error"}
       </div>
     );
@@ -95,7 +95,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
   // --- Empty State ---
   if (!votes || votes.length === 0) {
     return (
-      <div className="py-4 text-center text-muted-foreground border border-border rounded-md text-sm">
+      <div className="py-4 text-center text-muted-foreground bg-zinc-800/30 rounded-md text-sm">
         No votes have been recorded for this proposal yet.
       </div>
     );
@@ -113,10 +113,10 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
 
   // --- Render Votes Table ---
   return (
-    <div className="overflow-x-auto relative border border-border rounded-md">
+    <div className="overflow-x-auto relative bg-zinc-800/30 rounded-md">
       <Table>
         <TableHeader>
-          <TableRow className="hover:bg-muted/5">
+          <TableRow className="hover:bg-muted/5 border-b border-zinc-700/30">
             <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-muted-foreground">
               Vote
             </TableHead>
@@ -141,7 +141,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
           {votes.map((vote) => (
             <TableRow
               key={vote.id}
-              className="hover:bg-muted/5 border-t border-border"
+              className="hover:bg-muted/5 border-t border-zinc-700/30"
             >
               {/* Vote Yes/No */}
               <TableCell className="px-2 py-1.5 text-xs">
@@ -172,9 +172,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
                     variant="rounded"
                   />
                 ) : (
-                  <span className="text-muted-foreground">
-                    Agent did not vote
-                  </span>
+                  <span className="text-muted-foreground">N/A</span>
                 )}
               </TableCell>
 
@@ -214,7 +212,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
                 {vote.reasoning ? (
                   <div className="flex items-center gap-1 max-w-xs">
                     <Dialog>
-                      <DialogTrigger className="cursor-pointer  hover:underline truncate text-left">
+                      <DialogTrigger className="cursor-pointer text-blue-500 hover:underline truncate text-left">
                         {(vote.reasoning || "")
                           .substring(0, 30)
                           .replace(/[#*`_~[\]()]/g, "")}
