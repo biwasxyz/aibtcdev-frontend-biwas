@@ -1,19 +1,16 @@
 "use client";
 
-import type React from "react";
 import { CheckCircle2, XCircle, Clock } from "lucide-react";
 import { useVotingStatus } from "./TimeStatus";
 import { TokenBalance } from "@/components/reusables/balance-display";
 import { cn } from "@/lib/utils";
-// Update the import for the Proposal type
 import type { Proposal } from "@/types/supabase";
 
-// Replace the "any" type with the proper Proposal type
 interface ProposalMetricsProps {
   proposal: Proposal;
 }
 
-const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
+const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
   const { isActive, isEnded, startBlockTime } = useVotingStatus(
     proposal.status,
     proposal.start_block,
@@ -26,12 +23,13 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
   // Check if the proposal has failed
   const isFailed = isEnded && !proposal.passed;
 
+  // Simplified metrics display
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
       {/* Liquid Tokens */}
-      <div className="bg-zinc-800/50 rounded-lg px-4 py-3 border border-zinc-700/50">
-        <div className="text-sm text-muted-foreground mb-1">Liquid Tokens</div>
-        <div className="font-medium">
+      <div className="border border-border rounded-md px-3 py-2">
+        <div className="text-xs text-muted-foreground mb-1">Liquid Tokens</div>
+        <div className="font-medium text-sm">
           {proposal.liquid_tokens !== null ? (
             <TokenBalance
               value={proposal.liquid_tokens.toString()}
@@ -40,7 +38,7 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
               variant="abbreviated"
             />
           ) : (
-            "No data available"
+            "No data"
           )}
         </div>
       </div>
@@ -48,26 +46,26 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
       {/* Quorum */}
       <div
         className={cn(
-          "rounded-lg px-4 py-3 border",
+          "rounded-md px-3 py-2 border",
           votingNotStarted || isActive
-            ? "bg-blue-500/10 border-blue-500/30"
+            ? "border-blue-500/20"
             : proposal.met_quorum
-            ? "bg-green-500/10 border-green-500/30"
-            : "bg-red-500/10 border-red-500/30"
+            ? "border-green-500/20"
+            : "border-red-500/20"
         )}
       >
-        <div className="text-sm text-muted-foreground mb-1">Quorum</div>
-        <div className="flex items-center">
+        <div className="text-xs text-muted-foreground mb-1">Quorum</div>
+        <div className="flex items-center text-sm">
           {votingNotStarted || isActive ? (
             <span className="font-medium text-blue-500">Pending</span>
           ) : proposal.met_quorum ? (
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <div className="flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
               <span className="font-medium text-green-500">Met</span>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5">
-              <XCircle className="h-4 w-4 text-red-500" />
+            <div className="flex items-center gap-1">
+              <XCircle className="h-3.5 w-3.5 text-red-500" />
               <span className="font-medium text-red-500">Not Met</span>
             </div>
           )}
@@ -77,26 +75,26 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
       {/* Threshold */}
       <div
         className={cn(
-          "rounded-lg px-4 py-3 border",
+          "rounded-md px-3 py-2 border",
           votingNotStarted || isActive
-            ? "bg-blue-500/10 border-blue-500/30"
+            ? "border-blue-500/20"
             : proposal.met_threshold
-            ? "bg-green-500/10 border-green-500/30"
-            : "bg-red-500/10 border-red-500/30"
+            ? "border-green-500/20"
+            : "border-red-500/20"
         )}
       >
-        <div className="text-sm text-muted-foreground mb-1">Threshold</div>
-        <div className="flex items-center">
+        <div className="text-xs text-muted-foreground mb-1">Threshold</div>
+        <div className="flex items-center text-sm">
           {votingNotStarted || isActive ? (
             <span className="font-medium text-blue-500">Pending</span>
           ) : proposal.met_threshold ? (
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <div className="flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
               <span className="font-medium text-green-500">Met</span>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5">
-              <XCircle className="h-4 w-4 text-red-500" />
+            <div className="flex items-center gap-1">
+              <XCircle className="h-3.5 w-3.5 text-red-500" />
               <span className="font-medium text-red-500">Not Met</span>
             </div>
           )}
@@ -106,26 +104,26 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
       {/* Outcome */}
       <div
         className={cn(
-          "rounded-lg px-4 py-3 border",
+          "rounded-md px-3 py-2 border",
           votingNotStarted || isActive
-            ? "bg-blue-500/10 border-blue-500/30"
+            ? "border-blue-500/20"
             : proposal.passed
-            ? "bg-green-500/10 border-green-500/30"
-            : "bg-red-500/10 border-red-500/30"
+            ? "border-green-500/20"
+            : "border-red-500/20"
         )}
       >
-        <div className="text-sm text-muted-foreground mb-1">Outcome</div>
-        <div className="flex items-center">
+        <div className="text-xs text-muted-foreground mb-1">Outcome</div>
+        <div className="flex items-center text-sm">
           {votingNotStarted || isActive ? (
             <span className="font-medium text-blue-500">Pending</span>
           ) : proposal.passed ? (
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <div className="flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
               <span className="font-medium text-green-500">Passed</span>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5">
-              <XCircle className="h-4 w-4 text-red-500" />
+            <div className="flex items-center gap-1">
+              <XCircle className="h-3.5 w-3.5 text-red-500" />
               <span className="font-medium text-red-500">Failed</span>
             </div>
           )}
@@ -135,38 +133,38 @@ const ProposalMetrics: React.FC<ProposalMetricsProps> = ({ proposal }) => {
       {/* Execution Status */}
       <div
         className={cn(
-          "rounded-lg px-4 py-3 border",
+          "rounded-md px-3 py-2 border",
           votingNotStarted || isActive
-            ? "bg-blue-500/10 border-blue-500/30"
+            ? "border-blue-500/20"
             : isFailed
-            ? "bg-red-500/10 border-red-500/30"
+            ? "border-red-500/20"
             : proposal.executed === true
-            ? "bg-green-500/10 border-green-500/30"
-            : "bg-amber-500/10 border-amber-500/30"
+            ? "border-green-500/20"
+            : "border-amber-500/20"
         )}
       >
-        <div className="text-sm text-muted-foreground mb-1">Execution</div>
-        <div className="flex items-center">
+        <div className="text-xs text-muted-foreground mb-1">Execution</div>
+        <div className="flex items-center text-sm">
           {votingNotStarted || isActive ? (
             <span className="font-medium text-blue-500">Pending</span>
           ) : isFailed ? (
-            <div className="flex items-center gap-1.5">
-              <XCircle className="h-4 w-4 text-red-500" />
+            <div className="flex items-center gap-1">
+              <XCircle className="h-3.5 w-3.5 text-red-500" />
               <span className="font-medium text-red-500">Failed</span>
             </div>
           ) : proposal.executed === true ? (
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <div className="flex items-center gap-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
               <span className="font-medium text-green-500">Executed</span>
             </div>
           ) : proposal.executed === false ? (
-            <div className="flex items-center gap-1.5">
-              <XCircle className="h-4 w-4 text-red-500" />
+            <div className="flex items-center gap-1">
+              <XCircle className="h-3.5 w-3.5 text-red-500" />
               <span className="font-medium text-red-500">Not Executed</span>
             </div>
           ) : (
-            <div className="flex items-center gap-1.5">
-              <Clock className="h-4 w-4 text-amber-500" />
+            <div className="flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5 text-amber-500" />
               <span className="font-medium text-amber-500">Pending</span>
             </div>
           )}
