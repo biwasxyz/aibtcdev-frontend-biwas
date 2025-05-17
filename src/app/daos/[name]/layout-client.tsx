@@ -438,7 +438,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Navigation Tabs - Mobile */}
-        <div className="block sm:hidden border-b border-border overflow-x-auto mb-4 px-4">
+        <div className="block sm:hidden border-b border-border overflow-x-auto mb-4 px-4 sticky top-0 z-10 pt-2">
           <div className="flex whitespace-nowrap">
             <Link href={`/daos/${encodedName}`} className="mr-4">
               <div
@@ -480,7 +480,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation Tabs - Desktop */}
-        <div className="hidden sm:flex border-b border-border mb-4 px-4">
+        <div className="hidden sm:flex border-b border-border mb-4 px-4 sticky top-0 z-10 bg-background pt-2">
           <Link href={`/daos/${encodedName}`} className="mr-6">
             <div
               className={`flex items-center gap-2 pb-2 ${
