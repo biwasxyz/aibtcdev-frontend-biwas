@@ -32,7 +32,6 @@ import {
   fetchProposals,
   fetchDAOByName,
 } from "@/queries/dao-queries";
-import { DAOChatButton } from "@/components/daos/dao-chat-button";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -59,6 +58,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DAOSendProposal } from "@/components/daos/proposal/dao-send-proposal";
+import { DAOChatButton } from "@/components/daos/dao-chat-button";
 
 export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   const params = useParams();
@@ -246,15 +246,42 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
             <div className="flex items-start gap-3">
               {/* Token Image - Increased size */}
               {token?.image_url && (
-                <div className="relative w-20 h-20 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg overflow-hidden border border-border shadow-sm">
-                  <Image
-                    src={token.image_url || "/placeholder.svg"}
-                    alt={`${dao?.name} token`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 80px, 128px"
-                    priority
-                  />
+                <div className="flex flex-col gap-2">
+                  <div className="relative w-64 h-64 flex-shrink-0 rounded-lg overflow-hidden border border-border shadow-sm">
+                    <Image
+                      src={token.image_url || "/placeholder.svg"}
+                      alt={`${dao?.name} token`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 80px, 128px"
+                      priority
+                    />
+                  </div>
+
+                  {/* Mission Dialog directly below image */}
+                  {dao?.mission && (
+                    <Dialog
+                      open={missionModalOpen}
+                      onOpenChange={setMissionModalOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full">
+                          <Info className="h-4 w-4 mr-1.5" />
+                          <span>View Mission</span>
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="text-xl">
+                            {dao.name} Mission
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="mt-4">
+                          <FormatMission content={dao.mission} inline={false} />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                 </div>
               )}
 
@@ -294,41 +321,11 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
                   {/* Improved Action Buttons Layout */}
                   <div className="flex flex-col space-y-3 pt-1">
-                    <div className="flex items-center gap-3">
-                      {dao?.mission && (
-                        <Dialog
-                          open={missionModalOpen}
-                          onOpenChange={setMissionModalOpen}
-                        >
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm" className="h-9">
-                              <Info className="h-4 w-4 mr-1.5" />
-                              <span>Mission</span>
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle className="text-xl">
-                                {dao.name} Mission
-                              </DialogTitle>
-                            </DialogHeader>
-                            <div className="mt-4">
-                              <FormatMission
-                                content={dao.mission}
-                                inline={false}
-                              />
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      )}
-
+                    {/* <div className="flex items-center gap-3">
                       <DAOChatButton daoId={id!} />
-                    </div>
+                    </div> */}
 
                     {/* Send Proposal moved to bottom */}
-                    <div>
-                      <DAOSendProposal daoId={id!} />
-                    </div>
 
                     {/* Key Metrics - Moved below SendProposal */}
                     <div className="mt-4">
@@ -406,6 +403,10 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                           </div>
                         </div>
                       )}
+                    </div>
+
+                    <div>
+                      <DAOSendProposal daoId={id!} />
                     </div>
                   </div>
                 </div>
