@@ -104,11 +104,11 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
   // --- Helper function for confidence bar color ---
   const getConfidenceColor = (confidence: number | null): string => {
     if (confidence === null) return "bg-zinc-600";
-    if (confidence >= 0.8) return "bg-green-500";
-    if (confidence >= 0.6) return "bg-green-400";
-    if (confidence >= 0.4) return "bg-yellow-400";
-    if (confidence >= 0.2) return "bg-orange-500";
-    return "bg-red-500";
+    if (confidence >= 0.8) return "bg-primary";
+    if (confidence >= 0.6) return "bg-primary/80";
+    if (confidence >= 0.4) return "bg-primary/60";
+    if (confidence >= 0.2) return "bg-primary/40";
+    return "bg-zinc-500";
   };
 
   // --- Render Votes Table ---
@@ -151,12 +151,12 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
                     No vote
                   </span>
                 ) : vote.answer ? (
-                  <span className="flex items-center text-green-400">
+                  <span className="flex items-center text-primary">
                     <ThumbsUp className="h-3 w-3 mr-1 flex-shrink-0" />
                     Yes
                   </span>
                 ) : (
-                  <span className="flex items-center text-red-400">
+                  <span className="flex items-center text-zinc-400">
                     <ThumbsDown className="h-3 w-3 mr-1 flex-shrink-0" />
                     No
                   </span>
@@ -212,7 +212,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
                 {vote.reasoning ? (
                   <div className="flex items-center gap-1 max-w-xs">
                     <Dialog>
-                      <DialogTrigger className="cursor-pointer text-blue-500 hover:underline truncate text-left">
+                      <DialogTrigger className="cursor-pointer text-primary hover:underline truncate text-left">
                         {(vote.reasoning || "")
                           .substring(0, 30)
                           .replace(/[#*`_~[\]()]/g, "")}
@@ -247,7 +247,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
                     }`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 inline-block"
+                    className="text-primary hover:text-primary/80 inline-block"
                     title={`View transaction ${vote.tx_id}`}
                   >
                     <ExternalLink className="h-3 w-3" />

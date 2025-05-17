@@ -48,25 +48,25 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
         className={cn(
           "rounded-md px-3 py-2",
           votingNotStarted || isActive
-            ? "bg-blue-500/5"
+            ? "bg-primary"
             : proposal.met_quorum
-            ? "bg-green-500/5"
-            : "bg-red-500/5"
+            ? "bg-primary"
+            : "bg-zinc-800/50"
         )}
       >
         <div className="text-xs text-muted-foreground mb-1">Quorum</div>
         <div className="flex items-center text-sm">
           {votingNotStarted || isActive ? (
-            <span className="font-medium text-blue-500">Pending</span>
+            <span className="font-medium ">Pending</span>
           ) : proposal.met_quorum ? (
             <div className="flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-              <span className="font-medium text-green-500">Met</span>
+              <CheckCircle2 className="h-3.5 w-3.5 " />
+              <span className="font-medium ">Met</span>
             </div>
           ) : (
             <div className="flex items-center gap-1">
-              <XCircle className="h-3.5 w-3.5 text-red-500" />
-              <span className="font-medium text-red-500">Not Met</span>
+              <XCircle className="h-3.5 w-3.5 text-zinc-400" />
+              <span className="font-medium text-zinc-400">Not Met</span>
             </div>
           )}
         </div>
@@ -77,25 +77,25 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
         className={cn(
           "rounded-md px-3 py-2",
           votingNotStarted || isActive
-            ? "bg-blue-500/5"
+            ? "bg-primary"
             : proposal.met_threshold
-            ? "bg-green-500/5"
-            : "bg-red-500/5"
+            ? "bg-primary"
+            : "bg-zinc-800/50"
         )}
       >
         <div className="text-xs text-muted-foreground mb-1">Threshold</div>
         <div className="flex items-center text-sm">
           {votingNotStarted || isActive ? (
-            <span className="font-medium text-blue-500">Pending</span>
+            <span className="font-medium ">Pending</span>
           ) : proposal.met_threshold ? (
             <div className="flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-              <span className="font-medium text-green-500">Met</span>
+              <CheckCircle2 className="h-3.5 w-3.5 " />
+              <span className="font-medium ">Met</span>
             </div>
           ) : (
             <div className="flex items-center gap-1">
-              <XCircle className="h-3.5 w-3.5 text-red-500" />
-              <span className="font-medium text-red-500">Not Met</span>
+              <XCircle className="h-3.5 w-3.5 text-zinc-400" />
+              <span className="font-medium text-zinc-400">Not Met</span>
             </div>
           )}
         </div>
@@ -106,25 +106,25 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
         className={cn(
           "rounded-md px-3 py-2",
           votingNotStarted || isActive
-            ? "bg-blue-500/5"
+            ? "bg-primary"
             : proposal.passed
-            ? "bg-green-500/5"
-            : "bg-red-500/5"
+            ? "bg-primary"
+            : "bg-zinc-800/50"
         )}
       >
         <div className="text-xs text-muted-foreground mb-1">Outcome</div>
         <div className="flex items-center text-sm">
           {votingNotStarted || isActive ? (
-            <span className="font-medium text-blue-500">Pending</span>
+            <span className="font-medium ">Pending</span>
           ) : proposal.passed ? (
             <div className="flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-              <span className="font-medium text-green-500">Passed</span>
+              <CheckCircle2 className="h-3.5 w-3.5 " />
+              <span className="font-medium ">Passed</span>
             </div>
           ) : (
             <div className="flex items-center gap-1">
-              <XCircle className="h-3.5 w-3.5 text-red-500" />
-              <span className="font-medium text-red-500">Failed</span>
+              <XCircle className="h-3.5 w-3.5 text-zinc-400" />
+              <span className="font-medium text-zinc-400">Failed</span>
             </div>
           )}
         </div>
@@ -135,32 +135,32 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
         className={cn(
           "rounded-md px-3 py-2",
           votingNotStarted || isActive
-            ? "bg-blue-500/5"
+            ? "bg-primary"
             : isFailed
-            ? "bg-red-500/5"
+            ? "bg-zinc-800/50"
             : proposal.executed === true
-            ? "bg-green-500/5"
+            ? "bg-primary"
             : "bg-amber-500/5"
         )}
       >
         <div className="text-xs text-muted-foreground mb-1">Execution</div>
         <div className="flex items-center text-sm">
           {votingNotStarted || isActive ? (
-            <span className="font-medium text-blue-500">Pending</span>
+            <span className="font-medium ">Pending</span>
           ) : isFailed ? (
             <div className="flex items-center gap-1">
-              <XCircle className="h-3.5 w-3.5 text-red-500" />
-              <span className="font-medium text-red-500">Failed</span>
+              <XCircle className="h-3.5 w-3.5 text-zinc-400" />
+              <span className="font-medium text-zinc-400">Failed</span>
             </div>
           ) : proposal.executed === true ? (
             <div className="flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-              <span className="font-medium text-green-500">Executed</span>
+              <CheckCircle2 className="h-3.5 w-3.5 " />
+              <span className="font-medium ">Executed</span>
             </div>
           ) : proposal.executed === false ? (
             <div className="flex items-center gap-1">
-              <XCircle className="h-3.5 w-3.5 text-red-500" />
-              <span className="font-medium text-red-500">Not Executed</span>
+              <XCircle className="h-3.5 w-3.5 text-zinc-400" />
+              <span className="font-medium text-zinc-400">Not Executed</span>
             </div>
           ) : (
             <div className="flex items-center gap-1">
