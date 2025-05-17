@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Timer, Calendar, Clock, AlertTriangle } from "lucide-react";
+import { Timer, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import type { Proposal } from "@/types/supabase";
@@ -235,17 +235,18 @@ const TimeStatus = ({ status, start_block, end_block }: TimeStatusProps) => {
     );
   }
 
-  // 2. Handle SPECIFIC case: Start time is null AFTER loading (API returned null or error occurred)
+  // Handle case: Start time is null AFTER loading - this means voting has not started yet
   if (startBlockTime === null) {
     return (
-      <div className="border border-amber-500/20 rounded-md p-2 w-full">
-        <div className="flex items-center gap-1.5 text-amber-500">
-          <AlertTriangle className="h-3.5 w-3.5" />
-          <span className="text-xs font-medium">Start Time Unavailable</span>
+      <div className="border border-blue-500/20 bg-blue-500/5 rounded-md p-2 w-full">
+        <div className="flex items-center gap-1.5 text-blue-400">
+          <Timer className="h-3.5 w-3.5" />
+          <span className="text-xs font-medium">
+            Voting has not started yet
+          </span>
         </div>
-        <p className="text-xs text-amber-500/80 mt-1">
-          The timestamp for the starting block (#{start_block}) could not be
-          retrieved from the API.
+        <p className="text-xs text-blue-400/80 mt-1">
+          Voting starts in block #{start_block + 1}.
         </p>
       </div>
     );
