@@ -193,71 +193,77 @@ const VoteProgress = ({
           </div>
 
           <div className="grid grid-cols-3 gap-2 text-xs">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1 mb-1">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-muted-foreground">For</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <TokenBalance
-                  value={parsedVotes.votesFor}
-                  symbol={tokenSymbol}
-                  decimals={8}
-                  variant="abbreviated"
-                />
-                <span className="text-green-400 font-medium">
-                  ({voteCalculations.percentageFor.toFixed(1)}%)
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1 mb-1">
-                <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                <span className="text-muted-foreground">Against</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <TokenBalance
-                  value={parsedVotes.votesAgainst}
-                  symbol={tokenSymbol}
-                  decimals={8}
-                  variant="abbreviated"
-                />
-                <span className="text-red-400 font-medium">
-                  ({voteCalculations.percentageAgainst.toFixed(1)}%)
-                </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <span className="text-muted-foreground">For:</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <TokenBalance
+                    value={parsedVotes.votesFor}
+                    symbol={tokenSymbol}
+                    decimals={8}
+                    variant="abbreviated"
+                  />
+                  <span className="text-green-400 font-medium">
+                    ({voteCalculations.percentageFor.toFixed(1)}%)
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1 mb-1">
-                <div className="w-2 h-2 rounded-full bg-zinc-600"></div>
-                <span className="text-muted-foreground">Total</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                  <span className="text-muted-foreground">Against:</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <TokenBalance
+                    value={parsedVotes.votesAgainst}
+                    symbol={tokenSymbol}
+                    decimals={8}
+                    variant="abbreviated"
+                  />
+                  <span className="text-red-400 font-medium">
+                    ({voteCalculations.percentageAgainst.toFixed(1)}%)
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <TokenBalance
-                  value={liquidTokens || "0"}
-                  symbol={tokenSymbol}
-                  decimals={8}
-                  variant="abbreviated"
-                />
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-help ml-1">
-                        <Info className="h-3.5 w-3.5 text-zinc-400" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs">
-                      <p>
-                        Total liquid tokens available for voting.
-                        <br />
-                        {voteCalculations.percentageRemaining.toFixed(1)}% have
-                        not voted.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+            </div>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-zinc-600"></div>
+                  <span className="text-muted-foreground">Total:</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <TokenBalance
+                    value={liquidTokens || "0"}
+                    symbol={tokenSymbol}
+                    decimals={8}
+                    variant="abbreviated"
+                  />
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help ml-1">
+                          <Info className="h-3.5 w-3.5 text-zinc-400" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs">
+                        <p>
+                          Total liquid tokens available for voting.
+                          <br />
+                          {voteCalculations.percentageRemaining.toFixed(1)}%
+                          have not voted.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </div>
             </div>
           </div>

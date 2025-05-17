@@ -19,7 +19,6 @@ import {
   FileText,
   Calendar,
   RefreshCw,
-  MessageSquare,
   CheckCircle,
   XCircle,
   Clock,
@@ -156,7 +155,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   return (
     <Card
       className={cn(
-        "overflow-hidden shadow-sm hover:shadow-md bg-zinc-900 border-none",
+        "overflow-hidden shadow-sm hover:shadow-md border-zinc-800",
         getCardBorderColor()
       )}
     >
@@ -173,7 +172,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
               rel="noopener noreferrer"
               className="hover:underline"
             >
-              {truncateString(proposal.creator, 6, 4)}
+              {truncateString(proposal.creator, 5, 5)}
             </a>
           </div>
 
@@ -187,7 +186,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                 rel="noopener noreferrer"
                 className="hover:underline"
               >
-                {truncateString(proposal.concluded_by, 6, 4)}
+                {truncateString(proposal.concluded_by, 5, 5)}
               </a>
             </div>
           )}
@@ -199,7 +198,15 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
         <div className="flex flex-col gap-2">
           {/* Title and Status */}
           <div className="flex flex-wrap items-start justify-between gap-2">
-            <h3 className="text-lg font-bold">{proposal.title}</h3>
+            <div className="flex flex-col">
+              <h3 className="text-lg font-bold">{proposal.title}</h3>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground -mt-0.5">
+                <Calendar className="h-3.5 w-3.5" />
+                <span>
+                  {format(new Date(proposal.created_at), "MMM d, yyyy")}
+                </span>
+              </div>
+            </div>
 
             <div className="flex flex-wrap gap-2">
               {isLoading ? (
@@ -234,22 +241,15 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
             </div>
           </div>
 
-          {/* Date */}
-          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5" />
-              <span>
-                {format(new Date(proposal.created_at), "MMM d, yyyy")}
-              </span>
-            </div>
-
-            {isActive && (
-              <div className="flex items-center gap-1.5 ml-auto text-primary">
+          {/* Voting Status */}
+          {isActive && (
+            <div className="flex items-center gap-3 text-xs text-primary mt-1">
+              <div className="flex items-center gap-1.5">
                 <Timer className="h-3.5 w-3.5" />
                 <span>Voting in progress</span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </CardHeader>
 
@@ -258,8 +258,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
         <div className="px-3 pt-3">
           <div className="rounded-md">
             <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
-              <MessageSquare className="h-4 w-4 text-primary" />
-              <span>Message</span>
+              {/* <MessageSquare className="h-4 w-4 text-primary" /> */}
+              <span>On-chain Message</span>
             </h4>
             <MessageDisplay message={proposal.parameters} />
           </div>
@@ -269,7 +269,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
       {/* Main Content */}
       <CardContent className="p-0 pt-3">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full rounded-none bg-transparent px-3">
+          <TabsList className="w-full rounded-none bg-transparent px-3 justify-start border-b">
             <TabsTrigger
               value="overview"
               className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-1.5 h-9"
@@ -282,14 +282,14 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
               className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-1.5 h-9"
             >
               <Vote className="h-3.5 w-3.5" />
-              <span>Votes</span>
+              <span>Vote Details</span>
             </TabsTrigger>
             <TabsTrigger
               value="details"
               className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-1.5 h-9"
             >
               <Blocks className="h-3.5 w-3.5" />
-              <span>Details</span>
+              <span>Blockchain Details</span>
             </TabsTrigger>
           </TabsList>
 
@@ -302,7 +302,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-1.5">
-                  <Activity className="h-4 w-4 text-primary" />
+                  {/* <Activity className="h-4 w-4 text-primary" /> */}
                   <h4 className="text-sm font-medium">Voting Result</h4>
                 </div>
 
@@ -506,7 +506,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                         rel="noopener noreferrer"
                         className="hover:underline"
                       >
-                        {truncateString(proposal.concluded_by, 6, 4)}
+                        {truncateString(proposal.concluded_by, 5, 5)}
                       </a>
                     </div>
                   )}
