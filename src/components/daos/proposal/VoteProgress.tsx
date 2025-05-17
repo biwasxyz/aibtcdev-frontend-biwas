@@ -149,7 +149,7 @@ const VoteProgress = ({
         </div>
       ) : (
         <>
-          <div className="relative h-8 bg-zinc-800 rounded-md overflow-hidden">
+          <div className="relative h-4 bg-zinc-800 rounded-md overflow-hidden">
             {/* For votes */}
             <div
               className="absolute h-full bg-green-500/80 left-0 transition-all duration-500 ease-out flex items-center justify-start pl-2"
@@ -157,7 +157,7 @@ const VoteProgress = ({
             >
               {voteCalculations.percentageFor > 10 && (
                 <div className="flex items-center gap-1 text-white text-xs font-medium">
-                  <ThumbsUp className="h-3 w-3" />
+                  <ThumbsUp className="h-2 w-2" />
                   <span>{voteCalculations.percentageFor.toFixed(1)}%</span>
                 </div>
               )}
@@ -173,7 +173,7 @@ const VoteProgress = ({
             >
               {voteCalculations.percentageAgainst > 10 && (
                 <div className="flex items-center gap-1 text-white text-xs font-medium">
-                  <ThumbsDown className="h-3 w-3" />
+                  <ThumbsDown className="h-2 w-2" />
                   <span>{voteCalculations.percentageAgainst.toFixed(1)}%</span>
                 </div>
               )}
