@@ -167,7 +167,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   return (
     <Card
       className={cn(
-        "overflow-hidden shadow-sm hover:shadow-md border-zinc-800 bg-zinc-900",
+        "overflow-hidden shadow-sm hover:shadow-md border-t-0 border-r-0 border-b-0  bg-background",
         getCardBorderColor()
       )}
     >
@@ -180,7 +180,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
           </h3>
 
           {/* Meta information - Single line with status badge on right */}
-          <div className="flex flex-wrap items-center justify-between gap-y-2 text-xs text-gray-400 leading-tight">
+          <div className="flex flex-wrap items-center justify-between gap-y-2 text-xs  leading-tight">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-3 w-3" />
@@ -229,9 +229,9 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
       {/* Proposal Message - Always show full message */}
       {proposal.parameters && (
         <div className="px-6 pt-2 pb-3">
-          <div className="rounded-md bg-zinc-900/20 p-3">
+          <div className="rounded-md bg-zinc-800 p-3">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-xs font-medium uppercase tracking-wide text-gray-400">
+              <h4 className="text-xs font-medium uppercase tracking-wide ">
                 On-chain Message
               </h4>
             </div>
@@ -282,9 +282,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                       Updating...
                     </span>
                   ) : (
-                    <span className="text-xs text-gray-400">
-                      {nextRefreshIn}s
-                    </span>
+                    <span className="text-xs ">{nextRefreshIn}s</span>
                   )}
                   <Button
                     variant="ghost"
@@ -304,12 +302,12 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
             {/* Voting Progress */}
             <div className="bg-zinc-900/10 p-3 rounded-md">
-              <h4 className="text-xs uppercase tracking-wide text-gray-400 mb-2 flex items-center gap-1.5">
+              <h4 className="text-xs uppercase tracking-wide  mb-2 flex items-center gap-1.5">
                 Voting Result
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Info className="h-3 w-3 text-gray-400 cursor-help" />
+                      <Info className="h-3 w-3  cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="text-xs">
@@ -336,12 +334,12 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
             {/* Timeline - Full version */}
             <div className="bg-zinc-900/10 p-3 rounded-md">
-              <h4 className="text-xs uppercase tracking-wide text-gray-400 mb-2 flex items-center gap-1.5">
+              <h4 className="text-xs uppercase tracking-wide  mb-2 flex items-center gap-1.5">
                 Timeline
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Info className="h-3 w-3 text-gray-400 cursor-help" />
+                      <Info className="h-3 w-3  cursor-help" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="text-xs">Proposal timeline and status</p>
@@ -390,7 +388,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Block Information */}
               <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
-                <h4 className="text-xs uppercase tracking-wide text-gray-400 flex items-center gap-1.5">
+                <h4 className="text-xs uppercase tracking-wide  flex items-center gap-1.5">
                   <Layers className="h-3.5 w-3.5 text-primary" />
                   <span>Block Information</span>
                 </h4>
@@ -428,7 +426,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
               {/* Blockchain Details */}
               <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
-                <h4 className="text-xs uppercase tracking-wide text-gray-400 flex items-center gap-1.5">
+                <h4 className="text-xs uppercase tracking-wide  flex items-center gap-1.5">
                   <FileText className="h-3.5 w-3.5 text-primary" />
                   <span>Blockchain Details</span>
                 </h4>
@@ -471,7 +469,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
             {/* Execution Details */}
             {isEnded && (
               <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
-                <h4 className="text-xs uppercase tracking-wide text-gray-400 flex items-center gap-1.5">
+                <h4 className="text-xs uppercase tracking-wide  flex items-center gap-1.5">
                   {proposal.passed ? (
                     <CheckCircle className="h-3.5 w-3.5 text-primary" />
                   ) : (

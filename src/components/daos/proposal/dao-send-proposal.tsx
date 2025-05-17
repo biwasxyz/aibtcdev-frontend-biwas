@@ -1,5 +1,5 @@
 "use client";
-// TODO: ADD VALIDATION IF AGENT HAS THE TOKEN ENABLE THE BUTTON TO SEND MESSAGE OR ELSE SHOW THEM BUY TOKEN BUTTON..
+
 import type React from "react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -112,16 +112,7 @@ export function DAOSendProposal({
 
   return (
     <>
-      <div className={`flex w-full gap-2 flex-col ${className}`}>
-        {!hasAccessToken ? (
-          <p className="text-xs text-amber-500 mb-1">
-            Connect your wallet to send proposal
-          </p>
-        ) : !isConnected ? (
-          <p className="text-xs text-amber-500 mb-1">
-            Connecting to messaging service...
-          </p>
-        ) : null}
+      <div className={`flex w-full gap-2 flex-col  ${className}`}>
         <div className="flex w-full gap-2">
           <Input
             value={inputValue}
@@ -130,8 +121,12 @@ export function DAOSendProposal({
               // Clear error when user starts typing again
               if (inputError) setInputError(null);
             }}
-            placeholder="Send on-chain message"
-            className={`flex-grow ${
+            placeholder={
+              hasAccessToken
+                ? "Send on-chain message"
+                : "Connect your wallet to send message"
+            }
+            className={`flex-grow h-20 ${
               inputError ? "border-red-500 focus-visible:ring-red-500" : ""
             }`}
             onKeyDown={handleKeyDown}
@@ -175,7 +170,7 @@ export function DAOSendProposal({
               Your proposal message will be on-chain in a few seconds...
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end">
             <Button
               variant="default"
               onClick={() => setShowSuccessDialog(false)}

@@ -33,7 +33,7 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="bg-zinc-900/10 p-3 rounded-md cursor-help">
+            <div className="bg-zinc-900/10 p-3 rounded-md cursor-pointer">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs uppercase tracking-wide ">
@@ -70,7 +70,7 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
             <TooltipTrigger asChild>
               <div
                 className={cn(
-                  "rounded-md p-3 cursor-help",
+                  "rounded-md p-3 cursor-pointer",
                   isActive
                     ? "bg-primary"
                     : proposal.met_quorum
@@ -115,7 +115,7 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
             <TooltipTrigger asChild>
               <div
                 className={cn(
-                  "rounded-md p-3 cursor-help",
+                  "rounded-md p-3 cursor-pointer",
                   isActive
                     ? "bg-primary"
                     : proposal.met_threshold
@@ -163,7 +163,7 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
             <TooltipTrigger asChild>
               <div
                 className={cn(
-                  "rounded-md p-3 cursor-help",
+                  "rounded-md p-3 cursor-pointer",
                   isActive
                     ? "bg-primary"
                     : proposal.passed
@@ -208,7 +208,7 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
             <TooltipTrigger asChild>
               <div
                 className={cn(
-                  "rounded-md p-3 cursor-help",
+                  "rounded-md p-3 cursor-pointer",
                   isActive
                     ? "bg-primary"
                     : isFailed

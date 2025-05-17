@@ -21,7 +21,7 @@ const MessageDisplay = ({ message }: MessageDisplayProps) => {
 
   return (
     <div className="relative">
-      <div className="p-2 rounded bg-zinc-800 text-xs break-words whitespace-pre-wrap">
+      <div className="p-2 rounded  text-xs break-words whitespace-pre-wrap">
         {message}
         <Button
           variant="ghost"

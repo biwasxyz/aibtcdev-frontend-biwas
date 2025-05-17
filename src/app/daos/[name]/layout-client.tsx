@@ -247,7 +247,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               {/* Token Image - Increased size */}
               {token?.image_url && (
                 <div className="flex flex-col gap-2">
-                  <div className="relative w-64 h-64 flex-shrink-0 rounded-lg overflow-hidden border border-border shadow-sm">
+                  <div className="relative w-48 h-48 flex-shrink-0 rounded-lg overflow-hidden border border-border shadow-sm">
                     <Image
                       src={token.image_url || "/placeholder.svg"}
                       alt={`${dao?.name} token`}
@@ -265,12 +265,12 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                       onOpenChange={setMissionModalOpen}
                     >
                       <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="w-full">
+                        <Button className="border-none">
                           <Info className="h-4 w-4 mr-1.5" />
                           <span>View Mission</span>
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                      <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle className="text-xl">
                             {dao.name} Mission
@@ -454,7 +454,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Navigation Tabs - Mobile */}
-        <div className="block sm:hidden border-b border-border overflow-x-auto mb-4 px-4 sticky top-0 z-10 pt-2">
+        <div className="block sm:hidden  overflow-x-auto mb-4 px-4 sticky top-0 z-10 bg-background pt-2 border-b">
           <div className="flex whitespace-nowrap">
             <Link href={`/daos/${encodedName}`} className="mr-4">
               <div
@@ -496,7 +496,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation Tabs - Desktop */}
-        <div className="hidden sm:flex border-b border-border mb-4 px-4 sticky top-0 z-10 bg-background pt-2">
+        <div className="hidden sm:flex  mb-4 px-4 sticky top-0 z-10  pt-2 bg-background border-b">
           <Link href={`/daos/${encodedName}`} className="mr-6">
             <div
               className={`flex items-center gap-2 pb-2 ${
