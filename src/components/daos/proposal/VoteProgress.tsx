@@ -198,7 +198,7 @@ const VoteProgress = ({
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
                 <span className="text-muted-foreground">For</span>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
                 <TokenBalance
                   value={parsedVotes.votesFor}
                   symbol={tokenSymbol}
@@ -206,7 +206,7 @@ const VoteProgress = ({
                   variant="abbreviated"
                 />
                 <span className="text-green-400 font-medium">
-                  {voteCalculations.percentageFor.toFixed(1)}%
+                  ({voteCalculations.percentageFor.toFixed(1)}%)
                 </span>
               </div>
             </div>
@@ -216,7 +216,7 @@ const VoteProgress = ({
                 <div className="w-2 h-2 rounded-full bg-red-500"></div>
                 <span className="text-muted-foreground">Against</span>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
                 <TokenBalance
                   value={parsedVotes.votesAgainst}
                   symbol={tokenSymbol}
@@ -224,7 +224,7 @@ const VoteProgress = ({
                   variant="abbreviated"
                 />
                 <span className="text-red-400 font-medium">
-                  {voteCalculations.percentageAgainst.toFixed(1)}%
+                  ({voteCalculations.percentageAgainst.toFixed(1)}%)
                 </span>
               </div>
             </div>
@@ -234,7 +234,7 @@ const VoteProgress = ({
                 <div className="w-2 h-2 rounded-full bg-zinc-600"></div>
                 <span className="text-muted-foreground">Total</span>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
                 <TokenBalance
                   value={liquidTokens || "0"}
                   symbol={tokenSymbol}
@@ -244,7 +244,7 @@ const VoteProgress = ({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="cursor-help">
+                      <div className="cursor-help ml-1">
                         <Info className="h-3.5 w-3.5 text-zinc-400" />
                       </div>
                     </TooltipTrigger>
