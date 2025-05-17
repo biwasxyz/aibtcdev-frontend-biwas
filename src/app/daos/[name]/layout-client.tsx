@@ -241,7 +241,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
         {/* DAO Header - Grid layout with metrics on the right */}
         <div className="mb-4 px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-6 items-start">
+          <div className="grid grid-cols-1 gap-6 items-start">
             {/* Left column: DAO Info */}
             <div className="flex items-start gap-3">
               {/* Token Image - Increased size */}
@@ -329,72 +329,87 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                     <div>
                       <DAOSendProposal daoId={id!} />
                     </div>
+
+                    {/* Key Metrics - Moved below SendProposal */}
+                    <div className="mt-4">
+                      {isOverviewLoading ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Skeleton
+                              key={i}
+                              className="h-12 w-full rounded-md"
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                          <div className="bg-zinc-900 rounded-md p-2 flex flex-col justify-between h-full ">
+                            <div className="flex items-center">
+                              <CoinIcon className="h-3.5 w-3.5 text-zinc-400 mr-1" />
+                              <span className="text-xs text-zinc-400">
+                                Token Price
+                              </span>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {formatNumber(enhancedMarketStats.price, true)}
+                            </span>
+                          </div>
+
+                          <div className="bg-zinc-900 rounded-md p-2 flex flex-col justify-between h-full ">
+                            <div className="flex items-center">
+                              <Wallet className="h-3.5 w-3.5 text-zinc-400 mr-1" />
+                              <span className="text-xs text-zinc-400">
+                                Market Cap
+                              </span>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {formatNumber(enhancedMarketStats.marketCap)}
+                            </span>
+                          </div>
+
+                          <div className="bg-zinc-900 rounded-md p-2 flex flex-col justify-between h-full ">
+                            <div className="flex items-center">
+                              <Building2 className="h-3.5 w-3.5 text-zinc-400 mr-1" />
+                              <span className="text-xs text-zinc-400">
+                                Treasury
+                              </span>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {formatNumber(
+                                enhancedMarketStats.treasuryBalance
+                              )}
+                            </span>
+                          </div>
+
+                          <div className="bg-zinc-900 rounded-md p-2 flex flex-col justify-between h-full ">
+                            <div className="flex items-center">
+                              <Users2 className="h-3.5 w-3.5 text-zinc-400 mr-1" />
+                              <span className="text-xs text-zinc-400">
+                                Holders
+                              </span>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {enhancedMarketStats.holderCount.toLocaleString()}
+                            </span>
+                          </div>
+
+                          <div className="bg-zinc-900 rounded-md p-2 flex flex-col justify-between h-full ">
+                            <div className="flex items-center">
+                              <FileText className="h-3.5 w-3.5 text-zinc-400 mr-1" />
+                              <span className="text-xs text-zinc-400">
+                                Proposals
+                              </span>
+                            </div>
+                            <span className="text-sm font-medium">
+                              {totalProposals}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Right column: Key Metrics */}
-            <div className="flex items-center">
-              {isOverviewLoading ? (
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full rounded-md" />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  <div className="bg-zinc-800/90 rounded-md p-3 flex flex-col justify-between h-full shadow-sm border border-zinc-700/50">
-                    <div className="flex items-center mb-1">
-                      <CoinIcon className="h-4 w-4 text-zinc-400 mr-1.5" />
-                      <span className="text-sm text-zinc-400">Token Price</span>
-                    </div>
-                    <span className="text-lg font-medium">
-                      {formatNumber(enhancedMarketStats.price, true)}
-                    </span>
-                  </div>
-
-                  <div className="bg-zinc-800/90 rounded-md p-3 flex flex-col justify-between h-full shadow-sm border border-zinc-700/50">
-                    <div className="flex items-center mb-1">
-                      <Wallet className="h-4 w-4 text-zinc-400 mr-1.5" />
-                      <span className="text-sm text-zinc-400">Market Cap</span>
-                    </div>
-                    <span className="text-lg font-medium">
-                      {formatNumber(enhancedMarketStats.marketCap)}
-                    </span>
-                  </div>
-
-                  <div className="bg-zinc-800/90 rounded-md p-3 flex flex-col justify-between h-full shadow-sm border border-zinc-700/50">
-                    <div className="flex items-center mb-1">
-                      <Building2 className="h-4 w-4 text-zinc-400 mr-1.5" />
-                      <span className="text-sm text-zinc-400">Treasury</span>
-                    </div>
-                    <span className="text-lg font-medium">
-                      {formatNumber(enhancedMarketStats.treasuryBalance)}
-                    </span>
-                  </div>
-
-                  <div className="bg-zinc-800/90 rounded-md p-3 flex flex-col justify-between h-full shadow-sm border border-zinc-700/50">
-                    <div className="flex items-center mb-1">
-                      <Users2 className="h-4 w-4 text-zinc-400 mr-1.5" />
-                      <span className="text-sm text-zinc-400">Holders</span>
-                    </div>
-                    <span className="text-lg font-medium">
-                      {enhancedMarketStats.holderCount.toLocaleString()}
-                    </span>
-                  </div>
-
-                  <div className="bg-zinc-800/90 rounded-md p-3 flex flex-col justify-between h-full shadow-sm border border-zinc-700/50">
-                    <div className="flex items-center mb-1">
-                      <FileText className="h-4 w-4 text-zinc-400 mr-1.5" />
-                      <span className="text-sm text-zinc-400">Proposals</span>
-                    </div>
-                    <span className="text-lg font-medium">
-                      {totalProposals}
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
