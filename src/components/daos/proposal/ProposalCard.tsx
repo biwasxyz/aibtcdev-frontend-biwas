@@ -25,8 +25,6 @@ import {
   BarChart3,
   Vote,
   Blocks,
-  ChevronRight,
-  Copy,
   ExternalLink,
   Info,
 } from "lucide-react";
@@ -52,7 +50,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   const queryClient = useQueryClient();
 
   // Get voting status
-  const { isActive, isEnded, isLoading } = useVotingStatus(
+  const { isActive, isEnded } = useVotingStatus(
     proposal.status,
     proposal.start_block,
     proposal.end_block
