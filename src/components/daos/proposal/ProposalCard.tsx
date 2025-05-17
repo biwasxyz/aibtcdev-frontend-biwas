@@ -303,7 +303,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-1.5">
                   <Activity className="h-4 w-4 text-primary" />
-                  <h4 className="text-sm font-medium">Voting Progress</h4>
+                  <h4 className="text-sm font-medium">Voting Result</h4>
                 </div>
 
                 <div className="flex items-center gap-2">
