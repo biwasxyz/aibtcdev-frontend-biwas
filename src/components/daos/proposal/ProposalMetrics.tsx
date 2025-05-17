@@ -1,184 +1,267 @@
 "use client";
 
-import { CheckCircle2, XCircle, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Info } from "lucide-react";
 import { useVotingStatus } from "./TimeStatus";
 import { TokenBalance } from "@/components/reusables/balance-display";
 import { cn } from "@/lib/utils";
 import type { Proposal } from "@/types/supabase";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ProposalMetricsProps {
   proposal: Proposal;
 }
 
 const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
-  const { isActive, isEnded, startBlockTime } = useVotingStatus(
+  const { isActive, isEnded } = useVotingStatus(
     proposal.status,
     proposal.start_block,
     proposal.end_block
   );
 
-  // Check if voting has not started yet (start block not found)
-  const votingNotStarted = startBlockTime === null;
-
   // Check if the proposal has failed
   const isFailed = isEnded && !proposal.passed;
 
-  // Simplified metrics display without borders
+  // Improved metrics display with 3-column grid
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-      {/* Liquid Tokens */}
-      <div className="bg-zinc-800/30 rounded-md px-3 py-1.5">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Liquid Tokens</span>
-          <span className="font-medium text-sm">
-            {proposal.liquid_tokens !== null ? (
-              <TokenBalance
-                value={proposal.liquid_tokens.toString()}
-                symbol={proposal.token_symbol || ""}
-                decimals={8}
-                variant="abbreviated"
-              />
-            ) : (
-              "No data"
-            )}
-          </span>
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Liquid Tokens - First column */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="bg-zinc-900/10 p-3 rounded-md cursor-help">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs uppercase tracking-wide ">
+                    Liquid Tokens
+                  </span>
+                  <Info className="h-3 w-3 " />
+                </div>
+                <span className="text-sm font-medium">
+                  {proposal.liquid_tokens !== null ? (
+                    <TokenBalance
+                      value={proposal.liquid_tokens.toString()}
+                      symbol={proposal.token_symbol || ""}
+                      decimals={8}
+                      variant="abbreviated"
+                    />
+                  ) : (
+                    "No data"
+                  )}
+                </span>
+              </div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="text-xs">Total liquid tokens available for voting</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      {/* Quorum/Threshold - Second column */}
+      <div className="grid grid-cols-2 gap-2">
+        {/* Quorum */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className={cn(
+                  "rounded-md p-3 cursor-help",
+                  isActive
+                    ? "bg-primary"
+                    : proposal.met_quorum
+                    ? "bg-primary"
+                    : "bg-zinc-800/50"
+                )}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs uppercase tracking-wide ">
+                      Quorum
+                    </span>
+                    <Info className="h-3 w-3 " />
+                  </div>
+                  {isActive ? (
+                    <span className="text-sm font-medium">Pending</span>
+                  ) : proposal.met_quorum ? (
+                    <div className="flex items-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span className="text-sm font-medium">Met</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <XCircle className="h-3.5 w-3.5 text-zinc-400" />
+                      <span className="text-sm font-medium text-zinc-400">
+                        Missed
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Minimum participation required</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* Threshold */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className={cn(
+                  "rounded-md p-3 cursor-help",
+                  isActive
+                    ? "bg-primary"
+                    : proposal.met_threshold
+                    ? "bg-primary"
+                    : "bg-zinc-800/50"
+                )}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs uppercase tracking-wide ">
+                      Threshold
+                    </span>
+                    <Info className="h-3 w-3 " />
+                  </div>
+                  {isActive ? (
+                    <span className="text-sm font-medium">Pending</span>
+                  ) : proposal.met_threshold ? (
+                    <div className="flex items-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span className="text-sm font-medium">Met</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <XCircle className="h-3.5 w-3.5 text-zinc-400" />
+                      <span className="text-sm font-medium text-zinc-400">
+                        Missed
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Minimum approval percentage required</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
-      {/* Quorum */}
-      <div
-        className={cn(
-          "rounded-md px-3 py-1.5",
-          votingNotStarted || isActive
-            ? "bg-primary"
-            : proposal.met_quorum
-            ? "bg-primary"
-            : "bg-zinc-800/50"
-        )}
-      >
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Quorum</span>
-          <div className="text-sm">
-            {votingNotStarted || isActive ? (
-              <span className="font-medium">Pending</span>
-            ) : proposal.met_quorum ? (
-              <div className="flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3" />
-                <span className="font-medium">Met</span>
+      {/* Outcome/Execution - Third column */}
+      <div className="grid grid-cols-2 gap-2">
+        {/* Outcome */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className={cn(
+                  "rounded-md p-3 cursor-help",
+                  isActive
+                    ? "bg-primary"
+                    : proposal.passed
+                    ? "bg-primary"
+                    : "bg-zinc-800/50"
+                )}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs uppercase tracking-wide ">
+                      Outcome
+                    </span>
+                    <Info className="h-3 w-3 " />
+                  </div>
+                  {isActive ? (
+                    <span className="text-sm font-medium">Pending</span>
+                  ) : proposal.passed ? (
+                    <div className="flex items-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span className="text-sm font-medium">Passed</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <XCircle className="h-3.5 w-3.5 text-zinc-400" />
+                      <span className="text-sm font-medium text-zinc-400">
+                        Failed
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-            ) : (
-              <div className="flex items-center gap-1">
-                <XCircle className="h-3 w-3 text-zinc-400" />
-                <span className="font-medium text-zinc-400">Not Met</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Final result of the proposal vote</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
-      {/* Threshold */}
-      <div
-        className={cn(
-          "rounded-md px-3 py-1.5",
-          votingNotStarted || isActive
-            ? "bg-primary"
-            : proposal.met_threshold
-            ? "bg-primary"
-            : "bg-zinc-800/50"
-        )}
-      >
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Threshold</span>
-          <div className="text-sm">
-            {votingNotStarted || isActive ? (
-              <span className="font-medium">Pending</span>
-            ) : proposal.met_threshold ? (
-              <div className="flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3" />
-                <span className="font-medium">Met</span>
+        {/* Execution Status */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className={cn(
+                  "rounded-md p-3 cursor-help",
+                  isActive
+                    ? "bg-primary"
+                    : isFailed
+                    ? "bg-zinc-800/50"
+                    : proposal.executed === true
+                    ? "bg-primary"
+                    : "bg-amber-500/5"
+                )}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs uppercase tracking-wide ">
+                      Execution
+                    </span>
+                    <Info className="h-3 w-3 " />
+                  </div>
+                  {isActive ? (
+                    <span className="text-sm font-medium">Pending</span>
+                  ) : isFailed ? (
+                    <div className="flex items-center gap-1">
+                      <XCircle className="h-3.5 w-3.5 text-zinc-400" />
+                      <span className="text-sm font-medium text-zinc-400">
+                        Failed
+                      </span>
+                    </div>
+                  ) : proposal.executed === true ? (
+                    <div className="flex items-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span className="text-sm font-medium">Executed</span>
+                    </div>
+                  ) : proposal.executed === false ? (
+                    <div className="flex items-center gap-1">
+                      <XCircle className="h-3.5 w-3.5 text-zinc-400" />
+                      <span className="text-sm font-medium text-zinc-400">
+                        Not Executed
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5 text-amber-500" />
+                      <span className="text-sm font-medium text-amber-500">
+                        Pending
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-            ) : (
-              <div className="flex items-center gap-1">
-                <XCircle className="h-3 w-3 text-zinc-400" />
-                <span className="font-medium text-zinc-400">Not Met</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Outcome */}
-      <div
-        className={cn(
-          "rounded-md px-3 py-1.5",
-          votingNotStarted || isActive
-            ? "bg-primary"
-            : proposal.passed
-            ? "bg-primary"
-            : "bg-zinc-800/50"
-        )}
-      >
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Outcome</span>
-          <div className="text-sm">
-            {votingNotStarted || isActive ? (
-              <span className="font-medium">Pending</span>
-            ) : proposal.passed ? (
-              <div className="flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3" />
-                <span className="font-medium">Passed</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1">
-                <XCircle className="h-3 w-3 text-zinc-400" />
-                <span className="font-medium text-zinc-400">Failed</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Execution Status */}
-      <div
-        className={cn(
-          "rounded-md px-3 py-1.5",
-          votingNotStarted || isActive
-            ? "bg-primary"
-            : isFailed
-            ? "bg-zinc-800/50"
-            : proposal.executed === true
-            ? "bg-primary"
-            : "bg-amber-500/5"
-        )}
-      >
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Execution</span>
-          <div className="text-sm">
-            {votingNotStarted || isActive ? (
-              <span className="font-medium">Pending</span>
-            ) : isFailed ? (
-              <div className="flex items-center gap-1">
-                <XCircle className="h-3 w-3 text-zinc-400" />
-                <span className="font-medium text-zinc-400">Failed</span>
-              </div>
-            ) : proposal.executed === true ? (
-              <div className="flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3" />
-                <span className="font-medium">Executed</span>
-              </div>
-            ) : proposal.executed === false ? (
-              <div className="flex items-center gap-1">
-                <XCircle className="h-3 w-3 text-zinc-400" />
-                <span className="font-medium text-zinc-400">Not Executed</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-amber-500" />
-                <span className="font-medium text-amber-500">Pending</span>
-              </div>
-            )}
-          </div>
-        </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Status of proposal execution</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );

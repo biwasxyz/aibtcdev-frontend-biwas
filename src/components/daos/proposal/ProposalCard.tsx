@@ -26,6 +26,9 @@ import {
   Vote,
   Blocks,
   ChevronRight,
+  Copy,
+  ExternalLink,
+  Info,
 } from "lucide-react";
 import { truncateString, formatAction, getExplorerLink } from "./helper";
 import type { Proposal } from "@/types/supabase";
@@ -35,6 +38,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LabeledField from "./LabeledField";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import ProposalMetrics from "./ProposalMetrics";
 
 const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
@@ -110,8 +119,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   const getStatusBadge = () => {
     if (isActive) {
       return (
-        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1.5">
-          <Vote className="h-3.5 w-3.5" />
+        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1 px-1.5 py-0.5 text-xs">
+          <Vote className="h-3 w-3" />
           <span>Voting Active</span>
         </Badge>
       );
@@ -119,8 +128,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
     if (isExecuted) {
       return (
-        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1.5">
-          <CheckCircle className="h-3.5 w-3.5" />
+        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1 px-1.5 py-0.5 text-xs">
+          <CheckCircle className="h-3 w-3" />
           <span>Executed</span>
         </Badge>
       );
@@ -128,8 +137,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
     if (isPending) {
       return (
-        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/30 flex items-center gap-1.5">
-          <Clock className="h-3.5 w-3.5" />
+        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/30 flex items-center gap-1 px-1.5 py-0.5 text-xs">
+          <Clock className="h-3 w-3" />
           <span>Pending Execution</span>
         </Badge>
       );
@@ -137,16 +146,19 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
     if (isFailed) {
       return (
-        <Badge className="bg-zinc-800/50 text-zinc-400 flex items-center gap-1.5">
-          <XCircle className="h-3.5 w-3.5" />
-          <span>Not Executed</span>
+        <Badge className="bg-zinc-800/50 text-zinc-400 flex items-center gap-1 px-1.5 py-0.5 text-xs">
+          <XCircle className="h-3 w-3" />
+          <span>Failed</span>
         </Badge>
       );
     }
 
     return (
-      <Badge variant="outline" className="flex items-center gap-1.5">
-        <Timer className="h-3.5 w-3.5" />
+      <Badge
+        variant="outline"
+        className="flex items-center gap-1 px-1.5 py-0.5 text-xs"
+      >
+        <Timer className="h-3 w-3" />
         <span>Pending</span>
       </Badge>
     );
@@ -155,121 +167,83 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   return (
     <Card
       className={cn(
-        "overflow-hidden shadow-sm hover:shadow-md border-zinc-800",
+        "overflow-hidden shadow-sm hover:shadow-md border-zinc-800 bg-zinc-900",
         getCardBorderColor()
       )}
     >
-      {/* Status Header - Simplified */}
-      <div className="px-3 py-2 flex justify-between items-center">
-        <div className="flex items-center gap-2">{getStatusBadge()}</div>
+      {/* Header Section - Improved hierarchy */}
+      <CardHeader className="p-6 pb-3">
+        <div className="flex flex-col gap-3">
+          {/* Title - Full width, prominent */}
+          <h3 className="text-xl font-semibold leading-tight">
+            {proposal.title}
+          </h3>
 
-        <div className="flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-1.5">
-            <User className="h-3.5 w-3.5 text-muted-foreground" />
-            <a
-              href={getExplorerLink("address", proposal.creator)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline"
-            >
-              {truncateString(proposal.creator, 5, 5)}
-            </a>
-          </div>
-
-          {proposal.concluded_by && (
-            <div className="flex items-center gap-1.5">
-              <User className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground">Concluded:</span>
-              <a
-                href={getExplorerLink("address", proposal.concluded_by)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline"
-              >
-                {truncateString(proposal.concluded_by, 5, 5)}
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Header Section - Simplified */}
-      <CardHeader className="p-3 pb-0">
-        <div className="flex flex-col gap-2">
-          {/* Title and Status */}
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div className="flex flex-col">
-              <h3 className="text-lg font-bold">{proposal.title}</h3>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground -mt-0.5">
-                <Calendar className="h-3.5 w-3.5" />
+          {/* Meta information - Single line with status badge on right */}
+          <div className="flex flex-wrap items-center justify-between gap-y-2 text-xs text-gray-400 leading-tight">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3 w-3" />
                 <span>
                   {format(new Date(proposal.created_at), "MMM d, yyyy")}
                 </span>
               </div>
-            </div>
 
-            <div className="flex flex-wrap gap-2">
-              {isLoading ? (
-                <Badge variant="outline" className="animate-pulse">
-                  Loading...
-                </Badge>
-              ) : isActive ? (
-                <Badge
-                  variant="outline"
-                  className="text-primary border-primary/30"
-                >
-                  Active
-                </Badge>
-              ) : isEnded ? (
-                <Badge
-                  variant="outline"
-                  className={
-                    proposal.passed
-                      ? "text-primary border-primary/30"
-                      : "text-zinc-400 border-zinc-500/30"
-                  }
-                >
-                  {proposal.passed ? "Passed" : "Failed"}
-                </Badge>
-              ) : (
-                <Badge variant="outline">Pending</Badge>
-              )}
-
-              {proposal.status === "FAILED" && (
-                <Badge variant="destructive">Execution Failed</Badge>
-              )}
-            </div>
-          </div>
-
-          {/* Voting Status */}
-          {isActive && (
-            <div className="flex items-center gap-3 text-xs text-primary mt-1">
               <div className="flex items-center gap-1.5">
-                <Timer className="h-3.5 w-3.5" />
-                <span>Voting in progress</span>
+                <User className="h-3 w-3" />
+                <span>Created by:</span>
+                <a
+                  href={getExplorerLink("address", proposal.creator)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline flex items-center gap-1"
+                >
+                  {truncateString(proposal.creator, 5, 5)}
+                  <ExternalLink className="h-2.5 w-2.5" />
+                </a>
               </div>
+
+              {proposal.concluded_by && (
+                <div className="flex items-center gap-1.5">
+                  <User className="h-3 w-3" />
+                  <span>Concluded by:</span>
+                  <a
+                    href={getExplorerLink("address", proposal.concluded_by)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline flex items-center gap-1"
+                  >
+                    {truncateString(proposal.concluded_by, 5, 5)}
+                    <ExternalLink className="h-2.5 w-2.5" />
+                  </a>
+                </div>
+              )}
             </div>
-          )}
+
+            {/* Status badge - Right aligned */}
+            <div>{getStatusBadge()}</div>
+          </div>
         </div>
       </CardHeader>
 
-      {/* Proposal Message - Simplified */}
+      {/* Proposal Message - Always show full message */}
       {proposal.parameters && (
-        <div className="px-3 pt-3">
-          <div className="rounded-md">
-            <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
-              {/* <MessageSquare className="h-4 w-4 text-primary" /> */}
-              <span>On-chain Message</span>
-            </h4>
+        <div className="px-6 pt-2 pb-3">
+          <div className="rounded-md bg-zinc-900/20 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                On-chain Message
+              </h4>
+            </div>
             <MessageDisplay message={proposal.parameters} />
           </div>
         </div>
       )}
 
-      {/* Main Content */}
-      <CardContent className="p-0 pt-3">
+      {/* Main Content - Compact Layout */}
+      <CardContent className="p-0">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full rounded-none bg-transparent px-3 justify-start border-b">
+          <TabsList className="w-full rounded-none bg-zinc-900/30 px-6 justify-start">
             <TabsTrigger
               value="overview"
               className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-1.5 h-9"
@@ -293,50 +267,58 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab - Simplified */}
-          <TabsContent value="overview" className="p-3 space-y-4">
-            {/* Proposal Metrics */}
+          {/* Overview Tab - Compact Grid Layout */}
+          <TabsContent value="overview" className="p-6 space-y-4">
+            {/* Proposal Metrics - Using the updated component */}
             <ProposalMetrics proposal={proposal} />
 
-            {/* Voting Progress */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-1.5">
-                  {/* <Activity className="h-4 w-4 text-primary" /> */}
-                  <h4 className="text-sm font-medium">Voting Result</h4>
-                </div>
-
+            {/* Refresh button for active proposals */}
+            {isActive && (
+              <div className="flex justify-end">
                 <div className="flex items-center gap-2">
-                  {isActive && (
-                    <span className="text-xs text-muted-foreground">
-                      {refreshing ? (
-                        <span className="text-primary flex items-center">
-                          <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-                          Updating...
-                        </span>
-                      ) : (
-                        <span>{nextRefreshIn}s</span>
-                      )}
+                  {refreshing ? (
+                    <span className="text-primary flex items-center text-xs">
+                      <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                      Updating...
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-400">
+                      {nextRefreshIn}s
                     </span>
                   )}
-
                   <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs px-2"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
                     onClick={refreshVotesData}
                     disabled={refreshing}
+                    title="Refresh data"
                   >
                     <RefreshCw
-                      className={`h-3 w-3 mr-1 ${
-                        refreshing ? "animate-spin" : ""
-                      }`}
+                      className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`}
                     />
-                    Refresh
                   </Button>
                 </div>
               </div>
+            )}
 
+            {/* Voting Progress */}
+            <div className="bg-zinc-900/10 p-3 rounded-md">
+              <h4 className="text-xs uppercase tracking-wide text-gray-400 mb-2 flex items-center gap-1.5">
+                Voting Result
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3 w-3 text-gray-400 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">
+                        Current voting results and participation
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </h4>
               <VoteProgress
                 contractAddress={proposal.contract_principal}
                 proposalId={proposal.proposal_id}
@@ -352,8 +334,21 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
               />
             </div>
 
-            {/* Time Status */}
-            <div className="space-y-2">
+            {/* Timeline - Full version */}
+            <div className="bg-zinc-900/10 p-3 rounded-md">
+              <h4 className="text-xs uppercase tracking-wide text-gray-400 mb-2 flex items-center gap-1.5">
+                Timeline
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3 w-3 text-gray-400 cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">Proposal timeline and status</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </h4>
               <TimeStatus
                 createdAt={proposal.created_at}
                 concludedBy={proposal.concluded_by}
@@ -365,41 +360,42 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
           </TabsContent>
 
           {/* Votes Tab - Simplified */}
-          <TabsContent value="votes" className="p-3 space-y-3">
-            <div className="flex justify-between items-center">
+          <TabsContent value="votes" className="p-6 space-y-4">
+            <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-1.5">
-                <Vote className="h-4 w-4 text-primary" />
+                <Vote className="h-3.5 w-3.5 text-primary" />
                 <h4 className="text-sm font-medium">Detailed Vote Record</h4>
               </div>
 
               <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs px-2"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
                 onClick={refreshVotesData}
                 disabled={refreshing}
               >
                 <RefreshCw
-                  className={`h-3 w-3 mr-1 ${refreshing ? "animate-spin" : ""}`}
+                  className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
                 />
-                Refresh
               </Button>
             </div>
 
-            <VotesTable proposalId={proposal.id} />
+            <div className="bg-zinc-900/10 p-3 rounded-md">
+              <VotesTable proposalId={proposal.id} />
+            </div>
           </TabsContent>
 
           {/* Details Tab - Simplified */}
-          <TabsContent value="details" className="p-3 space-y-4">
+          <TabsContent value="details" className="p-6 space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Block Information */}
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium flex items-center gap-1.5">
-                  <Layers className="h-4 w-4 text-primary" />
+              <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
+                <h4 className="text-xs uppercase tracking-wide text-gray-400 flex items-center gap-1.5">
+                  <Layers className="h-3.5 w-3.5 text-primary" />
                   <span>Block Information</span>
                 </h4>
 
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-xs leading-tight">
                   <LabeledField
                     icon={Layers}
                     label="Snapshot block"
@@ -431,13 +427,13 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
               </div>
 
               {/* Blockchain Details */}
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium flex items-center gap-1.5">
-                  <FileText className="h-4 w-4 text-primary" />
+              <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
+                <h4 className="text-xs uppercase tracking-wide text-gray-400 flex items-center gap-1.5">
+                  <FileText className="h-3.5 w-3.5 text-primary" />
                   <span>Blockchain Details</span>
                 </h4>
 
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-xs leading-tight">
                   <LabeledField
                     icon={Wallet}
                     label="Principal"
@@ -474,17 +470,17 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
             {/* Execution Details */}
             {isEnded && (
-              <div className="space-y-2 mt-2">
-                <h4 className="text-sm font-medium flex items-center gap-1.5">
+              <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
+                <h4 className="text-xs uppercase tracking-wide text-gray-400 flex items-center gap-1.5">
                   {proposal.passed ? (
-                    <CheckCircle className="h-4 w-4 text-primary" />
+                    <CheckCircle className="h-3.5 w-3.5 text-primary" />
                   ) : (
-                    <XCircle className="h-4 w-4 text-zinc-400" />
+                    <XCircle className="h-3.5 w-3.5 text-zinc-400" />
                   )}
                   <span>Execution Details</span>
                 </h4>
 
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-xs leading-tight">
                   <p>
                     {proposal.passed
                       ? "This proposal has passed and " +
@@ -495,8 +491,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                   </p>
 
                   {proposal.concluded_by && (
-                    <div className="flex items-center gap-1.5 text-sm">
-                      <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div className="flex items-center gap-1.5 text-xs mt-2">
+                      <User className="h-3 w-3 text-muted-foreground" />
                       <span className="text-muted-foreground">
                         Concluded by:
                       </span>
@@ -509,17 +505,6 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                         {truncateString(proposal.concluded_by, 5, 5)}
                       </a>
                     </div>
-                  )}
-
-                  {proposal.executed === true && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-2 h-7 text-xs"
-                    >
-                      <ChevronRight className="h-3.5 w-3.5 mr-1" />
-                      View Execution Transaction
-                    </Button>
                   )}
                 </div>
               </div>
