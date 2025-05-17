@@ -206,7 +206,7 @@ const VoteProgress = ({
                   variant="abbreviated"
                 />
                 <span className="text-green-400 font-medium">
-                  {voteCalculations.castPercentageFor.toFixed(1)}%
+                  {voteCalculations.percentageFor.toFixed(1)}%
                 </span>
               </div>
             </div>
@@ -224,7 +224,7 @@ const VoteProgress = ({
                   variant="abbreviated"
                 />
                 <span className="text-red-400 font-medium">
-                  {voteCalculations.castPercentageAgainst.toFixed(1)}%
+                  {voteCalculations.percentageAgainst.toFixed(1)}%
                 </span>
               </div>
             </div>
