@@ -249,7 +249,7 @@ const VoteProgress = ({
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="cursor-help ml-1">
+                        <div className="cursor-pointer ml-1">
                           <Info className="h-3.5 w-3.5 text-zinc-400" />
                         </div>
                       </TooltipTrigger>

@@ -117,8 +117,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   const getStatusBadge = () => {
     if (isActive) {
       return (
-        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1 px-1.5 py-0.5 text-xs">
-          <Vote className="h-3 w-3" />
+        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1.5 px-2 py-1 text-sm">
+          <Vote className="h-3.5 w-3.5" />
           <span>Voting Active</span>
         </Badge>
       );
@@ -126,8 +126,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
     if (isExecuted) {
       return (
-        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1 px-1.5 py-0.5 text-xs">
-          <CheckCircle className="h-3 w-3" />
+        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1.5 px-2 py-1 text-sm">
+          <CheckCircle className="h-3.5 w-3.5" />
           <span>Executed</span>
         </Badge>
       );
@@ -135,8 +135,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
     if (isPending) {
       return (
-        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/30 flex items-center gap-1 px-1.5 py-0.5 text-xs">
-          <Clock className="h-3 w-3" />
+        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/30 flex items-center gap-1.5 px-2 py-1 text-sm">
+          <Clock className="h-3.5 w-3.5" />
           <span>Pending Execution</span>
         </Badge>
       );
@@ -144,8 +144,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
     if (isFailed) {
       return (
-        <Badge className="bg-zinc-800/50 text-zinc-400 flex items-center gap-1 px-1.5 py-0.5 text-xs">
-          <XCircle className="h-3 w-3" />
+        <Badge className="bg-zinc-800/50 text-zinc-400 flex items-center gap-1.5 px-2 py-1 text-sm">
+          <XCircle className="h-3.5 w-3.5" />
           <span>Failed</span>
         </Badge>
       );
@@ -154,9 +154,9 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
     return (
       <Badge
         variant="outline"
-        className="flex items-center gap-1 px-1.5 py-0.5 text-xs"
+        className="flex items-center gap-1.5 px-2 py-1 text-sm"
       >
-        <Timer className="h-3 w-3" />
+        <Timer className="h-3.5 w-3.5" />
         <span>Pending</span>
       </Badge>
     );
@@ -165,7 +165,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   return (
     <Card
       className={cn(
-        "overflow-hidden shadow-sm hover:shadow-md border-t-0 border-r-0 border-b-0  bg-background",
+        "overflow-hidden shadow-sm hover:shadow-md border-t-0 border-r-0 border-b-0 bg-background border-l-4",
         getCardBorderColor()
       )}
     >
@@ -173,22 +173,22 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
       <CardHeader className="p-6 pb-3">
         <div className="flex flex-col gap-3">
           {/* Title - Full width, prominent */}
-          <h3 className="text-xl font-semibold leading-tight">
+          <h3 className="text-2xl font-semibold leading-tight">
             {proposal.title}
           </h3>
 
           {/* Meta information - Single line with status badge on right */}
-          <div className="flex flex-wrap items-center justify-between gap-y-2 text-xs  leading-tight">
+          <div className="flex flex-wrap items-center justify-between gap-y-2 text-sm leading-tight">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-3 w-3" />
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
                 <span>
                   {format(new Date(proposal.created_at), "MMM d, yyyy")}
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5">
-                <User className="h-3 w-3" />
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
                 <span>Created by:</span>
                 <a
                   href={getExplorerLink("address", proposal.creator)}
@@ -197,13 +197,13 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                   className="hover:underline flex items-center gap-1"
                 >
                   {truncateString(proposal.creator, 5, 5)}
-                  <ExternalLink className="h-2.5 w-2.5" />
+                  <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
 
               {proposal.concluded_by && (
-                <div className="flex items-center gap-1.5">
-                  <User className="h-3 w-3" />
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
                   <span>Concluded by:</span>
                   <a
                     href={getExplorerLink("address", proposal.concluded_by)}
@@ -212,7 +212,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                     className="hover:underline flex items-center gap-1"
                   >
                     {truncateString(proposal.concluded_by, 5, 5)}
-                    <ExternalLink className="h-2.5 w-2.5" />
+                    <ExternalLink className="h-3 w-3" />
                   </a>
                 </div>
               )}
@@ -229,7 +229,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
         <div className="px-6 pt-2 pb-3">
           <div className="rounded-md bg-zinc-800 p-3">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-xs font-medium uppercase tracking-wide ">
+              <h4 className="text-sm font-medium uppercase tracking-wide">
                 On-chain Message
               </h4>
             </div>
@@ -244,23 +244,23 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
           <TabsList className="w-full rounded-none bg-zinc-900/30 px-6 justify-start">
             <TabsTrigger
               value="overview"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-1.5 h-9"
+              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-2 h-10 text-base"
             >
-              <BarChart3 className="h-3.5 w-3.5" />
+              <BarChart3 className="h-4 w-4" />
               <span>Overview</span>
             </TabsTrigger>
             <TabsTrigger
               value="votes"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-1.5 h-9"
+              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-2 h-10 text-base"
             >
-              <Vote className="h-3.5 w-3.5" />
+              <Vote className="h-4 w-4" />
               <span>Vote Details</span>
             </TabsTrigger>
             <TabsTrigger
               value="details"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-1.5 h-9"
+              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-2 h-10 text-base"
             >
-              <Blocks className="h-3.5 w-3.5" />
+              <Blocks className="h-4 w-4" />
               <span>Blockchain Details</span>
             </TabsTrigger>
           </TabsList>
@@ -275,23 +275,23 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
               <div className="flex justify-end">
                 <div className="flex items-center gap-2">
                   {refreshing ? (
-                    <span className="text-primary flex items-center text-xs">
-                      <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                    <span className="text-primary flex items-center text-sm">
+                      <RefreshCw className="h-4 w-4 mr-1.5 animate-spin" />
                       Updating...
                     </span>
                   ) : (
-                    <span className="text-xs ">{nextRefreshIn}s</span>
+                    <span className="text-sm">{nextRefreshIn}s</span>
                   )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6"
+                    className="h-8 w-8"
                     onClick={refreshVotesData}
                     disabled={refreshing}
                     title="Refresh data"
                   >
                     <RefreshCw
-                      className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`}
+                      className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
                     />
                   </Button>
                 </div>
@@ -300,15 +300,15 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
             {/* Voting Progress */}
             <div className="bg-zinc-900/10 p-3 rounded-md">
-              <h4 className="text-xs uppercase tracking-wide  mb-2 flex items-center gap-1.5">
+              <h4 className="text-sm uppercase tracking-wide mb-2 flex items-center gap-1.5">
                 Voting Result
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Info className="h-3 w-3  cursor-help" />
+                      <Info className="h-4 w-4 cursor-pointer" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-xs">
+                      <p className="text-sm">
                         Current voting results and participation
                       </p>
                     </TooltipContent>
@@ -332,15 +332,15 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
             {/* Timeline - Full version */}
             <div className="bg-zinc-900/10 p-3 rounded-md">
-              <h4 className="text-xs uppercase tracking-wide  mb-2 flex items-center gap-1.5">
+              <h4 className="text-sm uppercase tracking-wide mb-2 flex items-center gap-1.5">
                 Timeline
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Info className="h-3 w-3  cursor-help" />
+                      <Info className="h-4 w-4 cursor-pointer" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-xs">Proposal timeline and status</p>
+                      <p className="text-sm">Proposal timeline and status</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -358,20 +358,20 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
           {/* Votes Tab - Simplified */}
           <TabsContent value="votes" className="p-6 space-y-4">
             <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-1.5">
-                <Vote className="h-3.5 w-3.5 text-primary" />
-                <h4 className="text-sm font-medium">Detailed Vote Record</h4>
+              <div className="flex items-center gap-2">
+                <Vote className="h-4 w-4 text-primary" />
+                <h4 className="text-base font-medium">Detailed Vote Record</h4>
               </div>
 
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="h-8 w-8"
                 onClick={refreshVotesData}
                 disabled={refreshing}
               >
                 <RefreshCw
-                  className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
+                  className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
                 />
               </Button>
             </div>
@@ -386,12 +386,12 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Block Information */}
               <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
-                <h4 className="text-xs uppercase tracking-wide  flex items-center gap-1.5">
-                  <Layers className="h-3.5 w-3.5 text-primary" />
+                <h4 className="text-sm uppercase tracking-wide flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-primary" />
                   <span>Block Information</span>
                 </h4>
 
-                <div className="space-y-2 text-xs leading-tight">
+                <div className="space-y-2 text-sm leading-tight">
                   <LabeledField
                     icon={Layers}
                     label="Snapshot block"
@@ -424,12 +424,12 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
 
               {/* Blockchain Details */}
               <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
-                <h4 className="text-xs uppercase tracking-wide  flex items-center gap-1.5">
-                  <FileText className="h-3.5 w-3.5 text-primary" />
+                <h4 className="text-sm uppercase tracking-wide flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" />
                   <span>Blockchain Details</span>
                 </h4>
 
-                <div className="space-y-2 text-xs leading-tight">
+                <div className="space-y-2 text-sm leading-tight">
                   <LabeledField
                     icon={Wallet}
                     label="Principal"
@@ -467,16 +467,16 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
             {/* Execution Details */}
             {isEnded && (
               <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
-                <h4 className="text-xs uppercase tracking-wide  flex items-center gap-1.5">
+                <h4 className="text-sm uppercase tracking-wide flex items-center gap-2">
                   {proposal.passed ? (
-                    <CheckCircle className="h-3.5 w-3.5 text-primary" />
+                    <CheckCircle className="h-4 w-4 text-primary" />
                   ) : (
-                    <XCircle className="h-3.5 w-3.5 text-zinc-400" />
+                    <XCircle className="h-4 w-4 text-zinc-400" />
                   )}
                   <span>Execution Details</span>
                 </h4>
 
-                <div className="space-y-2 text-xs leading-tight">
+                <div className="space-y-2 text-sm leading-tight">
                   <p>
                     {proposal.passed
                       ? "This proposal has passed and " +
@@ -487,8 +487,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                   </p>
 
                   {proposal.concluded_by && (
-                    <div className="flex items-center gap-1.5 text-xs mt-2">
-                      <User className="h-3 w-3 text-muted-foreground" />
+                    <div className="flex items-center gap-2 text-sm mt-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">
                         Concluded by:
                       </span>
