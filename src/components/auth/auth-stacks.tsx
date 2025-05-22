@@ -151,14 +151,27 @@ export default function StacksAuth({ redirectUrl }: { redirectUrl?: string }) {
       const success = await handleAuthentication(stxAddress, signature);
 
       if (success) {
-        // get the user ID from Supabase
+        // 1️⃣ get the signed-in supabase user
         const {
           data: { user },
         } = await supabase.auth.getUser();
-
         const userId = user?.id;
+
+        // 2️⃣ grab both addresses from the wallet session
+        const mainnetAddr = userData.profile.stxAddress.mainnet;
+        const testnetAddr = userData.profile.stxAddress.testnet;
+
+        // 3️⃣ patch the profile table (creates row if missing)
         if (userId) {
-          await runAutoInit(userId); // ✅ auto select agent + create thread
+          console.log(
+            "Updating profile with Stacks addresses after authentication"
+          );
+          await ensureProfileHasStacksAddresses(
+            userId,
+            mainnetAddr,
+            testnetAddr
+          );
+          await runAutoInit(userId); // your existing auto-init
         }
 
         if (redirectUrl) {
@@ -434,8 +447,23 @@ export default function StacksAuth({ redirectUrl }: { redirectUrl?: string }) {
               </section>
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
+                  AI Compute Services
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  AIBTC may, at its sole discretion, provide AI compute services
+                  through the App. Access is subject to usage caps, throttling,
+                  or discontinuation at any time without notice. All fees for AI
+                  compute are collected at proposal creation and automatically
+                  transferred to the aibtc-dao-run-cost smart contract. AIBTC
+                  makes no warranties about availability or performance of AI
+                  compute and is not liable for indirect, incidental, or
+                  consequential damages arising from its restriction or
+                  termination.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
                   Bridging activities are carried out by third party service
-                  providers
                 </h2>
                 <p className="text-zinc-800 dark:text-zinc-200">
                   All bridging activities accessible via the App is carried out
@@ -469,4 +497,71 @@ export default function StacksAuth({ redirectUrl }: { redirectUrl?: string }) {
       </Dialog>
     </StacksProvider>
   );
+}
+
+export function getStacksAddress(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const blockstackSession = JSON.parse(
+    localStorage.getItem("blockstack-session") || "{}"
+  );
+
+  const address =
+    process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
+      ? blockstackSession.userData?.profile?.stxAddress?.mainnet
+      : blockstackSession.userData?.profile?.stxAddress?.testnet;
+
+  return address || null;
+}
+
+async function ensureProfileHasStacksAddresses(
+  userId: string,
+  mainnetAddr: string,
+  testnetAddr: string
+) {
+  try {
+    // Get the current profile data
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("mainnet_address, testnet_address")
+      .eq("id", userId)
+      .single();
+
+    // Prepare updates object - only update fields that are null
+    const updates: Record<string, string> = { id: userId };
+    // If no profile exists or mainnet_address is null, add it to updates
+    if (!profile?.mainnet_address && mainnetAddr) {
+      updates.mainnet_address = mainnetAddr;
+    }
+
+    // If no profile exists or testnet_address is null, add it to updates
+    if (!profile?.testnet_address && testnetAddr) {
+      updates.testnet_address = testnetAddr;
+    }
+
+    // Only proceed if we have updates to make
+    if (Object.keys(updates).length <= 1) {
+      console.log("No address updates needed for profile");
+      return;
+    }
+
+    // Use upsert to create or update the profile
+    const { error: upsertErr } = await supabase
+      .from("profiles")
+      .upsert(updates, {
+        onConflict: "id",
+        ignoreDuplicates: false,
+      });
+
+    if (upsertErr) {
+      console.error("Error updating profile:", upsertErr);
+      throw upsertErr;
+    }
+
+    console.log("Profile updated with Stacks addresses");
+  } catch (error) {
+    console.error("Error in ensureProfileHasStacksAddresses:", error);
+  }
 }

@@ -1,15 +1,8 @@
 "use client";
 
-import type React from "react";
 import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import MessageDisplay from "./MessageDisplay";
 import VoteProgress from "./VoteProgress";
 import TimeStatus, { useVotingStatus } from "./TimeStatus";
@@ -26,16 +19,14 @@ import {
   FileText,
   Calendar,
   RefreshCw,
-  MessageSquare,
   CheckCircle,
   XCircle,
   Clock,
   BarChart3,
   Vote,
-  Info,
-  ListFilter,
   Blocks,
-  ChevronRight,
+  ExternalLink,
+  Info,
 } from "lucide-react";
 import { truncateString, formatAction, getExplorerLink } from "./helper";
 import type { Proposal } from "@/types/supabase";
@@ -45,15 +36,21 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LabeledField from "./LabeledField";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import ProposalMetrics from "./ProposalMetrics";
 
-const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
+const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [nextRefreshIn, setNextRefreshIn] = useState(60);
   const queryClient = useQueryClient();
 
   // Get voting status
-  const { isActive, isEnded, isLoading } = useVotingStatus(
+  const { isActive, isEnded } = useVotingStatus(
     proposal.status,
     proposal.start_block,
     proposal.end_block
@@ -105,22 +102,22 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, refreshing, refreshVotesData]); // Added refreshVotesData to the dependency array
+  }, [isActive, refreshing, refreshVotesData]);
 
-  // Get card opacity based on execution status
-  const getCardOpacity = () => {
-    if (isActive) return "opacity-100"; // Active proposals are fully visible
-    if (isExecuted) return "opacity-100"; // Executed proposals are fully visible
-    if (isPending) return "opacity-95"; // Pending execution proposals are slightly muted
-    if (isFailed) return "opacity-90"; // Failed proposals are more muted
-    return "opacity-100"; // Default
+  // Get card border color based on status
+  const getCardBorderColor = () => {
+    if (isActive) return "border-l-primary";
+    if (isExecuted) return "border-l-primary";
+    if (isPending) return "border-l-amber-500";
+    if (isFailed) return "border-l-zinc-500";
+    return "";
   };
 
-  // Get execution status badge
-  const getExecutionBadge = () => {
+  // Get status badge
+  const getStatusBadge = () => {
     if (isActive) {
       return (
-        <Badge className="bg-blue-500 text-white border-blue-600 flex items-center gap-1.5">
+        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1.5 px-2 py-1 text-sm">
           <Vote className="h-3.5 w-3.5" />
           <span>Voting Active</span>
         </Badge>
@@ -129,7 +126,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
 
     if (isExecuted) {
       return (
-        <Badge className="bg-green-500 text-white border-green-600 flex items-center gap-1.5">
+        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1.5 px-2 py-1 text-sm">
           <CheckCircle className="h-3.5 w-3.5" />
           <span>Executed</span>
         </Badge>
@@ -138,7 +135,7 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
 
     if (isPending) {
       return (
-        <Badge className="bg-amber-500 text-white border-amber-600 flex items-center gap-1.5">
+        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/30 flex items-center gap-1.5 px-2 py-1 text-sm">
           <Clock className="h-3.5 w-3.5" />
           <span>Pending Execution</span>
         </Badge>
@@ -147,15 +144,18 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
 
     if (isFailed) {
       return (
-        <Badge className="bg-red-500 text-white border-red-600 flex items-center gap-1.5">
+        <Badge className="bg-zinc-800/50 text-zinc-400 flex items-center gap-1.5 px-2 py-1 text-sm">
           <XCircle className="h-3.5 w-3.5" />
-          <span>Not Executed</span>
+          <span>Failed</span>
         </Badge>
       );
     }
 
     return (
-      <Badge variant="outline" className="flex items-center gap-1.5">
+      <Badge
+        variant="outline"
+        className="flex items-center gap-1.5 px-2 py-1 text-sm"
+      >
         <Timer className="h-3.5 w-3.5" />
         <span>Pending</span>
       </Badge>
@@ -165,218 +165,156 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
   return (
     <Card
       className={cn(
-        "overflow-hidden bg-zinc-900 mb-6 w-full transition-all duration-200 shadow-md hover:shadow-lg",
-        getCardOpacity(),
-        isExecuted
-          ? "border-l-4 border-l-green-500"
-          : isPending
-          ? "border-l-4 border-l-amber-500"
-          : isFailed
-          ? "border-l-4 border-l-red-500"
-          : isActive
-          ? "border-l-4 border-l-blue-500"
-          : ""
+        "overflow-hidden shadow-sm hover:shadow-md border-t-0 border-r-0 border-b-0 bg-background border-l-4",
+        getCardBorderColor()
       )}
     >
-      {/* Execution Status Badge - Always visible at the top */}
-      <div className="bg-zinc-800/80 px-4 py-2 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-zinc-400">Status:</span>
-          {getExecutionBadge()}
-        </div>
+      {/* Header Section - Improved hierarchy */}
+      <CardHeader className="p-6 pb-3">
+        <div className="flex flex-col gap-3">
+          {/* Title - Full width, prominent */}
+          <h3 className="text-2xl font-semibold leading-tight">
+            {proposal.title}
+          </h3>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <User className="h-4 w-4 text-zinc-400" />
-            <span className="text-sm text-zinc-400">Creator:</span>
-            <a
-              href={getExplorerLink("address", proposal.creator)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm hover:underline"
-            >
-              {truncateString(proposal.creator, 6, 4)}
-            </a>
-          </div>
-
-          {proposal.concluded_by && (
-            <div className="flex items-center gap-1.5">
-              <User className="h-4 w-4 text-zinc-400" />
-              <span className="text-sm text-zinc-400">Concluded by:</span>
-              <a
-                href={getExplorerLink("address", proposal.concluded_by)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm hover:underline"
-              >
-                {truncateString(proposal.concluded_by, 6, 4)}
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Header Section */}
-      <CardHeader className="bg-gradient-to-r from-zinc-900 to-zinc-800 p-4 sm:p-6">
-        <div className="flex flex-col gap-4">
-          {/* Title and Status */}
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <h3 className="text-xl font-bold">{proposal.title}</h3>
-
-            <div className="flex flex-wrap gap-2">
-              {isLoading ? (
-                <Badge variant="outline" className="animate-pulse">
-                  Loading...
-                </Badge>
-              ) : isActive ? (
-                <Badge className="bg-blue-500 text-white hover:bg-blue-600">
-                  Active
-                </Badge>
-              ) : isEnded ? (
-                <Badge
-                  className={
-                    proposal.passed
-                      ? "bg-green-500 text-white hover:bg-green-600"
-                      : "bg-red-500 text-white hover:bg-red-600"
-                  }
-                >
-                  {proposal.passed ? "Passed" : "Failed"}
-                </Badge>
-              ) : (
-                <Badge variant="outline">Pending</Badge>
-              )}
-
-              {proposal.status === "FAILED" && (
-                <Badge variant="destructive">Execution Failed</Badge>
-              )}
-            </div>
-          </div>
-
-          {/* Creator and Date */}
-          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4" />
-              <span>
-                {format(new Date(proposal.created_at), "MMM d, yyyy")}
-              </span>
-            </div>
-
-            {isActive && (
-              <div className="flex items-center gap-1.5 ml-auto text-blue-400">
-                <Timer className="h-4 w-4" />
-                <span>Voting in progress</span>
+          {/* Meta information - Single line with status badge on right */}
+          <div className="flex flex-wrap items-center justify-between gap-y-2 text-sm leading-tight">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  {format(new Date(proposal.created_at), "MMM d, yyyy")}
+                </span>
               </div>
-            )}
+
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>Created by:</span>
+                <a
+                  href={getExplorerLink("address", proposal.creator)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline flex items-center gap-1"
+                >
+                  {truncateString(proposal.creator, 5, 5)}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+
+              {proposal.concluded_by && (
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span>Concluded by:</span>
+                  <a
+                    href={getExplorerLink("address", proposal.concluded_by)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline flex items-center gap-1"
+                  >
+                    {truncateString(proposal.concluded_by, 5, 5)}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Status badge - Right aligned */}
+            <div>{getStatusBadge()}</div>
           </div>
         </div>
       </CardHeader>
 
-      {/* Proposal Message/Parameters - Always visible */}
+      {/* Proposal Message - Always show full message */}
       {proposal.parameters && (
-        <div className="px-4 sm:p-6">
-          <div className=" rounded-md">
-            <h3 className="text-lg font-medium flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-blue-500" />
-              <span>Message:</span>
-            </h3>
+        <div className="px-6 pt-2 pb-3">
+          <div className="rounded-md bg-zinc-800 p-3">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="text-sm font-medium uppercase tracking-wide">
+                On-chain Message
+              </h4>
+            </div>
             <MessageDisplay message={proposal.parameters} />
           </div>
         </div>
       )}
 
-      {/* Main Content */}
+      {/* Main Content - Compact Layout */}
       <CardContent className="p-0">
         <Tabs defaultValue="overview" className="w-full">
-          <div className="bg-zinc-800/30">
-            <TabsList className="h-14 w-full rounded-none bg-transparent">
-              <TabsTrigger
-                value="overview"
-                className="data-[state=active]:bg-zinc-800 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none flex items-center gap-2 h-full"
-              >
-                <BarChart3 className="h-4 w-4" />
-                <span>Overview</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="votes"
-                className="data-[state=active]:bg-zinc-800 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none flex items-center gap-2 h-full"
-              >
-                <Vote className="h-4 w-4" />
-                <span>Detailed Vote Record</span>
-              </TabsTrigger>
-              <TabsTrigger
-                value="details"
-                className="data-[state=active]:bg-zinc-800 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none flex items-center gap-2 h-full"
-              >
-                <Blocks className="h-4 w-4" />
-                <span>Blockchain Details</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+          <TabsList className="w-full rounded-none bg-zinc-900/30 px-6 justify-start">
+            <TabsTrigger
+              value="overview"
+              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-2 h-10 text-base"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span>Overview</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="votes"
+              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-2 h-10 text-base"
+            >
+              <Vote className="h-4 w-4" />
+              <span>Vote Details</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="details"
+              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-2 h-10 text-base"
+            >
+              <Blocks className="h-4 w-4" />
+              <span>Blockchain Details</span>
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="p-4 sm:p-6 space-y-6">
-            {/* Proposal Metrics - Redesigned as horizontal pills */}
-            <div className="mb-6">
-              <ProposalMetrics proposal={proposal} />
-            </div>
+          {/* Overview Tab - Compact Grid Layout */}
+          <TabsContent value="overview" className="p-6 space-y-4">
+            {/* Proposal Metrics - Using the updated component */}
+            <ProposalMetrics proposal={proposal} />
 
-            {/* Voting Progress */}
-            <div className="p-4 bg-zinc-800/30 rounded-md">
-              <div className="flex justify-between items-center mb-4">
+            {/* Refresh button for active proposals */}
+            {isActive && (
+              <div className="flex justify-end">
                 <div className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-blue-500" />
-                  <h3 className="text-lg font-medium">Voting Progress</h3>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 -mt-0.5"
-                        >
-                          <Info className="h-4 w-4 text-zinc-400" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">
-                        <p className="text-sm">
-                          Current voting results for this proposal.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {isActive && (
-                    <span className="text-xs text-muted-foreground">
-                      {refreshing ? (
-                        <span className="text-blue-400 flex items-center">
-                          <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-                          Updating...
-                        </span>
-                      ) : (
-                        <span>Updating in {nextRefreshIn}s</span>
-                      )}
+                  {refreshing ? (
+                    <span className="text-primary flex items-center text-sm">
+                      <RefreshCw className="h-4 w-4 mr-1.5 animate-spin" />
+                      Updating...
                     </span>
+                  ) : (
+                    <span className="text-sm">{nextRefreshIn}s</span>
                   )}
-
                   <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
                     onClick={refreshVotesData}
                     disabled={refreshing}
+                    title="Refresh data"
                   >
                     <RefreshCw
-                      className={`h-3.5 w-3.5 mr-1.5 ${
-                        refreshing ? "animate-spin" : ""
-                      }`}
+                      className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
                     />
-                    Refresh
                   </Button>
                 </div>
               </div>
+            )}
 
+            {/* Voting Progress */}
+            <div className="bg-zinc-900/10 p-3 rounded-md">
+              <h4 className="text-sm uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                Voting Result
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 cursor-pointer" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-sm">
+                        Current voting results and participation
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </h4>
               <VoteProgress
                 contractAddress={proposal.contract_principal}
                 proposalId={proposal.proposal_id}
@@ -392,30 +330,21 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
               />
             </div>
 
-            {/* Time Status */}
-            <div className="p-4 bg-zinc-800/30 rounded-md">
-              <div className="flex items-center gap-2 mb-3">
-                <Timer className="h-5 w-5 text-blue-500" />
-                <h3 className="text-lg font-medium">Voting Timeline</h3>
+            {/* Timeline - Full version */}
+            <div className="bg-zinc-900/10 p-3 rounded-md">
+              <h4 className="text-sm uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                Timeline
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 -mt-0.5"
-                      >
-                        <Info className="h-4 w-4 text-zinc-400" />
-                      </Button>
+                      <Info className="h-4 w-4 cursor-pointer" />
                     </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p className="text-sm">
-                        The timeline for this proposal&apos;s voting period.
-                      </p>
+                    <TooltipContent>
+                      <p className="text-sm">Proposal timeline and status</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-              </div>
+              </h4>
               <TimeStatus
                 createdAt={proposal.created_at}
                 concludedBy={proposal.concluded_by}
@@ -426,87 +355,43 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
             </div>
           </TabsContent>
 
-          {/* Votes Tab */}
-          <TabsContent value="votes" className="p-4 sm:p-6 space-y-6">
-            <div className="flex justify-between items-center mb-4">
+          {/* Votes Tab - Simplified */}
+          <TabsContent value="votes" className="p-6 space-y-4">
+            <div className="flex justify-between items-center mb-3">
               <div className="flex items-center gap-2">
-                <Vote className="h-5 w-5 text-purple-500" />
-                <h3 className="text-lg font-medium">Detailed Vote Record</h3>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 -mt-0.5"
-                      >
-                        <Info className="h-4 w-4 text-zinc-400" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p className="text-sm">
-                        Individual votes cast for this proposal.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Vote className="h-4 w-4 text-primary" />
+                <h4 className="text-base font-medium">Detailed Vote Record</h4>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="h-8">
-                  <ListFilter className="h-3.5 w-3.5 mr-1.5" />
-                  Filter
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={refreshVotesData}
-                  disabled={refreshing}
-                >
-                  <RefreshCw
-                    className={`h-3.5 w-3.5 mr-1.5 ${
-                      refreshing ? "animate-spin" : ""
-                    }`}
-                  />
-                  Refresh
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={refreshVotesData}
+                disabled={refreshing}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+                />
+              </Button>
             </div>
 
-            <div className="overflow-hidden bg-zinc-800/30 rounded-md">
+            <div className="bg-zinc-900/10 p-3 rounded-md">
               <VotesTable proposalId={proposal.id} />
             </div>
           </TabsContent>
 
-          {/* Details Tab */}
-          <TabsContent value="details" className="p-4 sm:p-6 space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Details Tab - Simplified */}
+          <TabsContent value="details" className="p-6 space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Block Information */}
-              <div className="p-4 bg-zinc-800/30 rounded-md">
-                <h4 className="font-medium text-base mb-4 flex items-center gap-2">
-                  <Layers className="h-5 w-5 text-blue-500" />
+              <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
+                <h4 className="text-sm uppercase tracking-wide flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-primary" />
                   <span>Block Information</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 -mt-0.5"
-                        >
-                          <Info className="h-4 w-4 text-zinc-400" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">
-                        <p className="text-sm">
-                          Blockchain blocks associated with this proposal.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
                 </h4>
 
-                <div className="space-y-4">
+                <div className="space-y-2 text-sm leading-tight">
                   <LabeledField
                     icon={Layers}
                     label="Snapshot block"
@@ -538,31 +423,13 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
               </div>
 
               {/* Blockchain Details */}
-              <div className="p-4 bg-zinc-800/30 rounded-md">
-                <h4 className="font-medium text-base mb-4 flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-blue-500" />
+              <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
+                <h4 className="text-sm uppercase tracking-wide flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-primary" />
                   <span>Blockchain Details</span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 -mt-0.5"
-                        >
-                          <Info className="h-4 w-4 text-zinc-400" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">
-                        <p className="text-sm">
-                          Technical blockchain details for this proposal.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
                 </h4>
 
-                <div className="space-y-4">
+                <div className="space-y-2 text-sm leading-tight">
                   <LabeledField
                     icon={Wallet}
                     label="Principal"
@@ -599,78 +466,44 @@ const ProposalCard: React.FC<{ proposal: Proposal }> = ({ proposal }) => {
 
             {/* Execution Details */}
             {isEnded && (
-              <>
-                <div
-                  className={`p-4 rounded-md ${
-                    proposal.passed ? "bg-green-500/5" : "bg-red-500/5"
-                  }`}
-                >
-                  <h4 className="font-medium text-base mb-3 flex items-center gap-2">
-                    {proposal.passed ? (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-red-500" />
-                    )}
-                    <span>Execution Details</span>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 -mt-0.5"
-                          >
-                            <Info className="h-4 w-4 text-zinc-400" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top">
-                          <p className="text-sm">
-                            Details about the execution of this proposal.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </h4>
+              <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
+                <h4 className="text-sm uppercase tracking-wide flex items-center gap-2">
+                  {proposal.passed ? (
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-zinc-400" />
+                  )}
+                  <span>Execution Details</span>
+                </h4>
 
-                  <div className="space-y-2">
-                    <p className="text-sm">
-                      {proposal.passed
-                        ? "This proposal has passed and " +
-                          (proposal.executed === true
-                            ? "has been executed."
-                            : "is pending execution.")
-                        : "This proposal has failed and will not be executed."}
-                    </p>
+                <div className="space-y-2 text-sm leading-tight">
+                  <p>
+                    {proposal.passed
+                      ? "This proposal has passed and " +
+                        (proposal.executed === true
+                          ? "has been executed."
+                          : "is pending execution.")
+                      : "This proposal has failed and will not be executed."}
+                  </p>
 
-                    {proposal.concluded_by && (
-                      <div className="flex items-center gap-1.5 text-sm">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-muted-foreground">
-                          Concluded by:
-                        </span>
-                        <a
-                          href={getExplorerLink(
-                            "address",
-                            proposal.concluded_by
-                          )}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:underline"
-                        >
-                          {truncateString(proposal.concluded_by, 6, 4)}
-                        </a>
-                      </div>
-                    )}
-
-                    {proposal.executed === true && (
-                      <Button variant="outline" size="sm" className="mt-2">
-                        <ChevronRight className="h-4 w-4 mr-1" />
-                        View Execution Transaction
-                      </Button>
-                    )}
-                  </div>
+                  {proposal.concluded_by && (
+                    <div className="flex items-center gap-2 text-sm mt-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        Concluded by:
+                      </span>
+                      <a
+                        href={getExplorerLink("address", proposal.concluded_by)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {truncateString(proposal.concluded_by, 5, 5)}
+                      </a>
+                    </div>
+                  )}
                 </div>
-              </>
+              </div>
             )}
           </TabsContent>
         </Tabs>

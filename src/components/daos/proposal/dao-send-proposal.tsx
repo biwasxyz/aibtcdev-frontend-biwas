@@ -1,5 +1,5 @@
 "use client";
-// TODO: ADD VALIDATION IF AGENT HAS THE TOKEN ENABLE THE BUTTON TO SEND MESSAGE OR ELSE SHOW THEM BUY TOKEN BUTTON..
+
 import type React from "react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -112,17 +112,8 @@ export function DAOSendProposal({
 
   return (
     <>
-      <div className={`flex w-full gap-2 flex-col ${className}`}>
-        {!hasAccessToken ? (
-          <p className="text-sm text-amber-500 mb-2">
-            Connect your wallet to send proposal
-          </p>
-        ) : !isConnected ? (
-          <p className="text-sm text-amber-500 mb-2">
-            Connecting to messaging service...
-          </p>
-        ) : null}
-        <div className="flex w-full gap-2">
+      <div className={`w-full ${className}`}>
+        <div className="relative w-full">
           <Input
             value={inputValue}
             onChange={(e) => {
@@ -130,26 +121,32 @@ export function DAOSendProposal({
               // Clear error when user starts typing again
               if (inputError) setInputError(null);
             }}
-            placeholder="Send on-chain message"
-            className={`flex-grow ${
+            placeholder={
+              hasAccessToken
+                ? "Send on-chain message"
+                : "Connect your wallet to send message"
+            }
+            className={`w-full h-20 pr-16 text-base ${
               inputError ? "border-red-500 focus-visible:ring-red-500" : ""
             }`}
             onKeyDown={handleKeyDown}
             disabled={!hasAccessToken}
           />
-          <Button
-            variant="primary"
-            size={size}
-            onClick={handleSendMessage}
-            disabled={
-              !hasAccessToken ||
-              !inputValue.trim() ||
-              inputValue.trim().length < 50 ||
-              !isConnected
-            }
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+          <div className="absolute bottom-2 right-2">
+            <Button
+              variant="primary"
+              size={size}
+              onClick={handleSendMessage}
+              disabled={
+                !hasAccessToken ||
+                !inputValue.trim() ||
+                inputValue.trim().length < 50 ||
+                !isConnected
+              }
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         {inputError && (
           <p className="text-sm text-red-500 mt-1">{inputError}</p>
@@ -170,12 +167,12 @@ export function DAOSendProposal({
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Success</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl">Success</DialogTitle>
+            <DialogDescription className="text-base">
               Your proposal message will be on-chain in a few seconds...
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end">
             <Button
               variant="default"
               onClick={() => setShowSuccessDialog(false)}
