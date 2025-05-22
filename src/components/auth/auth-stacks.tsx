@@ -523,7 +523,7 @@ async function ensureProfileHasStacksAddresses(
 ) {
   try {
     // Get the current profile data
-    const { data: profile, error: fetchErr } = await supabase
+    const { data: profile } = await supabase
       .from("profiles")
       .select("mainnet_address, testnet_address")
       .eq("id", userId)

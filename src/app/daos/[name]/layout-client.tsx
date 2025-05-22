@@ -13,8 +13,8 @@ import {
   Users,
   Activity,
   Loader2,
-  ChevronDown,
-  ChevronUp,
+  // ChevronDown,
+  // ChevronUp,
   Info,
   Wallet,
   CoinsIcon as CoinIcon,
@@ -64,7 +64,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   const params = useParams();
   const encodedName = params.name as string;
   const pathname = usePathname();
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  // const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [missionModalOpen, setMissionModalOpen] = useState(false);
 
   // First, fetch the DAO by name to get its ID
