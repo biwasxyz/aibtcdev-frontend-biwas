@@ -447,6 +447,22 @@ export default function StacksAuth({ redirectUrl }: { redirectUrl?: string }) {
               </section>
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
+                  AI Compute Services
+                </h2>
+                <p className="text-zinc-800 dark:text-zinc-200">
+                  AIBTC may, at its sole discretion, provide AI compute services
+                  through the App. Access is subject to usage caps, throttling,
+                  or discontinuation at any time without notice. All fees for AI
+                  compute are collected at proposal creation and automatically
+                  transferred to the aibtc-dao-run-cost smart contract. AIBTC
+                  makes no warranties about availability or performance of AI
+                  compute and is not liable for indirect, incidental, or
+                  consequential damages arising from its restriction or
+                  termination.
+                </p>
+              </section>
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">
                   Bridging activities are carried out by third party service
                 </h2>
                 <p className="text-zinc-800 dark:text-zinc-200">
@@ -513,15 +529,8 @@ async function ensureProfileHasStacksAddresses(
       .eq("id", userId)
       .single();
 
-    if (fetchErr && fetchErr.code !== "PGRST116") {
-      // PGRST116 is "no rows returned" - we'll handle this by creating a new profile
-      console.error("Error fetching profile:", fetchErr);
-      throw fetchErr;
-    }
-
     // Prepare updates object - only update fields that are null
     const updates: Record<string, string> = { id: userId };
-
     // If no profile exists or mainnet_address is null, add it to updates
     if (!profile?.mainnet_address && mainnetAddr) {
       updates.mainnet_address = mainnetAddr;
