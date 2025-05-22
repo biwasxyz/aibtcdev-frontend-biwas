@@ -416,7 +416,8 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* About section - Improved with card styling */}
-        {dao.description && (
+
+        {/* {dao.description && (
           <div className="space-y-2 rounded-lg border bg-background/50 backdrop-blur-sm p-4 mb-4 mx-4 shadow-sm">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-medium">About</h3>
@@ -451,7 +452,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
               {dao.description}
             </p>
           </div>
-        )}
+        )} */}
 
         {/* Navigation Tabs - Mobile */}
         <div className="block sm:hidden overflow-x-auto mb-4 px-4 sticky top-0 z-10 bg-background pt-2 border-b">
