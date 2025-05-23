@@ -27,6 +27,22 @@ interface DAOSendProposalProps {
   className?: string;
 }
 
+// Define types for API responses
+interface ApiResponse {
+  output: string;
+  error: string | null;
+  success: boolean;
+}
+
+interface ParsedOutput {
+  success: boolean;
+  message: string;
+  data: {
+    txid?: string;
+    link?: string;
+  };
+}
+
 export function DAOSendProposal({
   daoId,
   size = "default",
@@ -36,7 +52,7 @@ export function DAOSendProposal({
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [inputError, setInputError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [apiResponse, setApiResponse] = useState<any>(null);
+  const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   const { activeThreadId, connect, isConnected } = useChatStore();
   const { accessToken, isLoading: isSessionLoading } = useSessionStore();
 
@@ -98,7 +114,7 @@ export function DAOSendProposal({
   };
 
   // Send the request to the endpoint
-  const sendRequest = async (extensionData: any) => {
+  const sendRequest = async (extensionData: Record<string, string>) => {
     if (!accessToken) {
       setInputError("Access token is required");
       return null;
@@ -127,7 +143,7 @@ export function DAOSendProposal({
       }
 
       console.log("API Response:", data);
-      return data;
+      return data as ApiResponse;
     } catch (error) {
       console.error("Error sending proposal:", error);
       throw error;
@@ -170,8 +186,10 @@ export function DAOSendProposal({
 
       // Show success dialog
       setShowSuccessDialog(true);
-    } catch (error: any) {
-      setInputError(error.message || "Failed to send proposal");
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to send proposal";
+      setInputError(errorMessage);
     }
   };
 
@@ -262,7 +280,9 @@ export function DAOSendProposal({
               {apiResponse?.success ? (
                 (() => {
                   try {
-                    const parsedOutput = JSON.parse(apiResponse.output);
+                    const parsedOutput = JSON.parse(
+                      apiResponse.output
+                    ) as ParsedOutput;
                     const txLink = parsedOutput.data?.link;
                     return txLink ? (
                       <a
@@ -276,7 +296,7 @@ export function DAOSendProposal({
                     ) : (
                       "Transaction completed successfully"
                     );
-                  } catch (error) {
+                  } catch {
                     return "Transaction completed successfully";
                   }
                 })()
@@ -284,7 +304,9 @@ export function DAOSendProposal({
                 <div className="text-red-600 space-y-2">
                   {(() => {
                     try {
-                      const parsedOutput = JSON.parse(apiResponse.output);
+                      const parsedOutput = JSON.parse(
+                        apiResponse?.output || "{}"
+                      ) as ParsedOutput;
                       return (
                         <>
                           <p>
@@ -301,7 +323,7 @@ export function DAOSendProposal({
                           </div>
                         </>
                       );
-                    } catch (error) {
+                    } catch {
                       return (
                         <>
                           <p>
