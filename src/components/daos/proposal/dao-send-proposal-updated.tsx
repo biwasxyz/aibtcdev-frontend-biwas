@@ -3,7 +3,7 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { DAO, Token } from "@/types/supabase";
 import { useChatStore } from "@/store/chat";
@@ -17,7 +17,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
 
 interface DAOSendProposalProps {
   daoId: string;
@@ -77,13 +76,18 @@ export function DAOSendProposal({
       return null;
     }
 
-    // Find the specific extensions needed
-    const actionProposalsVotingExt = daoExtensions.find(
-      (ext) => ext.type === "EXTENSIONS_ACTION_PROPOSALS"
-    );
-    const actionProposalContractExt = daoExtensions.find(
-      (ext) => ext.type === "ACTIONS_MESSAGING_SEND_MESSAGE"
-    );
+    // Find the specific extensions needed with fallback options
+    const actionProposalsVotingExt =
+      daoExtensions.find((ext) => ext.type === "EXTENSIONS_ACTION_PROPOSALS") ||
+      daoExtensions.find(
+        (ext) => ext.type === "EXTENSIONS_ACTION_PROPOSAL_VOTING"
+      );
+
+    const actionProposalContractExt =
+      daoExtensions.find(
+        (ext) => ext.type === "ACTIONS_MESSAGING_SEND_MESSAGE"
+      ) || daoExtensions.find((ext) => ext.type === "ACTIONS_SEND_MESSAGE");
+
     const daoTokenExt = daoExtensions.find((ext) => ext.type === "TOKEN_DAO");
 
     // Check if all required extensions are found
