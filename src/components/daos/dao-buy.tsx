@@ -8,16 +8,19 @@ import { Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/store/session";
 
+/* exact API envelope coming back from FastAPI */
+export interface ApiResponse {
+  output: string;
+  error: string | null;
+  success: boolean;
+}
+
 interface TokenBuyInputProps {
   tokenName: string;
   contractPrincipal: string;
   initialAmount?: string;
   onAmountChange?: (amount: string) => void;
-  onResult: (res: {
-    success: boolean;
-    link?: string | null;
-    message?: string | null;
-  }) => void;
+  onResult: (res: ApiResponse) => void; // <── only change
   disabled?: boolean;
 }
 
@@ -34,6 +37,7 @@ export function TokenBuyInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const { accessToken } = useSessionStore();
 
+  /* keep in sync with preset */
   useEffect(() => {
     if (initialAmount) setAmount(initialAmount);
   }, [initialAmount]);
@@ -68,37 +72,14 @@ export function TokenBuyInput({
           }
         );
 
-        const outer = await resp.json();
-
-        /* ---------- parse inner output JSON regardless of success ---------- */
-        let inner: any = null;
-        if (outer.output) {
-          try {
-            inner = JSON.parse(outer.output);
-          } catch {
-            /* ignore malformed inner JSON */
-          }
-        }
-
-        /* ---------- SUCCESS ---------- */
-        if (resp.ok && outer.success) {
-          const link: string | null = inner?.data?.link ?? null;
-          setAmount("");
-          onResult({ success: true, link });
-          return;
-        }
-
-        /* ---------- FAILURE ---------- */
-        const errorMsg =
-          inner?.message ||
-          outer.error ||
-          outer.message ||
-          "Transaction failed";
-        throw new Error(errorMsg);
+        const apiResponse: ApiResponse = await resp.json();
+        onResult(apiResponse);
+        if (apiResponse.success) setAmount("");
       } catch (err) {
         onResult({
           success: false,
-          message: err instanceof Error ? err.message : "Unknown error",
+          output: "",
+          error: err instanceof Error ? err.message : "Unknown error",
         });
       } finally {
         setIsLoading(false);
