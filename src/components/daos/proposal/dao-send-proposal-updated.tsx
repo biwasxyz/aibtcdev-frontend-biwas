@@ -75,6 +75,12 @@ export function DAOSendProposal({
       console.log("No DAO extensions found");
       return null;
     }
+    // FOR UPDATED EXTENSION TYPES...SENDING MESSAGES STILL NOT WORKING FOR LATEST DAO SO KEEPING IT COMMENTED FOR NOW
+    // const findExt = (type: string, subtype: string) =>
+    //   daoExtensions.find((ext) => ext.type === type && ext.subtype === subtype);
+    // const actionProposalsVotingExt = findExt("EXTENSIONS", "ACTION_PROPOSAL_VOTING");
+    // const actionProposalContractExt = findExt("ACTIONS", "SEND_MESSAGE");
+    // const daoTokenExt = findExt("TOKEN", "DAO");
 
     // Find the specific extensions needed with fallback options
     const actionProposalsVotingExt =
