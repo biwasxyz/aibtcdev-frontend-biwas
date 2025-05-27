@@ -2,6 +2,14 @@ import { supabase } from "@/utils/supabase/client"
 import { sdkFaktory } from "@/lib/faktory-fun"
 import type { DAO, Holder, Token, Proposal, Extension } from "@/types/supabase"
 
+const SUPPORTED_DAOS = [
+    "MEDIA3",
+    "FACES",
+    "FACE3",
+    "FACEY•AIBTC•DAO",
+    "UFACE•AIBTC•DAO"
+]
+
 // Define structure for Market Statistics
 interface MarketStats {
     price: number
@@ -83,7 +91,7 @@ export const fetchDAOsWithExtension = async (): Promise<DAO[]> => {
             .select("*")
             .order("created_at", { ascending: false })
             .eq("is_broadcasted", true)
-            .in("name", ["MEDIA3", "FACES", "FACE3", "FACEY•AIBTC•DAO"]),
+            .in("name", SUPPORTED_DAOS),
         fetchExtensions(),
     ])
 
@@ -107,7 +115,7 @@ export const fetchDAOs = async (): Promise<DAO[]> => {
             .select("*")
             .order("created_at", { ascending: false })
             .eq("is_broadcasted", true)
-            .in("name", ["MEDIA3", "FACES", "FACE3", "FACEY•AIBTC•DAO"]),
+            .in("name", SUPPORTED_DAOS),
     ])
 
     if (daosError) throw daosError
