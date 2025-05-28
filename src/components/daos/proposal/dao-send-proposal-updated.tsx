@@ -3,7 +3,7 @@
 import type React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Check, ExternalLink, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { DAO, Token } from "@/types/supabase";
 import { useSessionStore } from "@/store/session";
@@ -65,7 +65,6 @@ export function DAOSendProposal({
   size = "default",
   className,
 }: DAOSendProposalProps) {
-  /* ---------------------------- Local component state --------------------------- */
   const [inputValue, setInputValue] = useState("");
   const [showResultDialog, setShowResultDialog] = useState(false);
   const [inputError, setInputError] = useState<string | null>(null);
@@ -257,19 +256,7 @@ export function DAOSendProposal({
             <>
               <DialogHeader>
                 <DialogTitle className="text-xl flex items-center gap-2">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+                  <Check className="w-6 h-6" />
                   Transaction Successful
                 </DialogTitle>
                 <DialogDescription className="text-base">
@@ -291,19 +278,7 @@ export function DAOSendProposal({
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2"
                           >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                              />
-                            </svg>
+                            <ExternalLink className="w-4 h-4" />
                             View on Explorer
                           </a>
                         </Button>
@@ -327,19 +302,7 @@ export function DAOSendProposal({
             <>
               <DialogHeader>
                 <DialogTitle className="text-xl flex items-center gap-2">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <AlertCircle className="w-6 h-6" />
                   Transaction Failed
                 </DialogTitle>
                 <DialogDescription className="text-base">
