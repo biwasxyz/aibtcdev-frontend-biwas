@@ -1,12 +1,11 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Send, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import type { DAO, Token } from "@/types/supabase";
-import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDAOExtensions } from "@/queries/dao-queries";
@@ -17,10 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-/* -------------------------------------------------------------------------- */
-/*                                   Types                                    */
-/* -------------------------------------------------------------------------- */
 
 interface DAOSendProposalProps {
   daoId: string;
@@ -45,10 +40,6 @@ interface ParsedOutput {
   };
 }
 
-/* -------------------------------------------------------------------------- */
-/*                           Utility Functions                               */
-/* -------------------------------------------------------------------------- */
-
 /**
  * The `output` field that comes back from the backend is *not* pure JSON – it
  * contains a bunch of human‑readable logging lines followed by the JSON block
@@ -69,10 +60,6 @@ function parseOutput(raw: string): ParsedOutput | null {
   return null;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                               Main component                               */
-/* -------------------------------------------------------------------------- */
-
 export function DAOSendProposal({
   daoId,
   size = "default",
@@ -85,23 +72,13 @@ export function DAOSendProposal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
 
-  /* ------------------------ Global stores / session data ----------------------- */
-  const { activeThreadId, connect, isConnected } = useChatStore();
   const { accessToken, isLoading: isSessionLoading } = useSessionStore();
 
-  /* ----------------------------- DAO extensions -------------------------------- */
   const { data: daoExtensions, isLoading: isLoadingExtensions } = useQuery({
     queryKey: ["daoExtensions", daoId],
     queryFn: () => fetchDAOExtensions(daoId),
     staleTime: 10 * 60 * 1000, // 10 min
   });
-
-  /* -------------------------- WebSocket auto‑connect --------------------------- */
-  useEffect(() => {
-    if (accessToken && !isConnected && !isSessionLoading) {
-      connect(accessToken);
-    }
-  }, [accessToken, isConnected, connect, isSessionLoading]);
 
   /* ---------------------- Helpers – extension data builder --------------------- */
   const buildExtensionData = () => {
@@ -150,7 +127,6 @@ export function DAOSendProposal({
       const json = (await res.json()) as ApiResponse;
       console.log("API Response:", json);
 
-      // Don't throw here - let processApiResponse handle the logic
       return json;
     } finally {
       setIsSubmitting(false);
@@ -164,7 +140,6 @@ export function DAOSendProposal({
       return;
     }
 
-    if (!activeThreadId) return;
     setInputError(null);
 
     const extensionData = buildExtensionData();
@@ -246,7 +221,6 @@ export function DAOSendProposal({
                 !hasAccessToken ||
                 !inputValue.trim() ||
                 inputValue.trim().length < 50 ||
-                !isConnected ||
                 isSubmitting ||
                 isLoadingExtensions
               }
