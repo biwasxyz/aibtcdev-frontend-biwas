@@ -52,8 +52,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   // Get voting status
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
-    proposal.start_block,
-    proposal.end_block
+    proposal.vote_start,
+    proposal.vote_end
   );
 
   // Determine execution status
@@ -349,8 +349,8 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                 createdAt={proposal.created_at}
                 concludedBy={proposal.concluded_by}
                 status={proposal.status}
-                start_block={proposal.start_block}
-                end_block={proposal.end_block}
+                vote_start={proposal.vote_start}
+                vote_end={proposal.vote_end}
               />
             </div>
           </TabsContent>
@@ -396,27 +396,21 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                     icon={Layers}
                     label="Snapshot block"
                     value={
-                      <BlockVisual
-                        value={proposal.created_at_block}
-                        type="stacks"
-                      />
+                      <BlockVisual value={proposal.created_stx} type="stacks" />
                     }
                   />
                   <LabeledField
                     icon={ArrowRight}
                     label="Start block"
                     value={
-                      <BlockVisual
-                        value={proposal.start_block}
-                        type="bitcoin"
-                      />
+                      <BlockVisual value={proposal.vote_start} type="bitcoin" />
                     }
                   />
                   <LabeledField
                     icon={Timer}
                     label="End block"
                     value={
-                      <BlockVisual value={proposal.end_block} type="bitcoin" />
+                      <BlockVisual value={proposal.vote_end} type="bitcoin" />
                     }
                   />
                 </div>

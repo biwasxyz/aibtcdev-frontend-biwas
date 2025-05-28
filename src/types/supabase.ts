@@ -88,7 +88,6 @@ export interface Extension {
 }
 
 export interface Proposal {
-  token_symbol: string | undefined;
   id: string;
   created_at: string;
   title: string;
@@ -101,9 +100,6 @@ export interface Proposal {
   action: string;
   caller: string;
   creator: string;
-  created_at_block: number;
-  end_block: number;
-  start_block: number;
   liquid_tokens: number | null;
   parameters: string;
   concluded_by: string;
@@ -113,6 +109,27 @@ export interface Proposal {
   passed: boolean;
   votes_against: string;
   votes_for: string;
+  bond: string;
+  proposal_contract: string;
+  type: string;
+  image_url: string;
+  image_description: string;
+  contract_caller: string;
+  created_btc: number;
+  created_stx: number;
+  creator_user_id: number;
+  exec_end: number;
+  exec_start: number;
+  memo: string;
+  tx_sender: string;
+  vote_end: number;
+  vote_start: number;
+  voting_delay: number;
+  voting_period: number;
+  voting_quorum: number;
+  voting_reward: string;
+  voting_threshold: number;
+  token_symbol?: string;
 }
 
 export interface CronEntry {
