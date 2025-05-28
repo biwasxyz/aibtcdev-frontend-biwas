@@ -18,6 +18,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+/* -------------------------------------------------------------------------- */
+/*                                   Types                                    */
+/* -------------------------------------------------------------------------- */
+
 interface DAOSendProposalProps {
   daoId: string;
   dao?: DAO;
@@ -26,7 +30,6 @@ interface DAOSendProposalProps {
   className?: string;
 }
 
-// Define types for API responses
 interface ApiResponse {
   output: string;
   error: string | null;
@@ -42,42 +45,71 @@ interface ParsedOutput {
   };
 }
 
+/* -------------------------------------------------------------------------- */
+/*                           Utility Functions                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The `output` field that comes back from the backend is *not* pure JSON – it
+ * contains a bunch of human‑readable logging lines followed by the JSON block
+ * we actually want.  This helper finds the **last** opening curly brace and
+ * tries to `JSON.parse` everything from there onward.
+ */
+function parseOutput(raw: string): ParsedOutput | null {
+  const idxArr: number[] = [];
+  for (let i = 0; i < raw.length; i++) if (raw[i] === "{") idxArr.push(i);
+  for (const idx of idxArr) {
+    const slice = raw.slice(idx).trim();
+    try {
+      return JSON.parse(slice);
+    } catch {
+      continue; // keep trying – probably hit a nested "{" first
+    }
+  }
+  return null;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                               Main component                               */
+/* -------------------------------------------------------------------------- */
+
 export function DAOSendProposal({
   daoId,
   size = "default",
   className,
 }: DAOSendProposalProps) {
+  /* ---------------------------- Local component state --------------------------- */
   const [inputValue, setInputValue] = useState("");
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showResultDialog, setShowResultDialog] = useState(false);
   const [inputError, setInputError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
+
+  /* ------------------------ Global stores / session data ----------------------- */
   const { activeThreadId, connect, isConnected } = useChatStore();
   const { accessToken, isLoading: isSessionLoading } = useSessionStore();
 
-  // Fetch DAO extensions
+  /* ----------------------------- DAO extensions -------------------------------- */
   const { data: daoExtensions, isLoading: isLoadingExtensions } = useQuery({
     queryKey: ["daoExtensions", daoId],
     queryFn: () => fetchDAOExtensions(daoId),
-    staleTime: 600000, // 10 minutes
+    staleTime: 10 * 60 * 1000, // 10 min
   });
 
-  // Connect WebSocket when component mounts using the token from session store
+  /* -------------------------- WebSocket auto‑connect --------------------------- */
   useEffect(() => {
     if (accessToken && !isConnected && !isSessionLoading) {
       connect(accessToken);
     }
   }, [accessToken, isConnected, connect, isSessionLoading]);
 
-  // Extract the required extension data
-  const extractExtensionData = () => {
-    if (!daoExtensions || daoExtensions.length === 0) {
-      console.log("No DAO extensions found");
-      return null;
-    }
-    // FOR UPDATED EXTENSION TYPES...SENDING MESSAGES STILL NOT WORKING FOR LATEST DAO SO KEEPING IT COMMENTED FOR NOW
+  /* ---------------------- Helpers – extension data builder --------------------- */
+  const buildExtensionData = () => {
+    if (!daoExtensions || daoExtensions.length === 0) return null;
+
     const findExt = (type: string, subtype: string) =>
       daoExtensions.find((ext) => ext.type === type && ext.subtype === subtype);
+
     const actionProposalsVotingExt = findExt(
       "EXTENSIONS",
       "ACTION_PROPOSAL_VOTING"
@@ -85,36 +117,10 @@ export function DAOSendProposal({
     const actionProposalContractExt = findExt("ACTIONS", "SEND_MESSAGE");
     const daoTokenExt = findExt("TOKEN", "DAO");
 
-    // Find the specific extensions needed with fallback options
-    // const actionProposalsVotingExt =
-    //   daoExtensions.find((ext) => ext.type === "EXTENSIONS_ACTION_PROPOSALS") ||
-    //   daoExtensions.find(
-    //     (ext) => ext.type === "EXTENSIONS_ACTION_PROPOSAL_VOTING"
-    //   );
-
-    // const actionProposalContractExt =
-    //   daoExtensions.find(
-    //     (ext) => ext.type === "ACTIONS_MESSAGING_SEND_MESSAGE"
-    //   ) || daoExtensions.find((ext) => ext.type === "ACTIONS_SEND_MESSAGE");
-
-    // const daoTokenExt = daoExtensions.find((ext) => ext.type === "TOKEN_DAO");
-
-    // Check if all required extensions are found
-    if (
-      !actionProposalsVotingExt ||
-      !actionProposalContractExt ||
-      !daoTokenExt
-    ) {
-      console.error("Missing required extensions", {
-        actionProposalsVotingExt,
-        actionProposalContractExt,
-        daoTokenExt,
-      });
+    if (!actionProposalsVotingExt || !actionProposalContractExt || !daoTokenExt)
       return null;
-    }
 
-    // Create the data object
-    const extensionData = {
+    return {
       action_proposals_voting_extension:
         actionProposalsVotingExt.contract_principal,
       action_proposal_contract_to_execute:
@@ -122,88 +128,78 @@ export function DAOSendProposal({
       dao_token_contract_address: daoTokenExt.contract_principal,
       message: inputValue.trim(),
     };
-
-    return extensionData;
   };
 
-  // Send the request to the endpoint
-  const sendRequest = async (extensionData: Record<string, string>) => {
-    if (!accessToken) {
-      setInputError("Access token is required");
-      return null;
-    }
+  /* ------------------------------ API call helper ------------------------------ */
+  const sendRequest = async (payload: Record<string, string>) => {
+    if (!accessToken) throw new Error("Missing access token");
 
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
-
-      const response = await fetch(
+      const res = await fetch(
         `https://core-staging.aibtc.dev/tools/dao/action_proposals/propose_send_message?token=${encodeURIComponent(
           accessToken
         )}`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(extensionData),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         }
       );
 
-      const data = await response.json();
+      const json = (await res.json()) as ApiResponse;
+      console.log("API Response:", json);
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to send proposal");
-      }
-
-      console.log("API Response:", data);
-      return data as ApiResponse;
-    } catch (error) {
-      console.error("Error sending proposal:", error);
-      throw error;
+      // Don't throw here - let processApiResponse handle the logic
+      return json;
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  /* --------------------------------- Handlers --------------------------------- */
   const handleSendMessage = async () => {
-    // Validate message length
     if (inputValue.trim().length < 50) {
       setInputError("Message should have at least 50 characters");
       return;
     }
 
-    if (!inputValue.trim() || !activeThreadId) return;
-
-    // Clear any previous errors
+    if (!activeThreadId) return;
     setInputError(null);
-    setApiResponse(null);
 
-    // Get the extension data
-    const extensionData = extractExtensionData();
-
+    const extensionData = buildExtensionData();
     if (!extensionData) {
-      setInputError("Failed to extract required extension data");
+      setInputError("Could not determine required DAO extensions");
       return;
     }
 
-    // Console log the extension data
-    console.log("Extension Data:", extensionData);
-
     try {
-      // Send the request
       const response = await sendRequest(extensionData);
+
       setApiResponse(response);
+      setShowResultDialog(true);
 
-      // Reset input
+      // Clear input after any response (success or error)
       setInputValue("");
+    } catch (err) {
+      // Handle network errors or other unexpected errors
+      const networkErrorResponse: ApiResponse = {
+        success: false,
+        error:
+          err instanceof Error
+            ? err.message
+            : "Failed to connect to the server",
+        output: "",
+      };
 
-      // Show success dialog
-      setShowSuccessDialog(true);
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to send proposal";
-      setInputError(errorMessage);
+      setApiResponse(networkErrorResponse);
+      setShowResultDialog(true);
     }
+  };
+
+  const handleRetry = () => {
+    setShowResultDialog(false);
+    // Modal closed, user can try again
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -213,24 +209,27 @@ export function DAOSendProposal({
     }
   };
 
-  // Check if user has an access token
+  /* -------------------------------------------------------------------------- */
+  /*                                   Render                                   */
+  /* -------------------------------------------------------------------------- */
+
   const hasAccessToken = !!accessToken && !isSessionLoading;
 
   return (
     <>
-      <div className={`w-full ${className}`}>
+      {/* ------------------------------- Input box ------------------------------ */}
+      <div className={`w-full ${className ?? ""}`}>
         <div className="relative w-full">
           <Input
             value={inputValue}
             onChange={(e) => {
               setInputValue(e.target.value);
-              // Clear error when user starts typing again
               if (inputError) setInputError(null);
             }}
             placeholder={
               hasAccessToken
                 ? "Send on-chain message"
-                : "Connect your wallet to send message"
+                : "Connect your wallet to send a message"
             }
             className={`w-full h-20 pr-16 text-base ${
               inputError ? "border-red-500 focus-visible:ring-red-500" : ""
@@ -268,110 +267,144 @@ export function DAOSendProposal({
           inputValue.trim().length > 0 &&
           inputValue.trim().length < 50 && (
             <p className="text-sm text-red-500 mt-1">
-              {`Message needs ${
-                50 - inputValue.trim().length
-              } more characters (minimum 50)`}
+              {`Message needs ${50 - inputValue.trim().length} more characters`}
             </p>
           )}
         {isLoadingExtensions && (
-          <p className="text-sm text-gray-500 mt-1">
-            Loading DAO extensions...
-          </p>
+          <p className="text-sm text-gray-500 mt-1">Loading DAO extensions…</p>
         )}
       </div>
 
-      {/* Success Dialog */}
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-xl">
-              {apiResponse?.success
-                ? "Your proposal message has been sent on-chain"
-                : "Transaction Failed"}
-            </DialogTitle>
-            <DialogDescription className="text-base">
-              {apiResponse?.success ? (
-                (() => {
-                  try {
-                    const parsedOutput = JSON.parse(
-                      apiResponse.output
-                    ) as ParsedOutput;
-                    const txLink = parsedOutput.data?.link;
-                    return txLink ? (
-                      <a
-                        href={txLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 underline break-all"
-                      >
-                        {txLink}
-                      </a>
-                    ) : (
-                      "Transaction completed successfully"
-                    );
-                  } catch {
-                    return "Transaction completed successfully";
-                  }
-                })()
-              ) : (
-                <div className="text-red-600 space-y-2">
-                  {(() => {
-                    try {
-                      const parsedOutput = JSON.parse(
-                        apiResponse?.output || "{}"
-                      ) as ParsedOutput;
-                      return (
-                        <>
-                          <p>
-                            <strong>Message:</strong>{" "}
-                            {parsedOutput.message || "Unknown error"}
-                          </p>
-                          <div>
-                            <p>
-                              <strong>Output:</strong>
-                            </p>
-                            <pre className="text-xs mt-1 bg-red-50 p-2 rounded overflow-auto max-h-32 whitespace-pre-wrap">
-                              {JSON.stringify(parsedOutput, null, 2)}
-                            </pre>
-                          </div>
-                        </>
-                      );
-                    } catch {
-                      return (
-                        <>
-                          <p>
-                            <strong>Message:</strong>{" "}
-                            {apiResponse?.error || "Unknown error"}
-                          </p>
-                          <div>
-                            <p>
-                              <strong>Output:</strong>
-                            </p>
-                            <pre className="text-xs mt-1 bg-red-50 p-2 rounded overflow-auto max-h-32 whitespace-pre-wrap">
-                              {apiResponse?.output || "No output available"}
-                            </pre>
-                          </div>
-                        </>
-                      );
-                    }
-                  })()}
-                  {apiResponse?.error && (
-                    <p>
-                      <strong>Error:</strong> {apiResponse.error}
-                    </p>
+      {/* ----------------------------- Result modal ----------------------------- */}
+      <Dialog open={showResultDialog} onOpenChange={setShowResultDialog}>
+        <DialogContent className="sm:max-w-2xl">
+          {apiResponse?.success ? (
+            // Success state
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl flex items-center gap-2">
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  Transaction Successful
+                </DialogTitle>
+                <DialogDescription className="text-base">
+                  Your DAO proposal has been successfully submitted to the
+                  blockchain.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="mt-4">
+                {(() => {
+                  const parsed = parseOutput(apiResponse.output);
+                  return (
+                    parsed?.data?.link && (
+                      <div className="flex justify-center">
+                        <Button asChild>
+                          <a
+                            href={parsed.data.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                              />
+                            </svg>
+                            View on Explorer
+                          </a>
+                        </Button>
+                      </div>
+                    )
+                  );
+                })()}
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <Button
+                  variant="default"
+                  onClick={() => setShowResultDialog(false)}
+                >
+                  Close
+                </Button>
+              </div>
+            </>
+          ) : (
+            // Error state
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl flex items-center gap-2">
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  Transaction Failed
+                </DialogTitle>
+                <DialogDescription className="text-base">
+                  There was an error processing your DAO proposal.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="mt-4">
+                <div className="bg-muted border rounded-lg p-4">
+                  <h4 className="font-semibold mb-2">Error Details</h4>
+                  <div className="text-sm">
+                    {apiResponse?.error || "An unknown error occurred"}
+                  </div>
+                  {apiResponse?.output && (
+                    <details className="mt-3">
+                      <summary className="cursor-pointer hover:underline">
+                        View full response
+                      </summary>
+                      <pre className="whitespace-pre-wrap text-xs bg-white p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
+                        {apiResponse.output}
+                      </pre>
+                    </details>
                   )}
                 </div>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end mt-6">
-            <Button
-              variant="default"
-              onClick={() => setShowSuccessDialog(false)}
-            >
-              Close
-            </Button>
-          </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-6">
+                <Button variant="outline" onClick={handleRetry}>
+                  Try Again
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={() => setShowResultDialog(false)}
+                >
+                  Close
+                </Button>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </>
