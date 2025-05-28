@@ -76,25 +76,28 @@ export function DAOSendProposal({
       return null;
     }
     // FOR UPDATED EXTENSION TYPES...SENDING MESSAGES STILL NOT WORKING FOR LATEST DAO SO KEEPING IT COMMENTED FOR NOW
-    // const findExt = (type: string, subtype: string) =>
-    //   daoExtensions.find((ext) => ext.type === type && ext.subtype === subtype);
-    // const actionProposalsVotingExt = findExt("EXTENSIONS", "ACTION_PROPOSAL_VOTING");
-    // const actionProposalContractExt = findExt("ACTIONS", "SEND_MESSAGE");
-    // const daoTokenExt = findExt("TOKEN", "DAO");
+    const findExt = (type: string, subtype: string) =>
+      daoExtensions.find((ext) => ext.type === type && ext.subtype === subtype);
+    const actionProposalsVotingExt = findExt(
+      "EXTENSIONS",
+      "ACTION_PROPOSAL_VOTING"
+    );
+    const actionProposalContractExt = findExt("ACTIONS", "SEND_MESSAGE");
+    const daoTokenExt = findExt("TOKEN", "DAO");
 
     // Find the specific extensions needed with fallback options
-    const actionProposalsVotingExt =
-      daoExtensions.find((ext) => ext.type === "EXTENSIONS_ACTION_PROPOSALS") ||
-      daoExtensions.find(
-        (ext) => ext.type === "EXTENSIONS_ACTION_PROPOSAL_VOTING"
-      );
+    // const actionProposalsVotingExt =
+    //   daoExtensions.find((ext) => ext.type === "EXTENSIONS_ACTION_PROPOSALS") ||
+    //   daoExtensions.find(
+    //     (ext) => ext.type === "EXTENSIONS_ACTION_PROPOSAL_VOTING"
+    //   );
 
-    const actionProposalContractExt =
-      daoExtensions.find(
-        (ext) => ext.type === "ACTIONS_MESSAGING_SEND_MESSAGE"
-      ) || daoExtensions.find((ext) => ext.type === "ACTIONS_SEND_MESSAGE");
+    // const actionProposalContractExt =
+    //   daoExtensions.find(
+    //     (ext) => ext.type === "ACTIONS_MESSAGING_SEND_MESSAGE"
+    //   ) || daoExtensions.find((ext) => ext.type === "ACTIONS_SEND_MESSAGE");
 
-    const daoTokenExt = daoExtensions.find((ext) => ext.type === "TOKEN_DAO");
+    // const daoTokenExt = daoExtensions.find((ext) => ext.type === "TOKEN_DAO");
 
     // Check if all required extensions are found
     if (
