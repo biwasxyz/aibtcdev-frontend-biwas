@@ -19,8 +19,8 @@ interface ProposalMetricsProps {
 const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
-    proposal.start_block,
-    proposal.end_block
+    proposal.vote_start,
+    proposal.vote_end
   );
 
   // Check if the proposal has failed

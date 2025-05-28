@@ -210,6 +210,7 @@ export const fetchHolders = async (
         `https://api.${STACKS_NETWORK}.hiro.so/extended/v1/tokens/ft/${contractPrincipal}::${tokenSymbol}/holders`,
     )
     const data: HiroHolderResponse = await response.json()
+    // console.log(response.url)
 
     const holdersWithPercentage = data.results.map((holder) => ({
         ...holder,

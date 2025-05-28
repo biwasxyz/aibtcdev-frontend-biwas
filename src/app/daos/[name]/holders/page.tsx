@@ -15,14 +15,17 @@ export const runtime = "edge";
 export default function HoldersPage() {
   const params = useParams();
   const encodedName = params.name as string;
+  const decodedName = decodeURIComponent(encodedName);
+  // console.log(decodedName);
 
   // First, fetch the DAO by name to get its ID
   const { data: dao, isLoading: isLoadingDAO } = useQuery({
-    queryKey: ["dao", encodedName],
-    queryFn: () => fetchDAOByName(encodedName),
+    queryKey: ["dao", decodedName],
+    queryFn: () => fetchDAOByName(decodedName),
   });
 
   const daoId = dao?.id;
+  console.log(daoId);
 
   // Then use the ID to fetch the token
   const { data: token, isLoading: isLoadingToken } = useQuery({
@@ -38,6 +41,10 @@ export default function HoldersPage() {
     queryFn: () => fetchHolders(token!.contract_principal, token!.symbol),
     enabled: !!token?.contract_principal && !!token?.symbol,
   });
+
+  // console.log(token?.id);
+  // console.log(token?.symbol);
+  // console.log(token?.contract_principal);
 
   const isLoading = isLoadingDAO || isLoadingToken || isLoadingHolders;
 

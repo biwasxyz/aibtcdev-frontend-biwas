@@ -12,8 +12,8 @@ interface TimeStatusProps {
   createdAt: string;
   status: Proposal["status"];
   concludedBy?: string;
-  start_block: number;
-  end_block: number;
+  vote_start: number;
+  vote_end: number;
 }
 
 // Return interface for the hook
@@ -95,23 +95,23 @@ const fetchBlockTimes = async (
 // --- Refactored useVotingStatus Hook ---
 export const useVotingStatus = (
   status: Proposal["status"],
-  start_block: number,
-  end_block: number
+  vote_start: number,
+  vote_end: number
 ): VotingStatusInfo => {
   const { data, isLoading, error, isError } = useQuery({
     // Destructure isError as well
-    queryKey: ["blockTimes", start_block, end_block],
-    queryFn: () => fetchBlockTimes(start_block, end_block),
+    queryKey: ["blockTimes", vote_start, vote_end],
+    queryFn: () => fetchBlockTimes(vote_start, vote_end),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
     retry: 1,
 
     enabled:
-      typeof start_block === "number" &&
-      typeof end_block === "number" &&
-      start_block > 0 &&
-      end_block > 0,
+      typeof vote_start === "number" &&
+      typeof vote_end === "number" &&
+      vote_start > 0 &&
+      vote_end > 0,
   });
 
   // 2. Derive voting status using useMemo based on query results and props
@@ -131,8 +131,8 @@ export const useVotingStatus = (
     if (isError || !data) {
       console.error(
         "Error state or no data after loading for blocks:",
-        start_block,
-        end_block,
+        vote_start,
+        vote_end,
         error
       );
       return {
@@ -160,7 +160,7 @@ export const useVotingStatus = (
     if (!startDate) {
       console.warn(
         "Start block time not found in data for start_block:",
-        start_block
+        vote_start
       );
       return {
         startBlockTime: null, // Explicitly null
@@ -177,10 +177,10 @@ export const useVotingStatus = (
     if (
       startDate &&
       !endDate &&
-      typeof end_block === "number" &&
-      end_block > start_block
+      typeof vote_end === "number" &&
+      vote_end > vote_start
     ) {
-      endDate = estimateBlockTime(end_block, start_block, startDate);
+      endDate = estimateBlockTime(vote_end, vote_start, startDate);
       isEndTimeEstimated = true;
     }
 
@@ -208,13 +208,13 @@ export const useVotingStatus = (
       isEnded,
     };
     // Dependencies for useMemo: Recalculate if query results or inputs change
-  }, [data, isLoading, error, isError, status, start_block, end_block]); // Added isError dependency
+  }, [data, isLoading, error, isError, status, vote_start, vote_end]); // Added isError dependency
 
   // 3. Return the derived state object
   return votingStatusInfo;
 };
 
-const TimeStatus = ({ status, start_block, end_block }: TimeStatusProps) => {
+const TimeStatus = ({ status, vote_start, vote_end }: TimeStatusProps) => {
   const {
     startBlockTime,
     endBlockTime,
@@ -222,7 +222,7 @@ const TimeStatus = ({ status, start_block, end_block }: TimeStatusProps) => {
     isLoading,
     isActive,
     isEnded,
-  } = useVotingStatus(status, start_block, end_block);
+  } = useVotingStatus(status, vote_start, vote_end);
 
   if (isLoading) {
     return (
@@ -246,7 +246,7 @@ const TimeStatus = ({ status, start_block, end_block }: TimeStatusProps) => {
           </span>
         </div>
         <p className="text-xs text-blue-400/80 mt-1">
-          Voting starts in block #{start_block + 1}.
+          Voting starts in block #{vote_start}.
         </p>
       </div>
     );
@@ -315,7 +315,7 @@ const TimeStatus = ({ status, start_block, end_block }: TimeStatusProps) => {
                 </span>
               ) : (
                 <span className="text-muted-foreground">
-                  {end_block ? `After Block #${end_block}` : "Not determinable"}
+                  {vote_end ? `After Block #${vote_end}` : "Not determinable"}
                 </span>
               )}
             </div>
