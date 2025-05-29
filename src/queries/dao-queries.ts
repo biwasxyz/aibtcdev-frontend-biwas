@@ -3,9 +3,6 @@ import { sdkFaktory } from "@/lib/faktory-fun"
 import type { DAO, Holder, Token, Proposal, Extension } from "@/types/supabase"
 
 const SUPPORTED_DAOS = [
-    "MEDIA3",
-    "FACES",
-    "FACE3",
     "FACEY•AIBTC•DAO",
     "UFACE•AIBTC•DAO",
     "SLOW•AIBTC•DAO",
