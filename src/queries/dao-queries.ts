@@ -7,7 +7,9 @@ const SUPPORTED_DAOS = [
     "FACES",
     "FACE3",
     "FACEY•AIBTC•DAO",
-    "UFACE•AIBTC•DAO"
+    "UFACE•AIBTC•DAO",
+    "SLOW•AIBTC•DAO",
+    "FAST•AIBTC•DAO"
 ]
 
 // Define structure for Market Statistics
