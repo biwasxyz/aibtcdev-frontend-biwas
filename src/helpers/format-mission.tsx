@@ -31,7 +31,7 @@ export function FormatMission({ content, inline = false }: FormatMissionProps) {
   const sections = processedContent.split(/(?=^# )/gm).filter(Boolean);
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-3xl mx-auto p-6  rounded-lg shadow-md">
       {sections.map((section, sectionIndex) => {
         // Process each section
         const lines = section.split("\n");
