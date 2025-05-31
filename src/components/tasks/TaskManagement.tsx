@@ -80,7 +80,7 @@ export default function TaskManagement({
   };
 
   const filteredTasks = tasks.filter((task) =>
-    task.name.toLowerCase().includes(searchTerm.toLowerCase())
+    task.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (

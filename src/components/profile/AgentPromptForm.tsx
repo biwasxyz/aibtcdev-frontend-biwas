@@ -212,7 +212,7 @@ export function AgentPromptForm() {
 
   // Handle input changes for inline editing
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setEditingData((prev) => ({ ...prev, [name]: value }));
@@ -311,7 +311,7 @@ export function AgentPromptForm() {
     if (!agentId) return { walletAddress: null, walletBalance: null };
 
     const agentWallet = agentWallets.find(
-      (wallet) => wallet.agent_id === agentId
+      (wallet) => wallet.agent_id === agentId,
     );
 
     const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;

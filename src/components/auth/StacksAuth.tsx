@@ -27,7 +27,7 @@ const StacksProvider = dynamic(
   () => import("@/components/auth/StacksProvider"),
   {
     ssr: false,
-  }
+  },
 );
 
 export default function StacksAuth({ redirectUrl }: { redirectUrl?: string }) {
@@ -45,7 +45,7 @@ export default function StacksAuth({ redirectUrl }: { redirectUrl?: string }) {
 
   const handleAuthentication = async (
     stxAddress: string,
-    signature: string
+    signature: string,
   ) => {
     try {
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -170,12 +170,12 @@ export default function StacksAuth({ redirectUrl }: { redirectUrl?: string }) {
         // 3️⃣ patch the profile table (creates row if missing)
         if (userId) {
           console.log(
-            "Updating profile with Stacks addresses after authentication"
+            "Updating profile with Stacks addresses after authentication",
           );
           await ensureProfileHasStacksAddresses(
             userId,
             mainnetAddr,
-            testnetAddr
+            testnetAddr,
           );
           await runAutoInit(userId); // your existing auto-init
         }
@@ -511,7 +511,7 @@ export function getStacksAddress(): string | null {
   }
 
   const blockstackSession = JSON.parse(
-    localStorage.getItem("blockstack-session") || "{}"
+    localStorage.getItem("blockstack-session") || "{}",
   );
 
   const address =
@@ -525,7 +525,7 @@ export function getStacksAddress(): string | null {
 async function ensureProfileHasStacksAddresses(
   userId: string,
   mainnetAddr: string,
-  testnetAddr: string
+  testnetAddr: string,
 ) {
   try {
     // Get the current profile data

@@ -64,7 +64,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
           queryClient.invalidateQueries({
             queryKey: ["proposalVotesTable", proposalId],
           });
-        }
+        },
       )
       .subscribe();
 
@@ -193,7 +193,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
                     <div className="w-12 h-1.5 bg-zinc-700 rounded-full mr-1.5 overflow-hidden">
                       <div
                         className={`h-1.5 ${getConfidenceColor(
-                          vote.confidence
+                          vote.confidence,
                         )}`}
                         style={{ width: `${vote.confidence * 100}%` }}
                       ></div>

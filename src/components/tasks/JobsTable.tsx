@@ -96,8 +96,8 @@ export function JobsTable({ agentId }: JobsTableProps) {
                       job.status === "failed"
                         ? "text-destructive"
                         : job.status === "running"
-                        ? "text-yellow-500"
-                        : "text-green-500"
+                          ? "text-yellow-500"
+                          : "text-green-500"
                     }`}
                 >
                   {getStatusIcon(job.status)}

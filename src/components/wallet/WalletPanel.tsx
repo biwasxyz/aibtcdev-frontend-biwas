@@ -18,7 +18,7 @@ const StacksComponents = dynamic(
   () => import("@/components/wallet/StacksComponent"),
   {
     ssr: false,
-  }
+  },
 );
 
 interface WalletPanelProps {
@@ -45,7 +45,7 @@ export function WalletPanel({ onClose }: WalletPanelProps) {
   };
 
   const activeAgentWallets = agentWallets.filter(
-    (wallet) => !wallet.agent?.is_archived
+    (wallet) => !wallet.agent?.is_archived,
   );
 
   const handleAmountChange = (address: string, value: string) => {
@@ -121,14 +121,16 @@ export function WalletPanel({ onClose }: WalletPanelProps) {
                           </span>
                           <span className="text-white font-medium text-right">
                             {formatBalance(
-                              balances[getWalletAddress(userWallet)].stx.balance
+                              balances[getWalletAddress(userWallet)].stx
+                                .balance,
                             )}{" "}
                             STX
                           </span>
                         </div>
 
                         {Object.entries(
-                          balances[getWalletAddress(userWallet)].fungible_tokens
+                          balances[getWalletAddress(userWallet)]
+                            .fungible_tokens,
                         ).map(([tokenId, token]) => {
                           const [, tokenSymbol] = tokenId.split("::");
                           return (
@@ -148,7 +150,7 @@ export function WalletPanel({ onClose }: WalletPanelProps) {
 
                         {Object.entries(
                           balances[getWalletAddress(userWallet)]
-                            .non_fungible_tokens
+                            .non_fungible_tokens,
                         ).map(([tokenId, token]) => {
                           const [, tokenSymbol] = tokenId.split("::");
                           return (
@@ -263,11 +265,11 @@ export function WalletPanel({ onClose }: WalletPanelProps) {
                                   </span>
                                 </div>
                               );
-                            }
+                            },
                           )}
 
                           {Object.entries(
-                            walletBalance.non_fungible_tokens
+                            walletBalance.non_fungible_tokens,
                           ).map(([tokenId, token]) => {
                             const [, tokenSymbol] = tokenId.split("::");
                             return (
