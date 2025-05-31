@@ -99,14 +99,14 @@ export default function ApplicationLayout({
   };
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-950">
+    <div className="flex flex-col h-screen bg-[#1A1A1A]">
       {/* Mobile Header */}
-      <div className="md:hidden h-14 px-2 flex items-center justify-between bg-zinc-900">
+      <div className="md:hidden h-14 px-2 flex items-center justify-between bg-[#2A2A2A] border-b border-zinc-800">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setLeftPanelOpen(!leftPanelOpen)}
-          className="text-zinc-400"
+          className="text-zinc-400 hover:text-white hover:bg-zinc-800/50"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -126,7 +126,13 @@ export default function ApplicationLayout({
         </Link>
         <div className="flex items-center gap-2">
           {hasUser ? (
-            <Button onClick={handleSignOut}> Sign out</Button>
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              className="text-sm font-medium"
+            >
+              Sign out
+            </Button>
           ) : (
             <AuthButton />
           )}
@@ -134,7 +140,7 @@ export default function ApplicationLayout({
       </div>
 
       {/* Desktop Header */}
-      <div className="hidden md:flex h-16 bg-zinc-900 items-center px-6">
+      <div className="hidden md:flex h-16 bg-[#2A2A2A] items-center px-6 border-b border-zinc-800">
         <div className="w-1/4">
           <Link href="/daos" className="flex items-center gap-2">
             <Image
@@ -163,11 +169,11 @@ export default function ApplicationLayout({
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg transition-colors",
                     isActive
-                      ? "text-white"
-                      : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
+                      ? "text-white bg-zinc-800/50"
+                      : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
                   )}
                 >
-                  {/* <item.icon className="h-5 w-5" /> */}
+                  <item.icon className="h-5 w-5" />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -177,8 +183,11 @@ export default function ApplicationLayout({
         <div className="w-1/4 flex justify-end items-center gap-4">
           <NetworkIndicator />
           {hasUser ? (
-            <Button onClick={handleSignOut} variant="outline">
-              {" "}
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              className="text-sm font-medium"
+            >
               Sign out
             </Button>
           ) : (
@@ -194,13 +203,13 @@ export default function ApplicationLayout({
         <aside
           className={cn(
             "md:hidden fixed inset-y-0 left-0 z-50",
-            "bg-zinc-900 w-[min(100vw,320px)]",
+            "bg-[#2A2A2A] w-[min(100vw,320px)]",
             "transition-transform duration-200 ease-in-out",
-            leftPanelOpen ? "translate-x-0" : "-translate-x-full",
+            leftPanelOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
           {/* Mobile Sidebar Header */}
-          <div className="h-14 px-4 flex items-center justify-between">
+          <div className="h-14 px-4 flex items-center justify-between border-b border-zinc-800">
             <Link href="/daos" className="flex items-center gap-2">
               <Image
                 src="/logos/aibtcdev-avatar-1000px.png"
@@ -220,7 +229,7 @@ export default function ApplicationLayout({
               variant="ghost"
               size="icon"
               onClick={() => setLeftPanelOpen(false)}
-              className="text-zinc-400 h-8 w-8 hover:bg-zinc-800"
+              className="text-zinc-400 h-8 w-8 hover:bg-zinc-800 hover:text-white"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -228,13 +237,6 @@ export default function ApplicationLayout({
 
           {/* Mobile Sidebar Content */}
           <div className="flex flex-col h-[calc(100vh-3.5rem)]">
-            {/* Thread List */}
-            {/* <div className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
-                <ThreadList setLeftPanelOpen={setLeftPanelOpen} />
-              </ScrollArea>
-            </div> */}
-
             {/* Navigation */}
             <nav className="flex-shrink-0">
               <div className="p-2 space-y-1">
@@ -252,7 +254,7 @@ export default function ApplicationLayout({
                         "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                         isActive
                           ? "bg-zinc-800/50 text-white"
-                          : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
+                          : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
                       )}
                     >
                       <item.icon className="h-5 w-5" />

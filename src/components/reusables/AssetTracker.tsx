@@ -17,12 +17,12 @@ const AssetTracker = () => {
 
   // Function to find BTC token in fungible tokens
   const findSbtcToken = (
-    fungibleTokens: WalletBalance["fungible_tokens"] | undefined,
+    fungibleTokens: WalletBalance["fungible_tokens"] | undefined
   ) => {
     if (!fungibleTokens) return false;
 
     const sbtcTokenKey = Object.keys(fungibleTokens).find((key) =>
-      key.endsWith("::sbtc-token"),
+      key.endsWith("::sbtc-token")
     );
 
     return !!sbtcTokenKey;
@@ -37,7 +37,7 @@ const AssetTracker = () => {
         console.error("Error fetching balance:", err);
       }
     },
-    [fetchSingleBalance],
+    [fetchSingleBalance]
   );
 
   // Fetch wallets when component mounts
@@ -88,7 +88,7 @@ const AssetTracker = () => {
 
             console.log(`Balance for ${address}:`);
             console.log(
-              `STX Balance: ${balances[address]?.stx?.balance || "0"}`,
+              `STX Balance: ${balances[address]?.stx?.balance || "0"}`
             );
 
             // Log fungible tokens (including BTC if present)
@@ -100,7 +100,7 @@ const AssetTracker = () => {
                   if (tokenId.endsWith("::sbtc-token")) {
                     console.log(`  *** BTC FOUND: ${tokenData.balance} ***`);
                   }
-                },
+                }
               );
             } else {
               console.log("No fungible tokens found");
@@ -121,7 +121,7 @@ const AssetTracker = () => {
         "Agent wallets with BTC:",
         Object.entries(statusMap)
           .filter(([hasSbtc]) => hasSbtc)
-          .map(([address]) => address),
+          .map(([address]) => address)
       );
 
       setAgentSbtcStatus(statusMap);
@@ -145,35 +145,134 @@ const AssetTracker = () => {
 
   // Only render content if user is logged in
   return (
-    <div className="w-full border-b border-border py-3 px-4 shadow-sm">
-      {!isLoaded && (
-        <p className="text-center text-foreground">
-          Checking your agents&apos; BTC status...
-        </p>
-      )}
-
-      {isLoaded && hasAnySbtc && (
-        <p className="text-center text-primary font-medium">
-          Your agent account has BTC! You can buy FACES and start sending
-          proposals.
-        </p>
-      )}
-
-      {isLoaded && !hasAnySbtc && agentWallets.length > 0 && (
-        <p className="text-center text-primary">
-          Your agent account does not have BTC.{" "}
-          <Link href="/deposit" className="font-medium underline">
-            Click here
-          </Link>{" "}
-          to make a deposit.
-        </p>
-      )}
-
-      {isLoaded && agentWallets.length === 0 && (
-        <p className="text-center text-primary">
-          No agent wallets found. Create an agent to check for BTC.
-        </p>
-      )}
+    <div className="w-full max-w-2xl mx-auto my-4 bg-[#2A2A2A] rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.2)] border border-zinc-800 p-4 flex items-center gap-3">
+      {/* Status Icon */}
+      <span className="flex-shrink-0">
+        {!isLoaded ? (
+          // Spinner
+          <svg
+            className="animate-spin h-6 w-6 text-zinc-400"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+              fill="none"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            />
+          </svg>
+        ) : hasAnySbtc ? (
+          // Bitcoin icon (replace with your icon set)
+          <svg
+            className="h-6 w-6 text-[#FF6B00]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="#FF6B00"
+              strokeWidth="2"
+              fill="#232323"
+            />
+            <text
+              x="12"
+              y="16"
+              textAnchor="middle"
+              fontSize="10"
+              fill="#FF6B00"
+              fontWeight="bold"
+            >
+              ₿
+            </text>
+          </svg>
+        ) : agentWallets.length > 0 ? (
+          // Wallet icon (replace with your icon set)
+          <svg
+            className="h-6 w-6 text-zinc-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <rect
+              x="3"
+              y="7"
+              width="18"
+              height="10"
+              rx="2"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="#232323"
+            />
+            <circle cx="17" cy="12" r="1" fill="#FF6B00" />
+          </svg>
+        ) : (
+          // Alert icon for no wallets
+          <svg
+            className="h-6 w-6 text-zinc-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="#232323"
+            />
+            <path
+              d="M12 8v4m0 4h.01"
+              stroke="#FF6B00"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        )}
+      </span>
+      <div className="flex-1">
+        {!isLoaded && (
+          <span className="text-zinc-400 text-sm">
+            Checking your agents' BTC status...
+          </span>
+        )}
+        {isLoaded && hasAnySbtc && (
+          <span className="text-[#FF6B00] font-medium text-sm">
+            Your agent account has BTC! You can buy FACES and start sending
+            proposals.
+          </span>
+        )}
+        {isLoaded && !hasAnySbtc && agentWallets.length > 0 && (
+          <span className="text-zinc-400 text-sm flex items-center gap-2">
+            Your agent account does not have BTC.
+            <Link href="/deposit" legacyBehavior>
+              <a className="ml-2 px-3 py-1 rounded bg-[#FF6B00] text-white text-xs font-semibold hover:bg-[#FF8533] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00] focus-visible:ring-offset-2">
+                Deposit BTC
+              </a>
+            </Link>
+          </span>
+        )}
+        {isLoaded && agentWallets.length === 0 && (
+          <span className="text-zinc-400 text-sm">
+            No agent wallets found.{" "}
+            <Link href="/agents/new" className="underline text-[#FF6B00]">
+              Create an agent
+            </Link>{" "}
+            to check for BTC.
+          </span>
+        )}
+      </div>
     </div>
   );
 };
