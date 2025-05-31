@@ -2,15 +2,7 @@
 import { useCallback, useState } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
-import {
-  Loader2,
-  Search,
-  Filter,
-  TrendingUp,
-  Users,
-  DollarSign,
-} from "lucide-react";
-import { Heading } from "@/components/ui/heading";
+import { Loader2, Search, Filter } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -58,7 +50,7 @@ export default function DAOs() {
   // Helper function to get dex principal and token contract
   const getTokenContract = useCallback((dao: DAO) => {
     const dexExtension = dao.extensions?.find(
-      (ext) => ext.type === "dex" || ext.type === "TOKEN_DEX",
+      (ext) => ext.type === "dex" || ext.type === "TOKEN_DEX"
     );
     const dexPrincipal = dexExtension?.contract_principal;
     return dexPrincipal ? dexPrincipal.replace(/-dex$/, "") : null;
@@ -78,7 +70,7 @@ export default function DAOs() {
                 timestamp: trade.timestamp,
                 price: trade.pricePerToken,
               }))
-              .sort((a, b) => a.timestamp - b.timestamp),
+              .sort((a, b) => a.timestamp - b.timestamp)
           );
         },
         enabled: !!tokenContract && !!dao.id,
@@ -97,7 +89,7 @@ export default function DAOs() {
           try {
             const holdersData = await fetchHolders(
               token.contract_principal,
-              token.symbol,
+              token.symbol
             );
             return holdersData;
           } catch (error) {
@@ -118,7 +110,7 @@ export default function DAOs() {
         data: query.data,
         isLoading: query.isLoading,
       },
-    ]),
+    ])
   );
 
   // Create a map of trades data for each DAO
@@ -129,7 +121,7 @@ export default function DAOs() {
         data: query.data || [],
         isLoading: query.isLoading,
       },
-    ]),
+    ])
   );
 
   // Get unique categories for filtering
@@ -138,8 +130,8 @@ export default function DAOs() {
       daos
         ?.map((dao) => dao.extensions?.map((ext) => ext.type))
         .flat()
-        .filter(Boolean) || [],
-    ),
+        .filter(Boolean) || []
+    )
   );
 
   // Filter and sort DAOs
@@ -196,7 +188,7 @@ export default function DAOs() {
   // Calculate summary stats
   const totalDAOs = filteredAndSortedDAOs.length;
   const activeDAOs = filteredAndSortedDAOs.filter(
-    (dao) => dao.extensions && dao.extensions.length > 0,
+    (dao) => dao.extensions && dao.extensions.length > 0
   ).length;
   const totalHolders = filteredAndSortedDAOs.reduce((sum, dao) => {
     const holders =
@@ -210,57 +202,24 @@ export default function DAOs() {
   }, 0);
 
   return (
-    <div className="w-full min-h-screen bg-gray-900">
+    <div className="w-full min-h-screen bg-[#1A1A1A]">
       {/* Header Banner with Gradient */}
-      <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-purple-600 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-4 left-4 w-20 h-20 bg-white rounded-full"></div>
-          <div className="absolute top-16 right-8 w-12 h-12 bg-white rounded-full"></div>
-          <div className="absolute bottom-8 left-1/3 w-16 h-16 bg-white rounded-full"></div>
-          <div className="absolute bottom-4 right-1/4 w-8 h-8 bg-white rounded-full"></div>
-        </div>
-        <div className="relative px-4 sm:px-6 lg:px-8 py-12">
-          <div className="max-w-7xl mx-auto text-center">
-            <Heading className="text-4xl sm:text-5xl font-bold text-white mb-4">
-              AI-Powered DAOs
-            </Heading>
-            <p className="text-xl text-white/90 mb-6 max-w-2xl mx-auto">
-              Discover and engage with innovative decentralized autonomous
-              organizations powered by artificial intelligence
-            </p>
-            <div className="flex flex-wrap justify-center gap-4 text-white/80">
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-5 h-5" />
-                <span>Market Cap: ${totalMarketCap.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                <span>Total Holders: {totalHolders.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                <span>Active DAOs: {activeDAOs}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Sidebar - Filters */}
           <div className="lg:w-80 flex-shrink-0">
-            <Card className="sticky top-4 bg-gray-800 border-gray-700">
+            <Card className="sticky top-4 bg-[#2A2A2A] border-zinc-800">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-6">
-                  <Filter className="w-5 h-5 text-purple-400" />
+                  <Filter className="w-5 h-5 text-orange-400" />
                   <h3 className="text-lg font-semibold text-white">Filters</h3>
                 </div>
 
                 <div className="space-y-6">
                   {/* Search */}
                   <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
                       Search
                     </label>
                     <div className="relative">
@@ -269,14 +228,14 @@ export default function DAOs() {
                         placeholder="Search DAOs..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                        className="pl-9 bg-[#2A2A2A] border-zinc-800 text-white placeholder-zinc-400"
                       />
                     </div>
                   </div>
 
                   {/* Category Filter */}
                   <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
                       Category
                     </label>
                     <Select
@@ -301,7 +260,7 @@ export default function DAOs() {
 
                   {/* Status Filter */}
                   <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
                       Status
                     </label>
                     <Select
@@ -332,7 +291,7 @@ export default function DAOs() {
 
                   {/* Sort By */}
                   <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
                       Sort By
                     </label>
                     <Select
@@ -359,19 +318,19 @@ export default function DAOs() {
                 </div>
 
                 {/* Summary Stats Card */}
-                <div className="mt-8 p-4 bg-gray-900 rounded-lg text-white">
+                <div className="mt-8 p-4 bg-[#2A2A2A] rounded-lg text-white">
                   <h4 className="font-semibold mb-3">Summary</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Total DAOs:</span>
+                      <span className="text-zinc-300">Total DAOs:</span>
                       <span className="font-bold">{totalDAOs}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Active DAOs:</span>
+                      <span className="text-zinc-300">Active DAOs:</span>
                       <span className="font-bold">{activeDAOs}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-300">Total Holders:</span>
+                      <span className="text-zinc-300">Total Holders:</span>
                       <span className="font-bold">
                         {totalHolders.toLocaleString()}
                       </span>
@@ -390,7 +349,7 @@ export default function DAOs() {
                   <h2 className="text-2xl font-bold text-white">
                     Discover AI DAOs ({totalDAOs})
                   </h2>
-                  <p className="text-gray-400 mt-1">
+                  <p className="text-zinc-400 mt-1">
                     Explore innovative decentralized organizations powered by AI
                   </p>
                 </div>
@@ -401,18 +360,18 @@ export default function DAOs() {
               <div className="flex min-h-[50vh] items-center justify-center">
                 <div className="text-center">
                   <Loader2 className="h-12 w-12 animate-spin text-purple-400 mx-auto mb-4" />
-                  <p className="text-gray-400">Loading AI DAOs...</p>
+                  <p className="text-zinc-400">Loading AI DAOs...</p>
                 </div>
               </div>
             ) : filteredAndSortedDAOs.length === 0 ? (
               <div className="text-center py-16">
-                <div className="w-24 h-24 mx-auto mb-6 bg-gray-800 rounded-full flex items-center justify-center">
-                  <Search className="w-12 h-12 text-gray-500" />
+                <div className="w-24 h-24 mx-auto mb-6 bg-[#2A2A2A] rounded-full flex items-center justify-center">
+                  <Search className="w-12 h-12 text-zinc-400" />
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">
                   No DAOs found
                 </h3>
-                <p className="text-gray-400 max-w-md mx-auto">
+                <p className="text-zinc-400 max-w-md mx-auto">
                   Try adjusting your search terms or filters to discover more
                   AI-powered DAOs.
                 </p>

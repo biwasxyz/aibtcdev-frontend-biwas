@@ -100,12 +100,12 @@ export const DAOCard = ({
                   payload[0].value !== undefined
                 ) {
                   return (
-                    <div className="bg-popover text-popover-foreground rounded-md shadow-md p-2 text-xs">
+                    <div className="bg-[#2A2A2A] text-zinc-300 rounded-md shadow-md p-2 text-xs">
                       <p>Price: ${Number(payload[0].value).toFixed(8)}</p>
                       <p>
                         Time:{" "}
                         {new Date(
-                          payload[0].payload.timestamp,
+                          payload[0].payload.timestamp
                         ).toLocaleString()}
                       </p>
                     </div>
@@ -127,8 +127,8 @@ export const DAOCard = ({
     }
     return (
       <div className="flex h-16 items-center justify-center">
-        <BarChart className="h-4 w-4 text-muted-foreground opacity-50" />
-        <span className="ml-1 text-xs text-muted-foreground">No data</span>
+        <BarChart className="h-4 w-4 text-zinc-400 opacity-50" />
+        <span className="ml-1 text-xs text-zinc-400">No data</span>
       </div>
     );
   };
@@ -136,7 +136,7 @@ export const DAOCard = ({
   const renderPriceChange = (change: number | null | undefined) => {
     if (change === null || change === undefined) {
       return (
-        <div className="flex items-center gap-1 text-gray-500">
+        <div className="flex items-center gap-1 text-zinc-400">
           <span className="text-sm">0%</span>
         </div>
       );
@@ -192,7 +192,7 @@ export const DAOCard = ({
 
   return (
     <Link href={`/daos/${encodeURIComponent(dao.name)}`}>
-      <Card className="group h-full hover:shadow-lg transition-all duration-200 bg-gray-800 border-gray-700 hover:border-purple-400 cursor-pointer">
+      <Card className="group h-full hover:shadow-lg transition-all duration-200 bg-[#2A2A2A] border-zinc-800 hover:border-orange-400 cursor-pointer">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -230,9 +230,9 @@ export const DAOCard = ({
         <CardContent className="pt-0">
           <div className="space-y-4">
             {/* Price Chart */}
-            <div className="bg-gray-700 rounded-lg p-3">
+            <div className="bg-[#2A2A2A] rounded-lg p-3">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-gray-300">
+                <span className="text-xs font-medium text-zinc-300">
                   Price Trend
                 </span>
                 {renderPriceChange(tokenPrice?.price24hChanges)}
@@ -242,10 +242,10 @@ export const DAOCard = ({
 
             {/* Key Metrics */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-2 bg-gray-700 rounded-lg">
+              <div className="text-center p-2 bg-[#2A2A2A] rounded-lg">
                 <div className="flex items-center justify-center gap-1 mb-1">
-                  <DollarSign className="h-3 w-3 text-gray-400" />
-                  <span className="text-xs text-gray-400">Price</span>
+                  <DollarSign className="h-3 w-3 text-zinc-400" />
+                  <span className="text-xs text-zinc-400">Price</span>
                 </div>
                 <div className="text-sm font-semibold text-white">
                   {isFetchingPrice ? (
@@ -258,20 +258,20 @@ export const DAOCard = ({
                 </div>
               </div>
 
-              <div className="text-center p-2 bg-gray-700 rounded-lg">
+              <div className="text-center p-2 bg-[#2A2A2A] rounded-lg">
                 <div className="flex items-center justify-center gap-1 mb-1">
-                  <Users className="h-3 w-3 text-gray-400" />
-                  <span className="text-xs text-gray-400">Holders</span>
+                  <Users className="h-3 w-3 text-zinc-400" />
+                  <span className="text-xs text-zinc-400">Holders</span>
                 </div>
                 <div className="text-sm font-semibold text-white">
                   {getHolderCount()}
                 </div>
               </div>
 
-              <div className="text-center p-2 bg-gray-700 rounded-lg">
+              <div className="text-center p-2 bg-[#2A2A2A] rounded-lg">
                 <div className="flex items-center justify-center gap-1 mb-1">
-                  <TrendingUp className="h-3 w-3 text-gray-400" />
-                  <span className="text-xs text-gray-400">Market Cap</span>
+                  <TrendingUp className="h-3 w-3 text-zinc-400" />
+                  <span className="text-xs text-zinc-400">Market Cap</span>
                 </div>
                 <div className="text-sm font-semibold text-white">
                   {isFetchingPrice ? (
@@ -286,8 +286,8 @@ export const DAOCard = ({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-center pt-2 border-t border-gray-600">
-              <span className="text-xs text-gray-400">
+            <div className="flex items-center justify-center pt-2 border-t border-zinc-800">
+              <span className="text-xs text-zinc-400">
                 Created {new Date(dao.created_at).toLocaleDateString()}
               </span>
             </div>
