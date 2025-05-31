@@ -5,10 +5,10 @@ import { TransactionPriority } from "@faktoryfun/styx-sdk";
 import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DepositForm from "./DepositForm";
-import TransactionConfirmation from "./TransactionConfirmation";
-import MyHistory from "./my-history";
-import AllDeposits from "./all-deposits";
+import DepositForm from "@/components/btc-deposit/DepositForm";
+import TransactionConfirmation from "@/components/btc-deposit/TransactionConfirmation";
+import MyHistory from "@/components/btc-deposit/MyHistory";
+import AllDeposits from "@/components/btc-deposit/AllDeposits";
 import { getStacksAddress, getBitcoinAddress } from "@/lib/address";
 import { useSessionStore } from "@/store/session";
 import AuthButton from "@/components/home/AuthButton";
@@ -35,7 +35,7 @@ export default function BitcoinDeposit() {
   const [confirmationData, setConfirmationData] =
     useState<ConfirmationData | null>(null);
   const [feePriority, setFeePriority] = useState<TransactionPriority>(
-    TransactionPriority.Medium,
+    TransactionPriority.Medium
   );
   const [activeWalletProvider, setActiveWalletProvider] = useState<
     "leather" | "xverse" | null
@@ -51,7 +51,7 @@ export default function BitcoinDeposit() {
 
       // Get user data from localStorage
       const blockstackSession = JSON.parse(
-        localStorage.getItem("blockstack-session") || "{}",
+        localStorage.getItem("blockstack-session") || "{}"
       );
       const userData = blockstackSession.userData;
 

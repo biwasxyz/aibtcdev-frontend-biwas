@@ -15,7 +15,7 @@ import { HistoryIcon, Loader2, MessageSquare } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { MessageList } from "@/components/chat/MessageList";
-import AgentWalletSelector from "../chat/AgentSelector";
+import AgentWalletSelector from "@/components/chat/AgentSelector";
 import { CreateThreadButton } from "@/components/threads/CreateThreadButton";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
@@ -23,7 +23,7 @@ import { fetchDAOExtensions, fetchToken } from "@/queries/dao-queries";
 import type { DAO, Token, Extension } from "@/types/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ThreadList from "@/components/threads/ThreadList";
-import AuthButton from "../home/AuthButton";
+import AuthButton from "@/components/home/AuthButton";
 
 interface DAOChatModalProps {
   daoId: string;
@@ -95,7 +95,7 @@ export function DAOChatModal({
         connect(token);
       }
     },
-    [connect, isConnected],
+    [connect, isConnected]
   );
 
   useEffect(() => {
@@ -426,7 +426,7 @@ export function DAOChatModal({
                 // Find all relevant extensions for this prompt
                 const relevantExtensions =
                   daoExtensions?.filter((ext) =>
-                    promptItem.extensionTypes?.includes(ext.type),
+                    promptItem.extensionTypes?.includes(ext.type)
                   ) || [];
 
                 // If we have matching extensions, generate the prompt with all of them

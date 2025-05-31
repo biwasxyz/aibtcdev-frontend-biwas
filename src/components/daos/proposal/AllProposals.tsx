@@ -18,10 +18,8 @@ import {
   User,
   Calendar,
   Vote,
-  MessageSquare,
   ChevronDown,
   ChevronUp,
-  ExternalLink,
   Eye,
   EyeOff,
   BarChart3,
@@ -37,8 +35,11 @@ import {
   Building2,
 } from "lucide-react";
 import { format } from "date-fns";
-import { truncateString, getExplorerLink, formatAction } from "./helper";
-import { cn } from "@/lib/utils";
+import {
+  truncateString,
+  getExplorerLink,
+  formatAction,
+} from "@/helpers/helper";
 import {
   Tooltip,
   TooltipContent,
@@ -56,13 +57,13 @@ interface AllProposalsProps {
 const AllProposals = ({ proposals }: AllProposalsProps) => {
   const proposalsRef = useRef<HTMLDivElement>(null);
   const [hiddenProposals, setHiddenProposals] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
   // Calculate proposal statistics
   const totalProposals = proposals.length;
   const activeProposals = proposals.filter(
-    (p) => p.status === "DEPLOYED",
+    (p) => p.status === "DEPLOYED"
   ).length;
   const passedProposals = proposals.filter((p) => p.passed === true).length;
   const failedProposals = proposals.filter((p) => p.status === "FAILED").length;
@@ -237,7 +238,7 @@ const EnhancedAllProposalCard = ({
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
     proposal.vote_start,
-    proposal.vote_end,
+    proposal.vote_end
   );
 
   // Determine execution status
@@ -449,7 +450,7 @@ const EnhancedAllProposalCard = ({
                         Math.max(
                           Number(proposal.votes_for || 0) +
                             Number(proposal.votes_against || 0),
-                          1,
+                          1
                         )) *
                       100
                     }%`,
@@ -676,7 +677,7 @@ const EnhancedAllProposalCard = ({
                         value={formatAction(proposal.contract_principal)}
                         link={getExplorerLink(
                           "contract",
-                          proposal.contract_principal,
+                          proposal.contract_principal
                         )}
                       />
                       <LabeledField

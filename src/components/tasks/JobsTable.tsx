@@ -8,7 +8,7 @@ import {
 import { useProfile } from "@/hooks/use-profile";
 import { format } from "date-fns";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MarkdownComponents } from "../chat/ChatMessageBubble";
+import { MarkdownComponents } from "@/components/chat/ChatMessageBubble";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Card } from "@/components/ui/card";
@@ -96,8 +96,8 @@ export function JobsTable({ agentId }: JobsTableProps) {
                       job.status === "failed"
                         ? "text-destructive"
                         : job.status === "running"
-                          ? "text-yellow-500"
-                          : "text-green-500"
+                        ? "text-yellow-500"
+                        : "text-green-500"
                     }`}
                 >
                   {getStatusIcon(job.status)}

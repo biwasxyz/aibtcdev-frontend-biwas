@@ -13,8 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DAOCreationDate } from "./dao-creation-date";
-import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
+import { DAOCreationDate } from "@/components/daos/DaoCreationDate";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatNumber } from "@/helpers/format-utils";
 

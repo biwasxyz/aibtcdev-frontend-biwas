@@ -20,7 +20,7 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
     proposal.vote_start,
-    proposal.vote_end,
+    proposal.vote_end
   );
 
   // Check if the proposal has failed
@@ -76,8 +76,8 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
                   isActive || isNotStartedYet
                     ? "bg-primary"
                     : proposal.met_quorum
-                      ? "bg-primary"
-                      : "bg-zinc-800/50",
+                    ? "bg-primary"
+                    : "bg-zinc-800/50"
                 )}
               >
                 <div className="flex justify-between items-center">
@@ -121,8 +121,8 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
                   isActive || isNotStartedYet
                     ? "bg-primary"
                     : proposal.met_threshold
-                      ? "bg-primary"
-                      : "bg-zinc-800/50",
+                    ? "bg-primary"
+                    : "bg-zinc-800/50"
                 )}
               >
                 <div className="flex justify-between items-center">
@@ -169,8 +169,8 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
                   isActive || isNotStartedYet
                     ? "bg-primary"
                     : proposal.passed
-                      ? "bg-primary"
-                      : "bg-zinc-800/50",
+                    ? "bg-primary"
+                    : "bg-zinc-800/50"
                 )}
               >
                 <div className="flex justify-between items-center">
@@ -214,10 +214,10 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
                   isActive || isNotStartedYet
                     ? "bg-primary"
                     : isFailed
-                      ? "bg-zinc-800/50"
-                      : proposal.executed === true
-                        ? "bg-primary"
-                        : "bg-amber-500/5",
+                    ? "bg-zinc-800/50"
+                    : proposal.executed === true
+                    ? "bg-primary"
+                    : "bg-amber-500/5"
                 )}
               >
                 <div className="flex justify-between items-center">

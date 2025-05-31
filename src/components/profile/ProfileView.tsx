@@ -31,9 +31,9 @@ import { fetchVotes } from "@/queries/vote-queries";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
-import { AgentPromptForm } from "./AgentPromptForm";
+import { AgentPromptForm } from "@/components/profile/AgentPromptForm";
 import { useClipboard } from "@/helpers/clipboard-utils";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { getAddressExplorerUrl } from "@/helpers/explorer";
 import { TokenBalance } from "@/components/reusables/BalanceDisplay";
 
@@ -201,7 +201,7 @@ export function ProfileView() {
                                   new Date(vote.created_at),
                                   {
                                     addSuffix: true,
-                                  },
+                                  }
                                 )}
                               </TableCell>
                               <TableCell>

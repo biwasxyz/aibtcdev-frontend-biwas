@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
-import { ChatInput } from "./ChatInput";
-import { MessageList } from "./MessageList";
+import { ChatInput } from "@/components/chat/ChatInput";
+import { MessageList } from "@/components/chat/MessageList";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { PanelLeftOpen, PanelLeftClose } from "lucide-react";
-import AgentWalletSelector from "./AgentSelector";
-import ThreadList from "../threads/ThreadList";
+import AgentWalletSelector from "@/components/chat/AgentSelector";
+import ThreadList from "@/components/threads/ThreadList";
 
 export function ChatWindow() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -39,7 +39,7 @@ export function ChatWindow() {
         connect(token);
       }
     },
-    [connect, isConnected],
+    [connect, isConnected]
   );
 
   useEffect(() => {

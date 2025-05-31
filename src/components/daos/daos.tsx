@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DAOCard } from "./DaoCard";
+import { DAOCard } from "@/components/daos/DaoCard";
 import type { DAO, SortField } from "@/types/supabase";
 import {
   fetchDAOsWithExtension,
@@ -58,7 +58,7 @@ export default function DAOs() {
   // Helper function to get dex principal and token contract
   const getTokenContract = useCallback((dao: DAO) => {
     const dexExtension = dao.extensions?.find(
-      (ext) => ext.type === "dex" || ext.type === "TOKEN_DEX",
+      (ext) => ext.type === "dex" || ext.type === "TOKEN_DEX"
     );
     const dexPrincipal = dexExtension?.contract_principal;
     return dexPrincipal ? dexPrincipal.replace(/-dex$/, "") : null;
@@ -78,7 +78,7 @@ export default function DAOs() {
                 timestamp: trade.timestamp,
                 price: trade.pricePerToken,
               }))
-              .sort((a, b) => a.timestamp - b.timestamp),
+              .sort((a, b) => a.timestamp - b.timestamp)
           );
         },
         enabled: !!tokenContract && !!dao.id,
@@ -97,7 +97,7 @@ export default function DAOs() {
           try {
             const holdersData = await fetchHolders(
               token.contract_principal,
-              token.symbol,
+              token.symbol
             );
             return holdersData;
           } catch (error) {
@@ -118,7 +118,7 @@ export default function DAOs() {
         data: query.data,
         isLoading: query.isLoading,
       },
-    ]),
+    ])
   );
 
   // Create a map of trades data for each DAO
@@ -129,7 +129,7 @@ export default function DAOs() {
         data: query.data || [],
         isLoading: query.isLoading,
       },
-    ]),
+    ])
   );
 
   // Get unique categories for filtering
@@ -138,8 +138,8 @@ export default function DAOs() {
       daos
         ?.map((dao) => dao.extensions?.map((ext) => ext.type))
         .flat()
-        .filter(Boolean) || [],
-    ),
+        .filter(Boolean) || []
+    )
   );
 
   // Filter and sort DAOs
@@ -196,7 +196,7 @@ export default function DAOs() {
   // Calculate summary stats
   const totalDAOs = filteredAndSortedDAOs.length;
   const activeDAOs = filteredAndSortedDAOs.filter(
-    (dao) => dao.extensions && dao.extensions.length > 0,
+    (dao) => dao.extensions && dao.extensions.length > 0
   ).length;
   const totalHolders = filteredAndSortedDAOs.reduce((sum, dao) => {
     const holders =

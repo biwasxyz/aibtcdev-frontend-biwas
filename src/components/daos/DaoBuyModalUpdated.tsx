@@ -13,7 +13,7 @@ import {
   ExternalLink,
   RotateCcw,
 } from "lucide-react";
-import { TokenBuyInput, type ApiResponse } from "./dao-buy";
+import { TokenBuyInput, type ApiResponse } from "@/components/daos/DaoBuy";
 import { useSessionStore } from "@/store/session";
 import { useWalletStore } from "@/store/wallet";
 import { fetchDAOExtensions, fetchToken } from "@/queries/dao-queries";
@@ -83,7 +83,7 @@ export function DAOBuyModal({
   });
 
   const tokenDexExtension = daoExtensions?.find(
-    (ext: Extension) => ext.type === "TOKEN" && ext.subtype === "DEX",
+    (ext: Extension) => ext.type === "TOKEN" && ext.subtype === "DEX"
   );
 
   /* wallet & helpers */
@@ -135,7 +135,7 @@ export function DAOBuyModal({
                   <span>STX Balance</span>
                   <span className="font-medium">
                     {formatStxBalance(
-                      agentWalletData.walletBalance.stx.balance,
+                      agentWalletData.walletBalance.stx.balance
                     )}{" "}
                     STX
                   </span>
@@ -144,7 +144,7 @@ export function DAOBuyModal({
 
               {agentWalletData.walletBalance.fungible_tokens &&
                 Object.entries(
-                  agentWalletData.walletBalance.fungible_tokens,
+                  agentWalletData.walletBalance.fungible_tokens
                 ).map(([tokenId, token], idx, arr) => (
                   <div
                     key={tokenId}
@@ -225,7 +225,7 @@ export function DAOBuyModal({
                     {(() => {
                       try {
                         const parsed = JSON.parse(
-                          apiResponse.output || "{}",
+                          apiResponse.output || "{}"
                         ) as ParsedOutput;
                         return (
                           parsed.message ||

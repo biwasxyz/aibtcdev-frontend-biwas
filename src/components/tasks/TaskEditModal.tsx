@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase/client";
 import { Task } from "@/types/supabase";
-import { CronScheduleSelector } from "./cron-schedule-selector";
+import { CronScheduleSelector } from "@/components/tasks/CronScheduleSelector";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2 } from "lucide-react";
 import {

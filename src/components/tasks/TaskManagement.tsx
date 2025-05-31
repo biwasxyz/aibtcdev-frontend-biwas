@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PlusIcon, Edit2Icon, Trash2Icon } from "lucide-react";
-import TaskForm from "./TaskForm";
+import TaskForm from "@/components/tasks/TaskForm";
 import {
   Popover,
   PopoverContent,
@@ -80,7 +80,7 @@ export default function TaskManagement({
   };
 
   const filteredTasks = tasks.filter((task) =>
-    task.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    task.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

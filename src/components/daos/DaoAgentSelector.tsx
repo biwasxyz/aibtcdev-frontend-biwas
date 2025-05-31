@@ -15,10 +15,10 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { AgentAvatar } from "../reusables/AgentAvatar";
-import { AgentBalance } from "../reusables/AgentBalance";
-import { TransferTokenModal } from "./TransferTokenModal";
-import { SuccessModal } from "../reusables/SuccessModal";
+import { AgentAvatar } from "@/components/reusables/AgentAvatar";
+import { AgentBalance } from "@/components/reusables/AgentBalance";
+import { TransferTokenModal } from "@/components/daos/TransferTokenModal";
+import { SuccessModal } from "@/components/reusables/SuccessModal";
 import type { DAO, Token } from "@/types/supabase";
 import { getWalletAddress } from "@/helpers/wallet-utils";
 import { truncateAddress } from "@/helpers/format-utils";
@@ -107,7 +107,7 @@ export function AgentSelectorSheet({
 
   const isAgentEligible = (
     balance: WalletBalance,
-    requiredTokenSymbol?: string,
+    requiredTokenSymbol?: string
   ) => {
     if (!requiredTokenSymbol) return true;
     return Object.entries(balance.fungible_tokens).some(([tokenId, token]) => {
@@ -120,7 +120,7 @@ export function AgentSelectorSheet({
   const createTasks = async (
     agentId: string,
     tokenSymbol: string,
-    daoMission: string,
+    daoMission: string
   ) => {
     const tasks = [
       {
@@ -183,7 +183,7 @@ export function AgentSelectorSheet({
         await createTasks(
           agentId,
           requiredTokenSymbol,
-          dao.mission || "mission",
+          dao.mission || "mission"
         );
       }
     }
@@ -196,7 +196,7 @@ export function AgentSelectorSheet({
     agentId: string,
     name: string,
     tokenSymbol: string,
-    walletAddress: string,
+    walletAddress: string
   ) => {
     const token = tokens?.find((t) => t.symbol === tokenSymbol);
     const dao = daos.find((d) => d.id === token?.dao_id);
@@ -318,7 +318,7 @@ export function AgentSelectorSheet({
                             agent.id,
                             agent.name,
                             requiredTokenSymbol,
-                            walletAddress,
+                            walletAddress
                           );
                         }}
                       >

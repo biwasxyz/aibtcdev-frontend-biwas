@@ -88,7 +88,7 @@ export function DAOSendProposal({
 
     const actionProposalsVotingExt = findExt(
       "EXTENSIONS",
-      "ACTION_PROPOSAL_VOTING",
+      "ACTION_PROPOSAL_VOTING"
     );
     const actionProposalContractExt = findExt("ACTIONS", "SEND_MESSAGE");
     const daoTokenExt = findExt("TOKEN", "DAO");
@@ -114,13 +114,13 @@ export function DAOSendProposal({
     try {
       const res = await fetch(
         `https://core-staging.aibtc.dev/tools/dao/action_proposals/propose_send_message?token=${encodeURIComponent(
-          accessToken,
+          accessToken
         )}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        },
+        }
       );
 
       const json = (await res.json()) as ApiResponse;

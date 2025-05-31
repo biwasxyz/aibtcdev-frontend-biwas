@@ -12,10 +12,10 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { PrivacyPolicy } from "../terms-and-condition/privacy-policy";
-import { TermsOfService } from "../terms-and-condition/terms-of-service";
+import { PrivacyPolicy } from "@/components/terms-and-condition/PrivacyPolicy";
+import { TermsOfService } from "@/components/terms-and-condition/TermsOfService";
 
-const SignIn = dynamic(() => import("../auth/auth-stacks"), {
+const SignIn = dynamic(() => import("@/components/auth/StacksAuth"), {
   ssr: false,
 });
 

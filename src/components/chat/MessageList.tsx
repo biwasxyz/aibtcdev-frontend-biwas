@@ -2,9 +2,9 @@
 
 import { useRef } from "react";
 import type { Message } from "@/lib/chat/types";
-import { ChatMessageBubble } from "./chat-message-bubble";
+import { ChatMessageBubble } from "@/components/chat/ChatMessageBubble";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { TypingIndicator } from "./typing-indicator";
+import { TypingIndicator } from "@/components/chat/TypingIndicator";
 
 interface MessageListProps {
   messages: Message[];

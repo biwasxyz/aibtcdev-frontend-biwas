@@ -3,11 +3,13 @@
 import { useState, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import MessageDisplay from "./MessageDisplay";
-import VoteProgress from "./VoteProgress";
-import TimeStatus, { useVotingStatus } from "./TimeStatus";
-import BlockVisual from "./BlockVisual";
-import VotesTable from "./VotesTable";
+import MessageDisplay from "@/components/daos/proposal/MessageDisplay";
+import VoteProgress from "@/components/daos/proposal/VoteProgress";
+import TimeStatus, {
+  useVotingStatus,
+} from "@/components/daos/proposal/TimeStatus";
+import BlockVisual from "@/components/daos/proposal/BlockVisual";
+import VotesTable from "@/components/daos/proposal/VotesTable";
 import {
   ArrowRight,
   Timer,
@@ -31,13 +33,17 @@ import {
   ChevronUp,
   MessageSquare,
 } from "lucide-react";
-import { truncateString, formatAction, getExplorerLink } from "./helper";
+import {
+  truncateString,
+  formatAction,
+  getExplorerLink,
+} from "@/helpers/helper";
 import type { Proposal } from "@/types/supabase";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import LabeledField from "./LabeledField";
+import LabeledField from "@/components/daos/proposal/LabeledField";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -45,7 +51,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import ProposalMetrics from "./ProposalMetrics";
+import ProposalMetrics from "@/components/daos/proposal/ProposalMetrics";
 
 const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   const [refreshing, setRefreshing] = useState(false);
@@ -57,7 +63,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
     proposal.vote_start,
-    proposal.vote_end,
+    proposal.vote_end
   );
 
   // Determine execution status
@@ -167,7 +173,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
     <Card
       className={cn(
         "bg-[#2A2A2A] border-gray-600 border-l-4",
-        getBorderColor(),
+        getBorderColor()
       )}
     >
       {/* Simplified Header */}
@@ -439,7 +445,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                       value={formatAction(proposal.contract_principal)}
                       link={getExplorerLink(
                         "contract",
-                        proposal.contract_principal,
+                        proposal.contract_principal
                       )}
                     />
                     <LabeledField

@@ -2,7 +2,7 @@
 
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { Bot } from "lucide-react";
-import { DAOChatModal } from "./dao-chat-modal";
+import { DAOChatModal } from "@/components/daos/DaoChatModal";
 import type { DAO, Token } from "@/types/supabase";
 
 interface DAOChatButtonProps extends ButtonProps {

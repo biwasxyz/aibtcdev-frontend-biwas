@@ -11,7 +11,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Info, Loader2, Wallet } from "lucide-react";
-import { TokenBuyInput } from "./dao-buy-input";
+import { TokenBuyInput } from "@/components/daos/DaoBuyInput";
 import AgentWalletSelector from "@/components/chat/AgentSelector";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
@@ -94,7 +94,7 @@ export function DAOBuyModal({
         connect(token);
       }
     },
-    [connect, isConnected],
+    [connect, isConnected]
   );
 
   useEffect(() => {
@@ -140,7 +140,7 @@ export function DAOBuyModal({
     } else {
       // Agent wallet selected
       const agentWallet = agentWallets.find(
-        (w) => w.agent_id === selectedAgentId,
+        (w) => w.agent_id === selectedAgentId
       ) as WalletWithAgent | undefined;
       if (!agentWallet) return null;
 
@@ -217,7 +217,7 @@ export function DAOBuyModal({
     }
 
     const tokenDexExtension = daoExtensions?.find(
-      (ext: Extension) => ext.type === "TOKEN_DEX",
+      (ext: Extension) => ext.type === "TOKEN_DEX"
     );
     // Using the component-level tokenName variable
 
@@ -264,7 +264,7 @@ export function DAOBuyModal({
                     <span className="text-base">STX Balance</span>
                     <span className="font-medium text-base">
                       {formatStxBalance(
-                        agentWalletData.walletBalance.stx.balance,
+                        agentWalletData.walletBalance.stx.balance
                       )}{" "}
                       STX
                     </span>
@@ -274,7 +274,7 @@ export function DAOBuyModal({
                 {/* Fungible tokens - simplified display */}
                 {agentWalletData.walletBalance.fungible_tokens &&
                   Object.entries(
-                    agentWalletData.walletBalance.fungible_tokens,
+                    agentWalletData.walletBalance.fungible_tokens
                   ).map(([tokenId, token], index, arr) => {
                     const tokenSymbol = tokenId.split("::")[1] || "Token";
                     const isLast = index === arr.length - 1;
@@ -296,7 +296,7 @@ export function DAOBuyModal({
                 {/* Show message if no tokens found */}
                 {(!agentWalletData.walletBalance.stx ||
                   Object.keys(
-                    agentWalletData.walletBalance.fungible_tokens || {},
+                    agentWalletData.walletBalance.fungible_tokens || {}
                   ).length === 0) && (
                   <div className="text-center py-2 text-base text-muted-foreground">
                     No tokens found

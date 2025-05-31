@@ -3,8 +3,7 @@
 import type React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-// import { DAOBuyModal } from "./dao-buy-modal";
-import { DAOBuyModal } from "./dao-buy-modal-updated";
+import { DAOBuyModal } from "@/components/daos/DaoBuyModalUpdated";
 
 interface DAOBuyTokenProps {
   daoId: string;

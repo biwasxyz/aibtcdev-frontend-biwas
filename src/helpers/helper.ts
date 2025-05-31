@@ -3,9 +3,16 @@ export function truncateString(str: string, length: number): string {
   return str.slice(0, length) + "...";
 }
 
+export function formatAction(action: string): string {
+  if (!action) return "";
+  // Remove the contract name and keep only the function name
+  const parts = action.split(".");
+  return parts[parts.length - 1];
+}
+
 export function getExplorerLink(
-  txId: string,
   type: "tx" | "address" | "contract",
+  txId: string,
 ): string {
   const baseUrl = "https://explorer.stacks.co";
   switch (type) {

@@ -24,7 +24,7 @@ export default function TaskForm({
 }: TaskFormProps) {
   const [prompt, setPrompt] = useState(task?.prompt || "");
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(
-    task?.agent_id || null,
+    task?.agent_id || null
   );
   const [loading, setLoading] = useState(false);
 
@@ -82,7 +82,7 @@ export default function TaskForm({
     } catch (error) {
       console.error(
         isEditing ? "Error updating task:" : "Error creating task:",
-        error,
+        error
       );
       toast({
         title: "Error",
@@ -136,8 +136,8 @@ export default function TaskForm({
               ? "Updating..."
               : "Creating..."
             : isEditing
-              ? "Update Task"
-              : "Create Task"}
+            ? "Update Task"
+            : "Create Task"}
         </Button>
       </div>
     </form>

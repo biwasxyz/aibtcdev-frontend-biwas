@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Extension } from "@/types/supabase";
-import CopyButton from "./proposal/CopyButton";
+import CopyButton from "@/components/daos/proposal/CopyButton";
 
 interface DAOExtensionsProps {
   extensions: Extension[];
@@ -82,7 +82,7 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
     useState<Extension["status"]>("DEPLOYED");
 
   const filteredExtensions = extensions.filter(
-    (ext) => ext.status === selectedStatus,
+    (ext) => ext.status === selectedStatus
   );
   const stats = {
     active: extensions.filter((e) => e.status === "DEPLOYED").length,
@@ -137,7 +137,7 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                       <Badge
                         variant="secondary"
                         className={`${getStatusColor(
-                          extension.status,
+                          extension.status
                         )} border capitalize shrink-0`}
                       >
                         {extension.status}

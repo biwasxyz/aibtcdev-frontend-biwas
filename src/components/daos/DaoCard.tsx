@@ -13,7 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { DAO, Token, Holder } from "@/types/supabase";
-import { Loader } from "../reusables/Loader";
+import { Loader } from "@/components/reusables/Loader";
 import {
   LineChart,
   Line,
@@ -105,7 +105,7 @@ export const DAOCard = ({
                       <p>
                         Time:{" "}
                         {new Date(
-                          payload[0].payload.timestamp,
+                          payload[0].payload.timestamp
                         ).toLocaleString()}
                       </p>
                     </div>
