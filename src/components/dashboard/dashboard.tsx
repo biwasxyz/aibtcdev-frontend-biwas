@@ -57,7 +57,7 @@ export default function Dashboard() {
   useEffect(() => {
     // Simulate API call with mock data
     const fetchStats = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
       setStats(mockData);
       setLoading(false);
     };
@@ -71,7 +71,6 @@ export default function Dashboard() {
   return (
     <>
       {/* Coming Soon Overlay */}
-
 
       {/* Dashboard Content */}
       <div className="container mx-auto p-6 space-y-6">
@@ -104,7 +103,10 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {Math.round(stats.jobsPerDay.reduce((acc, day) => acc + day.jobs, 0) / stats.jobsPerDay.length)}
+                {Math.round(
+                  stats.jobsPerDay.reduce((acc, day) => acc + day.jobs, 0) /
+                    stats.jobsPerDay.length,
+                )}
               </div>
             </CardContent>
           </Card>
@@ -121,13 +123,17 @@ export default function Dashboard() {
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={stats.jobsPerDay}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="date" 
-                      tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={(value) =>
+                        new Date(value).toLocaleDateString()
+                      }
                     />
                     <YAxis />
                     <Tooltip
-                      labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                      labelFormatter={(value) =>
+                        new Date(value).toLocaleDateString()
+                      }
                     />
                     <Line
                       type="monotone"
@@ -155,10 +161,7 @@ export default function Dashboard() {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar
-                      dataKey="jobs"
-                      fill="hsl(var(--primary))"
-                    />
+                    <Bar dataKey="jobs" fill="hsl(var(--primary))" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

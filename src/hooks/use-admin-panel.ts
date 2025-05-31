@@ -74,7 +74,7 @@ export function useAdminPanel() {
             };
             return acc;
           },
-          {} as EditingProfile
+          {} as EditingProfile,
         );
         setEditingProfile(initialEditingState);
       }
@@ -121,7 +121,7 @@ export function useAdminPanel() {
   const handleInputChange = (
     userId: string,
     field: "assigned_agent_address" | "account_index" | "role",
-    value: string
+    value: string,
   ) => {
     setEditingProfile((prev) => ({
       ...prev,

@@ -164,7 +164,7 @@ export default function ApplicationLayout({
                     "flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg transition-colors",
                     isActive
                       ? "text-white"
-                      : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
+                      : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
                   )}
                 >
                   {/* <item.icon className="h-5 w-5" /> */}
@@ -196,7 +196,7 @@ export default function ApplicationLayout({
             "md:hidden fixed inset-y-0 left-0 z-50",
             "bg-zinc-900 w-[min(100vw,320px)]",
             "transition-transform duration-200 ease-in-out",
-            leftPanelOpen ? "translate-x-0" : "-translate-x-full"
+            leftPanelOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
           {/* Mobile Sidebar Header */}
@@ -252,7 +252,7 @@ export default function ApplicationLayout({
                         "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                         isActive
                           ? "bg-zinc-800/50 text-white"
-                          : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
+                          : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
                       )}
                     >
                       <item.icon className="h-5 w-5" />

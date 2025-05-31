@@ -36,7 +36,7 @@ export function ChatInput({
         textareaRef.current.style.height = "auto";
         textareaRef.current.style.height = `${Math.min(
           textareaRef.current.scrollHeight,
-          200
+          200,
         )}px`;
       }
     }
@@ -75,7 +75,7 @@ export function ChatInput({
         console.error("Failed to send message:", error);
       }
     },
-    [activeThreadId, input, sendMessage, accessToken, onChange]
+    [activeThreadId, input, sendMessage, accessToken, onChange],
   );
 
   const handleKeyDown = useCallback(
@@ -85,7 +85,7 @@ export function ChatInput({
         handleSubmit(e);
       }
     },
-    [handleSubmit]
+    [handleSubmit],
   );
 
   const handleChange = useCallback(
@@ -97,11 +97,11 @@ export function ChatInput({
         textareaRef.current.style.height = "auto";
         textareaRef.current.style.height = `${Math.min(
           textareaRef.current.scrollHeight,
-          200
+          200,
         )}px`;
       }
     },
-    [onChange]
+    [onChange],
   );
 
   const handleFocus = () => {
@@ -135,7 +135,7 @@ export function ChatInput({
                   "rounded-xl md:rounded-2xl",
                   "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                   "transition-all duration-200",
-                  "scroll-pb-2"
+                  "scroll-pb-2",
                 )}
                 rows={1}
               />

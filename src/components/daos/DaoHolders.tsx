@@ -39,7 +39,7 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
 
   const filteredHolders = useMemo(() => {
     return holders.filter((holder) =>
-      holder.address.toLowerCase().includes(searchQuery.toLowerCase())
+      holder.address.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [holders, searchQuery]);
 
@@ -142,7 +142,7 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
                       <TableCell className="text-right tabular-nums hidden md:table-cell">
                         $
                         {Number.parseFloat(
-                          holder.value_usd || "0"
+                          holder.value_usd || "0",
                         ).toLocaleString()}
                       </TableCell>
                     )}

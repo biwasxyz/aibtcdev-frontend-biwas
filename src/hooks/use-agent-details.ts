@@ -45,7 +45,8 @@ export function useAgentDetails() {
         .eq("agent_id", id)
         .single();
 
-      if (walletError && walletError.code !== "PGRST116") { // Ignore not found error
+      if (walletError && walletError.code !== "PGRST116") {
+        // Ignore not found error
         toast({
           title: "Warning",
           description: "Failed to fetch wallet details",

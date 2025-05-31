@@ -17,7 +17,7 @@ interface AdminTableProps {
   onInputChange: (
     userId: string,
     field: "assigned_agent_address" | "account_index" | "role",
-    value: string
+    value: string,
   ) => void;
   onUpdate: (userId: string) => Promise<void>;
 }
@@ -53,7 +53,10 @@ export function AdminTable({
       <table className="w-full">
         <thead>
           <tr className="border-b">
-            <th className="px-4 py-2 text-left cursor-pointer" onClick={onToggleSort}>
+            <th
+              className="px-4 py-2 text-left cursor-pointer"
+              onClick={onToggleSort}
+            >
               Account Index {getSortIcon()}
               <span className="ml-2 text-sm font-normal text-gray-500">
                 ({getSortText()})
@@ -90,7 +93,11 @@ export function AdminTable({
                   className="w-full p-2 border rounded-md"
                   value={editingProfile[profile.id]?.role || profile.role}
                   onChange={(e) =>
-                    onInputChange(profile.id, "role", e.target.value as UserRole)
+                    onInputChange(
+                      profile.id,
+                      "role",
+                      e.target.value as UserRole,
+                    )
                   }
                 >
                   <option value="No Role">No Role</option>
@@ -102,9 +109,15 @@ export function AdminTable({
               <td className="px-4 py-2">
                 <Input
                   type="text"
-                  value={editingProfile[profile.id]?.assigned_agent_address || ""}
+                  value={
+                    editingProfile[profile.id]?.assigned_agent_address || ""
+                  }
                   onChange={(e) =>
-                    onInputChange(profile.id, "assigned_agent_address", e.target.value)
+                    onInputChange(
+                      profile.id,
+                      "assigned_agent_address",
+                      e.target.value,
+                    )
                   }
                   placeholder="Enter agent address"
                   className="w-full"

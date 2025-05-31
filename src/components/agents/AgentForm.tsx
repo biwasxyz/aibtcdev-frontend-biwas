@@ -22,7 +22,7 @@ interface AgentFormProps {
   saving: boolean;
   onSubmit: (e: React.FormEvent) => Promise<void>;
   onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
   onToolsChange: (tools: string[]) => void;
 }
@@ -65,19 +65,22 @@ export function AgentForm({
   const filteredTools = availableTools.filter(
     (tool) =>
       tool.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tool.name.toLowerCase().includes(searchTerm.toLowerCase())
+      tool.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const toolsByCategory = useMemo(() => {
     const categories = Array.from(
-      new Set(filteredTools.map((tool) => tool.category))
+      new Set(filteredTools.map((tool) => tool.category)),
     ).sort();
-    return categories.reduce((acc, category) => {
-      acc[category] = filteredTools.filter(
-        (tool) => tool.category === category
-      );
-      return acc;
-    }, {} as Record<string, Tool[]>);
+    return categories.reduce(
+      (acc, category) => {
+        acc[category] = filteredTools.filter(
+          (tool) => tool.category === category,
+        );
+        return acc;
+      },
+      {} as Record<string, Tool[]>,
+    );
   }, [filteredTools]);
 
   const selectedTools = Array.isArray(formData.agent_tools)

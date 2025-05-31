@@ -55,7 +55,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { DAOSendProposal } from "@/components/daos/proposal/dao-send-proposal-updated";
+import { DAOSendProposal } from "@/components/daos/proposal/DaoSendProposal";
 
 export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   const params = useParams();
@@ -95,7 +95,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
   const dex = extensions?.find((ext) => ext.type === "dex")?.contract_principal;
   const treasuryAddress = extensions?.find(
-    (ext) => ext.type === "aibtc-treasury"
+    (ext) => ext.type === "aibtc-treasury",
   )?.contract_principal;
 
   // Fetch token price
@@ -136,7 +136,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         dex!,
         token!.contract_principal,
         token!.symbol,
-        token!.max_supply || 0
+        token!.max_supply || 0,
       ),
     enabled: !!dex && !!token && !!token.contract_principal && !!token.symbol,
   });
@@ -147,7 +147,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
       queryKey: ["treasuryTokens", treasuryAddress, tokenPrice?.price],
       queryFn: () => fetchTreasuryTokens(treasuryAddress!, tokenPrice!.price),
       enabled: !!treasuryAddress && !!tokenPrice,
-    }
+    },
   );
 
   // Check if we're loading basic DAO info

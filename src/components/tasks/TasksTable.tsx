@@ -1,27 +1,32 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit2 } from "lucide-react";
-import { TaskEditModal } from "./task-edit-modal";
+import { TaskEditModal } from "./TaskEditModal";
 import { supabase } from "@/utils/supabase/client";
-import { Task} from "@/types/supabase";
+import { Task } from "@/types/supabase";
 import { useProfile } from "@/hooks/use-profile";
-import cronstrue from 'cronstrue';
+import cronstrue from "cronstrue";
 
 interface TasksTableProps {
   agentId: string;
 }
-
 
 export function TasksTable({ agentId }: TasksTableProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user: profileId } = useProfile();
-
 
   const fetchTasks = useCallback(async () => {
     const { data, error } = await supabase
@@ -71,14 +76,18 @@ export function TasksTable({ agentId }: TasksTableProps) {
             {tasks.map((task) => (
               <TableRow key={task.id}>
                 <TableCell className="font-medium">{task.name}</TableCell>
-                <TableCell className="max-w-md truncate">{task.prompt}</TableCell>
+                <TableCell className="max-w-md truncate">
+                  {task.prompt}
+                </TableCell>
                 <TableCell>
                   <span className="text-sm">
                     {cronstrue.toString(task.cron, { locale: "en" })}
                   </span>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={task.is_scheduled ? "default" : "destructive"}>
+                  <Badge
+                    variant={task.is_scheduled ? "default" : "destructive"}
+                  >
                     {task.is_scheduled ? "Enabled" : "Disabled"}
                   </Badge>
                 </TableCell>

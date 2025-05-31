@@ -89,7 +89,7 @@ export function ThreadList({
   const startEditing = (
     e: React.MouseEvent,
     threadId: string,
-    currentTitle: string
+    currentTitle: string,
   ) => {
     e.stopPropagation();
     setEditingId(threadId);

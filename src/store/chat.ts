@@ -1,20 +1,19 @@
 import { create } from "zustand";
-import { Message } from '@/lib/chat/types';
+import { Message } from "@/lib/chat/types";
 import { useThreadsStore } from "./threads";
 import { getStacksAddress } from "@/lib/address";
 
-
 // Local storage key for active thread
-const address = getStacksAddress()
+const address = getStacksAddress();
 const ACTIVE_THREAD_KEY = `${address}_activeThreadId`;
-const SELECTED_AGENT_KEY = `${address}_selectedAgentId`
+const SELECTED_AGENT_KEY = `${address}_selectedAgentId`;
 
 // Global WebSocket instance
 let globalWs: WebSocket | null = null;
 
 interface ChatState {
   messages: Record<string, Message[]>;
-  fetchedThreads: Set<string>;  // Track which threads we've fetched
+  fetchedThreads: Set<string>; // Track which threads we've fetched
   activeThreadId: string | null;
   selectedAgentId: string | null;
   isConnected: boolean;
@@ -49,15 +48,15 @@ interface ChatState {
 
 // Helper function to get stored thread ID
 const getStoredThreadId = (): string | null => {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   return localStorage.getItem(ACTIVE_THREAD_KEY);
 };
 
 // Helper function to get stored agent ID
 const getStoredAgentId = (): string | null => {
-  if (typeof window === "undefined") return null
-  return localStorage.getItem(SELECTED_AGENT_KEY)
-}
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(SELECTED_AGENT_KEY);
+};
 
 export const useChatStore = create<ChatState>((set, get) => ({
   messages: {},
@@ -74,8 +73,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set((state) => ({
       isTyping: {
         ...state.isTyping,
-        [threadId]: isTyping
-      }
+        [threadId]: isTyping,
+      },
     }));
   },
 
@@ -85,13 +84,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   connect: (accessToken: string) => {
     // Don't reconnect if already connected or connecting
-    if (globalWs && (globalWs.readyState === WebSocket.OPEN || globalWs.readyState === WebSocket.CONNECTING)) {
+    if (
+      globalWs &&
+      (globalWs.readyState === WebSocket.OPEN ||
+        globalWs.readyState === WebSocket.CONNECTING)
+    ) {
       // console.log('WebSocket already connected or connecting, skipping connection');
       return;
     }
 
     try {
-      const wsUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:8000/chat/ws"
+      const wsUrl =
+        process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:8000/chat/ws";
       if (!wsUrl) {
         throw new Error("WebSocket URL not configured");
       }
@@ -117,7 +121,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       };
 
       globalWs.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.error("WebSocket error:", error);
         set({ error: "WebSocket connection error" });
       };
 
@@ -127,41 +131,45 @@ export const useChatStore = create<ChatState>((set, get) => ({
           // console.log('Received message:', data);
 
           // Set typing to false when receiving any message from the assistant
-          if (data.role === 'assistant' && data.thread_id) {
+          if (data.role === "assistant" && data.thread_id) {
             get().setTyping(data.thread_id, false);
           }
 
           // Handle various message types with appropriate status
           if (data.type === "token") {
             // Token messages should have processing or complete status
-            const status = data.status ||
+            const status =
+              data.status ||
               (data.status === "end" ? "complete" : "processing");
             get().addMessage({
               ...data,
-              status: status
+              status: status,
             });
           } else if (data.type === "step") {
             // Step messages are part of planning phase
             get().addMessage({
               ...data,
-              status: data.status || "planning"
+              status: data.status || "planning",
             });
           } else {
             // Handle other message types
             get().addMessage(data);
           }
         } catch (error) {
-          console.error('Error processing message:', error);
+          console.error("Error processing message:", error);
         }
       };
     } catch (error) {
-      console.error('Connection error:', error);
+      console.error("Connection error:", error);
       set({ error: "Failed to connect to WebSocket", isConnected: false });
     }
   },
 
   disconnect: () => {
-    if (globalWs?.readyState === WebSocket.OPEN || globalWs?.readyState === WebSocket.CONNECTING) {
+    if (
+      globalWs?.readyState === WebSocket.OPEN ||
+      globalWs?.readyState === WebSocket.CONNECTING
+    ) {
       // console.log('Closing WebSocket connection');
       globalWs.close();
       globalWs = null;
@@ -173,10 +181,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
     // Send delete message through WebSocket
     if (globalWs?.readyState === WebSocket.OPEN) {
       try {
-        globalWs.send(JSON.stringify({
-          type: "delete_thread",
-          thread_id: threadId,
-        }));
+        globalWs.send(
+          JSON.stringify({
+            type: "delete_thread",
+            thread_id: threadId,
+          }),
+        );
       } catch (error) {
         console.error("Failed to send delete thread message:", error);
       }
@@ -186,14 +196,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set((state) => ({
       messages: {
         ...state.messages,
-        [threadId]: []
+        [threadId]: [],
       },
       activeThreadId: null,
-      fetchedThreads: new Set(Array.from(state.fetchedThreads).filter(id => id !== threadId)),
+      fetchedThreads: new Set(
+        Array.from(state.fetchedThreads).filter((id) => id !== threadId),
+      ),
       isTyping: {
         ...state.isTyping,
-        [threadId]: false
-      }
+        [threadId]: false,
+      },
     }));
 
     // Clear from localStorage
@@ -214,8 +226,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     if (!state.fetchedThreads.has(threadId)) {
       setTimeout(() => {
         get().getThreadHistory();
-        set(state => ({
-          fetchedThreads: new Set(Array.from(state.fetchedThreads).concat([threadId]))
+        set((state) => ({
+          fetchedThreads: new Set(
+            Array.from(state.fetchedThreads).concat([threadId]),
+          ),
         }));
       }, 0);
     }
@@ -233,20 +247,23 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const lastMessage = messages[messages.length - 1];
 
       // For token messages, try to append to last message if it's processing
-      if (message.type === 'token') {
-        if (lastMessage?.type === 'token' &&
-          (lastMessage.status === 'processing' || lastMessage.status === 'planning')) {
+      if (message.type === "token") {
+        if (
+          lastMessage?.type === "token" &&
+          (lastMessage.status === "processing" ||
+            lastMessage.status === "planning")
+        ) {
           const updatedMessages = [...messages];
           updatedMessages[updatedMessages.length - 1] = {
             ...lastMessage,
-            content: lastMessage.content + (message.content || ''),
-            status: message.status
+            content: lastMessage.content + (message.content || ""),
+            status: message.status,
           };
           return {
             messages: {
               ...state.messages,
-              [message.thread_id]: updatedMessages
-            }
+              [message.thread_id]: updatedMessages,
+            },
           };
         }
       }
@@ -254,8 +271,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return {
         messages: {
           ...state.messages,
-          [message.thread_id]: [...messages, message]
-        }
+          [message.thread_id]: [...messages, message],
+        },
       };
     });
   },
@@ -266,13 +283,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return;
     }
     try {
-      globalWs.send(JSON.stringify({
-        type: "history",
-        role: "user",
-        status: "sent",
-        thread_id: get().activeThreadId,
-        agent_id: get().selectedAgentId
-      }));
+      globalWs.send(
+        JSON.stringify({
+          type: "history",
+          role: "user",
+          status: "sent",
+          thread_id: get().activeThreadId,
+          agent_id: get().selectedAgentId,
+        }),
+      );
     } catch (error) {
       set({ error: "Failed to send message" });
       console.error("Send error:", error);
@@ -294,18 +313,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
       role: "user",
       content,
       type: "message",
-      status: "sent"
+      status: "sent",
     });
 
     try {
-      globalWs.send(JSON.stringify({
-        type: "message",
-        role: "user",
-        status: "sent",
-        content,
-        thread_id: threadId,
-        agent_id: get().selectedAgentId
-      }));
+      globalWs.send(
+        JSON.stringify({
+          type: "message",
+          role: "user",
+          status: "sent",
+          content,
+          thread_id: threadId,
+          agent_id: get().selectedAgentId,
+        }),
+      );
     } catch (error) {
       set({ error: "Failed to send message" });
       console.error("Send error:", error);

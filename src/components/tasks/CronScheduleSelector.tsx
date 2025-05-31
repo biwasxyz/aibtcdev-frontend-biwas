@@ -54,7 +54,7 @@ export function CronScheduleSelector({
   onChange,
 }: CronScheduleSelectorProps) {
   const [selectedSchedule, setSelectedSchedule] = useState(
-    value || scheduleOptions[0].value
+    value || scheduleOptions[0].value,
   );
 
   useEffect(() => {
@@ -69,7 +69,7 @@ export function CronScheduleSelector({
   };
 
   const selectedOption = scheduleOptions.find(
-    (option) => option.value === selectedSchedule
+    (option) => option.value === selectedSchedule,
   );
 
   return (

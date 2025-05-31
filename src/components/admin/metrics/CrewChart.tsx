@@ -34,9 +34,7 @@ export function CrewChart({ data }: CrewChartProps) {
     <Card>
       <CardHeader>
         <CardTitle>Crews Created by Date</CardTitle>
-        <CardDescription>
-          Number of crews created on each date
-        </CardDescription>
+        <CardDescription>Number of crews created on each date</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer

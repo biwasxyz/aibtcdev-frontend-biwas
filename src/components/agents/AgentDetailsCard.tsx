@@ -41,11 +41,15 @@ export function AgentDetailsCard({ agent }: AgentDetailsCardProps) {
               <div className="space-y-2">
                 <div>
                   <p className="font-medium">Mainnet:</p>
-                  <p className="font-mono text-sm break-all">{agent.wallet.mainnet_address}</p>
+                  <p className="font-mono text-sm break-all">
+                    {agent.wallet.mainnet_address}
+                  </p>
                 </div>
                 <div>
                   <p className="font-medium">Testnet:</p>
-                  <p className="font-mono text-sm break-all">{agent.wallet.testnet_address}</p>
+                  <p className="font-mono text-sm break-all">
+                    {agent.wallet.testnet_address}
+                  </p>
                 </div>
               </div>
             </div>

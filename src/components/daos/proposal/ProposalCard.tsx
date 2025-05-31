@@ -57,7 +57,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
     proposal.vote_start,
-    proposal.vote_end
+    proposal.vote_end,
   );
 
   // Determine execution status
@@ -167,7 +167,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
     <Card
       className={cn(
         "bg-[#2A2A2A] border-gray-600 border-l-4",
-        getBorderColor()
+        getBorderColor(),
       )}
     >
       {/* Simplified Header */}
@@ -439,7 +439,7 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                       value={formatAction(proposal.contract_principal)}
                       link={getExplorerLink(
                         "contract",
-                        proposal.contract_principal
+                        proposal.contract_principal,
                       )}
                     />
                     <LabeledField

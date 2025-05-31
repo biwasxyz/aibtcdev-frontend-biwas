@@ -15,7 +15,7 @@ import {
 const TokenTransfer = dynamic(
   () =>
     import("@/components/auth/token-transfer").then((mod) => mod.TokenTransfer),
-  { ssr: false }
+  { ssr: false },
 );
 
 interface TransferModalProps {
@@ -106,7 +106,7 @@ export const TransferTokenModal = memo(
         </DialogContent>
       </Dialog>
     );
-  }
+  },
 );
 
 TransferTokenModal.displayName = "TransferTokenModal";

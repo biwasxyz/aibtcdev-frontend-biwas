@@ -63,7 +63,7 @@ export function TokenBuyInput({
       sendMessage,
       accessToken,
       onSend,
-    ]
+    ],
   );
 
   const handleChange = useCallback(
@@ -77,7 +77,7 @@ export function TokenBuyInput({
         onAmountChange(value);
       }
     },
-    [onAmountChange]
+    [onAmountChange],
   );
 
   const handleFocus = () => {
@@ -125,7 +125,7 @@ export function TokenBuyInput({
                     "text-base placeholder:text-muted-foreground",
                     "rounded-xl md:rounded-2xl",
                     "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                    "transition-all duration-200"
+                    "transition-all duration-200",
                   )}
                 />
                 <div className="absolute right-3 flex items-center gap-1 pointer-events-none">

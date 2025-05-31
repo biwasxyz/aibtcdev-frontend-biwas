@@ -21,29 +21,32 @@ export function useAgentForm() {
     profile_id: "",
   });
 
-  const fetchAgent = useCallback(async (id: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("agents")
-        .select("*")
-        .eq("id", id)
-        .single();
+  const fetchAgent = useCallback(
+    async (id: string) => {
+      try {
+        const { data, error } = await supabase
+          .from("agents")
+          .select("*")
+          .eq("id", id)
+          .single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setFormData(data);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch agent details",
-        variant: "destructive",
-      });
-      router.push("/agents");
-    } finally {
-      setLoading(false);
-    }
-  }, [toast, router]);
+        setFormData(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch agent details",
+          variant: "destructive",
+        });
+        router.push("/agents");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [toast, router],
+  );
 
   useEffect(() => {
     if (params.id && params.id !== "new") {
@@ -53,51 +56,50 @@ export function useAgentForm() {
     }
   }, [params.id, fetchAgent]);
 
-  const handleChange = useCallback((
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  }, []);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    },
+    [],
+  );
 
   const handleToolsChange = useCallback((tools: string[]) => {
-    setFormData(prev => ({ ...prev, agent_tools: tools }));
+    setFormData((prev) => ({ ...prev, agent_tools: tools }));
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setSaving(true);
 
-    try {
-      const { error } = params.id && params.id !== "new"
-        ? await supabase
-          .from("agents")
-          .update(formData)
-          .eq("id", params.id)
-        : await supabase
-          .from("agents")
-          .insert([formData])
-          .select();
+      try {
+        const { error } =
+          params.id && params.id !== "new"
+            ? await supabase.from("agents").update(formData).eq("id", params.id)
+            : await supabase.from("agents").insert([formData]).select();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Agent saved successfully",
-      });
+        toast({
+          title: "Success",
+          description: "Agent saved successfully",
+        });
 
-      router.push("/agents");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  }, [formData, params.id, router, toast]);
+        router.push("/agents");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } finally {
+        setSaving(false);
+      }
+    },
+    [formData, params.id, router, toast],
+  );
 
   return {
     loading,
@@ -153,6 +155,6 @@ export function useAgent(agentId: string | null | undefined) {
   return {
     agent,
     isLoading,
-    error
+    error,
   };
 }

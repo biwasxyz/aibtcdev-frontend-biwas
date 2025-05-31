@@ -21,9 +21,9 @@ export function useAdminMetrics() {
   const fetchMetrics = async () => {
     try {
       const { data: crews, error: crewsError } = await supabase
-        .from('crews')
-        .select('created_at,name')
-        .order('created_at', { ascending: true });
+        .from("crews")
+        .select("created_at,name")
+        .order("created_at", { ascending: true });
 
       if (crewsError) {
         throw crewsError;
@@ -31,7 +31,7 @@ export function useAdminMetrics() {
 
       const crews_by_date: { [key: string]: string[] } = {};
       crews?.forEach((crew: CrewData) => {
-        const date = crew.created_at.split('T')[0];
+        const date = crew.created_at.split("T")[0];
         if (!crews_by_date[date]) {
           crews_by_date[date] = [];
         }
@@ -40,10 +40,10 @@ export function useAdminMetrics() {
 
       setMetrics({
         total_crews: crews?.length || 0,
-        crews_by_date
+        crews_by_date,
       });
     } catch (error: unknown) {
-      console.error('Error fetching metrics:', error);
+      console.error("Error fetching metrics:", error);
       setError("Failed to fetch metrics. Please try again later.");
     } finally {
       setLoading(false);
@@ -58,7 +58,7 @@ export function useAdminMetrics() {
 
   const getChartData = () => {
     if (!metrics) return [];
-    
+
     return Object.entries(metrics.crews_by_date)
       .map(([date, crews]) => ({
         date,
@@ -71,6 +71,6 @@ export function useAdminMetrics() {
     metrics,
     loading,
     error,
-    chartData: getChartData()
+    chartData: getChartData(),
   };
 }

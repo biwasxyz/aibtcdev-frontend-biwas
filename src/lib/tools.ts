@@ -6,7 +6,6 @@ export interface Tool {
   parameters?: string;
 }
 
-
 let toolsCache: Tool[] | null = null;
 
 export async function fetchTools(): Promise<Tool[]> {
@@ -14,15 +13,15 @@ export async function fetchTools(): Promise<Tool[]> {
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tools/available`
+      `${process.env.NEXT_PUBLIC_API_URL}/tools/available`,
     );
-    const data = await response.json() as Tool[];
+    const data = (await response.json()) as Tool[];
 
     toolsCache = data;
     return data;
   } catch (error) {
-    console.error('Failed to fetch tools:', error);
-    throw new Error('Failed to fetch tools from API');
+    console.error("Failed to fetch tools:", error);
+    throw new Error("Failed to fetch tools from API");
   }
 }
 
@@ -48,5 +47,5 @@ export const getTool = async (id: string): Promise<Tool> => {
 // Helper function to get all available tool IDs
 export const getAvailableTools = async (): Promise<string[]> => {
   const tools = await fetchTools();
-  return tools.map(tool => tool.id);
+  return tools.map((tool) => tool.id);
 };

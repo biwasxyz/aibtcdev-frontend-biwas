@@ -36,7 +36,6 @@ export function useThreads() {
     fetchThreads();
   }, [fetchThreads]);
 
-
   const createThread = async (profileId: string) => {
     try {
       const { data, error } = await supabase

@@ -1,6 +1,6 @@
-import { supabase } from "@/utils/supabase/client"
-import type { WalletBalance } from "@/store/wallet"
-import { Wallet } from "@/types/supabase"
+import { supabase } from "@/utils/supabase/client";
+import type { WalletBalance } from "@/store/wallet";
+import { Wallet } from "@/types/supabase";
 
 /**
  * Fetches wallets for a specific user
@@ -8,25 +8,25 @@ import { Wallet } from "@/types/supabase"
  * @returns The wallets data with associated agents
  */
 export async function fetchWallets(userId: string | null) {
-    if (!userId) {
-        return []
+  if (!userId) {
+    return [];
+  }
+
+  try {
+    const { data: walletsData, error: walletsError } = await supabase
+      .from("wallets")
+      .select("*, agent:agents(*)")
+      .eq("profile_id", userId);
+
+    if (walletsError) {
+      throw walletsError;
     }
 
-    try {
-        const { data: walletsData, error: walletsError } = await supabase
-            .from("wallets")
-            .select("*, agent:agents(*)")
-            .eq("profile_id", userId)
-
-        if (walletsError) {
-            throw walletsError
-        }
-
-        return walletsData || []
-    } catch (error) {
-        console.error("Error fetching wallets:", error)
-        throw error
-    }
+    return walletsData || [];
+  } catch (error) {
+    console.error("Error fetching wallets:", error);
+    throw error;
+  }
 }
 
 /**
@@ -34,25 +34,30 @@ export async function fetchWallets(userId: string | null) {
  * @param address - The wallet address to fetch balance for
  * @returns The wallet balance data
  */
-export async function fetchWalletBalance(address: string): Promise<WalletBalance> {
-    try {
-        const network = process.env.NEXT_PUBLIC_STACKS_NETWORK
-        const response = await fetch(`https://api.${network}.hiro.so/extended/v1/address/${address}/balances`, {
-            // USING force-cache won't work on cloudflare deployment
-            next: {
-                revalidate: 1200 // Cache for 20 minutes (1200 seconds)
-            }
-        })
+export async function fetchWalletBalance(
+  address: string,
+): Promise<WalletBalance> {
+  try {
+    const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
+    const response = await fetch(
+      `https://api.${network}.hiro.so/extended/v1/address/${address}/balances`,
+      {
+        // USING force-cache won't work on cloudflare deployment
+        next: {
+          revalidate: 1200, // Cache for 20 minutes (1200 seconds)
+        },
+      },
+    );
 
-        if (!response.ok) {
-            throw new Error(`Failed to fetch balance for ${address}`)
-        }
-
-        return await response.json()
-    } catch (error) {
-        console.error(`Error fetching balance for ${address}:`, error)
-        throw error
+    if (!response.ok) {
+      throw new Error(`Failed to fetch balance for ${address}`);
     }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching balance for ${address}:`, error);
+    throw error;
+  }
 }
 
 /**
@@ -60,19 +65,21 @@ export async function fetchWalletBalance(address: string): Promise<WalletBalance
  * @param addresses - Array of wallet addresses to fetch balances for
  * @returns Object mapping addresses to their balances
  */
-export async function fetchWalletBalances(addresses: string[]): Promise<Record<string, WalletBalance>> {
-    try {
-        const balancePromises = addresses.map(async (address) => {
-            const balance = await fetchWalletBalance(address)
-            return [address, balance] as [string, WalletBalance]
-        })
+export async function fetchWalletBalances(
+  addresses: string[],
+): Promise<Record<string, WalletBalance>> {
+  try {
+    const balancePromises = addresses.map(async (address) => {
+      const balance = await fetchWalletBalance(address);
+      return [address, balance] as [string, WalletBalance];
+    });
 
-        const results = await Promise.all(balancePromises)
-        return Object.fromEntries(results)
-    } catch (error) {
-        console.error("Error fetching wallet balances:", error)
-        throw error
-    }
+    const results = await Promise.all(balancePromises);
+    return Object.fromEntries(results);
+  } catch (error) {
+    console.error("Error fetching wallet balances:", error);
+    throw error;
+  }
 }
 
 /**
@@ -81,6 +88,8 @@ export async function fetchWalletBalances(addresses: string[]): Promise<Record<s
  * @returns The appropriate wallet address for the current network
  */
 export function getWalletAddressFromNetwork(wallet: Wallet) {
-    if (!wallet) return null
-    return process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet" ? wallet.mainnet_address : wallet.testnet_address
+  if (!wallet) return null;
+  return process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet"
+    ? wallet.mainnet_address
+    : wallet.testnet_address;
 }

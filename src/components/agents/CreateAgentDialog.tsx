@@ -14,7 +14,10 @@ interface CreateAgentDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function CreateAgentDialog({ isOpen, onOpenChange }: CreateAgentDialogProps) {
+export function CreateAgentDialog({
+  isOpen,
+  onOpenChange,
+}: CreateAgentDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>

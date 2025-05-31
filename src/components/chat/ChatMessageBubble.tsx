@@ -124,7 +124,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
   const { agent } = useAgent(
     message.type === "tool" || message.role === "assistant"
       ? message.agent_id
-      : null
+      : null,
   );
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -163,7 +163,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
         "flex w-full gap-2 px-2 py-1 group min-w-0",
         message.role === "user" && message.type !== "tool"
           ? "flex-row-reverse"
-          : ""
+          : "",
       )}
     >
       <div
@@ -171,7 +171,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
           "flex h-6 w-6 shrink-0 select-none items-center justify-center rounded-full",
           message.type === "tool" || message.role === "assistant"
             ? "bg-zinc-700 text-zinc-300"
-            : "bg-blue-600 text-white"
+            : "bg-blue-600 text-white",
         )}
       >
         {message.type === "tool" || message.role === "assistant" ? (
@@ -186,7 +186,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
           message.role === "user" && message.type !== "tool"
             ? "items-end"
             : "items-start",
-          "max-w-[85%] sm:max-w-[75%] w-fit"
+          "max-w-[85%] sm:max-w-[75%] w-fit",
         )}
       >
         <div
@@ -195,8 +195,8 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
             message.role === "user" && message.type !== "tool"
               ? "bg-blue-600 text-white"
               : message.status === "planning"
-              ? "bg-indigo-900 text-zinc-200"
-              : "bg-zinc-800 text-zinc-200"
+                ? "bg-indigo-900 text-zinc-200"
+                : "bg-zinc-800 text-zinc-200",
           )}
         >
           {message.type === "tool" && message.tool && (
@@ -207,7 +207,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
                     "text-xs sm:text-sm font-medium mb-1 flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity",
                     message.role === "user"
                       ? "text-blue-100"
-                      : "text-indigo-400"
+                      : "text-indigo-400",
                   )}
                   onClick={() => setIsExpanded(!isExpanded)}
                 >
@@ -216,7 +216,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
                   <ChevronDown
                     className={cn(
                       "h-3.5 w-3.5 transition-transform duration-200",
-                      isExpanded ? "transform rotate-180" : ""
+                      isExpanded ? "transform rotate-180" : "",
                     )}
                   />
                 </div>
@@ -294,7 +294,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
                 <ChevronDown
                   className={cn(
                     "h-4 w-4 transition-transform duration-200",
-                    isExpanded ? "transform rotate-180" : ""
+                    isExpanded ? "transform rotate-180" : "",
                   )}
                 />
               </div>
@@ -314,7 +314,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
                 "text-xs sm:text-sm md:text-md leading-relaxed break-words [&>*:last-child]:mb-0",
                 message.type === "step" && message.status === "planning"
                   ? "mt-2"
-                  : ""
+                  : "",
               )}
             >
               <ReactMarkdown
@@ -353,7 +353,7 @@ export const ChatMessageBubble = memo(({ message }: { message: Message }) => {
           <div
             className={cn(
               "flex items-center gap-1.5 px-1",
-              message.role === "user" ? "flex-row-reverse" : "flex-row"
+              message.role === "user" ? "flex-row-reverse" : "flex-row",
             )}
           >
             {/* <p className="text-sm text-zinc-500">

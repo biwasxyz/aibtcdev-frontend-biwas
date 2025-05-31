@@ -201,7 +201,7 @@ export function ProfileView() {
                                   new Date(vote.created_at),
                                   {
                                     addSuffix: true,
-                                  }
+                                  },
                                 )}
                               </TableCell>
                               <TableCell>

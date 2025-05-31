@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/utils/supabase/client';
-import { User } from '@supabase/supabase-js';
+import { useState, useEffect } from "react";
+import { supabase } from "@/utils/supabase/client";
+import { User } from "@supabase/supabase-js";
 
 interface Profile {
   user: User | null;
@@ -18,7 +18,10 @@ export function useProfile() {
   useEffect(() => {
     async function loadProfile() {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
         if (error) throw error;
         // console.log(user)
         setProfile({

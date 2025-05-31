@@ -95,7 +95,7 @@ export function DAOChatModal({
         connect(token);
       }
     },
-    [connect, isConnected]
+    [connect, isConnected],
   );
 
   useEffect(() => {
@@ -426,7 +426,7 @@ export function DAOChatModal({
                 // Find all relevant extensions for this prompt
                 const relevantExtensions =
                   daoExtensions?.filter((ext) =>
-                    promptItem.extensionTypes?.includes(ext.type)
+                    promptItem.extensionTypes?.includes(ext.type),
                   ) || [];
 
                 // If we have matching extensions, generate the prompt with all of them

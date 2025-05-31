@@ -39,7 +39,7 @@ export function ChatWindow() {
         connect(token);
       }
     },
-    [connect, isConnected]
+    [connect, isConnected],
   );
 
   useEffect(() => {

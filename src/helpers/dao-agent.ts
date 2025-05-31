@@ -1,5 +1,5 @@
-import { supabase } from "@/utils/supabase/client"
-import { getRandomImageUrl } from "@/lib/generate-image"
+import { supabase } from "@/utils/supabase/client";
+import { getRandomImageUrl } from "@/lib/generate-image";
 
 const daoTools = [
     // DAO tools
@@ -28,7 +28,7 @@ const daoTools = [
     // External integrations
     "twitter_post_tweet",
     "send_telegram_notification",
-]
+];
 
 const tasks = [
     {
@@ -61,31 +61,34 @@ const tasks = [
             "Draft a tweet summarizing recent DAO achievements or upcoming events using the gathered information. Use the twitter_post_tweet tool to post it after approval. Send a notification about the tweet using send_telegram_notification.",
         cron: "0 15 * * *", // Daily at 3 PM
     },
-]
+];
 
 export async function createDaoAgent() {
     try {
         // Get the current user
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        const {
+            data: { session },
+            error: sessionError,
+        } = await supabase.auth.getSession();
 
-        if (sessionError) throw sessionError
-        if (!session) throw new Error("No authenticated session found")
+        if (sessionError) throw sessionError;
+        if (!session) throw new Error("No authenticated session found");
 
-        const profile_id = session.user.id
+        const profile_id = session.user.id;
 
         // Check if user already has a DAO agent
         const { data: profile, error: profileError } = await supabase
             .from("profiles")
             .select("has_dao_agent")
             .eq("id", profile_id)
-            .single()
+            .single();
 
-        if (profileError) throw profileError
+        if (profileError) throw profileError;
 
         // If user already has a DAO agent, return null or throw an error
         if (profile.has_dao_agent) {
-            console.log("User already has a DAO agent, skipping creation")
-            return null
+            console.log("User already has a DAO agent, skipping creation");
+            return null;
         }
 
         // Create Agent
@@ -98,15 +101,15 @@ export async function createDaoAgent() {
             image_url: getRandomImageUrl(),
             profile_id,
             agent_tools: daoTools,
-        }
+        };
 
         const { data: agentResult, error: agentError } = await supabase
             .from("agents")
             .insert(agentData)
             .select()
-            .single()
+            .single();
 
-        if (agentError) throw agentError
+        if (agentError) throw agentError;
 
         // Create Tasks
         const tasksData = tasks.map((task) => ({
@@ -114,31 +117,30 @@ export async function createDaoAgent() {
             agent_id: agentResult.id,
             is_scheduled: false,
             profile_id,
-        }))
+        }));
 
-        const { error: tasksError } = await supabase.from("tasks").insert(tasksData)
+        const { error: tasksError } = await supabase
+            .from("tasks")
+            .insert(tasksData);
 
         if (tasksError) {
             // Rollback agent creation if tasks fail
-            await supabase
-                .from('agents')
-                .delete()
-                .eq('id', agentResult.id)
-            throw tasksError
+            await supabase.from("agents").delete().eq("id", agentResult.id);
+            throw tasksError;
         }
 
         // Update the profile to indicate that the user now has a DAO agent
         const { error: updateError } = await supabase
             .from("profiles")
             .update({ has_dao_agent: true })
-            .eq("id", profile_id)
+            .eq("id", profile_id);
 
-        if (updateError) throw updateError
+        if (updateError) throw updateError;
 
         // console.log("DAO Manager agent and tasks created successfully")
-        return agentResult
+        return agentResult;
     } catch (error) {
-        console.error("Error creating DAO Manager agent and tasks:", error)
-        throw error
+        console.error("Error creating DAO Manager agent and tasks:", error);
+        throw error;
     }
 }

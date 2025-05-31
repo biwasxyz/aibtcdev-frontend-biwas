@@ -45,7 +45,7 @@ const AddressCell = ({ address }: { address: string }) => {
   const handleAddressClick = () => {
     window.open(
       `https://explorer.hiro.so/address/${address}?chain=mainnet`,
-      "_blank"
+      "_blank",
     );
   };
 
@@ -65,7 +65,7 @@ const formatAddress = (address: string): string => {
   if (!address) return "Unknown";
   if (address.length <= 10) return address;
   return `${address.substring(0, 5)}...${address.substring(
-    address.length - 5
+    address.length - 5,
   )}`;
 };
 
@@ -108,7 +108,7 @@ export default function AllDeposits({
 
   // Get status badge variant
   const getStatusVariant = (
-    status: string
+    status: string,
   ): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
       case "broadcast":
@@ -172,7 +172,7 @@ export default function AllDeposits({
               <p className="text-xs text-muted-foreground">Total Volume</p>
               <p className="text-xl font-bold text-primary">
                 {Number.parseFloat(
-                  allDepositsHistory.aggregateData.totalVolume
+                  allDepositsHistory.aggregateData.totalVolume,
                 ).toFixed(8)}
               </p>
               <p className="text-xs text-muted-foreground">BTC</p>

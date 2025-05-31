@@ -96,7 +96,7 @@ export function AgentWalletSelector({
       const initialStxAmounts: { [key: string]: string } = {};
       const userWallet = walletsData.find((wallet) => wallet.agent_id === null);
       const agentWallets = walletsData.filter(
-        (wallet) => wallet.agent_id !== null
+        (wallet) => wallet.agent_id !== null,
       );
 
       if (userWallet) {
@@ -116,14 +116,14 @@ export function AgentWalletSelector({
     if (userAddress) {
       // Load stored agent ID from localStorage
       const storedAgentId = localStorage.getItem(
-        `${userAddress}_selectedAgentId`
+        `${userAddress}_selectedAgentId`,
       );
       if (storedAgentId && !selectedAgentId) {
         onSelect(storedAgentId);
       } else if (!selectedAgentId && agents.length > 0) {
         // Find the DAO Manager agent
         const daoManagerAgent = agents.find(
-          (agent) => agent.name === "DAO Manager"
+          (agent) => agent.name === "DAO Manager",
         );
 
         // If found and no agent is currently selected, select it by default
@@ -131,7 +131,7 @@ export function AgentWalletSelector({
           onSelect(daoManagerAgent.id);
           localStorage.setItem(
             `${userAddress}_selectedAgentId`,
-            daoManagerAgent.id
+            daoManagerAgent.id,
           );
         }
       }
@@ -309,7 +309,7 @@ export function AgentWalletSelector({
               <div>
                 {agents.map((agent) => {
                   const wallet = agentWallets.find(
-                    (w) => w.agent_id === agent.id
+                    (w) => w.agent_id === agent.id,
                   );
                   const walletAddress = getWalletAddress(wallet);
                   const balance = walletAddress

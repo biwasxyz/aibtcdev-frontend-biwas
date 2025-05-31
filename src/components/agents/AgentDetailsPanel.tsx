@@ -39,7 +39,7 @@ export function AgentDetailsPanel({ agent }: AgentDetailsPanelProps) {
 
   // Find the wallet for this agent
   const agentWallet = agentWallets.find(
-    (wallet) => wallet.agent_id === agent.id
+    (wallet) => wallet.agent_id === agent.id,
   );
   const walletAddress = getWalletAddress(agentWallet);
   const walletBalance = walletAddress ? balances[walletAddress] : null;
@@ -71,7 +71,7 @@ export function AgentDetailsPanel({ agent }: AgentDetailsPanelProps) {
               <div
                 className={cn(
                   "w-40 h-40 sm:w-full sm:h-auto sm:aspect-square mx-auto overflow-hidden rounded-2xl border border-zinc-800/40 bg-zinc-900/50 relative",
-                  agent.is_archived && "grayscale"
+                  agent.is_archived && "grayscale",
                 )}
                 style={{
                   backgroundImage: `url(${
@@ -141,11 +141,11 @@ export function AgentDetailsPanel({ agent }: AgentDetailsPanelProps) {
                                   </span>
                                 </div>
                               );
-                            }
+                            },
                           )}
 
                           {Object.entries(
-                            walletBalance.non_fungible_tokens
+                            walletBalance.non_fungible_tokens,
                           ).map(([tokenId, token]) => {
                             const [, tokenSymbol] = tokenId.split("::");
                             return (

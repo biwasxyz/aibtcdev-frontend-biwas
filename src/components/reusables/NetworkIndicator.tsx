@@ -12,13 +12,13 @@ export function NetworkIndicator() {
         className={cn(
           "h-2 w-2 rounded-full",
           isTestnet ? "bg-orange-500" : "bg-green-500",
-          "animate-pulse"
+          "animate-pulse",
         )}
       />
       <span
         className={cn(
           "text-sm font-medium hidden md:block",
-          isTestnet ? "text-orange-500" : "text-green-500"
+          isTestnet ? "text-orange-500" : "text-green-500",
         )}
       >
         {network.toUpperCase()}

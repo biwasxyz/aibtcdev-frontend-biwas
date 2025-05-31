@@ -14,20 +14,23 @@ export function useAdminFilters(profiles: Profile[]) {
     });
   };
 
-  const sortProfiles = useCallback((profiles: Profile[]): Profile[] => {
-    if (sortOrder === null) return profiles;
+  const sortProfiles = useCallback(
+    (profiles: Profile[]): Profile[] => {
+      if (sortOrder === null) return profiles;
 
-    return [...profiles].sort((a, b) => {
-      const indexA = a.account_index ?? 0;
-      const indexB = b.account_index ?? 0;
+      return [...profiles].sort((a, b) => {
+        const indexA = a.account_index ?? 0;
+        const indexB = b.account_index ?? 0;
 
-      if (sortOrder === "asc") {
-        return indexA - indexB;
-      } else {
-        return indexB - indexA;
-      }
-    });
-  }, [sortOrder]);
+        if (sortOrder === "asc") {
+          return indexA - indexB;
+        } else {
+          return indexB - indexA;
+        }
+      });
+    },
+    [sortOrder],
+  );
 
   const filteredProfiles = useMemo(() => {
     return profiles.filter((profile) => {

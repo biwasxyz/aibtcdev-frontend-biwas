@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { supabase } from '@/utils/supabase/client';
+import { create } from "zustand";
+import { supabase } from "@/utils/supabase/client";
 
 interface SessionState {
   accessToken: string | null;
@@ -26,7 +26,10 @@ export const useSessionStore = create<SessionState>((set) => ({
         error: null,
       });
 
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
 
       if (error) throw error;
 
