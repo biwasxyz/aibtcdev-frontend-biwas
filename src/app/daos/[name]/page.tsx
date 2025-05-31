@@ -83,7 +83,7 @@ export default function ProposalsPage() {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ["proposals", daoId] });
-        },
+        }
       )
       .subscribe();
     return () => {
@@ -93,8 +93,11 @@ export default function ProposalsPage() {
 
   if (isLoadingDAO || isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[200px] w-full">
-        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-muted-foreground" />
+      <div className="flex justify-center items-center min-h-[400px] w-full">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-[#FF6B00] mx-auto" />
+          <p className="text-zinc-400">Loading proposals...</p>
+        </div>
       </div>
     );
   }
@@ -102,10 +105,10 @@ export default function ProposalsPage() {
   // Add error state
   if (!dao) {
     return (
-      <div className="flex justify-center items-center min-h-[200px] w-full">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">DAO Not Found</h2>
-          <p className="text-muted-foreground">
+      <div className="flex justify-center items-center min-h-[400px] w-full">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-semibold text-white">DAO Not Found</h2>
+          <p className="text-zinc-400">
             Could not find a DAO with the name &apos;
             {decodeURIComponent(encodedName)}&apos;
           </p>
@@ -142,8 +145,11 @@ export default function ProposalsPage() {
       </div> */}
       <Suspense
         fallback={
-          <div className="flex justify-center items-center min-h-[200px] w-full">
-            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-muted-foreground" />
+          <div className="flex justify-center items-center min-h-[400px] w-full">
+            <div className="text-center space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-[#FF6B00] mx-auto" />
+              <p className="text-zinc-400">Loading proposals...</p>
+            </div>
           </div>
         }
       >
