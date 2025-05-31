@@ -30,7 +30,7 @@ import { fetchAgents, fetchAgentById } from "@/queries/agent-queries";
 import { fetchWallets } from "@/queries/wallet-queries";
 
 // Dynamically import Stacks components
-const StacksComponents = dynamic(() => import("../wallet/stacks-component"), {
+const StacksComponents = dynamic(() => import("../wallet/StacksComponent"), {
   ssr: false,
 });
 

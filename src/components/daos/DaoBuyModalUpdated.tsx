@@ -20,7 +20,7 @@ import { fetchDAOExtensions, fetchToken } from "@/queries/dao-queries";
 import type { DAO, Token, Extension } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import type { WalletBalance } from "@/store/wallet";
-import AuthButton from "../home/auth-button";
+import AuthButton from "../home/AuthButton";
 import {
   formatStxBalance,
   formatTokenBalance,

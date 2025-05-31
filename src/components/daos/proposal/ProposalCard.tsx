@@ -27,6 +27,9 @@ import {
   Blocks,
   ExternalLink,
   Info,
+  ChevronDown,
+  ChevronUp,
+  MessageSquare,
 } from "lucide-react";
 import { truncateString, formatAction, getExplorerLink } from "./helper";
 import type { Proposal } from "@/types/supabase";
@@ -47,6 +50,7 @@ import ProposalMetrics from "./ProposalMetrics";
 const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [nextRefreshIn, setNextRefreshIn] = useState(60);
+  const [isExpanded, setIsExpanded] = useState(false);
   const queryClient = useQueryClient();
 
   // Get voting status
@@ -104,217 +108,113 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
     };
   }, [isActive, refreshing, refreshVotesData]);
 
-  // Get card border color based on status
-  const getCardBorderColor = () => {
-    if (isActive) return "border-l-primary";
-    if (isExecuted) return "border-l-primary";
-    if (isPending) return "border-l-amber-500";
-    if (isFailed) return "border-l-zinc-500";
-    return "";
-  };
-
-  // Get status badge
+  // Get status badge with updated colors
   const getStatusBadge = () => {
-    if (isActive) {
+    if (proposal.status === "DEPLOYED" && isActive) {
       return (
-        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1.5 px-2 py-1 text-sm">
+        <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30 flex items-center gap-1.5 px-3 py-1">
           <Vote className="h-3.5 w-3.5" />
-          <span>Voting Active</span>
+          <span>Active</span>
         </Badge>
       );
     }
 
     if (isExecuted) {
       return (
-        <Badge className="bg-primary/10 text-primary border-primary/30 flex items-center gap-1.5 px-2 py-1 text-sm">
+        <Badge className="bg-green-500/20 text-green-500 border-green-500/30 flex items-center gap-1.5 px-3 py-1">
           <CheckCircle className="h-3.5 w-3.5" />
-          <span>Executed</span>
+          <span>Passed</span>
         </Badge>
       );
     }
 
-    if (isPending) {
+    if (proposal.status === "FAILED" || isFailed) {
       return (
-        <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/30 flex items-center gap-1.5 px-2 py-1 text-sm">
-          <Clock className="h-3.5 w-3.5" />
-          <span>Pending Execution</span>
-        </Badge>
-      );
-    }
-
-    if (isFailed) {
-      return (
-        <Badge className="bg-zinc-800/50 text-zinc-400 flex items-center gap-1.5 px-2 py-1 text-sm">
+        <Badge className="bg-red-500/20 text-red-500 border-red-500/30 flex items-center gap-1.5 px-3 py-1">
           <XCircle className="h-3.5 w-3.5" />
           <span>Failed</span>
         </Badge>
       );
     }
 
+    if (proposal.status === "PENDING") {
+      return (
+        <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 flex items-center gap-1.5 px-3 py-1">
+          <Clock className="h-3.5 w-3.5" />
+          <span>Pending</span>
+        </Badge>
+      );
+    }
+
     return (
-      <Badge
-        variant="outline"
-        className="flex items-center gap-1.5 px-2 py-1 text-sm"
-      >
+      <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 flex items-center gap-1.5 px-3 py-1">
         <Timer className="h-3.5 w-3.5" />
-        <span>Pending</span>
+        <span>Draft</span>
       </Badge>
     );
+  };
+
+  // Get border color based on status
+  const getBorderColor = () => {
+    if (proposal.status === "DEPLOYED" && isActive)
+      return "border-l-orange-500";
+    if (isExecuted) return "border-l-green-500";
+    if (proposal.status === "FAILED" || isFailed) return "border-l-red-500";
+    return "border-l-gray-600";
   };
 
   return (
     <Card
       className={cn(
-        "overflow-hidden shadow-sm hover:shadow-md border-t-0 border-r-0 border-b-0 bg-background border-l-4",
-        getCardBorderColor()
+        "bg-[#2A2A2A] border-gray-600 border-l-4",
+        getBorderColor()
       )}
     >
-      {/* Header Section - Improved hierarchy */}
-      <CardHeader className="p-6 pb-3">
+      {/* Simplified Header */}
+      <CardHeader className="p-6 pb-4">
         <div className="flex flex-col gap-3">
-          {/* Title - Full width, prominent */}
-          <h3 className="text-2xl font-semibold leading-tight">
-            {proposal.title}
-          </h3>
+          {/* Title and Status Row */}
+          <div className="flex items-start justify-between gap-4">
+            <h3 className="text-xl font-semibold text-white leading-tight flex-1">
+              {proposal.title}
+            </h3>
+            {getStatusBadge()}
+          </div>
 
-          {/* Meta information - Single line with status badge on right */}
-          <div className="flex flex-wrap items-center justify-between gap-y-2 text-sm leading-tight">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  {format(new Date(proposal.created_at), "MMM d, yyyy")}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>Created by:</span>
-                <a
-                  href={getExplorerLink("address", proposal.creator)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline flex items-center gap-1"
-                >
-                  {truncateString(proposal.creator, 5, 5)}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
-
-              {proposal.concluded_by && (
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span>Concluded by:</span>
-                  <a
-                    href={getExplorerLink("address", proposal.concluded_by)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline flex items-center gap-1"
-                  >
-                    {truncateString(proposal.concluded_by, 5, 5)}
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
-              )}
+          {/* Meta Information */}
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>
+                {format(new Date(proposal.created_at), "MMM d, yyyy")}
+              </span>
             </div>
 
-            {/* Status badge - Right aligned */}
-            <div>{getStatusBadge()}</div>
-          </div>
-        </div>
-      </CardHeader>
-
-      {/* Proposal Message - Always show full message */}
-      {proposal.parameters && (
-        <div className="px-6 pt-2 pb-3">
-          <div className="rounded-md bg-zinc-800 p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-sm font-medium uppercase tracking-wide">
-                On-chain Message
-              </h4>
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span>By:</span>
+              <a
+                href={getExplorerLink("address", proposal.creator)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors flex items-center gap-1"
+              >
+                {truncateString(proposal.creator, 5, 5)}
+                <ExternalLink className="h-3 w-3" />
+              </a>
             </div>
-            <MessageDisplay message={proposal.parameters} />
-          </div>
-        </div>
-      )}
 
-      {/* Main Content - Compact Layout */}
-      <CardContent className="p-0">
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full rounded-none bg-zinc-900/30 px-6 justify-start">
-            <TabsTrigger
-              value="overview"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-2 h-10 text-base"
-            >
-              <BarChart3 className="h-4 w-4" />
-              <span>Overview</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="votes"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-2 h-10 text-base"
-            >
-              <Vote className="h-4 w-4" />
-              <span>Vote Details</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="details"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none flex items-center gap-2 h-10 text-base"
-            >
-              <Blocks className="h-4 w-4" />
-              <span>Blockchain Details</span>
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab - Compact Grid Layout */}
-          <TabsContent value="overview" className="p-6 space-y-4">
-            {/* Proposal Metrics - Using the updated component */}
-            <ProposalMetrics proposal={proposal} />
-
-            {/* Refresh button for active proposals */}
-            {isActive && (
-              <div className="flex justify-end">
-                <div className="flex items-center gap-2">
-                  {refreshing ? (
-                    <span className="text-primary flex items-center text-sm">
-                      <RefreshCw className="h-4 w-4 mr-1.5 animate-spin" />
-                      Updating...
-                    </span>
-                  ) : (
-                    <span className="text-sm">{nextRefreshIn}s</span>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={refreshVotesData}
-                    disabled={refreshing}
-                    title="Refresh data"
-                  >
-                    <RefreshCw
-                      className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-                    />
-                  </Button>
-                </div>
+            {proposal.parameters && (
+              <div className="flex items-center gap-2 text-gray-500">
+                <MessageSquare className="h-4 w-4" />
+                <span>Has message</span>
               </div>
             )}
+          </div>
 
-            {/* Voting Progress */}
-            <div className="bg-zinc-900/10 p-3 rounded-md">
-              <h4 className="text-sm uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                Voting Result
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 cursor-pointer" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-sm">
-                        Current voting results and participation
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </h4>
+          {/* Quick Voting Summary (if active or recently concluded) */}
+          {(isActive || isExecuted || isFailed) && (
+            <div className="bg-[#1A1A1A] rounded-md p-3 border border-gray-600">
               <VoteProgress
                 contractAddress={proposal.contract_principal}
                 proposalId={proposal.proposal_id}
@@ -327,181 +227,249 @@ const ProposalCard = ({ proposal }: { proposal: Proposal }) => {
                     ? proposal.liquid_tokens.toString()
                     : "0"
                 }
+                isActive={isActive}
               />
             </div>
+          )}
 
-            {/* Timeline - Full version */}
-            <div className="bg-zinc-900/10 p-3 rounded-md">
-              <h4 className="text-sm uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                Timeline
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 cursor-pointer" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-sm">Proposal timeline and status</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </h4>
-              <TimeStatus
-                createdAt={proposal.created_at}
-                concludedBy={proposal.concluded_by}
-                status={proposal.status}
-                vote_start={proposal.vote_start}
-                vote_end={proposal.vote_end}
-              />
-            </div>
-          </TabsContent>
-
-          {/* Votes Tab - Simplified */}
-          <TabsContent value="votes" className="p-6 space-y-4">
-            <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-2">
-                <Vote className="h-4 w-4 text-primary" />
-                <h4 className="text-base font-medium">Detailed Vote Record</h4>
-              </div>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={refreshVotesData}
-                disabled={refreshing}
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-                />
-              </Button>
-            </div>
-
-            <div className="bg-zinc-900/10 p-3 rounded-md">
-              <VotesTable proposalId={proposal.id} />
-            </div>
-          </TabsContent>
-
-          {/* Details Tab - Simplified */}
-          <TabsContent value="details" className="p-6 space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Block Information */}
-              <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
-                <h4 className="text-sm uppercase tracking-wide flex items-center gap-2">
-                  <Layers className="h-4 w-4 text-primary" />
-                  <span>Block Information</span>
-                </h4>
-
-                <div className="space-y-2 text-sm leading-tight">
-                  <LabeledField
-                    icon={Layers}
-                    label="Snapshot block"
-                    value={
-                      <BlockVisual value={proposal.created_stx} type="stacks" />
-                    }
-                  />
-                  <LabeledField
-                    icon={ArrowRight}
-                    label="Start block"
-                    value={
-                      <BlockVisual value={proposal.vote_start} type="bitcoin" />
-                    }
-                  />
-                  <LabeledField
-                    icon={Timer}
-                    label="End block"
-                    value={
-                      <BlockVisual value={proposal.vote_end} type="bitcoin" />
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Blockchain Details */}
-              <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
-                <h4 className="text-sm uppercase tracking-wide flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" />
-                  <span>Blockchain Details</span>
-                </h4>
-
-                <div className="space-y-2 text-sm leading-tight">
-                  <LabeledField
-                    icon={Wallet}
-                    label="Principal"
-                    value={formatAction(proposal.contract_principal)}
-                    link={getExplorerLink(
-                      "contract",
-                      proposal.contract_principal
-                    )}
-                  />
-                  <LabeledField
-                    icon={Activity}
-                    label="Action"
-                    value={formatAction(proposal.action)}
-                    link={
-                      proposal.action
-                        ? getExplorerLink("contract", proposal.action)
-                        : undefined
-                    }
-                  />
-                  <LabeledField
-                    icon={Hash}
-                    label="Proposal ID"
-                    value={`#${proposal.proposal_id}`}
-                  />
-                  <LabeledField
-                    icon={Hash}
-                    label="Transaction ID"
-                    value={truncateString(proposal.tx_id, 8, 8)}
-                    link={getExplorerLink("tx", proposal.tx_id)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Execution Details */}
-            {isEnded && (
-              <div className="space-y-3 bg-zinc-900/10 p-3 rounded-md">
-                <h4 className="text-sm uppercase tracking-wide flex items-center gap-2">
-                  {proposal.passed ? (
-                    <CheckCircle className="h-4 w-4 text-primary" />
-                  ) : (
-                    <XCircle className="h-4 w-4 text-zinc-400" />
-                  )}
-                  <span>Execution Details</span>
-                </h4>
-
-                <div className="space-y-2 text-sm leading-tight">
-                  <p>
-                    {proposal.passed
-                      ? "This proposal has passed and " +
-                        (proposal.executed === true
-                          ? "has been executed."
-                          : "is pending execution.")
-                      : "This proposal has failed and will not be executed."}
-                  </p>
-
-                  {proposal.concluded_by && (
-                    <div className="flex items-center gap-2 text-sm mt-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">
-                        Concluded by:
-                      </span>
-                      <a
-                        href={getExplorerLink("address", proposal.concluded_by)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline"
-                      >
-                        {truncateString(proposal.concluded_by, 5, 5)}
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
+          {/* Expand/Collapse Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="self-start text-gray-400 hover:text-white p-2 h-auto"
+          >
+            {isExpanded ? (
+              <>
+                <ChevronUp className="h-4 w-4 mr-2" />
+                Hide Details
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4 mr-2" />
+                View Details
+              </>
             )}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
+          </Button>
+        </div>
+      </CardHeader>
+
+      {/* Collapsible Content */}
+      {isExpanded && (
+        <CardContent className="p-0 border-t border-gray-600">
+          {/* Proposal Message */}
+          {proposal.parameters && (
+            <div className="p-6 pb-4 border-b border-gray-600">
+              <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium text-white uppercase tracking-wide">
+                    On-chain Message
+                  </h4>
+                </div>
+                <MessageDisplay message={proposal.parameters} />
+              </div>
+            </div>
+          )}
+
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="w-full rounded-none bg-[#1A1A1A] px-6 justify-start border-b border-gray-600">
+              <TabsTrigger
+                value="overview"
+                className="data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-500 rounded-md px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="votes"
+                className="data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-500 rounded-md px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <Vote className="h-4 w-4 mr-2" />
+                Vote Details
+              </TabsTrigger>
+              <TabsTrigger
+                value="blockchain"
+                className="data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-500 rounded-md px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                <Blocks className="h-4 w-4 mr-2" />
+                Blockchain
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="p-6 space-y-4 m-0">
+              <ProposalMetrics proposal={proposal} />
+
+              {/* Refresh button for active proposals */}
+              {isActive && (
+                <div className="flex justify-end">
+                  <div className="flex items-center gap-2">
+                    {refreshing ? (
+                      <span className="text-orange-500 flex items-center text-sm">
+                        <RefreshCw className="h-4 w-4 mr-1.5 animate-spin" />
+                        Updating...
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-400">
+                        {nextRefreshIn}s
+                      </span>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      onClick={refreshVotesData}
+                      disabled={refreshing}
+                      title="Refresh data"
+                    >
+                      <RefreshCw
+                        className={`h-4 w-4 ${
+                          refreshing ? "animate-spin" : ""
+                        }`}
+                      />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Timeline Status */}
+              <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
+                <h4 className="text-sm uppercase tracking-wide mb-3 text-white">
+                  Timeline Status
+                </h4>
+                <TimeStatus
+                  createdAt={proposal.created_at}
+                  status={proposal.status}
+                  concludedBy={proposal.concluded_by}
+                  vote_start={proposal.vote_start}
+                  vote_end={proposal.vote_end}
+                />
+              </div>
+            </TabsContent>
+
+            {/* Votes Tab */}
+            <TabsContent value="votes" className="p-6 m-0">
+              <div className="space-y-4">
+                <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
+                  <h4 className="text-sm uppercase tracking-wide mb-3 text-white flex items-center gap-2">
+                    Voting Results
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-4 w-4 cursor-pointer text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-sm">
+                            Current voting results and participation
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </h4>
+                  <VoteProgress
+                    contractAddress={proposal.contract_principal}
+                    proposalId={proposal.proposal_id}
+                    votesFor={proposal.votes_for}
+                    votesAgainst={proposal.votes_against}
+                    refreshing={refreshing}
+                    tokenSymbol={proposal.token_symbol || ""}
+                    liquidTokens={
+                      proposal.liquid_tokens !== null
+                        ? proposal.liquid_tokens.toString()
+                        : "0"
+                    }
+                    isActive={isActive}
+                  />
+                </div>
+
+                <VotesTable proposalId={proposal.id} />
+              </div>
+            </TabsContent>
+
+            {/* Blockchain Tab */}
+            <TabsContent value="blockchain" className="p-6 m-0">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Block Information */}
+                <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
+                  <h4 className="text-sm uppercase tracking-wide mb-3 text-white flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-orange-500" />
+                    Block Information
+                  </h4>
+                  <div className="space-y-3 text-sm">
+                    <LabeledField
+                      icon={Layers}
+                      label="Snapshot block"
+                      value={
+                        <BlockVisual
+                          value={proposal.created_stx}
+                          type="stacks"
+                        />
+                      }
+                    />
+                    <LabeledField
+                      icon={ArrowRight}
+                      label="Start block"
+                      value={
+                        <BlockVisual
+                          value={proposal.vote_start}
+                          type="bitcoin"
+                        />
+                      }
+                    />
+                    <LabeledField
+                      icon={Timer}
+                      label="End block"
+                      value={
+                        <BlockVisual value={proposal.vote_end} type="bitcoin" />
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Contract Details */}
+                <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
+                  <h4 className="text-sm uppercase tracking-wide mb-3 text-white flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-orange-500" />
+                    Contract Details
+                  </h4>
+                  <div className="space-y-3 text-sm">
+                    <LabeledField
+                      icon={Wallet}
+                      label="Principal"
+                      value={formatAction(proposal.contract_principal)}
+                      link={getExplorerLink(
+                        "contract",
+                        proposal.contract_principal
+                      )}
+                    />
+                    <LabeledField
+                      icon={Activity}
+                      label="Action"
+                      value={formatAction(proposal.action)}
+                      link={
+                        proposal.action
+                          ? getExplorerLink("contract", proposal.action)
+                          : undefined
+                      }
+                    />
+                    <LabeledField
+                      icon={Hash}
+                      label="Proposal ID"
+                      value={`#${proposal.proposal_id}`}
+                    />
+                    <LabeledField
+                      icon={Hash}
+                      label="Transaction ID"
+                      value={truncateString(proposal.tx_id, 8, 8)}
+                      link={getExplorerLink("tx", proposal.tx_id)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      )}
     </Card>
   );
 };

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, ArrowUpDown } from "lucide-react";
-import { TokenBalance } from "@/components/reusables/balance-display";
+import { TokenBalance } from "@/components/reusables/BalanceDisplay";
 
 interface Holder {
   address: string;

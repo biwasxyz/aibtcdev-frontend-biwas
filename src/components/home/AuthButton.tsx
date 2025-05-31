@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 
-const SignIn = dynamic(() => import("../auth/auth-stacks"), {
+const SignIn = dynamic(() => import("../auth/StacksAuth"), {
   ssr: false,
 });
 

@@ -5,7 +5,7 @@ import {
   GlobeIcon,
 } from "@radix-ui/react-icons";
 import { BsTwitterX } from "react-icons/bs";
-import { Disclaimer } from "@/components/reusables/disclaimer";
+import { Disclaimer } from "@/components/reusables/Disclaimer";
 
 import { Button } from "@/components/ui/button";
 import { NavigationMenuLink } from "@/components/ui/navigation-menu";

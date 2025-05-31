@@ -31,11 +31,11 @@ import { fetchVotes } from "@/queries/vote-queries";
 import { formatDistanceToNow } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
-import { AgentPromptForm } from "./agent-prompt-form";
+import { AgentPromptForm } from "./AgentPromptForm";
 import { useClipboard } from "@/helpers/clipboard-utils";
 import { Button } from "../ui/button";
 import { getAddressExplorerUrl } from "@/helpers/explorer";
-import { TokenBalance } from "@/components/reusables/balance-display";
+import { TokenBalance } from "@/components/reusables/BalanceDisplay";
 
 const stacksAddress = getStacksAddress();
 

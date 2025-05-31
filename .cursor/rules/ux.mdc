@@ -3,4 +3,36 @@ description:
 globs: 
 alwaysApply: true
 ---
-You are a highly skilled UX designer and full-stack developer tasked with enhancing a React-based web application for a Decentralized Autonomous Organization (DAO) proposal voting dashboard. The dashboard allows users to review, edit, and manage AI agent recommendations for DAO proposals, with features for viewing other agents' votes, editing recommendations, confirming votes, and vetoing votes before they are cast on-chain.
+Global Design Prompt for UX/UI Styling of a DAO Platform:
+
+Design a UX/UI for a decentralized autonomous organization (DAO) platform that balances modern aesthetics with functional clarity, emphasizing user engagement, efficient navigation, and community-driven interaction. The style should feel professional, approachable, and visually dynamic while maintaining a focus on usability for managing proposals, projects, and transparency data. Follow these detailed guidelines:
+
+Layout and Structure:
+Adopt a two-column layout: a left sidebar for filtering options (e.g., by category, status, and timeframe) and a main content area for displaying proposals, projects, or other data.
+Use a card-based format for listing items (e.g., proposals, projects) to ensure visual separation and easy scanning.
+Include a prominent header banner at the top of the main content area to highlight key initiatives or announcements, ensuring it integrates seamlessly with the overall design.
+Color Scheme:
+Use a minimalistic base palette of white, light gray, and dark gray to create a clean and professional backdrop.
+Incorporate vibrant gradient accents for the header banner (e.g., a pink-to-purple gradient) to add visual energy and draw attention to key messages.
+Apply subtle accent colors for categories and statuses (e.g., orange for "Governance," green for "Passed," purple for "Grants") to differentiate elements while maintaining harmony.
+Reserve red for primary action buttons (e.g., "Submit a Proposal") to ensure they stand out without overwhelming the design.
+Typography:
+Use a clean, sans-serif font with a clear hierarchy: bold headings for titles (e.g., proposal or project names), and smaller, lighter text for secondary details (e.g., vote counts, funding amounts, timestamps).
+Ensure text is legible and scannable, with sufficient contrast against backgrounds, especially in the header banner where white text should stand out against the gradient.
+Visual Elements:
+Cards: Display proposals and projects in cards with subtle borders, light background shading, and rounded corners for a modern look. Include small icons (e.g., circles for avatars) and color-coded tags for categories and statuses (e.g., "Active," "Ongoing").
+Progress Bars: For projects, include slim, color-coded progress bars (e.g., green for completed milestones, yellow for ongoing) to visually communicate status at a glance.
+Header Banner: Design the banner with a dynamic gradient background (pink-to-purple) and a subtle, abstract pattern (e.g., circular motifs) to add depth. Include white text and secondary links (e.g., "Learn More") for additional navigation.
+Icons and Indicators: Use small, minimal icons for filters, statuses, and user avatars. Ensure icons are consistent in style (e.g., rounded, flat design) and color-coded to match the accent palette.
+Buttons: Use a mix of filled buttons (e.g., red for primary actions like "Submit a Proposal") and outlined buttons (e.g., for secondary actions like "Hide") to create a balanced visual hierarchy.
+Interactivity:
+Incorporate clickable filters, collapsible sections (with arrow indicators), and clear call-to-action buttons to encourage user engagement, aligning with the participatory nature of a DAO platform.
+Ensure interactive elements (e.g., buttons, filters) have hover states with subtle animations (e.g., slight color shift or shadow) to provide feedback.
+Include tooltips or labels for statuses (e.g., "Ended 7 months ago") to provide context without cluttering the design.
+Data Visualization:
+For summary sections (e.g., project funding, proposal counts), use dark gray or black background cards with white text for high contrast and readability.
+Highlight key metrics (e.g., "2 Ongoing Projects," "$0 Project Funding") with bold, white text, and use smaller, lighter text for secondary details (e.g., "0 Ending This Week").
+Overall Aesthetic:
+Aim for a utilitarian yet visually engaging style that avoids unnecessary ornamentation while incorporating modern design trends (e.g., gradients, rounded corners).
+Balance clarity and accessibility with subtle vibrancy through the use of gradients and accent colors, ensuring the design feels professional for DAO governance while remaining inviting for community participation.
+Maintain consistency across sections (e.g., proposals, projects, transparency) by reusing design elements like cards, color coding, and typography styles.

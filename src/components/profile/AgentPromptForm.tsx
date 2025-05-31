@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { WalletInfoCard } from "./agent-wallet-info";
+import { WalletInfoCard } from "./AgentWalletInfo";
 import {
   Select,
   SelectContent,

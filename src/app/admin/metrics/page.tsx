@@ -1,9 +1,9 @@
 "use client";
 
-import { Loader } from "@/components/reusables/loader";
+import { Loader } from "@/components/reusables/Loader";
 import { useAdminMetrics } from "@/hooks/use-admin-metrics";
-import { CrewChart } from "@/components/admin/metrics/crew-chart";
-import { MetricsHeader } from "@/components/admin/metrics/metrics-header";
+import { CrewChart } from "@/components/admin/metrics/CrewChart";
+import { MetricsHeader } from "@/components/admin/metrics/MetricsHeader";
 
 export default function AdminMetrics() {
   const { metrics, loading, error, chartData } = useAdminMetrics();

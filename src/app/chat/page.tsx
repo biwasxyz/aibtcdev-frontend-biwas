@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useSessionStore } from "@/store/session";
-import { ChatWindow } from "@/components/chat/chat-window";
-import { Loader } from "@/components/reusables/loader";
+import { ChatWindow } from "@/components/chat/ChatWindow";
+import { Loader } from "@/components/reusables/Loader";
 
 export default function ChatPage() {
   const { accessToken, isLoading, initialize } = useSessionStore();

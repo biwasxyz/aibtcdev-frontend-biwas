@@ -132,6 +132,14 @@ export interface Proposal {
   token_symbol?: string;
 }
 
+// Enhanced Proposal type with DAO information for all proposals view
+export interface ProposalWithDAO extends Proposal {
+  daos?: {
+    name: string;
+    description: string;
+  };
+}
+
 export interface CronEntry {
   id?: string;
   profile_id?: string;

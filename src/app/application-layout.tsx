@@ -4,17 +4,17 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Users, Boxes, Menu, X } from "lucide-react";
+import { Users, Boxes, Menu, X, FileText } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 // import { ThreadList } from "@/components/threads/thread-list";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { supabase } from "@/utils/supabase/client";
-import { NetworkIndicator } from "@/components/reusables/network-indicator";
+import { NetworkIndicator } from "@/components/reusables/NetworkIndicator";
 // import { getStacksAddress } from "@/lib/address";
-import AuthButton from "@/components/home/auth-button";
-import AssetTracker from "@/components/reusables/asset-tracker";
-import { AuthModal } from "@/components/auth/auth-modal";
+import AuthButton from "@/components/home/AuthButton";
+import AssetTracker from "@/components/reusables/AssetTracker";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 interface ApplicationLayoutProps {
   children: React.ReactNode;
@@ -22,6 +22,7 @@ interface ApplicationLayoutProps {
 
 const navigation = [
   { id: "daos", name: "DAOs", href: "/daos", icon: Boxes },
+  { id: "proposals", name: "Proposals", href: "/proposals", icon: FileText },
   // { id: "chat", name: "Chat", href: "/chat", icon: MessageSquare },
   // { id: "agents", name: "Agents", href: "/agents", icon: Users },
   { id: "profile", name: "Profile", href: "/profile", icon: Users },

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import ReactMarkdown from "react-markdown";
 import CopyButton from "./CopyButton";
-import { TokenBalance } from "@/components/reusables/balance-display";
+import { TokenBalance } from "@/components/reusables/BalanceDisplay";
 import { supabase } from "@/utils/supabase/client";
 
 interface VotesTableProps {

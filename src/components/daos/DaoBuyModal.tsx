@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Info, Loader2, Wallet } from "lucide-react";
 import { TokenBuyInput } from "./dao-buy-input";
-import AgentWalletSelector from "@/components/chat/agent-selector";
+import AgentWalletSelector from "@/components/chat/AgentSelector";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
 import { useWalletStore } from "@/store/wallet";
@@ -20,7 +20,7 @@ import { fetchDAOExtensions, fetchToken } from "@/queries/dao-queries";
 import type { DAO, Token, Extension } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import type { WalletBalance, WalletWithAgent } from "@/store/wallet";
-import AuthButton from "../home/auth-button";
+import AuthButton from "../home/AuthButton";
 import {
   formatStxBalance,
   formatTokenBalance,

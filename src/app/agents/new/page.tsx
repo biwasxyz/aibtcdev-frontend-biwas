@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AgentForm } from "@/components/agents/agent-form";
+import { AgentForm } from "@/components/agents/AgentForm";
 import { Agent } from "@/types/supabase";
 import { supabase } from "@/utils/supabase/client";
 import { useSessionStore } from "@/store/session";

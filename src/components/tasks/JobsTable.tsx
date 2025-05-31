@@ -8,7 +8,7 @@ import {
 import { useProfile } from "@/hooks/use-profile";
 import { format } from "date-fns";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MarkdownComponents } from "../chat/chat-message-bubble";
+import { MarkdownComponents } from "../chat/ChatMessageBubble";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Card } from "@/components/ui/card";
@@ -53,7 +53,8 @@ export function JobsTable({ agentId }: JobsTableProps) {
       <Alert variant="destructive" className="mx-auto max-w-2xl">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          Failed to load jobs: {error instanceof Error ? error.message : String(error)}
+          Failed to load jobs:{" "}
+          {error instanceof Error ? error.message : String(error)}
         </AlertDescription>
       </Alert>
     );

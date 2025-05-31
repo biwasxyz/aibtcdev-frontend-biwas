@@ -13,17 +13,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { HistoryIcon, Loader2, MessageSquare } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ChatInput } from "@/components/chat/chat-input";
-import { MessageList } from "@/components/chat/message-list";
-import AgentWalletSelector from "../chat/agent-selector";
+import { ChatInput } from "@/components/chat/ChatInput";
+import { MessageList } from "@/components/chat/MessageList";
+import AgentWalletSelector from "../chat/AgentSelector";
 import { CreateThreadButton } from "@/components/threads/CreateThreadButton";
 import { useChatStore } from "@/store/chat";
 import { useSessionStore } from "@/store/session";
 import { fetchDAOExtensions, fetchToken } from "@/queries/dao-queries";
 import type { DAO, Token, Extension } from "@/types/supabase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ThreadList from "@/components/threads/thread-list";
-import AuthButton from "../home/auth-button";
+import ThreadList from "@/components/threads/ThreadList";
+import AuthButton from "../home/AuthButton";
 
 interface DAOChatModalProps {
   daoId: string;

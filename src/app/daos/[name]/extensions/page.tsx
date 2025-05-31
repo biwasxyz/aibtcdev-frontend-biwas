@@ -2,9 +2,9 @@
 
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import DAOExtensions from "@/components/daos/dao-extensions";
+import DAOExtensions from "@/components/daos/DaoExtensions";
 import { fetchDAOExtensions, fetchDAOByName } from "@/queries/dao-queries";
-import { Loader } from "@/components/reusables/loader";
+import { Loader } from "@/components/reusables/Loader";
 
 export const runtime = "edge";
 

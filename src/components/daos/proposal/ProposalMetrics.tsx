@@ -2,7 +2,7 @@
 
 import { CheckCircle2, XCircle, Clock, Info } from "lucide-react";
 import { useVotingStatus } from "./TimeStatus";
-import { TokenBalance } from "@/components/reusables/balance-display";
+import { TokenBalance } from "@/components/reusables/BalanceDisplay";
 import { cn } from "@/lib/utils";
 import type { Proposal } from "@/types/supabase";
 import {

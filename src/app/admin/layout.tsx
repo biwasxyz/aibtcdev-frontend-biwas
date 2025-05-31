@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import { Footer } from "@/components/reusables/footer";
+import { Footer } from "@/components/reusables/Footer";
 
 export const metadata: Metadata = {
   title: "Admin",

@@ -2,11 +2,11 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader } from "@/components/reusables/loader";
+import { Loader } from "@/components/reusables/Loader";
 import { useAdminPanel } from "@/hooks/use-admin-panel";
 import { useAdminFilters } from "@/hooks/use-admin-filters";
-import { AdminHeader } from "@/components/admin/admin-header";
-import { AdminTable } from "@/components/admin/admin-table";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { AdminTable } from "@/components/admin/AdminTable";
 
 export default function AdminPanel() {
   const {

@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProposalVotes } from "@/lib/vote-utils";
-import { TokenBalance } from "@/components/reusables/balance-display";
+import { TokenBalance } from "@/components/reusables/BalanceDisplay";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,

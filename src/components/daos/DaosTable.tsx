@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowUpRight, ArrowDownRight, BarChart } from "lucide-react";
 import type { DAO, Token, Holder } from "@/types/supabase";
-import { Loader } from "../reusables/loader";
+import { Loader } from "../reusables/Loader";
 import {
   LineChart,
   Line,

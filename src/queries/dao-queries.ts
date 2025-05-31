@@ -1,6 +1,6 @@
 import { supabase } from "@/utils/supabase/client"
 import { sdkFaktory } from "@/lib/faktory-fun"
-import type { DAO, Holder, Token, Proposal, Extension } from "@/types/supabase"
+import type { DAO, Holder, Token, Proposal, Extension, ProposalWithDAO } from "@/types/supabase"
 
 const SUPPORTED_DAOS = [
     "HUMAN•AIBTC•DAO",
@@ -297,6 +297,23 @@ export const fetchProposals = async (daoId: string): Promise<Proposal[]> => {
         .from("proposals")
         .select("*")
         .eq("dao_id", daoId)
+        .order("created_at", { ascending: false })
+
+    if (error) throw error
+    return data || []
+}
+
+// Fetches all proposals across all DAOs, newest first.
+export const fetchAllProposals = async (): Promise<ProposalWithDAO[]> => {
+    const { data, error } = await supabase
+        .from("proposals")
+        .select(`
+            *,
+            daos:dao_id (
+                name,
+                description
+            )
+        `)
         .order("created_at", { ascending: false })
 
     if (error) throw error

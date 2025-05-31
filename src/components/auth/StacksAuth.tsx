@@ -14,13 +14,13 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import dynamic from "next/dynamic";
-import { connectWallet, requestSignature } from "./stacks-provider";
+import { connectWallet, requestSignature } from "./StacksProvider";
 import { createDaoAgent } from "../agents/dao-agent";
 import { useRouter } from "next/navigation";
 import { runAutoInit } from "./runAutoInit";
 
 // Dynamically import StacksProvider component
-const StacksProvider = dynamic(() => import("./stacks-provider"), {
+const StacksProvider = dynamic(() => import("./StacksProvider"), {
   ssr: false,
 });
 

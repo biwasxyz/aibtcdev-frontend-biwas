@@ -15,7 +15,7 @@ import {
   StxBalance,
   BtcBalance,
   TokenBalance,
-} from "@/components/reusables/balance-display";
+} from "@/components/reusables/BalanceDisplay";
 
 interface WalletInfoCardProps {
   walletAddress?: string | null;

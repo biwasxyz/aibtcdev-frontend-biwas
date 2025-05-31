@@ -11,7 +11,7 @@ import MyHistory from "./my-history";
 import AllDeposits from "./all-deposits";
 import { getStacksAddress, getBitcoinAddress } from "@/lib/address";
 import { useSessionStore } from "@/store/session";
-import AuthButton from "@/components/home/auth-button";
+import AuthButton from "@/components/home/AuthButton";
 import { useFormattedBtcPrice } from "@/hooks/deposit/useSdkBtcPrice";
 import useSdkPoolStatus from "@/hooks/deposit/useSdkPoolStatus";
 import useSdkDepositHistory from "@/hooks/deposit/useSdkDepositHistory";

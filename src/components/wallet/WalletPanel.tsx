@@ -14,7 +14,7 @@ import { getWalletAddress } from "@/helpers/wallet-utils";
 import { useClipboard } from "@/helpers/clipboard-utils";
 
 // Dynamically import Stacks components with ssr: false
-const StacksComponents = dynamic(() => import("./stacks-component"), {
+const StacksComponents = dynamic(() => import("./StacksComponent"), {
   ssr: false,
 });
 

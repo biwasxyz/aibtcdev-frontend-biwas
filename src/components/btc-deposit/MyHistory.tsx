@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import AuthButton from "@/components/home/auth-button";
+import AuthButton from "@/components/home/AuthButton";
 
 interface MyHistoryProps {
   depositHistory: Deposit[] | undefined;

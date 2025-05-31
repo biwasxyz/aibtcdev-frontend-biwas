@@ -12,7 +12,7 @@ import BlockVisual from "./BlockVisual";
 import VotesTable from "./VotesTable";
 import ProposalMetrics from "./ProposalMetrics";
 import LabeledField from "./LabeledField";
-import type { Proposal } from "@/types/supabase";
+import type { ProposalWithDAO } from "@/types/supabase";
 import {
   FileText,
   User,
@@ -34,6 +34,7 @@ import {
   Hash,
   RefreshCw,
   Info,
+  Building2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { truncateString, getExplorerLink, formatAction } from "./helper";
@@ -46,12 +47,13 @@ import {
 } from "@/components/ui/tooltip";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
+import Link from "next/link";
 
-interface DAOProposalsProps {
-  proposals: Proposal[];
+interface AllProposalsProps {
+  proposals: ProposalWithDAO[];
 }
 
-const DAOProposals = ({ proposals }: DAOProposalsProps) => {
+const AllProposals = ({ proposals }: AllProposalsProps) => {
   const proposalsRef = useRef<HTMLDivElement>(null);
   const [hiddenProposals, setHiddenProposals] = useState<Set<string>>(
     new Set()
@@ -82,7 +84,7 @@ const DAOProposals = ({ proposals }: DAOProposalsProps) => {
   };
 
   // Get status badge for individual proposals
-  const getStatusBadge = (proposal: Proposal) => {
+  const getStatusBadge = (proposal: ProposalWithDAO) => {
     if (proposal.status === "DEPLOYED") {
       return (
         <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30 text-xs px-2 py-0.5">
@@ -112,7 +114,7 @@ const DAOProposals = ({ proposals }: DAOProposalsProps) => {
   };
 
   // Get vote count summary
-  const getVoteSummary = (proposal: Proposal) => {
+  const getVoteSummary = (proposal: ProposalWithDAO) => {
     const votesFor = Number(proposal.votes_for || 0);
     const votesAgainst = Number(proposal.votes_against || 0);
     const totalVotes = votesFor + votesAgainst;
@@ -130,7 +132,7 @@ const DAOProposals = ({ proposals }: DAOProposalsProps) => {
       <div className="bg-[#2A2A2A] rounded-lg p-6 border border-gray-600">
         <div className="flex items-center gap-3 mb-4">
           <FileText className="h-6 w-6 text-orange-500" />
-          <h2 className="text-2xl font-bold text-white">Proposals</h2>
+          <h2 className="text-2xl font-bold text-white">All DAO Proposals</h2>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -173,7 +175,7 @@ const DAOProposals = ({ proposals }: DAOProposalsProps) => {
               All Proposals ({visibleProposals.length})
             </h3>
             <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 text-sm px-3 py-1">
-              Priority Proposals Spotlight
+              Cross-DAO View
             </Badge>
           </div>
           <Button
@@ -194,13 +196,13 @@ const DAOProposals = ({ proposals }: DAOProposalsProps) => {
                   No proposals found.
                 </CardDescription>
                 <p className="text-gray-500 text-sm mt-2">
-                  This DAO hasn't submitted any proposals yet.
+                  No DAOs have submitted any proposals yet.
                 </p>
               </CardContent>
             </Card>
           ) : (
             visibleProposals.map((proposal) => (
-              <EnhancedProposalCard
+              <EnhancedAllProposalCard
                 key={proposal.id}
                 proposal={proposal}
                 onToggleVisibility={toggleProposalVisibility}
@@ -214,18 +216,18 @@ const DAOProposals = ({ proposals }: DAOProposalsProps) => {
   );
 };
 
-// Enhanced Proposal Card Component for the new design
-interface EnhancedProposalCardProps {
-  proposal: Proposal;
+// Enhanced Proposal Card Component for the all proposals view
+interface EnhancedAllProposalCardProps {
+  proposal: ProposalWithDAO;
   onToggleVisibility: (proposalId: string) => void;
   isHidden: boolean;
 }
 
-const EnhancedProposalCard = ({
+const EnhancedAllProposalCard = ({
   proposal,
   onToggleVisibility,
   isHidden,
-}: EnhancedProposalCardProps) => {
+}: EnhancedAllProposalCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [nextRefreshIn, setNextRefreshIn] = useState(60);
@@ -329,6 +331,22 @@ const EnhancedProposalCard = ({
     } • 0 Comments • ${votesFor} For • ${votesAgainst} Against`;
   };
 
+  // Get DAO name with link
+  const getDAOInfo = () => {
+    if (proposal.daos?.name) {
+      const encodedDAOName = encodeURIComponent(proposal.daos.name);
+      return (
+        <Link
+          href={`/daos/${encodedDAOName}`}
+          className="hover:text-white transition-colors"
+        >
+          {proposal.daos.name}
+        </Link>
+      );
+    }
+    return "Unknown DAO";
+  };
+
   return (
     <Card className="bg-[#2A2A2A] border-gray-600 hover:border-gray-500 transition-colors">
       <CardContent className="p-6">
@@ -348,6 +366,11 @@ const EnhancedProposalCard = ({
 
                 {/* Meta Information */}
                 <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400 mb-3">
+                  <span className="flex items-center gap-1">
+                    <Building2 className="h-3 w-3" />
+                    {getDAOInfo()}
+                  </span>
+                  <span>•</span>
                   <span className="flex items-center gap-1">
                     <User className="h-3 w-3" />
                     By{" "}
@@ -689,4 +712,4 @@ const EnhancedProposalCard = ({
   );
 };
 
-export default DAOProposals;
+export default AllProposals;

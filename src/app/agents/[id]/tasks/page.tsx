@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { TaskEditModal } from "@/components/tasks/task-edit-modal";
+import { TaskEditModal } from "@/components/tasks/TaskEditModal";
 import { Heading } from "@/components/ui/heading";
 import { useParams } from "next/navigation";
 import { useProfile } from "@/hooks/use-profile";

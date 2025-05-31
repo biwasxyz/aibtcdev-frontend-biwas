@@ -1,6 +1,6 @@
 "use client";
 import { X } from "lucide-react";
-import AuthButton from "@/components/home/auth-button";
+import AuthButton from "@/components/home/AuthButton";
 
 export function AuthModal({
   isOpen,
