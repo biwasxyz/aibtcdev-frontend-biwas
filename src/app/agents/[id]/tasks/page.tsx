@@ -1,6 +1,6 @@
 "use client";
 
-import { TasksTable } from "@/components/tasks/tasks";
+import { TasksTable } from "@/components/tasks/TasksTable";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@heroicons/react/16/solid";
 import {
