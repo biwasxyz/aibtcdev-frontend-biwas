@@ -91,9 +91,9 @@ export async function fetchVotes(): Promise<Vote[]> {
   const proposals =
     proposalIds.length > 0
       ? await supabase
-          .from("proposals")
-          .select("id, title")
-          .in("id", proposalIds)
+        .from("proposals")
+        .select("id, title")
+        .in("id", proposalIds)
       : { data: [] };
 
   // Create lookup maps
@@ -210,6 +210,8 @@ const url =
   process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet"
     ? process.env.NEXT_PUBLIC_CACHE_URL_TESTNET
     : process.env.NEXT_PUBLIC_CACHE_URL;
+
+
 
 /**
  * Fetches aggregate proposal votes (For/Against counts) from a Stacks cache/read-only endpoint.
