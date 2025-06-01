@@ -48,7 +48,7 @@ type SortField =
 const AllProposals = ({ proposals }: AllProposalsProps) => {
   const proposalsRef = useRef<HTMLDivElement>(null);
   const [hiddenProposals, setHiddenProposals] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
@@ -66,7 +66,7 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   // Get unique DAOs for filter options
   const daoOptions = useMemo(() => {
     const uniqueDAOs = Array.from(
-      new Set(proposals.map((p) => p.daos?.name).filter(Boolean))
+      new Set(proposals.map((p) => p.daos?.name).filter(Boolean)),
     ).sort();
 
     return [
@@ -203,23 +203,23 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
 
   // Pagination logic
   const totalPages = Math.ceil(
-    filteredAndSortedProposals.length / itemsPerPage
+    filteredAndSortedProposals.length / itemsPerPage,
   );
   const paginatedProposals = filteredAndSortedProposals.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   // Calculate statistics
   const totalProposals = filteredAndSortedProposals.length;
   const activeProposals = filteredAndSortedProposals.filter(
-    (p) => p.status === "DEPLOYED"
+    (p) => p.status === "DEPLOYED",
   ).length;
   const passedProposals = filteredAndSortedProposals.filter(
-    (p) => p.passed === true
+    (p) => p.passed === true,
   ).length;
   const failedProposals = filteredAndSortedProposals.filter(
-    (p) => p.status === "FAILED"
+    (p) => p.status === "FAILED",
   ).length;
 
   // Summary stats for sidebar
@@ -415,7 +415,7 @@ const EnhancedAllProposalCard = ({
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
     proposal.vote_start,
-    proposal.vote_end
+    proposal.vote_end,
   );
 
   // Get status badge

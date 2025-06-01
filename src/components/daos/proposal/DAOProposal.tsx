@@ -25,7 +25,7 @@ interface DAOProposalsProps {
 
 const DAOProposals = ({ proposals }: DAOProposalsProps) => {
   const [hiddenProposals, setHiddenProposals] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
 
   const toggleProposalVisibility = (proposalId: string) => {
@@ -41,7 +41,7 @@ const DAOProposals = ({ proposals }: DAOProposalsProps) => {
   };
 
   const visibleProposals = proposals.filter(
-    (proposal) => !hiddenProposals.has(proposal.id)
+    (proposal) => !hiddenProposals.has(proposal.id),
   );
 
   const hiddenCount = hiddenProposals.size;
@@ -105,7 +105,7 @@ const EnhancedProposalCard = ({
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
     proposal.vote_start,
-    proposal.vote_end
+    proposal.vote_end,
   );
 
   const getStatusBadge = () => {

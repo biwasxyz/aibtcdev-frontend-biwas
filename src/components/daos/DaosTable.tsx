@@ -84,7 +84,7 @@ export const DAOTable = ({
       data: Array<{ timestamp: number; price: number }>;
       isLoading: boolean;
     },
-    compact = false
+    compact = false,
   ) => {
     if (tradeData.isLoading) {
       return (
@@ -112,7 +112,7 @@ export const DAOTable = ({
                       <p>
                         Time:{" "}
                         {new Date(
-                          payload[0].payload.timestamp
+                          payload[0].payload.timestamp,
                         ).toLocaleString()}
                       </p>
                     </div>
@@ -414,7 +414,7 @@ export const DAOTable = ({
                                 <TooltipTrigger asChild>
                                   <Link
                                     href={`/daos/${encodeURIComponent(
-                                      dao.name
+                                      dao.name,
                                     )}`}
                                     className="font-medium hover:underline text-sm"
                                   >

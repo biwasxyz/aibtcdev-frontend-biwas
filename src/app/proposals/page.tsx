@@ -41,7 +41,7 @@ export default function AllProposalsPage() {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ["allProposals"] });
-        }
+        },
       )
       .subscribe();
     return () => {

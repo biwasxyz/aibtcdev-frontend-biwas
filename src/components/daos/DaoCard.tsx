@@ -102,7 +102,7 @@ export const DAOCard = ({
                       <p>
                         Time:{" "}
                         {new Date(
-                          payload[0].payload.timestamp
+                          payload[0].payload.timestamp,
                         ).toLocaleString()}
                       </p>
                     </div>

@@ -44,7 +44,7 @@ const ProposalDetails = ({
   const { isActive } = useVotingStatus(
     proposal.status,
     proposal.vote_start,
-    proposal.vote_end
+    proposal.vote_end,
   );
 
   const refreshVotesData = useCallback(async () => {

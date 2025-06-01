@@ -144,7 +144,7 @@ export function WalletInfoCard({
                       </TableCell>
                     </TableRow>
                   );
-                }
+                },
               )}
 
             {/* NFTs */}
@@ -163,7 +163,7 @@ export function WalletInfoCard({
                       </TableCell>
                     </TableRow>
                   );
-                }
+                },
               )}
 
             {/* Show empty state if no balances */}

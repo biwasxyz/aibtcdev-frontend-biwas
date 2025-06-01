@@ -20,7 +20,7 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
     proposal.vote_start,
-    proposal.vote_end
+    proposal.vote_end,
   );
 
   // Check if the proposal has failed
@@ -79,8 +79,8 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
                   isActive || isNotStartedYet
                     ? "bg-orange-500/10 border-orange-500/30"
                     : proposal.met_quorum
-                    ? "bg-green-500/10 border-green-500/30"
-                    : "bg-red-500/10 border-red-500/30"
+                      ? "bg-green-500/10 border-green-500/30"
+                      : "bg-red-500/10 border-red-500/30",
                 )}
               >
                 <div className="flex flex-col gap-2">
@@ -135,8 +135,8 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
                   isActive || isNotStartedYet
                     ? "bg-orange-500/10 border-orange-500/30"
                     : proposal.met_threshold
-                    ? "bg-green-500/10 border-green-500/30"
-                    : "bg-red-500/10 border-red-500/30"
+                      ? "bg-green-500/10 border-green-500/30"
+                      : "bg-red-500/10 border-red-500/30",
                 )}
               >
                 <div className="flex flex-col gap-2">
@@ -191,12 +191,12 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
                   isActive || isNotStartedYet
                     ? "bg-orange-500/10 border-orange-500/30"
                     : isFailed
-                    ? "bg-red-500/10 border-red-500/30"
-                    : proposal.executed === true
-                    ? "bg-green-500/10 border-green-500/30"
-                    : proposal.executed === false
-                    ? "bg-red-500/10 border-red-500/30"
-                    : "bg-amber-500/10 border-amber-500/30"
+                      ? "bg-red-500/10 border-red-500/30"
+                      : proposal.executed === true
+                        ? "bg-green-500/10 border-green-500/30"
+                        : proposal.executed === false
+                          ? "bg-red-500/10 border-red-500/30"
+                          : "bg-amber-500/10 border-amber-500/30",
                 )}
               >
                 <div className="flex flex-col gap-2">

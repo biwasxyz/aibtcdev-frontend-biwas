@@ -1,4 +1,8 @@
-export function truncateString(str: string, startLength: number, endLength?: number): string {
+export function truncateString(
+  str: string,
+  startLength: number,
+  endLength?: number,
+): string {
   if (!str) return "";
 
   // If endLength is provided, show start...end format

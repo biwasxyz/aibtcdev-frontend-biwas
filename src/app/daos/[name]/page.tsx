@@ -83,7 +83,7 @@ export default function ProposalsPage() {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ["proposals", daoId] });
-        }
+        },
       )
       .subscribe();
     return () => {

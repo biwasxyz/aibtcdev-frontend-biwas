@@ -140,7 +140,7 @@ export default function ApplicationLayout({
       </div>
 
       {/* Desktop Header */}
-      <div className="hidden md:flex h-16 bg-[#2A2A2A] items-center px-6 border-b border-zinc-800">
+      <div className="hidden md:flex h-16  items-center px-6 border-b border-zinc-800">
         <div className="w-1/4">
           <Link href="/daos" className="flex items-center gap-2">
             <Image
@@ -170,7 +170,7 @@ export default function ApplicationLayout({
                     "flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg transition-colors",
                     isActive
                       ? "text-white bg-zinc-800/50"
-                      : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
+                      : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
                   )}
                 >
                   <item.icon className="h-5 w-5" />
@@ -203,9 +203,9 @@ export default function ApplicationLayout({
         <aside
           className={cn(
             "md:hidden fixed inset-y-0 left-0 z-50",
-            "bg-[#2A2A2A] w-[min(100vw,320px)]",
+            "w-[min(100vw,320px)]",
             "transition-transform duration-200 ease-in-out",
-            leftPanelOpen ? "translate-x-0" : "-translate-x-full"
+            leftPanelOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
           {/* Mobile Sidebar Header */}
@@ -254,7 +254,7 @@ export default function ApplicationLayout({
                         "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                         isActive
                           ? "bg-zinc-800/50 text-white"
-                          : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
+                          : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
                       )}
                     >
                       <item.icon className="h-5 w-5" />

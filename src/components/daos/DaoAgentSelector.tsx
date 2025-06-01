@@ -107,7 +107,7 @@ export function AgentSelectorSheet({
 
   const isAgentEligible = (
     balance: WalletBalance,
-    requiredTokenSymbol?: string
+    requiredTokenSymbol?: string,
   ) => {
     if (!requiredTokenSymbol) return true;
     return Object.entries(balance.fungible_tokens).some(([tokenId, token]) => {
@@ -120,7 +120,7 @@ export function AgentSelectorSheet({
   const createTasks = async (
     agentId: string,
     tokenSymbol: string,
-    daoMission: string
+    daoMission: string,
   ) => {
     const tasks = [
       {
@@ -183,7 +183,7 @@ export function AgentSelectorSheet({
         await createTasks(
           agentId,
           requiredTokenSymbol,
-          dao.description || "description"
+          dao.description || "description",
         );
       }
     }
@@ -196,7 +196,7 @@ export function AgentSelectorSheet({
     agentId: string,
     name: string,
     tokenSymbol: string,
-    walletAddress: string
+    walletAddress: string,
   ) => {
     const token = tokens?.find((t) => t.symbol === tokenSymbol);
     const dao = daos.find((d) => d.id === token?.dao_id);
@@ -318,7 +318,7 @@ export function AgentSelectorSheet({
                             agent.id,
                             agent.name,
                             requiredTokenSymbol,
-                            walletAddress
+                            walletAddress,
                           );
                         }}
                       >

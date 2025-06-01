@@ -70,7 +70,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
   const dex = extensions?.find((ext) => ext.type === "dex")?.contract_principal;
   const treasuryAddress = extensions?.find(
-    (ext) => ext.type === "aibtc-treasury"
+    (ext) => ext.type === "aibtc-treasury",
   )?.contract_principal;
 
   // Fetch token price
@@ -111,7 +111,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         dex!,
         token!.contract_principal,
         token!.symbol,
-        token!.max_supply || 0
+        token!.max_supply || 0,
       ),
     enabled: !!dex && !!token && !!token.contract_principal && !!token.symbol,
   });
