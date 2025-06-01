@@ -84,7 +84,7 @@ export const DAOTable = ({
       data: Array<{ timestamp: number; price: number }>;
       isLoading: boolean;
     },
-    compact = false,
+    compact = false
   ) => {
     if (tradeData.isLoading) {
       return (
@@ -112,7 +112,7 @@ export const DAOTable = ({
                       <p>
                         Time:{" "}
                         {new Date(
-                          payload[0].payload.timestamp,
+                          payload[0].payload.timestamp
                         ).toLocaleString()}
                       </p>
                     </div>
@@ -249,14 +249,18 @@ export const DAOTable = ({
                 <TooltipTrigger asChild>
                   <p className="text-xs text-muted-foreground line-clamp-2 cursor-help">
                     <FormatMission
-                      content={dao.mission || "No mission statement available"}
+                      content={
+                        dao.description || "No mission statement available"
+                      }
                       inline={true}
                     />
                   </p>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-[400px]">
                   <FormatMission
-                    content={dao.mission || "No mission statement available"}
+                    content={
+                      dao.description || "No mission statement available"
+                    }
                     inline={true}
                   />
                 </TooltipContent>
@@ -410,7 +414,7 @@ export const DAOTable = ({
                                 <TooltipTrigger asChild>
                                   <Link
                                     href={`/daos/${encodeURIComponent(
-                                      dao.name,
+                                      dao.name
                                     )}`}
                                     className="font-medium hover:underline text-sm"
                                   >
@@ -451,8 +455,7 @@ export const DAOTable = ({
                             <p className="text-sm text-muted-foreground truncate">
                               <FormatMission
                                 content={
-                                  dao.mission ||
-                                  "No mission statement available"
+                                  dao.description || "No description available"
                                 }
                                 inline={true}
                               />
@@ -461,7 +464,7 @@ export const DAOTable = ({
                           <TooltipContent className="max-w-[400px]">
                             <FormatMission
                               content={
-                                dao.mission || "No mission statement available"
+                                dao.description || "No description available"
                               }
                               inline={true}
                             />

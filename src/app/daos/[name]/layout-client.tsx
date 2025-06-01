@@ -230,9 +230,9 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                   <h1 className="text-2xl sm:text-3xl font-bold text-white">
                     {dao?.name}
                   </h1>
-                  {dao?.mission && (
+                  {dao?.description && (
                     <div className="text-zinc-300 text-sm sm:text-base line-clamp-2">
-                      {dao.mission}
+                      {dao.description}
                     </div>
                   )}
                   <div className="flex flex-wrap gap-2">

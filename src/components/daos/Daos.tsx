@@ -192,7 +192,7 @@ export default function DAOs() {
         const matchesSearch =
           !searchQuery ||
           dao.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          dao.mission.toLowerCase().includes(searchQuery.toLowerCase());
+          dao.description.toLowerCase().includes(searchQuery.toLowerCase());
 
         const matchesCategory =
           categoryFilter === "all" ||
