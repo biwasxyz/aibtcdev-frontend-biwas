@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { Card, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,13 @@ import BlockVisual from "./BlockVisual";
 import VotesTable from "./VotesTable";
 import ProposalMetrics from "./ProposalMetrics";
 import LabeledField from "./LabeledField";
+import {
+  FilterSidebar,
+  type FilterConfig,
+  type FilterState,
+  type SummaryStats,
+} from "@/components/reusables/FilterSidebar";
+import { Pagination } from "@/components/reusables/Pagination";
 import type { ProposalWithDAO } from "@/types/supabase";
 import {
   FileText,
@@ -54,22 +61,236 @@ interface AllProposalsProps {
   proposals: ProposalWithDAO[];
 }
 
+// Define sort options
+type SortField =
+  | "newest"
+  | "oldest"
+  | "title"
+  | "votes"
+  | "status"
+  | "creator"
+  | "dao";
+
 const AllProposals = ({ proposals }: AllProposalsProps) => {
   const proposalsRef = useRef<HTMLDivElement>(null);
   const [hiddenProposals, setHiddenProposals] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
-  // Calculate proposal statistics
-  const totalProposals = proposals.length;
-  const activeProposals = proposals.filter(
-    (p) => p.status === "DEPLOYED",
-  ).length;
-  const passedProposals = proposals.filter((p) => p.passed === true).length;
-  const failedProposals = proposals.filter((p) => p.status === "FAILED").length;
+  // Filter and pagination state
+  const [filterState, setFilterState] = useState<FilterState>({
+    search: "",
+    dao: "all",
+    status: "all",
+    creator: "",
+    sort: "newest",
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
 
-  // Filter out hidden proposals
-  const visibleProposals = proposals.filter((p) => !hiddenProposals.has(p.id));
+  // Get unique DAOs for filter options
+  const daoOptions = useMemo(() => {
+    const uniqueDAOs = Array.from(
+      new Set(proposals.map((p) => p.daos?.name).filter(Boolean))
+    ).sort();
+
+    return [
+      { value: "all", label: "All DAOs" },
+      ...uniqueDAOs.map((dao) => ({ value: dao!, label: dao! })),
+    ];
+  }, [proposals]);
+
+  // Get unique creators for suggestions (you might want to implement autocomplete)
+  const creatorOptions = useMemo(() => {
+    const uniqueCreators = Array.from(
+      new Set(proposals.map((p) => p.creator).filter(Boolean))
+    );
+    return uniqueCreators.slice(0, 10); // Limit for performance
+  }, [proposals]);
+
+  // Filter configuration
+  const filterConfig: FilterConfig[] = [
+    {
+      key: "search",
+      label: "Search",
+      type: "search",
+      placeholder: "Search proposals...",
+    },
+    {
+      key: "dao",
+      label: "DAO",
+      type: "select",
+      options: daoOptions,
+    },
+    {
+      key: "status",
+      label: "Status",
+      type: "select",
+      options: [
+        { value: "all", label: "All Status" },
+        { value: "DEPLOYED", label: "Active", badge: true },
+        { value: "PASSED", label: "Passed", badge: true },
+        { value: "FAILED", label: "Failed", badge: true },
+        { value: "DRAFT", label: "Draft", badge: true },
+      ],
+    },
+    {
+      key: "creator",
+      label: "Creator Address",
+      type: "search",
+      placeholder: "Enter creator address...",
+    },
+    {
+      key: "sort",
+      label: "Sort By",
+      type: "select",
+      options: [
+        { value: "newest", label: "Newest First" },
+        { value: "oldest", label: "Oldest First" },
+        { value: "title", label: "Title A-Z" },
+        { value: "votes", label: "Most Votes" },
+        { value: "status", label: "Status" },
+        { value: "dao", label: "DAO Name" },
+      ],
+    },
+  ];
+
+  // Filter and sort logic
+  const filteredAndSortedProposals = useMemo(() => {
+    let filtered = proposals.filter((proposal) => {
+      // Hide hidden proposals
+      if (hiddenProposals.has(proposal.id)) return false;
+
+      // Search filter
+      if (filterState.search && typeof filterState.search === "string") {
+        const searchTerm = filterState.search.toLowerCase();
+        const matchesTitle =
+          proposal.title?.toLowerCase().includes(searchTerm) || false;
+        const matchesDAO =
+          proposal.daos?.name?.toLowerCase().includes(searchTerm) || false;
+        const matchesCreator =
+          proposal.creator?.toLowerCase().includes(searchTerm) || false;
+        if (!matchesTitle && !matchesDAO && !matchesCreator) return false;
+      }
+
+      // DAO filter
+      if (filterState.dao && filterState.dao !== "all") {
+        if (proposal.daos?.name !== filterState.dao) return false;
+      }
+
+      // Status filter
+      if (filterState.status && filterState.status !== "all") {
+        if (filterState.status === "PASSED" && !proposal.passed) return false;
+        if (filterState.status === "DEPLOYED" && proposal.status !== "DEPLOYED")
+          return false;
+        if (filterState.status === "FAILED" && proposal.status !== "FAILED")
+          return false;
+        if (filterState.status === "DRAFT" && proposal.status !== "DRAFT")
+          return false;
+      }
+
+      // Creator filter
+      if (filterState.creator && typeof filterState.creator === "string") {
+        const creatorTerm = filterState.creator.toLowerCase();
+        if (!proposal.creator.toLowerCase().includes(creatorTerm)) return false;
+      }
+
+      return true;
+    });
+
+    // Sort logic
+    const sortField = filterState.sort as SortField;
+    filtered.sort((a, b) => {
+      switch (sortField) {
+        case "newest":
+          return (
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+        case "oldest":
+          return (
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+        case "title":
+          return a.title.localeCompare(b.title);
+        case "votes":
+          const votesA =
+            Number(a.votes_for || 0) + Number(a.votes_against || 0);
+          const votesB =
+            Number(b.votes_for || 0) + Number(b.votes_against || 0);
+          return votesB - votesA;
+        case "status":
+          return a.status.localeCompare(b.status);
+        case "dao":
+          const daoA = a.daos?.name || "";
+          const daoB = b.daos?.name || "";
+          return daoA.localeCompare(daoB);
+        case "creator":
+          return a.creator.localeCompare(b.creator);
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [proposals, hiddenProposals, filterState]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(
+    filteredAndSortedProposals.length / itemsPerPage
+  );
+  const paginatedProposals = filteredAndSortedProposals.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Calculate statistics
+  const totalProposals = filteredAndSortedProposals.length;
+  const activeProposals = filteredAndSortedProposals.filter(
+    (p) => p.status === "DEPLOYED"
+  ).length;
+  const passedProposals = filteredAndSortedProposals.filter(
+    (p) => p.passed === true
+  ).length;
+  const failedProposals = filteredAndSortedProposals.filter(
+    (p) => p.status === "FAILED"
+  ).length;
+
+  // Summary stats for sidebar
+  const summaryStats: SummaryStats = {
+    total: {
+      label: "Total Proposals",
+      value: totalProposals,
+    },
+    active: {
+      label: "Active",
+      value: activeProposals,
+    },
+    passed: {
+      label: "Passed",
+      value: passedProposals,
+    },
+    failed: {
+      label: "Failed",
+      value: failedProposals,
+    },
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (key: string, value: string | string[]) => {
+    setFilterState((prev) => ({ ...prev, [key]: value }));
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
+  // Handle pagination changes
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    proposalsRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
 
   // Toggle proposal visibility
   const toggleProposalVisibility = (proposalId: string) => {
@@ -128,89 +349,75 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   };
 
   return (
-    <div className="w-full space-y-6">
-      {/* Summary Card */}
-      <div className="bg-[#2A2A2A] rounded-lg p-6 border border-gray-600">
-        <div className="flex items-center gap-3 mb-4">
-          <FileText className="h-6 w-6 text-orange-500" />
-          <h2 className="text-2xl font-bold text-white">All DAO Proposals</h2>
-        </div>
+    <div className="w-full min-h-screen bg-[#1A1A1A]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filter Sidebar */}
+          <FilterSidebar
+            title="Filters"
+            filters={filterConfig}
+            filterState={filterState}
+            onFilterChange={handleFilterChange}
+            summaryStats={summaryStats}
+          />
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
-            <div className="text-2xl font-bold text-white">
-              {totalProposals}
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Header */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Proposals</h2>
+                  <p className="text-gray-400 mt-1">
+                    View and filter proposals across all DAOs
+                  </p>
+                </div>
+                <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30 text-sm px-3 py-1">
+                  Cross-DAO View
+                </Badge>
+              </div>
             </div>
-            <div className="text-sm text-gray-400">Total Proposals</div>
-          </div>
 
-          <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
-            <div className="text-2xl font-bold text-orange-500">
-              {activeProposals}
+            {/* Proposals List */}
+            <div ref={proposalsRef} className="space-y-4">
+              {paginatedProposals.length === 0 ? (
+                <Card className="bg-[#2A2A2A] border-gray-600">
+                  <CardContent className="p-8 text-center">
+                    <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+                    <CardDescription className="text-gray-400 text-lg">
+                      No proposals found.
+                    </CardDescription>
+                    <p className="text-gray-500 text-sm mt-2">
+                      Try adjusting your search terms or filters.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                paginatedProposals.map((proposal) => (
+                  <EnhancedAllProposalCard
+                    key={proposal.id}
+                    proposal={proposal}
+                    onToggleVisibility={toggleProposalVisibility}
+                    isHidden={hiddenProposals.has(proposal.id)}
+                  />
+                ))
+              )}
             </div>
-            <div className="text-sm text-gray-400">Active</div>
-          </div>
 
-          <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
-            <div className="text-2xl font-bold text-green-500">
-              {passedProposals}
-            </div>
-            <div className="text-sm text-gray-400">Passed</div>
+            {/* Pagination */}
+            {filteredAndSortedProposals.length > 0 && (
+              <div className="mt-8">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={filteredAndSortedProposals.length}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={handlePageChange}
+                  onItemsPerPageChange={handleItemsPerPageChange}
+                />
+              </div>
+            )}
           </div>
-
-          <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
-            <div className="text-2xl font-bold text-red-500">
-              {failedProposals}
-            </div>
-            <div className="text-sm text-gray-400">Failed</div>
-          </div>
-        </div>
-      </div>
-
-      {/* All Proposals Section */}
-      <div className="space-y-6">
-        {/* Section Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h3 className="text-2xl font-bold text-white">
-              All Proposals ({visibleProposals.length})
-            </h3>
-            <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 text-sm px-3 py-1">
-              Cross-DAO View
-            </Badge>
-          </div>
-          <Button
-            variant="outline"
-            className="border-red-500/30 text-red-500 hover:bg-red-500/10 hover:text-red-400"
-          >
-            Hide
-          </Button>
-        </div>
-
-        {/* Proposals List */}
-        <div ref={proposalsRef} className="space-y-2">
-          {visibleProposals.length === 0 ? (
-            <Card className="bg-[#2A2A2A] border-gray-600">
-              <CardContent className="p-8 text-center">
-                <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                <CardDescription className="text-gray-400 text-lg">
-                  No proposals found.
-                </CardDescription>
-                <p className="text-gray-500 text-sm mt-2">
-                  No DAOs have submitted any proposals yet.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            visibleProposals.map((proposal) => (
-              <EnhancedAllProposalCard
-                key={proposal.id}
-                proposal={proposal}
-                onToggleVisibility={toggleProposalVisibility}
-                isHidden={hiddenProposals.has(proposal.id)}
-              />
-            ))
-          )}
         </div>
       </div>
     </div>
@@ -238,7 +445,7 @@ const EnhancedAllProposalCard = ({
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
     proposal.vote_start,
-    proposal.vote_end,
+    proposal.vote_end
   );
 
   // Determine execution status
@@ -450,7 +657,7 @@ const EnhancedAllProposalCard = ({
                         Math.max(
                           Number(proposal.votes_for || 0) +
                             Number(proposal.votes_against || 0),
-                          1,
+                          1
                         )) *
                       100
                     }%`,
@@ -677,7 +884,7 @@ const EnhancedAllProposalCard = ({
                         value={formatAction(proposal.contract_principal)}
                         link={getExplorerLink(
                           "contract",
-                          proposal.contract_principal,
+                          proposal.contract_principal
                         )}
                       />
                       <LabeledField

@@ -1,6 +1,15 @@
-export function truncateString(str: string, length: number): string {
-  if (str.length <= length) return str;
-  return str.slice(0, length) + "...";
+export function truncateString(str: string, startLength: number, endLength?: number): string {
+  if (!str) return "";
+
+  // If endLength is provided, show start...end format
+  if (endLength !== undefined) {
+    if (str.length <= startLength + endLength) return str;
+    return `${str.slice(0, startLength)}...${str.slice(-endLength)}`;
+  }
+
+  // Otherwise, show start... format
+  if (str.length <= startLength) return str;
+  return str.slice(0, startLength) + "...";
 }
 
 export function formatAction(action: string): string {

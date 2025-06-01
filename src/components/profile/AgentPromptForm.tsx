@@ -212,7 +212,7 @@ export function AgentPromptForm() {
 
   // Handle input changes for inline editing
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setEditingData((prev) => ({ ...prev, [name]: value }));
@@ -311,7 +311,7 @@ export function AgentPromptForm() {
     if (!agentId) return { walletAddress: null, walletBalance: null };
 
     const agentWallet = agentWallets.find(
-      (wallet) => wallet.agent_id === agentId,
+      (wallet) => wallet.agent_id === agentId
     );
 
     const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
@@ -335,8 +335,8 @@ export function AgentPromptForm() {
   const uniqueDaoIds = daos.map((dao) => dao.id);
 
   return (
-    <div className="w-full space-y-4">
-      <div className="space-y-4">
+    <div className="w-full space-y-6">
+      <div className="space-y-6">
         {/* Wallet Info Section */}
         <div className="w-full">
           {daoManagerAgentId && (
@@ -349,34 +349,51 @@ export function AgentPromptForm() {
 
         {/* Agent Prompts Section */}
         <div className="w-full space-y-4">
-          <div className="w-full overflow-x-auto border rounded-lg p-4 bg-card">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-              <h2 className="text-base sm:text-lg lg:text-2xl font-medium">
-                Agent Prompts
-              </h2>
+          <div className="w-full overflow-x-auto border border-gray-600 rounded-lg p-6 bg-[#1A1A1A]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+              <div>
+                <h3 className="text-lg font-bold text-white">Agent Prompts</h3>
+                <p className="text-gray-400 text-sm mt-1">
+                  Configure how your agent responds to DAO proposals
+                </p>
+              </div>
             </div>
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-1/5">DAO</TableHead>
-                  <TableHead className="w-1/7">Status</TableHead>
-                  <TableHead className="w-1/7">Model</TableHead>
-                  <TableHead className="w-1/7">Temperature</TableHead>
-                  <TableHead className="w-1/3">Prompt Text</TableHead>
-                  <TableHead className="w-1/9 text-right">Actions</TableHead>
+                <TableRow className="border-gray-600">
+                  <TableHead className="w-1/5 text-gray-300">DAO</TableHead>
+                  <TableHead className="w-1/7 text-gray-300">Status</TableHead>
+                  <TableHead className="w-1/7 text-gray-300">Model</TableHead>
+                  <TableHead className="w-1/7 text-gray-300">
+                    Temperature
+                  </TableHead>
+                  <TableHead className="w-1/3 text-gray-300">
+                    Prompt Text
+                  </TableHead>
+                  <TableHead className="w-1/9 text-right text-gray-300">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading && uniqueDaoIds.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4">
-                      <Loader2 className="h-6 w-6 animate-spin mx-auto" />
+                  <TableRow className="border-gray-600">
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto text-orange-500" />
                     </TableCell>
                   </TableRow>
                 ) : uniqueDaoIds.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4">
-                      No DAOs found.
+                  <TableRow className="border-gray-600">
+                    <TableCell
+                      colSpan={6}
+                      className="text-center py-8 text-gray-400"
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <p>No DAOs found.</p>
+                        <p className="text-sm text-gray-500">
+                          Available DAOs will appear here for configuration
+                        </p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -386,21 +403,20 @@ export function AgentPromptForm() {
                     const isEditing = editingDaoId === daoId;
 
                     return (
-                      <TableRow key={daoId}>
-                        <TableCell className="font-medium">{daoName}</TableCell>
+                      <TableRow key={daoId} className="border-gray-600">
+                        <TableCell className="font-medium text-white">
+                          {daoName}
+                        </TableCell>
                         <TableCell>
-                          <Badge
-                            variant={
-                              prompt?.is_active ? "default" : "secondary"
-                            }
-                            className={
-                              prompt?.is_active
-                                ? "bg-green-500/20 text-green-700 hover:bg-green-500/20"
-                                : "bg-muted text-muted-foreground hover:bg-muted"
-                            }
-                          >
-                            {prompt?.is_active ? "Active" : "Disabled"}
-                          </Badge>
+                          {prompt?.is_active ? (
+                            <Badge className="bg-green-500/20 text-green-500 border-green-500/30 text-xs px-2 py-0.5">
+                              Active
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 text-xs px-2 py-0.5">
+                              Disabled
+                            </Badge>
+                          )}
                         </TableCell>
 
                         {/* Model Selection */}
@@ -412,24 +428,40 @@ export function AgentPromptForm() {
                                 setEditingData({ ...editingData, model: value })
                               }
                             >
-                              <SelectTrigger className="h-8 w-full">
+                              <SelectTrigger className="h-8 w-full bg-[#2A2A2A] border-gray-600 text-white">
                                 <SelectValue placeholder="Select model" />
                               </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="gpt-4o">GPT-4o</SelectItem>
-                                <SelectItem value="gpt-4o-mini">
+                              <SelectContent className="bg-[#2A2A2A] border-gray-600">
+                                <SelectItem
+                                  value="gpt-4o"
+                                  className="text-white hover:bg-gray-700"
+                                >
+                                  GPT-4o
+                                </SelectItem>
+                                <SelectItem
+                                  value="gpt-4o-mini"
+                                  className="text-white hover:bg-gray-700"
+                                >
                                   GPT-4o Mini
                                 </SelectItem>
-                                <SelectItem value="gpt-4.1-nano">
+                                <SelectItem
+                                  value="gpt-4.1-nano"
+                                  className="text-white hover:bg-gray-700"
+                                >
                                   GPT-4.1 Nano
                                 </SelectItem>
-                                <SelectItem value="gpt-4.1-mini">
+                                <SelectItem
+                                  value="gpt-4.1-mini"
+                                  className="text-white hover:bg-gray-700"
+                                >
                                   GPT-4.1 Mini
                                 </SelectItem>
                               </SelectContent>
                             </Select>
                           ) : (
-                            <span>{prompt?.model || "gpt-4o"}</span>
+                            <span className="text-gray-300">
+                              {prompt?.model || "gpt-4o"}
+                            </span>
                           )}
                         </TableCell>
 
@@ -445,16 +477,18 @@ export function AgentPromptForm() {
                                 step="0.1"
                                 value={editingData.temperature}
                                 onChange={handleInputChange}
-                                className="h-8 w-20"
+                                className="h-8 w-20 bg-[#2A2A2A] border-gray-600 text-white"
                               />
                               {errors.temperature && (
-                                <p className="text-xs text-red-500">
+                                <p className="text-xs text-red-500 mt-1">
                                   {errors.temperature}
                                 </p>
                               )}
                             </div>
                           ) : (
-                            <span>{prompt?.temperature || 0.1}</span>
+                            <span className="text-gray-300">
+                              {prompt?.temperature || 0.1}
+                            </span>
                           )}
                         </TableCell>
 
@@ -467,17 +501,21 @@ export function AgentPromptForm() {
                                 value={editingData.prompt_text}
                                 onChange={handleInputChange}
                                 placeholder="Enter prompt text"
-                                className="min-h-[80px] text-sm"
+                                className="min-h-[80px] text-sm bg-[#2A2A2A] border-gray-600 text-white placeholder:text-gray-500"
                               />
                               {errors.prompt_text && (
-                                <p className="text-xs text-red-500">
+                                <p className="text-xs text-red-500 mt-1">
                                   {errors.prompt_text}
                                 </p>
                               )}
                             </div>
                           ) : (
-                            <p className="truncate text-sm text-muted-foreground">
-                              {prompt?.prompt_text || "No prompt configured"}
+                            <p className="truncate text-sm text-gray-300">
+                              {prompt?.prompt_text || (
+                                <span className="text-gray-500">
+                                  No prompt configured
+                                </span>
+                              )}
                             </p>
                           )}
                         </TableCell>
@@ -490,7 +528,7 @@ export function AgentPromptForm() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleCancelEditing}
-                                className="h-8 w-8 p-0"
+                                className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
                                 title="Cancel"
                               >
                                 <X className="h-4 w-4" />
@@ -501,7 +539,7 @@ export function AgentPromptForm() {
                                 size="sm"
                                 onClick={() => handleSavePrompt(daoId)}
                                 disabled={isLoading}
-                                className="h-8 w-8 p-0"
+                                className="h-8 w-8 p-0 text-orange-500 hover:text-orange-400 hover:bg-orange-500/10"
                                 title="Save"
                               >
                                 {createMutation.isPending ||
@@ -519,7 +557,7 @@ export function AgentPromptForm() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleStartEditing(daoId)}
-                                className="h-8 w-8 p-0"
+                                className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
                                 title="Edit"
                               >
                                 <Pencil className="h-4 w-4" />
@@ -531,13 +569,13 @@ export function AgentPromptForm() {
                                   size="sm"
                                   onClick={() => handleDelete(prompt.id)}
                                   disabled={deleteMutation.isPending}
-                                  className="h-8 w-8 p-0"
+                                  className="h-8 w-8 p-0 text-red-500 hover:text-red-400 hover:bg-red-500/10"
                                   title="Delete"
                                 >
                                   {deleteMutation.isPending ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
-                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                    <Trash2 className="h-4 w-4" />
                                   )}
                                   <span className="sr-only">Delete</span>
                                 </Button>

@@ -1,17 +1,15 @@
 "use client";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
-import { Input } from "@/components/ui/input";
-import { Loader2, Search, Filter } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  FilterSidebar,
+  type FilterConfig,
+  type FilterState,
+  type SummaryStats,
+} from "@/components/reusables/FilterSidebar";
 import { DAOCard } from "@/components/daos/DaoCard";
 import type { DAO, SortField } from "@/types/supabase";
 import {
@@ -23,10 +21,12 @@ import {
 } from "@/queries/dao-queries";
 
 export default function DAOs() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<SortField>("newest");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [filterState, setFilterState] = useState<FilterState>({
+    search: "",
+    sort: "newest",
+    category: "all",
+    status: "all",
+  });
 
   // Fetch DAOs with TanStack Query
   const { data: daos, isLoading: isLoadingDAOs } = useQuery({
@@ -125,20 +125,73 @@ export default function DAOs() {
   );
 
   // Get unique categories for filtering
-  const categories = Array.from(
-    new Set(
-      daos
-        ?.map((dao) => dao.extensions?.map((ext) => ext.type))
-        .flat()
-        .filter(Boolean) || []
-    )
-  );
+  const categories = useMemo(() => {
+    return Array.from(
+      new Set(
+        daos
+          ?.map((dao) => dao.extensions?.map((ext) => ext.type))
+          .flat()
+          .filter(Boolean) || []
+      )
+    ).sort();
+  }, [daos]);
+
+  // Filter configuration
+  const filterConfig: FilterConfig[] = [
+    {
+      key: "search",
+      label: "Search",
+      type: "search",
+      placeholder: "Search DAOs...",
+    },
+    {
+      key: "category",
+      label: "Category",
+      type: "select",
+      options: [
+        { value: "all", label: "All Categories" },
+        ...categories.map((category) => ({
+          value: category!,
+          label: category!.replace(/_/g, " ").toLowerCase(),
+          badge: true,
+        })),
+      ],
+    },
+    {
+      key: "status",
+      label: "Status",
+      type: "select",
+      options: [
+        { value: "all", label: "All Status" },
+        { value: "active", label: "Active", badge: true },
+        { value: "inactive", label: "Inactive", badge: true },
+      ],
+    },
+    {
+      key: "sort",
+      label: "Sort By",
+      type: "select",
+      options: [
+        { value: "newest", label: "Newest" },
+        { value: "oldest", label: "Oldest" },
+        { value: "holders", label: "Holders" },
+        { value: "price", label: "Token Price" },
+        { value: "price24hChanges", label: "24h Change" },
+        { value: "marketCap", label: "Market Cap" },
+      ],
+    },
+  ];
 
   // Filter and sort DAOs
-  const filteredAndSortedDAOs = (() => {
+  const filteredAndSortedDAOs = useMemo(() => {
     let filtered =
       daos?.filter((dao) => {
+        const searchQuery = filterState.search as string;
+        const categoryFilter = filterState.category as string;
+        const statusFilter = filterState.status as string;
+
         const matchesSearch =
+          !searchQuery ||
           dao.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           dao.mission.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -157,6 +210,7 @@ export default function DAOs() {
         return matchesSearch && matchesCategory && matchesStatus;
       }) || [];
 
+    const sortField = filterState.sort as SortField;
     return filtered.sort((a, b) => {
       if (sortField === "created_at" || sortField === "newest") {
         return (
@@ -183,7 +237,7 @@ export default function DAOs() {
       const valueB = tokenPrices?.[b.id]?.[sortField] ?? 0;
       return valueB - valueA;
     });
-  })();
+  }, [daos, filterState, holdersMap, tokenPrices]);
 
   // Calculate summary stats
   const totalDAOs = filteredAndSortedDAOs.length;
@@ -201,154 +255,52 @@ export default function DAOs() {
     return sum + (tokenPrices?.[dao.id]?.marketCap || 0);
   }, 0);
 
+  // Summary stats for sidebar
+  const summaryStats: SummaryStats = {
+    total: {
+      label: "Total DAOs",
+      value: totalDAOs,
+    },
+    active: {
+      label: "Active DAOs",
+      value: activeDAOs,
+    },
+    holders: {
+      label: "Total Holders",
+      value: totalHolders,
+      format: (value) => Number(value).toLocaleString(),
+    },
+    marketCap: {
+      label: "Total Market Cap",
+      value: totalMarketCap,
+      format: (value) => `$${Number(value).toLocaleString()}`,
+    },
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (key: string, value: string | string[]) => {
+    setFilterState((prev) => ({ ...prev, [key]: value }));
+  };
+
   return (
     <div className="w-full min-h-screen bg-[#1A1A1A]">
-      {/* Header Banner with Gradient */}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Sidebar - Filters */}
-          <div className="lg:w-80 flex-shrink-0">
-            <Card className="sticky top-4 bg-[#2A2A2A] border-zinc-800">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <Filter className="w-5 h-5 text-orange-400" />
-                  <h3 className="text-lg font-semibold text-white">Filters</h3>
-                </div>
-
-                <div className="space-y-6">
-                  {/* Search */}
-                  <div>
-                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
-                      Search
-                    </label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-                      <Input
-                        placeholder="Search DAOs..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 bg-[#2A2A2A] border-zinc-800 text-white placeholder-zinc-400"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Category Filter */}
-                  <div>
-                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
-                      Category
-                    </label>
-                    <Select
-                      value={categoryFilter}
-                      onValueChange={setCategoryFilter}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Categories" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        {categories.map((category) => (
-                          <SelectItem key={category} value={category || ""}>
-                            <Badge variant="secondary" className="text-xs">
-                              {category?.replace(/_/g, " ").toLowerCase()}
-                            </Badge>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Status Filter */}
-                  <div>
-                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
-                      Status
-                    </label>
-                    <Select
-                      value={statusFilter}
-                      onValueChange={setStatusFilter}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="active">
-                          <Badge
-                            variant="default"
-                            className="bg-green-100 text-green-800 text-xs"
-                          >
-                            Active
-                          </Badge>
-                        </SelectItem>
-                        <SelectItem value="inactive">
-                          <Badge variant="secondary" className="text-xs">
-                            Inactive
-                          </Badge>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Sort By */}
-                  <div>
-                    <label className="text-sm font-medium text-zinc-300 mb-2 block">
-                      Sort By
-                    </label>
-                    <Select
-                      value={sortField}
-                      onValueChange={(value) =>
-                        setSortField(value as SortField)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sort by" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="newest">Newest</SelectItem>
-                        <SelectItem value="oldest">Oldest</SelectItem>
-                        <SelectItem value="holders">Holders</SelectItem>
-                        <SelectItem value="price">Token Price</SelectItem>
-                        <SelectItem value="price24hChanges">
-                          24h Change
-                        </SelectItem>
-                        <SelectItem value="marketCap">Market Cap</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Summary Stats Card */}
-                <div className="mt-8 p-4 bg-[#2A2A2A] rounded-lg text-white">
-                  <h4 className="font-semibold mb-3">Summary</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-zinc-300">Total DAOs:</span>
-                      <span className="font-bold">{totalDAOs}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-zinc-300">Active DAOs:</span>
-                      <span className="font-bold">{activeDAOs}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-zinc-300">Total Holders:</span>
-                      <span className="font-bold">
-                        {totalHolders.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Filter Sidebar */}
+          <FilterSidebar
+            title="Filters"
+            filters={filterConfig}
+            filterState={filterState}
+            onFilterChange={handleFilterChange}
+            summaryStats={summaryStats}
+          />
 
           {/* Main Content Area */}
           <div className="flex-1">
             <div className="mb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-white">
-                    Discover AI DAOs ({totalDAOs})
-                  </h2>
+                  <h2 className="text-2xl font-bold text-white">AI DAOs</h2>
                   <p className="text-zinc-400 mt-1">
                     Explore innovative decentralized organizations powered by AI
                   </p>

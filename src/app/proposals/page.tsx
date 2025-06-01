@@ -42,7 +42,7 @@ export default function AllProposalsPage() {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ["allProposals"] });
-        },
+        }
       )
       .subscribe();
     return () => {
@@ -74,32 +74,5 @@ export default function AllProposalsPage() {
     );
   }
 
-  return (
-    <div className="flex flex-col w-full bg-[#1A1A1A] min-h-screen">
-      <div className="w-full py-4 flex-grow">
-        {/* Header Section */}
-        <div className="mb-8 px-4 max-w-7xl mx-auto">
-          <div className="bg-[#2A2A2A] rounded-lg p-6 space-y-4">
-            <h1 className="text-3xl font-bold text-white">All DAO Proposals</h1>
-            <p className="text-gray-300">
-              View all proposals across all DAOs in one place.
-            </p>
-          </div>
-        </div>
-
-        {/* Content */}
-        <main className="w-full mb-6 px-4 max-w-7xl mx-auto">
-          <Suspense
-            fallback={
-              <div className="flex justify-center items-center min-h-[200px] w-full">
-                <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-muted-foreground" />
-              </div>
-            }
-          >
-            <AllProposals proposals={proposals || []} />
-          </Suspense>
-        </main>
-      </div>
-    </div>
-  );
+  return <AllProposals proposals={proposals || []} />;
 }
