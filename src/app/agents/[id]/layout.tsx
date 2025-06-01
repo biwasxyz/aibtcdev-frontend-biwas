@@ -3,14 +3,7 @@
 import React, { useState } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  ChevronRight,
-  Info,
-  ListChecks,
-  Trash2,
-  PlayCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Info, ListChecks, PlayCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -77,28 +70,6 @@ export default function AgentLayout({
   return (
     <>
       <div className="container mx-auto p-4 space-y-4">
-        {/* Breadcrumb and Delete */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Link
-              href="/agents"
-              className="hover:text-foreground transition-colors"
-            >
-              Agents
-            </Link>
-            <ChevronRight className="h-4 w-4 mx-1" />
-            <span className="text-foreground font-medium">Details</span>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowDeleteDialog(true)}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-
         {/* Navigation Tabs */}
         <div className="flex border-b border-border">
           <Link href={`/agents/${id}`} className="mr-6">

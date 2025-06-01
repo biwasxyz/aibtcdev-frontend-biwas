@@ -24,6 +24,8 @@ import {
   Eye,
   EyeOff,
   Building2,
+  Filter,
+  X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { truncateString, getExplorerLink } from "@/helpers/helper";
@@ -48,6 +50,7 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   const [hiddenProposals, setHiddenProposals] = useState<Set<string>>(
     new Set()
   );
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Filter and pagination state
   const [filterState, setFilterState] = useState<FilterState>({
@@ -243,6 +246,10 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   const handleFilterChange = (key: string, value: string | string[]) => {
     setFilterState((prev) => ({ ...prev, [key]: value }));
     setCurrentPage(1); // Reset to first page when filtering
+    // Close mobile filter on filter change (optional UX improvement)
+    if (window.innerWidth < 1024) {
+      setIsMobileFilterOpen(false);
+    }
   };
 
   // Handle pagination changes
@@ -271,41 +278,86 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
 
   return (
     <div className="w-full min-h-screen bg-[#1A1A1A]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filter Sidebar */}
-          <FilterSidebar
-            title="Filters"
-            filters={filterConfig}
-            filterState={filterState}
-            onFilterChange={handleFilterChange}
-            summaryStats={summaryStats}
-          />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">
+                Proposals
+              </h2>
+              <p className="text-gray-400 mt-1 text-sm sm:text-base">
+                View and filter proposals across all DAOs
+              </p>
+            </div>
+            {/* Mobile Filter Toggle */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
+              className="lg:hidden flex items-center gap-2 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+            </Button>
+          </div>
+        </div>
 
-          {/* Main Content */}
-          <div className="flex-1">
-            {/* Header */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-white">Proposals</h2>
-                  <p className="text-gray-400 mt-1">
-                    View and filter proposals across all DAOs
-                  </p>
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          {/* Mobile Filter Overlay */}
+          {isMobileFilterOpen && (
+            <div
+              className="lg:hidden fixed inset-0 z-50 bg-black/50"
+              onClick={() => setIsMobileFilterOpen(false)}
+            >
+              <div
+                className="absolute right-0 top-0 h-full w-full max-w-sm bg-[#1A1A1A] border-l border-zinc-700 overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-4 border-b border-zinc-700 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-white">Filters</h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsMobileFilterOpen(false)}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
                 </div>
-                <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30 text-sm px-3 py-1">
-                  Cross-DAO View
-                </Badge>
+                <div className="p-4">
+                  <FilterSidebar
+                    title=""
+                    filters={filterConfig}
+                    filterState={filterState}
+                    onFilterChange={handleFilterChange}
+                    summaryStats={summaryStats}
+                  />
+                </div>
               </div>
             </div>
+          )}
 
+          {/* Desktop Filter Sidebar */}
+          <div className="hidden lg:block">
+            <FilterSidebar
+              title="Filters"
+              filters={filterConfig}
+              filterState={filterState}
+              onFilterChange={handleFilterChange}
+              summaryStats={summaryStats}
+            />
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
             {/* Proposals List */}
-            <div ref={proposalsRef} className="space-y-4">
+            <div ref={proposalsRef} className="space-y-3 sm:space-y-4">
               {paginatedProposals.length === 0 ? (
                 <Card className="bg-[#2A2A2A] border-gray-600">
-                  <CardContent className="p-8 text-center">
-                    <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                    <CardDescription className="text-gray-400 text-lg">
+                  <CardContent className="p-6 sm:p-8 text-center">
+                    <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-gray-500 mx-auto mb-4" />
+                    <CardDescription className="text-gray-400 text-base sm:text-lg">
                       No proposals found.
                     </CardDescription>
                     <p className="text-gray-500 text-sm mt-2">
@@ -327,7 +379,7 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
 
             {/* Pagination */}
             {filteredAndSortedProposals.length > 0 && (
-              <div className="mt-8">
+              <div className="mt-6 sm:mt-8">
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -424,52 +476,56 @@ const EnhancedAllProposalCard = ({
 
   return (
     <Card className="overflow-hidden bg-zinc-900/50 border-zinc-700/50 hover:border-zinc-600/50 transition-colors">
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         {/* Header Section */}
         <div className="flex items-start justify-between mb-4">
           {/* Left side - Title and metadata */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
               {/* Avatar placeholder */}
-              <div className="w-10 h-10 rounded-full bg-zinc-700 flex-shrink-0" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-zinc-700 flex-shrink-0" />
 
               {/* Title and basic info */}
               <div className="min-w-0 flex-1">
-                <h3 className="text-lg font-semibold text-white mb-1 truncate">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-1 truncate">
                   {proposal.title}
                 </h3>
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <span className="flex items-center gap-1">
-                    <Building2 className="h-3 w-3" />
-                    {getDAOInfo()}
-                  </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    By{" "}
-                    <a
-                      href={getExplorerLink("address", proposal.creator)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-white transition-colors"
-                    >
-                      {truncateString(proposal.creator, 5, 5)}
-                    </a>
-                  </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {format(new Date(proposal.created_at), "MMM d, yyyy")}
-                  </span>
-                  <span>•</span>
-                  <span>{getVoteSummary()}</span>
+                {/* Mobile-optimized metadata */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center gap-1">
+                      <Building2 className="h-3 w-3" />
+                      {getDAOInfo()}
+                    </span>
+                    <span className="hidden sm:inline">•</span>
+                    <span className="flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      By{" "}
+                      <a
+                        href={getExplorerLink("address", proposal.creator)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-white transition-colors"
+                      >
+                        {truncateString(proposal.creator, 4, 4)}
+                      </a>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {format(new Date(proposal.created_at), "MMM d, yyyy")}
+                    </span>
+                    <span className="hidden sm:inline">•</span>
+                    <span>{getVoteSummary()}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right side - Actions */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {getStatusBadge()}
             <Button
               variant="ghost"
@@ -519,7 +575,7 @@ const EnhancedAllProposalCard = ({
 
         {/* Expand/Collapse Toggle */}
         <div className="flex justify-between items-center">
-          <CardDescription className="text-gray-400">
+          <CardDescription className="text-gray-400 text-xs sm:text-sm">
             {proposal.status || "Awaiting first vote"}
           </CardDescription>
 
@@ -527,17 +583,19 @@ const EnhancedAllProposalCard = ({
             variant="ghost"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="self-start text-gray-400 hover:text-white p-2 h-auto"
+            className="self-start text-gray-400 hover:text-white p-2 h-auto text-xs sm:text-sm"
           >
             {isExpanded ? (
               <>
-                <ChevronUp className="h-4 w-4 mr-2" />
-                Hide Details
+                <ChevronUp className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Hide Details</span>
+                <span className="sm:hidden">Hide</span>
               </>
             ) : (
               <>
-                <ChevronDown className="h-4 w-4 mr-2" />
-                View Details
+                <ChevronDown className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">View Details</span>
+                <span className="sm:hidden">Details</span>
               </>
             )}
           </Button>

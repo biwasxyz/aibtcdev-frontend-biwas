@@ -9,7 +9,6 @@ import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
-  ChevronRight,
   Blocks,
   Users,
   Activity,
@@ -31,7 +30,6 @@ import {
   fetchDAOByName,
 } from "@/queries/dao-queries";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DAOCreationDate } from "@/components/daos/DaoCreationDate";
 import { DAOSendProposal } from "@/components/daos/proposal/DAOSendProposal";
 
 export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
@@ -119,13 +117,11 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   });
 
   // Fetch treasury tokens
-  const { data: treasuryTokens, isLoading: isLoadingTreasuryTokens } = useQuery(
-    {
-      queryKey: ["treasuryTokens", treasuryAddress, tokenPrice?.price],
-      queryFn: () => fetchTreasuryTokens(treasuryAddress!, tokenPrice!.price),
-      enabled: !!treasuryAddress && !!tokenPrice,
-    }
-  );
+  const { isLoading: isLoadingTreasuryTokens } = useQuery({
+    queryKey: ["treasuryTokens", treasuryAddress, tokenPrice?.price],
+    queryFn: () => fetchTreasuryTokens(treasuryAddress!, tokenPrice!.price),
+    enabled: !!treasuryAddress && !!tokenPrice,
+  });
 
   // Check if we're loading basic DAO info
   const isBasicLoading = isLoadingDAOByName || isLoadingToken;
@@ -196,17 +192,6 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col w-full bg-[#1A1A1A] min-h-screen">
       <div className="w-full py-6 flex-grow">
-        {/* Breadcrumb */}
-        <nav className="flex items-center text-sm sm:text-base text-zinc-400 mb-6 px-4 max-w-7xl mx-auto">
-          <Link href="/daos" className="hover:text-white transition-colors">
-            DAOs
-          </Link>
-          <ChevronRight className="h-4 w-4 mx-2" />
-          <span className="text-white font-medium truncate">
-            {dao?.name || "Details"}
-          </span>
-        </nav>
-
         {/* Main Content Grid */}
         <div className="px-4 max-w-7xl mx-auto">
           {/* DAO Header Section */}
@@ -360,110 +345,10 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Main Content Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Left Column - Main Content */}
-            <div className="lg:col-span-3">
-              <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 p-6">
-                {isMission ? (
-                  <div className="space-y-6">
-                    <div>
-                      {dao?.description ? (
-                        <div className="prose prose-invert prose-zinc max-w-none">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            className="text-zinc-300 leading-relaxed"
-                            components={{
-                              h1: ({ children }) => (
-                                <h1 className="text-2xl font-bold text-white mb-4 mt-6 first:mt-0">
-                                  {children}
-                                </h1>
-                              ),
-                              h2: ({ children }) => (
-                                <h2 className="text-xl font-bold text-white mb-3 mt-6 first:mt-0">
-                                  {children}
-                                </h2>
-                              ),
-                              h3: ({ children }) => (
-                                <h3 className="text-lg font-semibold text-white mb-2 mt-4 first:mt-0">
-                                  {children}
-                                </h3>
-                              ),
-                              p: ({ children }) => (
-                                <p className="text-zinc-300 leading-relaxed mb-4 last:mb-0">
-                                  {children}
-                                </p>
-                              ),
-                              ul: ({ children }) => (
-                                <ul className="list-disc list-inside text-zinc-300 mb-4 space-y-2 ml-4">
-                                  {children}
-                                </ul>
-                              ),
-                              ol: ({ children }) => (
-                                <ol className="list-decimal list-inside text-zinc-300 mb-4 space-y-2 ml-4">
-                                  {children}
-                                </ol>
-                              ),
-                              li: ({ children }) => (
-                                <li className="text-zinc-300 leading-relaxed">
-                                  {children}
-                                </li>
-                              ),
-                              strong: ({ children }) => (
-                                <strong className="font-semibold text-white">
-                                  {children}
-                                </strong>
-                              ),
-                              em: ({ children }) => (
-                                <em className="italic text-zinc-300">
-                                  {children}
-                                </em>
-                              ),
-                              a: ({ href, children }) => (
-                                <a
-                                  href={href}
-                                  className="text-[#FF6B00] hover:underline font-medium"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  {children}
-                                </a>
-                              ),
-                              blockquote: ({ children }) => (
-                                <blockquote className="border-l-4 border-[#FF6B00] pl-4 italic text-zinc-400 my-4 bg-zinc-800/30 py-2 rounded-r">
-                                  {children}
-                                </blockquote>
-                              ),
-                              code: ({ children }) => (
-                                <code className="bg-zinc-800 text-zinc-300 px-2 py-1 rounded text-sm font-mono">
-                                  {children}
-                                </code>
-                              ),
-                              pre: ({ children }) => (
-                                <pre className="bg-zinc-800 text-zinc-300 p-4 rounded-lg overflow-x-auto mb-4 border border-zinc-700">
-                                  {children}
-                                </pre>
-                              ),
-                            }}
-                          >
-                            {dao.description.replace(/\\n/g, "\n")}
-                          </ReactMarkdown>
-                        </div>
-                      ) : (
-                        <div className="text-zinc-400 italic">
-                          No mission statement available for this DAO.
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  children
-                )}
-              </div>
-            </div>
-
-            {/* Right Column - Sidebar */}
+          {isProposals ? (
+            /* Single Column Layout for Proposals Page */
             <div className="space-y-6">
-              {/* Send On-chain Message */}
+              {/* Send On-chain Message - Above Proposals */}
               <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 p-4">
                 <h3 className="text-sm font-semibold text-white mb-3">
                   Send Message
@@ -471,43 +356,110 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                 <DAOSendProposal daoId={id!} />
               </div>
 
-              {/* Treasury Holdings */}
-              {!isOverviewLoading &&
-                treasuryTokens &&
-                treasuryTokens.length > 0 && (
-                  <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 p-4">
-                    <h3 className="text-sm font-semibold text-white mb-3">
-                      Treasury
-                    </h3>
-                    <div className="space-y-2">
-                      {treasuryTokens.slice(0, 3).map((token, index) => (
-                        <div
-                          key={index}
-                          className="flex justify-between items-center text-xs"
+              {/* Proposals Content */}
+              <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 p-6">
+                {children}
+              </div>
+            </div>
+          ) : (
+            /* Single Column Layout for Other Pages (Mission, Extensions, Holders) */
+            <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 p-6">
+              {isMission ? (
+                <div className="space-y-6">
+                  <div>
+                    {dao?.description ? (
+                      <div className="prose prose-invert prose-zinc max-w-none">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          className="text-zinc-300 leading-relaxed"
+                          components={{
+                            h1: ({ children }) => (
+                              <h1 className="text-2xl font-bold text-white mb-4 mt-6 first:mt-0">
+                                {children}
+                              </h1>
+                            ),
+                            h2: ({ children }) => (
+                              <h2 className="text-xl font-bold text-white mb-3 mt-6 first:mt-0">
+                                {children}
+                              </h2>
+                            ),
+                            h3: ({ children }) => (
+                              <h3 className="text-lg font-semibold text-white mb-2 mt-4 first:mt-0">
+                                {children}
+                              </h3>
+                            ),
+                            p: ({ children }) => (
+                              <p className="text-zinc-300 leading-relaxed mb-4 last:mb-0">
+                                {children}
+                              </p>
+                            ),
+                            ul: ({ children }) => (
+                              <ul className="list-disc list-inside text-zinc-300 mb-4 space-y-2 ml-4">
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="list-decimal list-inside text-zinc-300 mb-4 space-y-2 ml-4">
+                                {children}
+                              </ol>
+                            ),
+                            li: ({ children }) => (
+                              <li className="text-zinc-300 leading-relaxed">
+                                {children}
+                              </li>
+                            ),
+                            strong: ({ children }) => (
+                              <strong className="font-semibold text-white">
+                                {children}
+                              </strong>
+                            ),
+                            em: ({ children }) => (
+                              <em className="italic text-zinc-300">
+                                {children}
+                              </em>
+                            ),
+                            a: ({ href, children }) => (
+                              <a
+                                href={href}
+                                className="text-[#FF6B00] hover:underline font-medium"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {children}
+                              </a>
+                            ),
+                            blockquote: ({ children }) => (
+                              <blockquote className="border-l-4 border-[#FF6B00] pl-4 italic text-zinc-400 my-4 bg-zinc-800/30 py-2 rounded-r">
+                                {children}
+                              </blockquote>
+                            ),
+                            code: ({ children }) => (
+                              <code className="bg-zinc-800 text-zinc-300 px-2 py-1 rounded text-sm font-mono">
+                                {children}
+                              </code>
+                            ),
+                            pre: ({ children }) => (
+                              <pre className="bg-zinc-800 text-zinc-300 p-4 rounded-lg overflow-x-auto mb-4 border border-zinc-700">
+                                {children}
+                              </pre>
+                            ),
+                          }}
                         >
-                          <span className="text-zinc-400">{token.symbol}</span>
-                          <span className="text-white font-medium">
-                            {formatNumber(token.amount)}
-                          </span>
-                        </div>
-                      ))}
-                      {treasuryTokens.length > 3 && (
-                        <div className="text-xs text-zinc-500 text-center pt-1">
-                          +{treasuryTokens.length - 3} more
-                        </div>
-                      )}
-                    </div>
+                          {dao.description.replace(/\\n/g, "\n")}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <div className="text-zinc-400 italic">
+                        No mission statement available for this DAO.
+                      </div>
+                    )}
                   </div>
-                )}
-
-              {/* Creation Date */}
-              {!isOverviewLoading && (
-                <div className="text-center text-xs text-zinc-500">
-                  <DAOCreationDate createdAt={dao.created_at} />
                 </div>
+              ) : (
+                children
               )}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
