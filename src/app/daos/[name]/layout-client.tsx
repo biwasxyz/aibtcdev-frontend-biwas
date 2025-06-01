@@ -6,6 +6,8 @@ import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   ChevronRight,
   Blocks,
@@ -51,6 +53,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   const isProposals = pathname === `/daos/${encodedName}`;
   const isExtensions = pathname === `/daos/${encodedName}/extensions`;
   const isHolders = pathname === `/daos/${encodedName}/holders`;
+  const isMission = pathname === `/daos/${encodedName}/mission`;
 
   // Fetch token data - only if we have the DAO ID
   const { data: token, isLoading: isLoadingToken } = useQuery({
@@ -230,29 +233,6 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                   <h1 className="text-2xl sm:text-3xl font-bold text-white">
                     {dao?.name}
                   </h1>
-                  {dao?.description && (
-                    <div className="text-zinc-300 text-sm sm:text-base line-clamp-2">
-                      {dao.description}
-                    </div>
-                  )}
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-lg border-zinc-700 text-zinc-300 hover:text-white hover:border-[#FF6B00] transition-all duration-200"
-                    >
-                      <Info className="h-4 w-4 mr-2" />
-                      View Mission
-                    </Button>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="rounded-lg bg-[#FF6B00] text-white hover:bg-[#FF6B00]/90 transition-all duration-200"
-                    >
-                      <FileText className="h-4 w-4 mr-2" />
-                      Submit Proposal
-                    </Button>
-                  </div>
                 </div>
               </div>
 
@@ -326,6 +306,18 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                   <span className="text-sm">Proposals</span>
                 </div>
               </Link>
+              <Link href={`/daos/${encodedName}/mission`}>
+                <div
+                  className={`flex items-center gap-2 pb-2 border-b-2 transition-all duration-200 ${
+                    isMission
+                      ? "border-[#FF6B00] text-white font-semibold"
+                      : "border-transparent text-zinc-400 hover:text-white hover:border-[#FF6B00]"
+                  }`}
+                >
+                  <Info className="h-4 w-4" />
+                  <span className="text-sm">Mission</span>
+                </div>
+              </Link>
               <Link href={`/daos/${encodedName}/extensions`}>
                 <div
                   className={`flex items-center gap-2 pb-2 border-b-2 transition-all duration-200 ${
@@ -358,7 +350,100 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
             {/* Left Column - Main Content */}
             <div className="lg:col-span-3">
               <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 p-6">
-                {children}
+                {isMission ? (
+                  <div className="space-y-6">
+                    <div>
+                      {dao?.description ? (
+                        <div className="prose prose-invert prose-zinc max-w-none">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            className="text-zinc-300 leading-relaxed"
+                            components={{
+                              h1: ({ children }) => (
+                                <h1 className="text-2xl font-bold text-white mb-4 mt-6 first:mt-0">
+                                  {children}
+                                </h1>
+                              ),
+                              h2: ({ children }) => (
+                                <h2 className="text-xl font-bold text-white mb-3 mt-6 first:mt-0">
+                                  {children}
+                                </h2>
+                              ),
+                              h3: ({ children }) => (
+                                <h3 className="text-lg font-semibold text-white mb-2 mt-4 first:mt-0">
+                                  {children}
+                                </h3>
+                              ),
+                              p: ({ children }) => (
+                                <p className="text-zinc-300 leading-relaxed mb-4 last:mb-0">
+                                  {children}
+                                </p>
+                              ),
+                              ul: ({ children }) => (
+                                <ul className="list-disc list-inside text-zinc-300 mb-4 space-y-2 ml-4">
+                                  {children}
+                                </ul>
+                              ),
+                              ol: ({ children }) => (
+                                <ol className="list-decimal list-inside text-zinc-300 mb-4 space-y-2 ml-4">
+                                  {children}
+                                </ol>
+                              ),
+                              li: ({ children }) => (
+                                <li className="text-zinc-300 leading-relaxed">
+                                  {children}
+                                </li>
+                              ),
+                              strong: ({ children }) => (
+                                <strong className="font-semibold text-white">
+                                  {children}
+                                </strong>
+                              ),
+                              em: ({ children }) => (
+                                <em className="italic text-zinc-300">
+                                  {children}
+                                </em>
+                              ),
+                              a: ({ href, children }) => (
+                                <a
+                                  href={href}
+                                  className="text-[#FF6B00] hover:underline font-medium"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {children}
+                                </a>
+                              ),
+                              blockquote: ({ children }) => (
+                                <blockquote className="border-l-4 border-[#FF6B00] pl-4 italic text-zinc-400 my-4 bg-zinc-800/30 py-2 rounded-r">
+                                  {children}
+                                </blockquote>
+                              ),
+                              code: ({ children }) => (
+                                <code className="bg-zinc-800 text-zinc-300 px-2 py-1 rounded text-sm font-mono">
+                                  {children}
+                                </code>
+                              ),
+                              pre: ({ children }) => (
+                                <pre className="bg-zinc-800 text-zinc-300 p-4 rounded-lg overflow-x-auto mb-4 border border-zinc-700">
+                                  {children}
+                                </pre>
+                              ),
+                            }}
+                          >
+                            {dao.description.replace(/\\n/g, "\n")}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <div className="text-zinc-400 italic">
+                          No mission statement available for this DAO.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  children
+                )}
               </div>
             </div>
 
