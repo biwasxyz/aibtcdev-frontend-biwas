@@ -30,7 +30,6 @@ import {
   fetchProposals,
   fetchDAOByName,
 } from "@/queries/dao-queries";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DAOCreationDate } from "@/components/daos/DaoCreationDate";
 import { DAOSendProposal } from "@/components/daos/proposal/DAOSendProposal";
@@ -211,137 +210,152 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
         {/* Main Content Grid */}
         <div className="px-4 max-w-7xl mx-auto">
           {/* DAO Header Section */}
-          <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 p-6 mb-6">
-            <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
-              {/* DAO Info */}
-              <div className="flex flex-col sm:flex-row items-start gap-6 flex-1">
-                {/* Token Image */}
-                {token?.image_url && (
-                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-xl overflow-hidden border border-zinc-700 shadow-lg">
-                    <Image
-                      src={token.image_url || "/placeholder.svg"}
-                      alt={`${dao?.name} token`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 80px, 96px"
-                      priority
-                    />
-                  </div>
-                )}
-                {/* DAO Details */}
-                <div className="flex-1 space-y-3">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-white">
-                    {dao?.name}
-                  </h1>
-                </div>
-              </div>
-
-              {/* Key Metrics - Inline */}
-              <div className="lg:min-w-[400px]">
-                {isOverviewLoading ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    {[...Array(4)].map((_, i) => (
-                      <Skeleton
-                        key={i}
-                        className="h-16 w-full rounded-lg bg-zinc-700"
+          <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 mb-6 overflow-hidden">
+            {/* Main Header Content */}
+            <div className="p-6">
+              <div className="flex flex-col lg:flex-row items-start gap-6">
+                {/* DAO Info - Left Side */}
+                <div className="flex items-start gap-4 flex-1">
+                  {/* Token Image */}
+                  {token?.image_url && (
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border border-zinc-700 shadow-lg">
+                      <Image
+                        src={token.image_url || "/placeholder.svg"}
+                        alt={`${dao?.name} token`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 64px, 80px"
+                        priority
                       />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00] transition-colors duration-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <CoinIcon className="h-4 w-4 text-[#FF6B00]" />
-                        <span className="text-xs text-zinc-400">Price</span>
-                      </div>
-                      <span className="text-sm font-bold text-white">
-                        {formatNumber(enhancedMarketStats.price, true)}
+                    </div>
+                  )}
+                  {/* DAO Details */}
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 truncate">
+                      {dao?.name}
+                    </h1>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="text-xs px-2 py-1 bg-[#FF6B00]/20 text-[#FF6B00] rounded-full border border-[#FF6B00]/30">
+                        Active DAO
+                      </span>
+                      <span className="text-xs px-2 py-1 bg-zinc-800 text-zinc-300 rounded-full">
+                        {token?.symbol || "N/A"}
                       </span>
                     </div>
-                    <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00] transition-colors duration-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Wallet className="h-4 w-4 text-[#FF6B00]" />
-                        <span className="text-xs text-zinc-400">
-                          Market Cap
+                  </div>
+                </div>
+
+                {/* Key Metrics - Right Side */}
+                <div className="w-full lg:w-auto lg:min-w-[320px]">
+                  {isOverviewLoading ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      {[...Array(4)].map((_, i) => (
+                        <Skeleton
+                          key={i}
+                          className="h-14 w-full rounded-lg bg-zinc-700"
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00]/50 transition-all duration-200 group">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CoinIcon className="h-3.5 w-3.5 text-[#FF6B00] group-hover:scale-110 transition-transform" />
+                          <span className="text-xs text-zinc-400">Price</span>
+                        </div>
+                        <span className="text-sm font-bold text-white">
+                          {formatNumber(enhancedMarketStats.price, true)}
                         </span>
                       </div>
-                      <span className="text-sm font-bold text-white">
-                        {formatNumber(enhancedMarketStats.marketCap)}
-                      </span>
-                    </div>
-                    <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00] transition-colors duration-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Users2 className="h-4 w-4 text-[#FF6B00]" />
-                        <span className="text-xs text-zinc-400">Holders</span>
+                      <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00]/50 transition-all duration-200 group">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Wallet className="h-3.5 w-3.5 text-[#FF6B00] group-hover:scale-110 transition-transform" />
+                          <span className="text-xs text-zinc-400">
+                            Market Cap
+                          </span>
+                        </div>
+                        <span className="text-sm font-bold text-white">
+                          {formatNumber(enhancedMarketStats.marketCap)}
+                        </span>
                       </div>
-                      <span className="text-sm font-bold text-white">
-                        {enhancedMarketStats.holderCount.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00] transition-colors duration-200">
-                      <div className="flex items-center gap-2 mb-1">
-                        <FileText className="h-4 w-4 text-[#FF6B00]" />
-                        <span className="text-xs text-zinc-400">Proposals</span>
+                      <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00]/50 transition-all duration-200 group">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Users2 className="h-3.5 w-3.5 text-[#FF6B00] group-hover:scale-110 transition-transform" />
+                          <span className="text-xs text-zinc-400">Holders</span>
+                        </div>
+                        <span className="text-sm font-bold text-white">
+                          {enhancedMarketStats.holderCount.toLocaleString()}
+                        </span>
                       </div>
-                      <span className="text-sm font-bold text-white">
-                        {totalProposals}
-                      </span>
+                      <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00]/50 transition-all duration-200 group">
+                        <div className="flex items-center gap-2 mb-1">
+                          <FileText className="h-3.5 w-3.5 text-[#FF6B00] group-hover:scale-110 transition-transform" />
+                          <span className="text-xs text-zinc-400">
+                            Proposals
+                          </span>
+                        </div>
+                        <span className="text-sm font-bold text-white">
+                          {totalProposals}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Navigation Tabs - Integrated */}
-            <div className="flex flex-wrap gap-6 mt-6 pt-6 border-t border-zinc-800">
-              <Link href={`/daos/${encodedName}`}>
-                <div
-                  className={`flex items-center gap-2 pb-2 border-b-2 transition-all duration-200 ${
-                    isProposals
-                      ? "border-[#FF6B00] text-white font-semibold"
-                      : "border-transparent text-zinc-400 hover:text-white hover:border-[#FF6B00]"
-                  }`}
-                >
-                  <Activity className="h-4 w-4" />
-                  <span className="text-sm">Proposals</span>
-                </div>
-              </Link>
-              <Link href={`/daos/${encodedName}/mission`}>
-                <div
-                  className={`flex items-center gap-2 pb-2 border-b-2 transition-all duration-200 ${
-                    isMission
-                      ? "border-[#FF6B00] text-white font-semibold"
-                      : "border-transparent text-zinc-400 hover:text-white hover:border-[#FF6B00]"
-                  }`}
-                >
-                  <Info className="h-4 w-4" />
-                  <span className="text-sm">Mission</span>
-                </div>
-              </Link>
-              <Link href={`/daos/${encodedName}/extensions`}>
-                <div
-                  className={`flex items-center gap-2 pb-2 border-b-2 transition-all duration-200 ${
-                    isExtensions
-                      ? "border-[#FF6B00] text-white font-semibold"
-                      : "border-transparent text-zinc-400 hover:text-white hover:border-[#FF6B00]"
-                  }`}
-                >
-                  <Blocks className="h-4 w-4" />
-                  <span className="text-sm">Extensions</span>
-                </div>
-              </Link>
-              <Link href={`/daos/${encodedName}/holders`}>
-                <div
-                  className={`flex items-center gap-2 pb-2 border-b-2 transition-all duration-200 ${
-                    isHolders
-                      ? "border-[#FF6B00] text-white font-semibold"
-                      : "border-transparent text-zinc-400 hover:text-white hover:border-[#FF6B00]"
-                  }`}
-                >
-                  <Users className="h-4 w-4" />
-                  <span className="text-sm">Holders</span>
-                </div>
-              </Link>
+            {/* Navigation Tabs - Bottom Border */}
+            <div className="bg-[#1A1A1A] border-t border-zinc-800 px-6 py-3">
+              <div className="flex flex-wrap gap-8">
+                <Link href={`/daos/${encodedName}`}>
+                  <div
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                      isProposals
+                        ? "bg-[#FF6B00] text-white font-semibold shadow-lg shadow-[#FF6B00]/25"
+                        : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                    }`}
+                  >
+                    <Activity className="h-4 w-4" />
+                    <span className="text-sm">Proposals</span>
+                  </div>
+                </Link>
+                <Link href={`/daos/${encodedName}/mission`}>
+                  <div
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                      isMission
+                        ? "bg-[#FF6B00] text-white font-semibold shadow-lg shadow-[#FF6B00]/25"
+                        : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                    }`}
+                  >
+                    <Info className="h-4 w-4" />
+                    <span className="text-sm">Mission</span>
+                  </div>
+                </Link>
+                <Link href={`/daos/${encodedName}/extensions`}>
+                  <div
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                      isExtensions
+                        ? "bg-[#FF6B00] text-white font-semibold shadow-lg shadow-[#FF6B00]/25"
+                        : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                    }`}
+                  >
+                    <Blocks className="h-4 w-4" />
+                    <span className="text-sm">Extensions</span>
+                  </div>
+                </Link>
+                <Link href={`/daos/${encodedName}/holders`}>
+                  <div
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                      isHolders
+                        ? "bg-[#FF6B00] text-white font-semibold shadow-lg shadow-[#FF6B00]/25"
+                        : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                    }`}
+                  >
+                    <Users className="h-4 w-4" />
+                    <span className="text-sm">Holders</span>
+                  </div>
+                </Link>
+              </div>
             </div>
           </div>
 

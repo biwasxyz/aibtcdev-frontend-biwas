@@ -67,12 +67,15 @@ const ProposalDetails = ({
 
   // Cleanup intervals on unmount
   useEffect(() => {
+    const refreshInterval = refreshIntervalRef.current;
+    const countdownInterval = countdownIntervalRef.current;
+
     return () => {
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current);
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
       }
-      if (countdownIntervalRef.current) {
-        clearInterval(countdownIntervalRef.current);
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
       }
     };
   }, []);
