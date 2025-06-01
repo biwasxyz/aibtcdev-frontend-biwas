@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import AllProposals from "@/components/daos/proposal/AllProposals";
 import { fetchAllProposals } from "@/queries/dao-queries";
 import { supabase } from "@/utils/supabase/client";
@@ -52,7 +52,7 @@ export default function AllProposalsPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[200px] w-full">
-        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-muted-foreground" />
+                      <Loader />
       </div>
     );
   }

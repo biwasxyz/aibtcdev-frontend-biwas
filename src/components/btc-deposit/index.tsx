@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { TransactionPriority } from "@faktoryfun/styx-sdk";
 import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DepositForm from "@/components/btc-deposit/DepositForm";
 import TransactionConfirmation from "@/components/btc-deposit/TransactionConfirmation";
@@ -165,7 +165,7 @@ export default function BitcoinDeposit() {
           <Card className="bg-card border-border/30 p-4">
             {isDataLoading ? (
               <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Loader />
                 <p className="text-sm text-muted-foreground">
                   Loading deposit data...
                 </p>

@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Loader2,
+
   ExternalLink,
   ThumbsUp,
   ThumbsDown,
@@ -11,6 +11,7 @@ import {
   HistoryIcon,
   User,
 } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import { getStacksAddress } from "@/lib/address";
 import {
   Table,
@@ -57,7 +58,7 @@ export function ProfileView() {
   if (isLoading) {
     return (
       <div className="w-full min-h-screen bg-[#1A1A1A] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+        <Loader />
       </div>
     );
   }

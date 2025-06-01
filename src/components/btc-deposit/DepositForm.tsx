@@ -12,7 +12,8 @@ import type {
 } from "@faktoryfun/styx-sdk";
 import { MIN_DEPOSIT_SATS, MAX_DEPOSIT_SATS } from "@faktoryfun/styx-sdk";
 import { useToast } from "@/hooks/use-toast";
-import { Bitcoin, Loader2 } from "lucide-react";
+import { Bitcoin } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import AuthButton from "@/components/home/AuthButton";
 import { useSessionStore } from "@/store/session";
 import { Button } from "@/components/ui/button";
@@ -505,7 +506,7 @@ export default function DepositForm({
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center space-y-4 py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <Loader />
         <p className="text-sm text-muted-foreground">Loading your session...</p>
       </div>
     );

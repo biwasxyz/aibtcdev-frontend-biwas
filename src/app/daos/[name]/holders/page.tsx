@@ -35,11 +35,11 @@ export default function HoldersPage() {
     enabled: !!daoId, // Only run this query when we have the daoId
   });
 
-  // Finally fetch the holders using the token data
+  // Finally fetch the holders using the DAO ID
   const { data: holdersData, isLoading: isLoadingHolders } = useQuery({
-    queryKey: ["holders", token?.contract_principal, token?.symbol],
-    queryFn: () => fetchHolders(token!.contract_principal, token!.symbol),
-    enabled: !!token?.contract_principal && !!token?.symbol,
+    queryKey: ["holders", daoId],
+    queryFn: () => fetchHolders(daoId!),
+    enabled: !!daoId,
   });
 
   // console.log(token?.id);

@@ -3,7 +3,8 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { Loader2, Trash2, Check, X, Pencil } from "lucide-react";
+import { Trash2, Check, X, Pencil } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -379,7 +380,7 @@ export function AgentPromptForm() {
                 {isLoading && uniqueDaoIds.length === 0 ? (
                   <TableRow className="border-gray-600">
                     <TableCell colSpan={6} className="text-center py-8">
-                      <Loader2 className="h-6 w-6 animate-spin mx-auto text-orange-500" />
+                      <Loader />
                     </TableCell>
                   </TableRow>
                 ) : uniqueDaoIds.length === 0 ? (
@@ -544,7 +545,7 @@ export function AgentPromptForm() {
                               >
                                 {createMutation.isPending ||
                                 updateMutation.isPending ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  <Loader />
                                 ) : (
                                   <Check className="h-4 w-4" />
                                 )}
@@ -573,7 +574,7 @@ export function AgentPromptForm() {
                                   title="Delete"
                                 >
                                   {deleteMutation.isPending ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <Loader />
                                   ) : (
                                     <Trash2 className="h-4 w-4" />
                                   )}

@@ -1,7 +1,8 @@
 "use client";
 import { useCallback, useMemo } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
-import { Loader2, Search } from "lucide-react";
+import { Search } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 
 import { DAOCard } from "@/components/daos/DaoCard";
 import type { DAO, Holder } from "@/types/supabase";
@@ -72,12 +73,10 @@ export default function DAOs() {
   const holderQueries = useQueries({
     queries:
       daos?.map((dao) => {
-        const token = tokens?.find((t) => t.dao_id === dao.id);
-        const tokenContract = getTokenContract(dao);
         return {
-          queryKey: ["holders", dao.id, tokenContract, token?.symbol],
-          queryFn: () => fetchHolders(tokenContract!, token!.symbol),
-          enabled: !!tokenContract && !!token?.symbol,
+          queryKey: ["holders", dao.id],
+          queryFn: () => fetchHolders(dao.id),
+          enabled: !!dao.id,
           staleTime: 10 * 60 * 1000, // 10 minutes
         };
       }) || [],
@@ -151,14 +150,7 @@ export default function DAOs() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
         <div className="mb-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              AI DAOs
-            </h1>
-            <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-              Explore innovative decentralized organizations powered by AI
-            </p>
-          </div>
+
 
           {/* Summary Stats Row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -191,7 +183,7 @@ export default function DAOs() {
         {isLoadingDAOs ? (
           <div className="flex min-h-[50vh] items-center justify-center">
             <div className="text-center">
-              <Loader2 className="h-12 w-12 animate-spin text-[#FF6B00] mx-auto mb-4" />
+              <Loader />
               <p className="text-zinc-400">Loading AI DAOs...</p>
             </div>
           </div>
@@ -208,7 +200,7 @@ export default function DAOs() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {daos.map((dao) => (
               <DAOCard
                 key={dao.id}

@@ -10,7 +10,8 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Info, Loader2, Wallet } from "lucide-react";
+import { Info, Wallet } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import { TokenBuyInput } from "@/components/daos/DaoBuyInput";
 import AgentWalletSelector from "@/components/chat/AgentSelector";
 import { useChatStore } from "@/store/chat";
@@ -210,7 +211,7 @@ export function DAOBuyModal({
     if (isExtensionsLoading || isTokenLoading) {
       return (
         <div className="flex items-center justify-center h-full">
-          <Loader2 className="h-10 w-10 animate-spin" />
+                      <Loader />
           <span className="ml-3 text-lg">Loading...</span>
         </div>
       );

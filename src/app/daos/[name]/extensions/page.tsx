@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import DAOExtensions from "@/components/daos/DaoExtensions";
 import { fetchDAOExtensions, fetchDAOByName } from "@/queries/dao-queries";
-import { Loader2 } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 
 export const runtime = "edge";
 
@@ -34,7 +34,7 @@ export default function ExtensionsPage() {
     return (
       <div className="flex justify-center items-center min-h-[400px] w-full">
         <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-[#FF6B00] mx-auto" />
+          <Loader />
           <p className="text-zinc-400">Loading extensions...</p>
         </div>
       </div>

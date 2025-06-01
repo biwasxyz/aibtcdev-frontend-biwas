@@ -10,7 +10,8 @@ import {
   request as xverseRequest,
 } from "sats-connect";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Copy, Check, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowLeft, Copy, Check, AlertTriangle } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import { useSessionStore } from "@/store/session";
 import { useClipboard } from "@/helpers/clipboard-utils";
 import type {
@@ -738,7 +739,7 @@ export default function TransactionConfirmation({
       <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-aut">
           <div className="flex flex-col items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin " />
+            <Loader />
             <p className="mt-4 text-s">Loading your session...</p>
           </div>
         </DialogContent>
@@ -857,7 +858,7 @@ export default function TransactionConfirmation({
                   <p className="text-white text-sm font-medium mb-1">Low</p>
                   <p className="text-zinc-300 text-xs">
                     {loadingFees ? (
-                      <Loader2 className="h-3 w-3 animate-spin mx-auto" />
+                      <Loader />
                     ) : (
                       `${feeEstimates.low.fee} sats`
                     )}
@@ -880,7 +881,7 @@ export default function TransactionConfirmation({
                   <p className="text-white text-sm font-medium mb-1">Medium</p>
                   <p className="text-zinc-300 text-xs">
                     {loadingFees ? (
-                      <Loader2 className="h-3 w-3 animate-spin mx-auto" />
+                      <Loader />
                     ) : (
                       `${feeEstimates.medium.fee} sats`
                     )}
@@ -903,7 +904,7 @@ export default function TransactionConfirmation({
                   <p className="text-white text-sm font-medium mb-1">High</p>
                   <p className="text-zinc-300 text-xs">
                     {loadingFees ? (
-                      <Loader2 className="h-3 w-3 animate-spin mx-auto" />
+                      <Loader />
                     ) : (
                       `${feeEstimates.high.fee} sats`
                     )}

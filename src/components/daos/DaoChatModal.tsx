@@ -11,7 +11,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { HistoryIcon, Loader2, MessageSquare } from "lucide-react";
+import { HistoryIcon, MessageSquare } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { MessageList } from "@/components/chat/MessageList";
@@ -395,7 +396,7 @@ export function DAOChatModal({
     if (isExtensionsLoading || isTokenLoading) {
       return (
         <div className="flex justify-center items-center h-full w-full">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                        <Loader />
         </div>
       );
     }

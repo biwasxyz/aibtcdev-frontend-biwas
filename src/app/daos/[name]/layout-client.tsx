@@ -12,13 +12,14 @@ import {
   Blocks,
   Users,
   Activity,
-  Loader2,
+
   Info,
   Wallet,
   CoinsIcon as CoinIcon,
   Users2,
   FileText,
 } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import {
   fetchToken,
   fetchDAOExtensions,
@@ -31,6 +32,7 @@ import {
 } from "@/queries/dao-queries";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DAOSendProposal } from "@/components/daos/proposal/DAOSendProposal";
+import { DAOBuyToken } from "@/components/daos/DaoBuyToken";
 
 export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   const params = useParams();
@@ -82,9 +84,9 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
 
   // Fetch holders data
   const { data: holdersData, isLoading: isLoadingHolders } = useQuery({
-    queryKey: ["holders", token?.contract_principal, token?.symbol],
-    queryFn: () => fetchHolders(token!.contract_principal, token!.symbol),
-    enabled: !!token?.contract_principal && !!token?.symbol,
+    queryKey: ["holders", id],
+    queryFn: () => fetchHolders(id!),
+    enabled: !!id,
     staleTime: 600000, // 10 minutes
   });
 
@@ -102,18 +104,15 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
       "marketStats",
       id,
       dex,
-      token?.contract_principal,
-      token?.symbol,
       token?.max_supply,
     ],
     queryFn: () =>
       fetchMarketStats(
         dex!,
-        token!.contract_principal,
-        token!.symbol,
+        id!,
         token!.max_supply || 0,
       ),
-    enabled: !!dex && !!token && !!token.contract_principal && !!token.symbol,
+    enabled: !!dex && !!id && !!token,
   });
 
   // Fetch treasury tokens
@@ -170,7 +169,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   if (isBasicLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-900">
-        <Loader2 className="h-10 w-10 animate-spin text-white" />
+        <Loader />
       </div>
     );
   }
@@ -219,13 +218,22 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                     <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 truncate">
                       {dao?.name}
                     </h1>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="text-xs px-2 py-1 bg-[#FF6B00]/20 text-[#FF6B00] rounded-full border border-[#FF6B00]/30">
-                        Active DAO
-                      </span>
-                      <span className="text-xs px-2 py-1 bg-zinc-800 text-zinc-300 rounded-full">
-                        {token?.symbol || "N/A"}
-                      </span>
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap gap-2">
+                        <span className="text-xs px-2 py-1 bg-[#FF6B00]/20 text-[#FF6B00] rounded-full border border-[#FF6B00]/30">
+                          Active DAO
+                        </span>
+                        <span className="text-xs px-2 py-1 bg-zinc-800 text-zinc-300 rounded-full">
+                          {token?.symbol || "N/A"}
+                        </span>
+                      </div>
+                      
+                      {/* Buy Token Button */}
+                      {id && (
+                        <div className="flex">
+                          <DAOBuyToken daoId={id} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

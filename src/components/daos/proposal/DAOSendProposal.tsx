@@ -3,7 +3,8 @@
 import type React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Send, Loader2, Check, ExternalLink, AlertCircle } from "lucide-react";
+import { Send, Check, ExternalLink, AlertCircle } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import { Input } from "@/components/ui/input";
 import type { DAO, Token } from "@/types/supabase";
 import { useSessionStore } from "@/store/session";
@@ -225,7 +226,7 @@ export function DAOSendProposal({
               }
             >
               {isSubmitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader />
               ) : (
                 <Send className="h-4 w-4" />
               )}

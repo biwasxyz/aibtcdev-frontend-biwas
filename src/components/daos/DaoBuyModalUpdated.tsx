@@ -6,13 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Info,
-  Loader2,
+
   Wallet,
   XCircle,
   CheckCircle,
   ExternalLink,
   RotateCcw,
 } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import { TokenBuyInput, type ApiResponse } from "@/components/daos/DaoBuy";
 import { useSessionStore } from "@/store/session";
 import { useWalletStore } from "@/store/wallet";
@@ -325,7 +326,7 @@ export function DAOBuyModal({
     renderResultScreen()
   ) : isExtLoading ? (
     <div className="flex items-center justify-center h-full">
-      <Loader2 className="h-10 w-10 animate-spin" />
+      <Loader />
       <span className="ml-3 text-lg">Loading…</span>
     </div>
   ) : !accessToken ? (

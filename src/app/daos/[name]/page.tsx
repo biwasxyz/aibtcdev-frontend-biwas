@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Suspense } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import DAOProposals from "@/components/daos/proposal/DAOProposal";
 import { fetchProposals, fetchDAOByName } from "@/queries/dao-queries";
 // import { Button } from "@/components/ui/button";
@@ -95,7 +95,7 @@ export default function ProposalsPage() {
     return (
       <div className="flex justify-center items-center min-h-[400px] w-full">
         <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-[#FF6B00] mx-auto" />
+          <Loader />
           <p className="text-zinc-400">Loading proposals...</p>
         </div>
       </div>
@@ -147,7 +147,7 @@ export default function ProposalsPage() {
         fallback={
           <div className="flex justify-center items-center min-h-[400px] w-full">
             <div className="text-center space-y-4">
-              <Loader2 className="h-8 w-8 animate-spin text-[#FF6B00] mx-auto" />
+              <Loader />
               <p className="text-zinc-400">Loading proposals...</p>
             </div>
           </div>

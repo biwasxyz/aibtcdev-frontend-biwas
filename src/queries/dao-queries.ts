@@ -10,9 +10,6 @@ import type {
 } from "@/types/supabase";
 
 const SUPPORTED_DAOS = [
-  "HUMAN•AIBTC•DAO",
-  "FACEY•AIBTC•DAO",
-  "UFACE•AIBTC•DAO",
   "SLOW•AIBTC•DAO",
   "FAST•AIBTC•DAO",
 ];
@@ -70,16 +67,16 @@ interface HiroBalanceResponse {
 }
 
 // Define structure for the response from Hiro API for token holders
-interface HiroHolderResponse {
-  total_supply: string;
-  limit: number;
-  offset: number;
-  total: number; // Total number of holders
-  results: {
-    address: string;
-    balance: string;
-  }[];
-}
+// interface HiroHolderResponse {
+//   total_supply: string;
+//   limit: number;
+//   offset: number;
+//   total: number; // Total number of holders
+//   results: {
+//     address: string;
+//     balance: string;
+//   }[];
+// }
 
 // Get Stacks network configuration from environment variables
 const STACKS_NETWORK = process.env.NEXT_PUBLIC_STACKS_NETWORK;
@@ -245,26 +242,34 @@ export const fetchDAOExtensions = async (id: string): Promise<Extension[]> => {
   return data ?? [];
 };
 
-// Fetches FT holders, supply, count, and calculates percentages via Hiro API.
+// Fetches FT holders, supply, count, and calculates percentages from Supabase.
 export const fetchHolders = async (
-  contractPrincipal: string,
-  tokenSymbol: string,
+  daoId: string,
 ): Promise<{ holders: Holder[]; totalSupply: number; holderCount: number }> => {
-  const response = await fetch(
-    `https://api.${STACKS_NETWORK}.hiro.so/extended/v1/tokens/ft/${contractPrincipal}::${tokenSymbol}/holders`,
-  );
-  const data: HiroHolderResponse = await response.json();
-  // console.log(response.url)
+  const { data, error } = await supabase
+    .from("holders")
+    .select("*")
+    .eq("dao_id", daoId);
 
-  const holdersWithPercentage = data.results.map((holder) => ({
-    ...holder,
-    percentage: (Number(holder.balance) / Number(data.total_supply)) * 100,
+  if (error) throw error;
+  if (!data) return { holders: [], totalSupply: 0, holderCount: 0 };
+
+  // Calculate total supply from all holder amounts
+  const totalSupply = data.reduce((sum, holder) => {
+    return sum + Number(holder.amount || 0);
+  }, 0);
+
+  // Map holders with percentage calculations
+  const holdersWithPercentage = data.map((holder) => ({
+    address: holder.wallet_id || '',
+    balance: holder.amount || '0',
+    percentage: totalSupply > 0 ? (Number(holder.amount || 0) / totalSupply) * 100 : 0,
   }));
 
   return {
     holders: holdersWithPercentage,
-    totalSupply: Number(data.total_supply),
-    holderCount: data.total,
+    totalSupply,
+    holderCount: data.length,
   };
 };
 
@@ -323,12 +328,11 @@ export const fetchTreasuryTokens = async (
 // Fetches and calculates combined market statistics for a DAO's token.
 export const fetchMarketStats = async (
   dex: string,
-  contractPrincipal: string,
-  tokenSymbol: string,
+  daoId: string,
   maxSupply: number,
 ): Promise<MarketStats> => {
   const [holdersData, tokenDetails] = await Promise.all([
-    fetchHolders(contractPrincipal, tokenSymbol),
+    fetchHolders(daoId),
     fetchTokenPrice(dex),
   ]);
 

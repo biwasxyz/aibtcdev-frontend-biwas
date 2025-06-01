@@ -39,16 +39,16 @@ interface HiroBalanceResponse {
   };
 }
 
-interface HiroHolderResponse {
-  total_supply: string;
-  limit: number;
-  offset: number;
-  total: number;
-  results: {
-    address: string;
-    balance: string;
-  }[];
-}
+// interface HiroHolderResponse {
+//   total_supply: string;
+//   limit: number;
+//   offset: number;
+//   total: number;
+//   results: {
+//     address: string;
+//     balance: string;
+//   }[];
+// }
 
 const daoCache = new Map<
   string,
@@ -92,26 +92,32 @@ export function useDAODetails(id: string) {
   const [treasuryTokens, setTreasuryTokens] = useState<TreasuryToken[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchHolders = async (
-    contractPrincipal: string,
-    tokenSymbol: string,
-  ) => {
+  const fetchHolders = async (daoId: string) => {
     try {
-      const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
-      const response = await fetch(
-        `https://api.${network}.hiro.so/extended/v1/tokens/ft/${contractPrincipal}::${tokenSymbol}/holders`,
-      );
-      const data: HiroHolderResponse = await response.json();
+      const { data, error } = await supabase
+        .from("holders")
+        .select("*")
+        .eq("dao_id", daoId);
 
-      const holdersWithPercentage = data.results.map((holder) => ({
-        ...holder,
-        percentage: (Number(holder.balance) / Number(data.total_supply)) * 100,
+      if (error) throw error;
+      if (!data) return { holders: [], totalSupply: 0, holderCount: 0 };
+
+      // Calculate total supply from all holder amounts
+      const totalSupply = data.reduce((sum, holder) => {
+        return sum + Number(holder.amount || 0);
+      }, 0);
+
+      // Map holders with percentage calculations
+      const holdersWithPercentage = data.map((holder) => ({
+        address: holder.wallet_id || '',
+        balance: holder.amount || '0',
+        percentage: totalSupply > 0 ? (Number(holder.amount || 0) / totalSupply) * 100 : 0,
       }));
 
       return {
         holders: holdersWithPercentage,
-        totalSupply: Number(data.total_supply),
-        holderCount: data.total,
+        totalSupply,
+        holderCount: data.length,
       };
     } catch (error) {
       console.error("Error fetching holders:", error);
@@ -259,7 +265,7 @@ export function useDAODetails(id: string) {
           if (!dex) throw new Error("No DEX contract found");
 
           const [holdersData, tokenDetails] = await Promise.all([
-            fetchHolders(currentToken.contract_principal, currentToken.symbol),
+            fetchHolders(id),
             fetchTokenPrice(dex),
           ]);
 

@@ -1,5 +1,6 @@
 "use client";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import type { Deposit } from "@faktoryfun/styx-sdk";
 import { useSessionStore } from "@/store/session";
 import { formatDistanceToNow } from "date-fns";
@@ -100,7 +101,7 @@ export default function MyHistory({
         </Card>
       ) : isLoading ? (
         <div className="flex flex-col items-center justify-center py-8 space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader />
           <p className="text-sm text-muted-foreground">
             Loading deposit history...
           </p>
@@ -111,7 +112,7 @@ export default function MyHistory({
           {isRefetching && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10 rounded-md">
               <div className="flex flex-col items-center space-y-2">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <Loader />
                 <p className="text-sm">Updating history...</p>
               </div>
             </div>

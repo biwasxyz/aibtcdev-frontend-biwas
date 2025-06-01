@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -203,7 +203,7 @@ export default function StacksAuth({ redirectUrl }: { redirectUrl?: string }) {
       <Button onClick={handleAuth} disabled={isLoading} variant="primary">
         {isLoading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            <Loader />
             Connecting...
           </>
         ) : (
