@@ -11,7 +11,6 @@ import {
   HistoryIcon,
   User,
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 import { getStacksAddress } from "@/lib/address";
 import {
   Table,

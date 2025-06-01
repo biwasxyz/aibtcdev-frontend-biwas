@@ -100,14 +100,6 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
     ];
   }, [proposals]);
 
-  // Get unique creators for suggestions (you might want to implement autocomplete)
-  const creatorOptions = useMemo(() => {
-    const uniqueCreators = Array.from(
-      new Set(proposals.map((p) => p.creator).filter(Boolean))
-    );
-    return uniqueCreators.slice(0, 10); // Limit for performance
-  }, [proposals]);
-
   // Filter configuration
   const filterConfig: FilterConfig[] = [
     {
@@ -157,7 +149,7 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
 
   // Filter and sort logic
   const filteredAndSortedProposals = useMemo(() => {
-    let filtered = proposals.filter((proposal) => {
+    const filtered = proposals.filter((proposal) => {
       // Hide hidden proposals
       if (hiddenProposals.has(proposal.id)) return false;
 
@@ -306,47 +298,6 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   };
 
   // Get status badge for individual proposals
-  const getStatusBadge = (proposal: ProposalWithDAO) => {
-    if (proposal.status === "DEPLOYED") {
-      return (
-        <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30 text-xs px-2 py-0.5">
-          Active
-        </Badge>
-      );
-    }
-    if (proposal.passed === true) {
-      return (
-        <Badge className="bg-green-500/20 text-green-500 border-green-500/30 text-xs px-2 py-0.5">
-          Passed
-        </Badge>
-      );
-    }
-    if (proposal.status === "FAILED") {
-      return (
-        <Badge className="bg-red-500/20 text-red-500 border-red-500/30 text-xs px-2 py-0.5">
-          Failed
-        </Badge>
-      );
-    }
-    return (
-      <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 text-xs px-2 py-0.5">
-        Draft
-      </Badge>
-    );
-  };
-
-  // Get vote count summary
-  const getVoteSummary = (proposal: ProposalWithDAO) => {
-    const votesFor = Number(proposal.votes_for || 0);
-    const votesAgainst = Number(proposal.votes_against || 0);
-    const totalVotes = votesFor + votesAgainst;
-    if (totalVotes === 0) {
-      return "0 Votes • Awaiting first vote";
-    }
-    return `${totalVotes} Vote${
-      totalVotes === 1 ? "" : "s"
-    } • ${votesFor} For • ${votesAgainst} Against`;
-  };
 
   return (
     <div className="w-full min-h-screen bg-[#1A1A1A]">
@@ -442,16 +393,11 @@ const EnhancedAllProposalCard = ({
   const queryClient = useQueryClient();
 
   // Get voting status
-  const { isActive, isEnded } = useVotingStatus(
+  const { isActive } = useVotingStatus(
     proposal.status,
     proposal.vote_start,
     proposal.vote_end
   );
-
-  // Determine execution status
-  const isExecuted = proposal.executed === true;
-  const isPending = proposal.passed && proposal.executed !== true;
-  const isFailed = isEnded && !proposal.passed;
 
   // Refresh votes data
   const refreshVotesData = useCallback(async () => {

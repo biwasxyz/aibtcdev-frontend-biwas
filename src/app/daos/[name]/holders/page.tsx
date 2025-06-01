@@ -2,14 +2,13 @@
 
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Loader } from "@/components/reusables/Loader";
 import DAOHolders from "@/components/daos/DaoHolders";
 import {
   fetchToken,
   fetchHolders,
   fetchDAOByName,
 } from "@/queries/dao-queries";
-import { Loader2 } from "lucide-react";
 
 export const runtime = "edge";
 
@@ -53,7 +52,7 @@ export default function HoldersPage() {
     return (
       <div className="flex justify-center items-center min-h-[400px] w-full">
         <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-[#FF6B00] mx-auto" />
+          <Loader />
           <p className="text-zinc-400">Loading holders...</p>
         </div>
       </div>

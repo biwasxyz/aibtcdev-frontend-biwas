@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import AllProposals from "@/components/daos/proposal/AllProposals";
 import { fetchAllProposals } from "@/queries/dao-queries";

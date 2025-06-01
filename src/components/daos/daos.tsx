@@ -2,8 +2,7 @@
 import { useCallback, useState, useMemo } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { Loader2, Search } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
 import {
   FilterSidebar,
   type FilterConfig,
@@ -184,7 +183,7 @@ export default function DAOs() {
 
   // Filter and sort DAOs
   const filteredAndSortedDAOs = useMemo(() => {
-    let filtered =
+    const filtered =
       daos?.filter((dao) => {
         const searchQuery = filterState.search as string;
         const categoryFilter = filterState.category as string;

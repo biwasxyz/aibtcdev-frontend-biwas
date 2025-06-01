@@ -244,7 +244,7 @@ const AssetTracker = () => {
       <div className="flex-1">
         {!isLoaded && (
           <span className="text-zinc-400 text-sm">
-            Checking your agents' BTC status...
+            Checking your agents BTC status...
           </span>
         )}
         {isLoaded && hasAnySbtc && (

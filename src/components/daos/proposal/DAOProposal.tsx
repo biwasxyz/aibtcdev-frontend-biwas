@@ -57,13 +57,13 @@ interface DAOProposalsProps {
 const DAOProposals = ({ proposals }: DAOProposalsProps) => {
   const proposalsRef = useRef<HTMLDivElement>(null);
   const [hiddenProposals, setHiddenProposals] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
   // Calculate proposal statistics
   const totalProposals = proposals.length;
   const activeProposals = proposals.filter(
-    (p) => p.status === "DEPLOYED",
+    (p) => p.status === "DEPLOYED"
   ).length;
   const passedProposals = proposals.filter((p) => p.passed === true).length;
   const failedProposals = proposals.filter((p) => p.status === "FAILED").length;
@@ -82,49 +82,6 @@ const DAOProposals = ({ proposals }: DAOProposalsProps) => {
       }
       return newSet;
     });
-  };
-
-  // Get status badge for individual proposals
-  const getStatusBadge = (proposal: Proposal) => {
-    if (proposal.status === "DEPLOYED") {
-      return (
-        <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30 text-xs px-2 py-0.5">
-          Active
-        </Badge>
-      );
-    }
-    if (proposal.passed === true) {
-      return (
-        <Badge className="bg-green-500/20 text-green-500 border-green-500/30 text-xs px-2 py-0.5">
-          Passed
-        </Badge>
-      );
-    }
-    if (proposal.status === "FAILED") {
-      return (
-        <Badge className="bg-red-500/20 text-red-500 border-red-500/30 text-xs px-2 py-0.5">
-          Failed
-        </Badge>
-      );
-    }
-    return (
-      <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 text-xs px-2 py-0.5">
-        Draft
-      </Badge>
-    );
-  };
-
-  // Get vote count summary
-  const getVoteSummary = (proposal: Proposal) => {
-    const votesFor = Number(proposal.votes_for || 0);
-    const votesAgainst = Number(proposal.votes_against || 0);
-    const totalVotes = votesFor + votesAgainst;
-    if (totalVotes === 0) {
-      return "0 Votes • Awaiting first vote";
-    }
-    return `${totalVotes} Vote${
-      totalVotes === 1 ? "" : "s"
-    } • ${votesFor} For • ${votesAgainst} Against`;
   };
 
   return (
@@ -197,7 +154,7 @@ const DAOProposals = ({ proposals }: DAOProposalsProps) => {
                   No proposals found.
                 </CardDescription>
                 <p className="text-gray-500 text-sm mt-2">
-                  This DAO hasn't submitted any proposals yet.
+                  This DAO hasn&apos;t submitted any proposals yet.
                 </p>
               </CardContent>
             </Card>
@@ -235,16 +192,11 @@ const EnhancedProposalCard = ({
   const queryClient = useQueryClient();
 
   // Get voting status
-  const { isActive, isEnded } = useVotingStatus(
+  const { isActive } = useVotingStatus(
     proposal.status,
     proposal.vote_start,
-    proposal.vote_end,
+    proposal.vote_end
   );
-
-  // Determine execution status
-  const isExecuted = proposal.executed === true;
-  const isPending = proposal.passed && proposal.executed !== true;
-  const isFailed = isEnded && !proposal.passed;
 
   // Refresh votes data
   const refreshVotesData = useCallback(async () => {
@@ -429,7 +381,7 @@ const EnhancedProposalCard = ({
                         Math.max(
                           Number(proposal.votes_for || 0) +
                             Number(proposal.votes_against || 0),
-                          1,
+                          1
                         )) *
                       100
                     }%`,
@@ -656,7 +608,7 @@ const EnhancedProposalCard = ({
                         value={formatAction(proposal.contract_principal)}
                         link={getExplorerLink(
                           "contract",
-                          proposal.contract_principal,
+                          proposal.contract_principal
                         )}
                       />
                       <LabeledField

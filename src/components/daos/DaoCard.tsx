@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   ArrowUpRight,
@@ -27,7 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useRouter } from "next/navigation";
+
 import { formatNumber } from "@/helpers/format-utils";
 
 interface DAOCardProps {
@@ -66,8 +65,6 @@ export const DAOCard = ({
   trades,
   holders,
 }: DAOCardProps) => {
-  const router = useRouter();
-
   const getChartColor = (data: Array<{ timestamp: number; price: number }>) => {
     if (data.length < 2) return "#8884d8";
     const startPrice = data[0].price;
@@ -169,25 +166,6 @@ export const DAOCard = ({
     }
 
     return tokenPrice?.holders?.toLocaleString() || "—";
-  };
-
-  const getStatusBadge = () => {
-    const hasExtensions = dao.extensions && dao.extensions.length > 0;
-    if (hasExtensions) {
-      return (
-        <Badge
-          variant="default"
-          className="bg-green-100 text-green-800 text-xs"
-        >
-          Active
-        </Badge>
-      );
-    }
-    return (
-      <Badge variant="secondary" className="text-xs">
-        Inactive
-      </Badge>
-    );
   };
 
   return (

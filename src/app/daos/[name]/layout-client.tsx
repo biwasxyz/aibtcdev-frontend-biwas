@@ -2,7 +2,6 @@
 
 import type React from "react";
 
-import { useState } from "react";
 import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,7 +15,6 @@ import {
   Info,
   Wallet,
   CoinsIcon as CoinIcon,
-  Building2,
   Users2,
   FileText,
 } from "lucide-react";
@@ -32,36 +30,13 @@ import {
 } from "@/queries/dao-queries";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { DAOCreationDate } from "@/components/daos/DaoCreationDate";
-import { FormatMission } from "@/helpers/format-mission";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { DAOSendProposal } from "@/components/daos/proposal/DAOSendProposal";
 
 export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   const params = useParams();
   const encodedName = params.name as string;
   const pathname = usePathname();
-  const [missionModalOpen, setMissionModalOpen] = useState(false);
 
   // First, fetch the DAO by name to get its ID
   const { data: dao, isLoading: isLoadingDAOByName } = useQuery({

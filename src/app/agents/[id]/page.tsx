@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Agent } from "@/types/supabase";
 import { supabase } from "@/utils/supabase/client";
-import { AgentDetailsPanel } from "@/components/agents/agent-details-panel";
+import { AgentDetailsPanel } from "@/components/agents/AgentDetailsPanel";
 
 export const runtime = "edge";
 
