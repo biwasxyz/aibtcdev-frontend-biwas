@@ -58,7 +58,7 @@ interface WebSocketTransactionMessage {
 
 interface DAOVetoProposalProps {
   daoId: string;
-  proposalId: number;
+  proposalId: string;
   dao?: DAO;
   size?: "sm" | "default" | "lg";
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
