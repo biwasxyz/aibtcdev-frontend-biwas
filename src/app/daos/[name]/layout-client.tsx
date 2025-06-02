@@ -196,10 +196,10 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <main className="w-full min-h-screen">
+    <main className="min-h-[100dvh] w-full flex flex-col bg-background">
       <div className="flex-1 w-full">
         <div className="flex flex-col w-full bg-[#1A1A1A] min-h-screen">
-            <div className="w-full py-6 flex-grow">
+          <div className="w-full py-6 flex-grow">
               {/* Main Content Grid */}
               <div className="px-4 max-w-7xl mx-auto">
                 {/* DAO Header Section */}
@@ -481,7 +481,6 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
-      </div>
     </main>
   );
 }

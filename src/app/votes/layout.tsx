@@ -1,5 +1,5 @@
-import React from "react";
 import { Metadata, Viewport } from "next";
+import React from "react";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -9,10 +9,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Admin",
+  title: "Votes",
+  description: "View all votes across all organizations in one place.",
 };
 
-export default function AdminLayout({
+export default function VotesLayout({
   children,
 }: {
   children: React.ReactNode;

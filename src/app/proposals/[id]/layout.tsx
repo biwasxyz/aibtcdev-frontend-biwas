@@ -9,17 +9,20 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Admin",
+  title: "Proposal Details",
+  description: "View detailed information about a DAO proposal",
 };
 
-export default function AdminLayout({
+export default function ProposalDetailsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <main className="w-full min-h-screen">
-      {children}
+      <div className="flex-1 w-full">
+        {children}
+      </div>
     </main>
   );
-}
+} 

@@ -11,16 +11,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { safeNumberFromBigInt } from "@/helpers/proposal-utils";
 
 interface ProposalMetricsProps {
   proposal: Proposal;
+  tokenSymbol?: string;
 }
 
-const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
+const ProposalMetrics = ({ proposal, tokenSymbol = "" }: ProposalMetricsProps) => {
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
-    proposal.vote_start,
-    proposal.vote_end,
+    safeNumberFromBigInt(proposal.vote_start),
+    safeNumberFromBigInt(proposal.vote_end),
   );
 
   // Check if the proposal has failed
@@ -48,7 +50,7 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
                     {proposal.liquid_tokens !== null ? (
                       <TokenBalance
                         value={proposal.liquid_tokens.toString()}
-                        symbol={proposal.token_symbol || ""}
+                        symbol={tokenSymbol}
                         decimals={8}
                         variant="abbreviated"
                       />

@@ -13,7 +13,6 @@ import { supabase } from "@/utils/supabase/client";
 import { NetworkIndicator } from "@/components/reusables/NetworkIndicator";
 // import { getStacksAddress } from "@/lib/address";
 import AuthButton from "@/components/home/AuthButton";
-import AssetTracker from "@/components/reusables/AssetTracker";
 import { AuthModal } from "@/components/auth/AuthModal";
 
 interface ApplicationLayoutProps {
