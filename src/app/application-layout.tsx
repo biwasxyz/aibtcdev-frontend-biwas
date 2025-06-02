@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Users, Boxes, Menu, X, FileText } from "lucide-react";
+import { Users, Boxes, Menu, X, FileText, Vote } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 // import { ThreadList } from "@/components/threads/thread-list";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ const navigation = [
   { id: "proposals", name: "Proposals", href: "/proposals", icon: FileText },
   // { id: "chat", name: "Chat", href: "/chat", icon: MessageSquare },
   // { id: "agents", name: "Agents", href: "/agents", icon: Users },
+  { id: "votes", name: "Votes", href: "/votes", icon: Vote },
   { id: "profile", name: "Profile", href: "/profile", icon: Users },
 ];
 
@@ -45,11 +46,11 @@ export default function ApplicationLayout({
       } = await supabase.auth.getUser();
       setHasUser(!!user);
 
-      // If we're on the profile page and not authenticated, show the modal
-      if (pathname === "/profile" && !user) {
+      // If we're on a protected page and not authenticated, show the modal
+      if ((pathname === "/profile" || pathname === "/votes") && !user) {
         setShowAuthModal(true);
-      } else if (pathname === "/profile" && user) {
-        // If we're on the profile page and authenticated, make sure modal is closed
+      } else if ((pathname === "/profile" || pathname === "/votes") && user) {
+        // If we're on a protected page and authenticated, make sure modal is closed
         setShowAuthModal(false);
       }
     };
@@ -81,8 +82,8 @@ export default function ApplicationLayout({
 
   // Handle navigation to protected routes
   const handleNavigation = async (href: string, e: React.MouseEvent) => {
-    // Only intercept navigation to profile page
-    if (href === "/profile") {
+    // Only intercept navigation to protected pages (profile and votes)
+    if (href === "/profile" || href === "/votes") {
       e.preventDefault();
 
       // Check if user is authenticated
@@ -92,7 +93,7 @@ export default function ApplicationLayout({
         // Show auth modal if not authenticated
         setShowAuthModal(true);
       } else {
-        // Navigate to profile if authenticated
+        // Navigate to the page if authenticated
         router.push(href);
       }
     }
@@ -284,7 +285,7 @@ export default function ApplicationLayout({
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        redirectUrl="/profile"
+        redirectUrl={pathname === "/votes" ? "/votes" : "/profile"}
       />
     </div>
   );

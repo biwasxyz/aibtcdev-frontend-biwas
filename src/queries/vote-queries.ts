@@ -4,32 +4,37 @@ export interface Vote {
   created_at: string;
   dao_id: string;
   dao_name: string;
-  agent_id: string;
-  agent_name: string;
+  wallet_id: string | null;
+  profile_id: string | null;
   answer: boolean;
   proposal_id: string;
   proposal_title: string;
   reasoning: string | null;
   tx_id: string | null;
-  amount: number | null;
+  address: string | null;
+  amount: string | null;
   prompt: string | null;
   confidence: number | null;
+  voted: boolean | null;
 }
 
 interface VoteWithDetails {
   id: string;
   created_at: string;
   dao_id: string;
-  agent_id: string;
+  wallet_id: string | null;
+  profile_id: string | null;
   answer: boolean;
   proposal_id: string;
   reasoning: string | null;
   tx_id: string | null;
-  amount: number | null;
+  address: string | null;
+  amount: string | null;
   prompt: string | null;
   confidence: number | null;
-  agents: { id: string; name: string }[];
+  voted: boolean | null;
   daos: { id: string; name: string }[];
+  proposals: { id: string; title: string }[];
 }
 
 /**
@@ -39,88 +44,59 @@ interface VoteWithDetails {
  * Refactor this similarly to fetchProposalVotes if used on performance-critical pages.
  */
 export async function fetchVotes(): Promise<Vote[]> {
-  console.warn(
-    "fetchVotes function contains N+1 pattern and might need refactoring if used.",
-  );
-
   const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
   if (userError || !user) throw new Error("User not authenticated");
 
-  const { data: userAgents, error: agentsError } = await supabase
-    .from("agents")
-    .select("id")
-    .eq("profile_id", user.id);
-  if (agentsError) throw agentsError;
-  if (!userAgents || userAgents.length === 0) return [];
-  const agentIds = userAgents.map((agent) => agent.id);
-
-  // Fetch base vote data
+  // Fetch votes for the current user using profile_id with DAO and proposal details
   const { data, error } = await supabase
     .from("votes")
     .select(
-      `id, created_at, dao_id, agent_id, answer, proposal_id, reasoning, tx_id, amount, prompt, confidence`,
+      `
+      id,
+      created_at,
+      dao_id,
+      wallet_id,
+      profile_id,
+      answer,
+      proposal_id,
+      reasoning,
+      tx_id,
+      address,
+      amount,
+      prompt,
+      confidence,
+      voted,
+      daos ( id, name ),
+      proposals ( id, title )
+      `
     )
-    .in("agent_id", agentIds)
+    .eq("profile_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
   if (!data || data.length === 0) return [];
 
-  // N+1 Fetches (Problematic Section)
-  const agentIds2 = Array.from(
-    new Set(data.map((vote) => vote.agent_id)),
-  ).filter(Boolean);
-  const daoIds = Array.from(new Set(data.map((vote) => vote.dao_id))).filter(
-    Boolean,
-  );
-  const proposalIds = Array.from(
-    new Set(data.map((vote) => vote.proposal_id)),
-  ).filter(Boolean);
-
-  const agents =
-    agentIds2.length > 0
-      ? await supabase.from("agents").select("id, name").in("id", agentIds2)
-      : { data: [] };
-  const daos =
-    daoIds.length > 0
-      ? await supabase.from("daos").select("id, name").in("id", daoIds)
-      : { data: [] };
-  const proposals =
-    proposalIds.length > 0
-      ? await supabase
-          .from("proposals")
-          .select("id, title")
-          .in("id", proposalIds)
-      : { data: [] };
-
-  // Create lookup maps
-  const agentMap = new Map(
-    agents.data?.map((agent) => [agent.id, agent.name]) || [],
-  );
-  const daoMap = new Map(daos.data?.map((dao) => [dao.id, dao.name]) || []);
-  const proposalMap = new Map(
-    proposals.data?.map((proposal) => [proposal.id, proposal.title]) || [],
-  );
-
-  // Transform data into the locally defined Vote interface
+  // Transform data into the Vote interface
   const transformedVotes: Vote[] = data.map((vote) => ({
     id: vote.id,
     created_at: vote.created_at,
     dao_id: vote.dao_id,
-    dao_name: daoMap.get(vote.dao_id) || "Unknown DAO",
-    agent_id: vote.agent_id,
-    agent_name: agentMap.get(vote.agent_id) || "Unknown Agent",
+    dao_name: vote.daos?.[0]?.name || "Unknown DAO",
+    wallet_id: vote.wallet_id,
+    profile_id: vote.profile_id,
     answer: vote.answer,
     proposal_id: vote.proposal_id,
-    proposal_title: proposalMap.get(vote.proposal_id) || "Unknown Proposal",
+    proposal_title: vote.proposals?.[0]?.title || "Unknown Proposal",
     reasoning: vote.reasoning,
     tx_id: vote.tx_id,
+    address: vote.address,
     amount: vote.amount,
     prompt: vote.prompt,
-    confidence: vote.confidence ?? null, // Ensure null if undefined
+    confidence: vote.confidence ?? null,
+    voted: vote.voted,
   }));
 
   return transformedVotes;
@@ -141,21 +117,24 @@ export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
     .from("votes")
     .select(
       `
-            id,
-            created_at,
-            dao_id,
-            agent_id,
-            answer,
-            proposal_id,
-            reasoning,
-            tx_id,
-            amount,
-            prompt,
-            confidence,
-            agents ( id, name ),
-            daos ( id, name )
-        `,
-    ) // Fetch related agents and daos using Supabase joins
+      id,
+      created_at,
+      dao_id,
+      wallet_id,
+      profile_id,
+      answer,
+      proposal_id,
+      reasoning,
+      tx_id,
+      address,
+      amount,
+      prompt,
+      confidence,
+      voted,
+      daos ( id, name ),
+      proposals ( id, title )
+      `,
+    )
     .eq("proposal_id", proposalId)
     .order("created_at", { ascending: false });
 
@@ -164,29 +143,30 @@ export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
       `Error fetching votes with details for proposal ${proposalId}:`,
       error,
     );
-    throw error; // Let React Query handle the error
+    throw error;
   }
 
   if (!data) {
-    return []; // Return empty array if no votes found
+    return [];
   }
 
   const transformedVotes: Vote[] = data.map((vote: VoteWithDetails) => ({
-    // Spread basic vote properties that match
     id: vote.id,
     created_at: vote.created_at,
     dao_id: vote.dao_id,
-    agent_id: vote.agent_id,
+    dao_name: vote.daos?.[0]?.name || "Unknown DAO",
+    wallet_id: vote.wallet_id,
+    profile_id: vote.profile_id,
     answer: vote.answer,
     proposal_id: vote.proposal_id,
+    proposal_title: vote.proposals?.[0]?.title || "Current Proposal",
     reasoning: vote.reasoning,
     tx_id: vote.tx_id,
+    address: vote.address,
     amount: vote.amount,
     prompt: vote.prompt,
     confidence: vote.confidence ?? null,
-    agent_name: vote.agents?.[0]?.name || "Unknown Agent",
-    dao_name: vote.daos?.[0]?.name || "Unknown DAO",
-    proposal_title: "Current Proposal",
+    voted: vote.voted,
   }));
 
   return transformedVotes;
