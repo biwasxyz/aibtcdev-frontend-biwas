@@ -169,7 +169,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
     return (
       <main className="min-h-[100dvh] w-full flex flex-col bg-background">
         <div className="flex-1 w-full">
-          <div className="flex h-screen items-center justify-center bg-gray-900">
+          <div className="flex h-screen items-center justify-center bg-background">
             <Loader />
           </div>
         </div>
@@ -181,10 +181,10 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
     return (
       <main className="min-h-[100dvh] w-full flex flex-col bg-background">
         <div className="flex-1 w-full">
-          <div className="flex items-center justify-center min-h-[50vh] bg-gray-900">
-            <div className="text-center space-y-2">
-              <p className="text-xl font-medium text-gray-300">DAO not found</p>
-              <p className="text-base text-gray-400">
+          <div className="flex items-center justify-center min-h-[50vh] bg-background">
+            <div className="text-center space-y-3">
+              <p className="text-xl font-medium text-foreground">DAO not found</p>
+              <p className="text-base text-muted-foreground">
                 The DAO you&apos;re looking for doesn&apos;t exist or has been
                 removed
               </p>
@@ -198,20 +198,20 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
   return (
     <main className="min-h-[100dvh] w-full flex flex-col bg-background">
       <div className="flex-1 w-full">
-        <div className="flex flex-col w-full bg-[#1A1A1A] min-h-screen">
-          <div className="w-full py-6 flex-grow">
+        <div className="flex flex-col w-full bg-background min-h-screen">
+          <div className="w-full py-8 flex-grow">
               {/* Main Content Grid */}
-              <div className="px-4 max-w-7xl mx-auto">
+              <div className="px-6 max-w-7xl mx-auto">
                 {/* DAO Header Section */}
-                <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 mb-6 overflow-hidden">
+                <div className="bg-card rounded-xl shadow-lg border border-border mb-8 overflow-hidden">
                   {/* Main Header Content */}
-                  <div className="p-6">
-                    <div className="flex flex-col lg:flex-row items-start gap-6">
+                  <div className="p-8">
+                    <div className="flex flex-col lg:flex-row items-start gap-8">
                       {/* DAO Info - Left Side */}
-                      <div className="flex items-start gap-4 flex-1">
+                      <div className="flex items-start gap-6 flex-1">
                         {/* Token Image */}
                         {token?.image_url && (
-                          <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border border-zinc-700 shadow-lg">
+                          <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-xl overflow-hidden border border-border shadow-sm">
                             <Image
                               src={token.image_url || "/placeholder.svg"}
                               alt={`${dao?.name} token`}
@@ -224,15 +224,15 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                         )}
                         {/* DAO Details */}
                         <div className="flex-1 min-w-0">
-                          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 truncate">
+                          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-3 truncate">
                             {dao?.name}
                           </h1>
-                          <div className="space-y-3">
-                            <div className="flex flex-wrap gap-2">
-                              <span className="text-xs px-2 py-1 bg-[#FF6B00]/20 text-[#FF6B00] rounded-full border border-[#FF6B00]/30">
+                          <div className="space-y-4">
+                            <div className="flex flex-wrap gap-3">
+                              <span className="text-xs px-3 py-1.5 bg-primary/20 text-primary rounded-full border border-primary/30">
                                 Active DAO
                               </span>
-                              <span className="text-xs px-2 py-1 bg-zinc-800 text-zinc-300 rounded-full">
+                              <span className="text-xs px-3 py-1.5 bg-muted text-muted-foreground rounded-full border border-border">
                                 {token?.symbol || "N/A"}
                               </span>
                             </div>
@@ -250,53 +250,53 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                       {/* Key Metrics - Right Side */}
                       <div className="w-full lg:w-auto lg:min-w-[320px]">
                         {isOverviewLoading ? (
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-2 gap-3">
                             {[...Array(4)].map((_, i) => (
                               <Skeleton
                                 key={i}
-                                className="h-14 w-full rounded-lg bg-zinc-700"
+                                className="h-16 w-full rounded-xl bg-muted"
                               />
                             ))}
                           </div>
                         ) : (
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00]/50 transition-all duration-200 group">
-                              <div className="flex items-center gap-2 mb-1">
-                                <CoinIcon className="h-3.5 w-3.5 text-[#FF6B00] group-hover:scale-110 transition-transform" />
-                                <span className="text-xs text-zinc-400">Price</span>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-background rounded-xl p-4 border border-border hover:border-primary/50 transition-all duration-150 group shadow-sm">
+                              <div className="flex items-center gap-2 mb-2">
+                                <CoinIcon className="h-4 w-4 text-primary group-hover:scale-110 transition-transform duration-150" />
+                                <span className="text-xs text-muted-foreground">Price</span>
                               </div>
-                              <span className="text-sm font-bold text-white">
+                              <span className="text-sm font-bold text-foreground">
                                 {formatNumber(enhancedMarketStats.price, true)}
                               </span>
                             </div>
-                            <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00]/50 transition-all duration-200 group">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Wallet className="h-3.5 w-3.5 text-[#FF6B00] group-hover:scale-110 transition-transform" />
-                                <span className="text-xs text-zinc-400">
+                            <div className="bg-background rounded-xl p-4 border border-border hover:border-primary/50 transition-all duration-150 group shadow-sm">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Wallet className="h-4 w-4 text-primary group-hover:scale-110 transition-transform duration-150" />
+                                <span className="text-xs text-muted-foreground">
                                   Market Cap
                                 </span>
                               </div>
-                              <span className="text-sm font-bold text-white">
+                              <span className="text-sm font-bold text-foreground">
                                 {formatNumber(enhancedMarketStats.marketCap)}
                               </span>
                             </div>
-                            <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00]/50 transition-all duration-200 group">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Users2 className="h-3.5 w-3.5 text-[#FF6B00] group-hover:scale-110 transition-transform" />
-                                <span className="text-xs text-zinc-400">Holders</span>
+                            <div className="bg-background rounded-xl p-4 border border-border hover:border-primary/50 transition-all duration-150 group shadow-sm">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Users2 className="h-4 w-4 text-primary group-hover:scale-110 transition-transform duration-150" />
+                                <span className="text-xs text-muted-foreground">Holders</span>
                               </div>
-                              <span className="text-sm font-bold text-white">
+                              <span className="text-sm font-bold text-foreground">
                                 {enhancedMarketStats.holderCount.toLocaleString()}
                               </span>
                             </div>
-                            <div className="bg-[#1A1A1A] rounded-lg p-3 border border-zinc-800 hover:border-[#FF6B00]/50 transition-all duration-200 group">
-                              <div className="flex items-center gap-2 mb-1">
-                                <FileText className="h-3.5 w-3.5 text-[#FF6B00] group-hover:scale-110 transition-transform" />
-                                <span className="text-xs text-zinc-400">
+                            <div className="bg-background rounded-xl p-4 border border-border hover:border-primary/50 transition-all duration-150 group shadow-sm">
+                              <div className="flex items-center gap-2 mb-2">
+                                <FileText className="h-4 w-4 text-primary group-hover:scale-110 transition-transform duration-150" />
+                                <span className="text-xs text-muted-foreground">
                                   Proposals
                                 </span>
                               </div>
-                              <span className="text-sm font-bold text-white">
+                              <span className="text-sm font-bold text-foreground">
                                 {totalProposals}
                               </span>
                             </div>
@@ -307,14 +307,14 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                   </div>
 
                   {/* Navigation Tabs - Bottom Border */}
-                  <div className="bg-[#1A1A1A] border-t border-zinc-800 px-6 py-3">
-                    <div className="flex flex-wrap gap-8">
+                  <div className="bg-background border-t border-border px-8 py-4">
+                    <div className="flex flex-wrap gap-6">
                       <Link href={`/daos/${encodedName}`}>
                         <div
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-150 ${
                             isProposals
-                              ? "bg-[#FF6B00] text-white font-semibold shadow-lg shadow-[#FF6B00]/25"
-                              : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                              ? "bg-primary text-primary-foreground font-semibold shadow-md"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                           }`}
                         >
                           <Activity className="h-4 w-4" />
@@ -323,10 +323,10 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                       </Link>
                       <Link href={`/daos/${encodedName}/mission`}>
                         <div
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-150 ${
                             isMission
-                              ? "bg-[#FF6B00] text-white font-semibold shadow-lg shadow-[#FF6B00]/25"
-                              : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                              ? "bg-primary text-primary-foreground font-semibold shadow-md"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                           }`}
                         >
                           <Info className="h-4 w-4" />
@@ -335,10 +335,10 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                       </Link>
                       <Link href={`/daos/${encodedName}/extensions`}>
                         <div
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-150 ${
                             isExtensions
-                              ? "bg-[#FF6B00] text-white font-semibold shadow-lg shadow-[#FF6B00]/25"
-                              : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                              ? "bg-primary text-primary-foreground font-semibold shadow-md"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                           }`}
                         >
                           <Blocks className="h-4 w-4" />
@@ -347,10 +347,10 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                       </Link>
                       <Link href={`/daos/${encodedName}/holders`}>
                         <div
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${
+                          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-150 ${
                             isHolders
-                              ? "bg-[#FF6B00] text-white font-semibold shadow-lg shadow-[#FF6B00]/25"
-                              : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                              ? "bg-primary text-primary-foreground font-semibold shadow-md"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                           }`}
                         >
                           <Users className="h-4 w-4" />
@@ -364,81 +364,81 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                 {/* Main Content Section */}
                 {isProposals ? (
                   /* Single Column Layout for Proposals Page */
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {/* Send On-chain Message - Above Proposals */}
-                    <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 p-4">
-                      <h3 className="text-sm font-semibold text-white mb-3">
+                    <div className="bg-card rounded-xl shadow-sm border border-border p-6">
+                      <h3 className="text-sm font-semibold text-foreground mb-4">
                         Send Message
                       </h3>
                       <DAOSendProposal daoId={id!} />
                     </div>
 
                     {/* Proposals Content */}
-                    <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 p-6">
+                    <div className="bg-card rounded-xl shadow-sm border border-border p-8">
                       {children}
                     </div>
                   </div>
                 ) : (
                   /* Single Column Layout for Other Pages (Mission, Extensions, Holders) */
-                  <div className="bg-[#2A2A2A] rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.3)] border border-zinc-800 p-6">
+                  <div className="bg-card rounded-xl shadow-sm border border-border p-8">
                     {isMission ? (
-                      <div className="space-y-6">
+                      <div className="space-y-8">
                         <div>
                           {dao?.description ? (
                             <div className="prose prose-invert prose-zinc max-w-none">
                               <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
-                                className="text-zinc-300 leading-relaxed"
+                                className="text-muted-foreground leading-relaxed"
                                 components={{
                                   h1: ({ children }) => (
-                                    <h1 className="text-2xl font-bold text-white mb-4 mt-6 first:mt-0">
+                                    <h1 className="text-2xl font-bold text-foreground mb-4 mt-6 first:mt-0">
                                       {children}
                                     </h1>
                                   ),
                                   h2: ({ children }) => (
-                                    <h2 className="text-xl font-bold text-white mb-3 mt-6 first:mt-0">
+                                    <h2 className="text-xl font-bold text-foreground mb-3 mt-6 first:mt-0">
                                       {children}
                                     </h2>
                                   ),
                                   h3: ({ children }) => (
-                                    <h3 className="text-lg font-semibold text-white mb-2 mt-4 first:mt-0">
+                                    <h3 className="text-lg font-semibold text-foreground mb-2 mt-4 first:mt-0">
                                       {children}
                                     </h3>
                                   ),
                                   p: ({ children }) => (
-                                    <p className="text-zinc-300 leading-relaxed mb-4 last:mb-0">
+                                    <p className="text-muted-foreground leading-relaxed mb-4 last:mb-0">
                                       {children}
                                     </p>
                                   ),
                                   ul: ({ children }) => (
-                                    <ul className="list-disc list-inside text-zinc-300 mb-4 space-y-2 ml-4">
+                                    <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-2 ml-4">
                                       {children}
                                     </ul>
                                   ),
                                   ol: ({ children }) => (
-                                    <ol className="list-decimal list-inside text-zinc-300 mb-4 space-y-2 ml-4">
+                                    <ol className="list-decimal list-inside text-muted-foreground mb-4 space-y-2 ml-4">
                                       {children}
                                     </ol>
                                   ),
                                   li: ({ children }) => (
-                                    <li className="text-zinc-300 leading-relaxed">
+                                    <li className="text-muted-foreground leading-relaxed">
                                       {children}
                                     </li>
                                   ),
                                   strong: ({ children }) => (
-                                    <strong className="font-semibold text-white">
+                                    <strong className="font-semibold text-foreground">
                                       {children}
                                     </strong>
                                   ),
                                   em: ({ children }) => (
-                                    <em className="italic text-zinc-300">
+                                    <em className="italic text-muted-foreground">
                                       {children}
                                     </em>
                                   ),
                                   a: ({ href, children }) => (
                                     <a
                                       href={href}
-                                      className="text-[#FF6B00] hover:underline font-medium"
+                                      className="text-primary hover:underline font-medium transition-colors duration-150"
                                       target="_blank"
                                       rel="noopener noreferrer"
                                     >
@@ -446,17 +446,17 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                                     </a>
                                   ),
                                   blockquote: ({ children }) => (
-                                    <blockquote className="border-l-4 border-[#FF6B00] pl-4 italic text-zinc-400 my-4 bg-zinc-800/30 py-2 rounded-r">
+                                    <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-4 bg-muted/30 py-2 rounded-r">
                                       {children}
                                     </blockquote>
                                   ),
                                   code: ({ children }) => (
-                                    <code className="bg-zinc-800 text-zinc-300 px-2 py-1 rounded text-sm font-mono">
+                                    <code className="bg-muted text-muted-foreground px-2 py-1 rounded text-sm font-mono">
                                       {children}
                                     </code>
                                   ),
                                   pre: ({ children }) => (
-                                    <pre className="bg-zinc-800 text-zinc-300 p-4 rounded-lg overflow-x-auto mb-4 border border-zinc-700">
+                                    <pre className="bg-muted text-muted-foreground p-4 rounded-lg overflow-x-auto mb-4 border border-border">
                                       {children}
                                     </pre>
                                   ),
@@ -466,7 +466,7 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                               </ReactMarkdown>
                             </div>
                           ) : (
-                            <div className="text-zinc-400 italic">
+                            <div className="text-muted-foreground italic">
                               No mission statement available for this DAO.
                             </div>
                           )}

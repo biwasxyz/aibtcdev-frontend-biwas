@@ -102,10 +102,10 @@ const ProposalDetails = ({
   }, [isActive, refreshVotesData]);
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`space-y-8 ${className}`}>
       {/* Vote Progress Section */}
-      <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
-        <h4 className="text-sm font-medium text-white uppercase tracking-wide mb-3">
+      <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
+        <h4 className="text-sm font-medium text-foreground uppercase tracking-wide mb-4">
           Voting Progress
         </h4>
         <VotesTable proposalId={proposal.id} />
@@ -113,9 +113,9 @@ const ProposalDetails = ({
 
       {/* On-chain Message */}
       {proposal.content && (
-        <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-medium text-white uppercase tracking-wide">
+        <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-sm font-medium text-foreground uppercase tracking-wide">
               On-chain Message
             </h4>
           </div>
@@ -124,17 +124,17 @@ const ProposalDetails = ({
       )}
 
       {/* Overview Section */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="h-5 w-5 text-orange-500" />
-          <h4 className="text-lg font-semibold text-white">Overview</h4>
+      <div className="space-y-8">
+        <div className="flex items-center gap-3 mb-6">
+          <BarChart3 className="h-6 w-6 text-primary" />
+          <h4 className="text-xl font-semibold text-foreground">Overview</h4>
         </div>
 
         <ProposalMetrics proposal={proposal} />
 
         {/* Timeline Status */}
-        <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
-          <h4 className="text-sm uppercase tracking-wide mb-3 text-white">
+        <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
+          <h4 className="text-sm uppercase tracking-wide mb-4 text-foreground">
             Timeline Status
           </h4>
           <TimeStatus
@@ -150,20 +150,20 @@ const ProposalDetails = ({
 
 
       {/* Blockchain Section */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Blocks className="h-5 w-5 text-orange-500" />
-          <h4 className="text-lg font-semibold text-white">Blockchain</h4>
+      <div className="space-y-8">
+        <div className="flex items-center gap-3 mb-6">
+          <Blocks className="h-6 w-6 text-primary" />
+          <h4 className="text-xl font-semibold text-foreground">Blockchain</h4>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Block Information */}
-          <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
-            <h4 className="text-sm uppercase tracking-wide mb-3 text-white flex items-center gap-2">
-              <Layers className="h-4 w-4 text-orange-500" />
+          <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
+            <h4 className="text-sm uppercase tracking-wide mb-4 text-foreground flex items-center gap-2">
+              <Layers className="h-4 w-4 text-primary" />
               Block Information
             </h4>
-            <div className="space-y-3 text-sm">
+            <div className="space-y-4 text-sm">
               <LabeledField
                 icon={Layers}
                 label="Snapshot block"
@@ -187,12 +187,12 @@ const ProposalDetails = ({
           </div>
 
           {/* Contract Details */}
-          <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
-            <h4 className="text-sm uppercase tracking-wide mb-3 text-white flex items-center gap-2">
-              <FileText className="h-4 w-4 text-orange-500" />
+          <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
+            <h4 className="text-sm uppercase tracking-wide mb-4 text-foreground flex items-center gap-2">
+              <FileText className="h-4 w-4 text-primary" />
               Contract Details
             </h4>
-            <div className="space-y-3 text-sm">
+            <div className="space-y-4 text-sm">
               <LabeledField
                 icon={Wallet}
                 label="Principal"

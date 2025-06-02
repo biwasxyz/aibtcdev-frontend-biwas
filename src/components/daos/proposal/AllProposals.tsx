@@ -267,16 +267,16 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   };
 
   return (
-    <div className="w-full min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div className="w-full min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 py-6 sm:py-12">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">
                 Proposals
               </h2>
-              <p className="text-gray-400 mt-1 text-sm sm:text-base">
+              <p className="text-muted-foreground mt-3 text-sm sm:text-base">
                 View and filter proposals across all DAOs
               </p>
             </div>
@@ -285,7 +285,7 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
               variant="outline"
               size="sm"
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-              className="lg:hidden flex items-center gap-2 bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
+              className="lg:hidden flex items-center gap-2 bg-card border-border text-foreground hover:bg-muted/50 transition-colors duration-150"
             >
               <Filter className="h-4 w-4" />
               Filters
@@ -297,25 +297,25 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
           {/* Mobile Filter Overlay */}
           {isMobileFilterOpen && (
             <div
-              className="lg:hidden fixed inset-0 z-50 bg-black/50"
+              className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
               onClick={() => setIsMobileFilterOpen(false)}
             >
               <div
-                className="absolute right-0 top-0 h-full w-full max-w-sm bg-[#1A1A1A] border-l border-zinc-700 overflow-y-auto"
+                className="absolute right-0 top-0 h-full w-full max-w-sm bg-card border-l border-border overflow-y-auto shadow-lg"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="p-4 border-b border-zinc-700 flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">Filters</h3>
+                <div className="p-6 border-b border-border flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-foreground">Filters</h3>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsMobileFilterOpen(false)}
-                    className="text-gray-400 hover:text-white"
+                    className="text-muted-foreground hover:text-foreground transition-colors duration-150"
                   >
                     <X className="h-5 w-5" />
                   </Button>
                 </div>
-                <div className="p-4">
+                <div className="p-6">
                   <FilterSidebar
                     title=""
                     filters={filterConfig}
@@ -342,15 +342,15 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
           {/* Main Content */}
           <div className="flex-1 min-w-0">
             {/* Proposals List */}
-            <div ref={proposalsRef} className="space-y-3 sm:space-y-4">
+            <div ref={proposalsRef} className="space-y-4 sm:space-y-6">
               {paginatedProposals.length === 0 ? (
-                <Card className="bg-[#2A2A2A] border-gray-600">
-                  <CardContent className="p-6 sm:p-8 text-center">
-                    <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-gray-500 mx-auto mb-4" />
-                    <CardDescription className="text-gray-400 text-base sm:text-lg">
+                <Card className="bg-card border-border shadow-sm">
+                  <CardContent className="p-8 sm:p-12 text-center">
+                    <FileText className="h-12 w-12 sm:h-16 sm:w-16 text-muted mx-auto mb-6" />
+                    <CardDescription className="text-muted-foreground text-base sm:text-lg mb-3">
                       No proposals found.
                     </CardDescription>
-                    <p className="text-gray-500 text-sm mt-2">
+                    <p className="text-muted-foreground text-sm">
                       Try adjusting your search terms or filters.
                     </p>
                   </CardContent>
@@ -371,7 +371,7 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
 
             {/* Pagination */}
             {filteredAndSortedProposals.length > 0 && (
-              <div className="mt-6 sm:mt-8">
+              <div className="mt-8 sm:mt-12">
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}

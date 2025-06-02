@@ -59,14 +59,14 @@ export function FilterSidebar({
       case "search":
         return (
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
             <Input
               placeholder={
                 filter.placeholder || `Search ${filter.label.toLowerCase()}...`
               }
               value={value as string}
               onChange={(e) => onFilterChange(filter.key, e.target.value)}
-              className="pl-9 bg-[#1A1A1A] border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+              className="pl-10 bg-background border-border text-foreground placeholder-muted-foreground focus:border-primary transition-colors duration-150"
             />
           </div>
         );
@@ -77,19 +77,19 @@ export function FilterSidebar({
             value={value as string}
             onValueChange={(newValue) => onFilterChange(filter.key, newValue)}
           >
-            <SelectTrigger className="bg-[#1A1A1A] border-gray-600 text-white">
+            <SelectTrigger className="bg-background border-border text-foreground hover:bg-muted/50 transition-colors duration-150">
               <SelectValue
                 placeholder={
                   filter.placeholder || `Select ${filter.label.toLowerCase()}`
                 }
               />
             </SelectTrigger>
-            <SelectContent className="bg-[#2A2A2A] border-gray-600">
+            <SelectContent className="bg-card border-border shadow-lg">
               {filter.options?.map((option) => (
                 <SelectItem
                   key={option.value}
                   value={option.value}
-                  className="text-white hover:bg-[#1A1A1A]"
+                  className="text-foreground hover:bg-muted/50 transition-colors duration-150"
                 >
                   {option.badge ? (
                     <Badge variant="secondary" className="text-xs">
@@ -111,17 +111,17 @@ export function FilterSidebar({
 
   return (
     <div className={`w-80 flex-shrink-0 ${className}`}>
-      <Card className="sticky top-4 bg-[#2A2A2A] border-gray-600">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Filter className="w-5 h-5 text-orange-400" />
-            <h3 className="text-lg font-semibold text-white">{title}</h3>
+      <Card className="sticky top-6 bg-card border-border shadow-sm">
+        <CardContent className="p-8">
+          <div className="flex items-center gap-3 mb-8">
+            <Filter className="w-5 h-5 text-primary" />
+            <h3 className="text-xl font-semibold text-foreground">{title}</h3>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             {filters.map((filter) => (
               <div key={filter.key}>
-                <label className="text-sm font-medium text-gray-300 mb-2 block">
+                <label className="text-sm font-medium text-muted-foreground mb-3 block">
                   {filter.label}
                 </label>
                 {renderFilterInput(filter)}
@@ -131,13 +131,13 @@ export function FilterSidebar({
 
           {/* Summary Stats Card */}
           {summaryStats && (
-            <div className="mt-8 p-4 bg-[#1A1A1A] rounded-lg border border-gray-600">
-              <h4 className="font-semibold mb-3 text-white">Summary</h4>
-              <div className="space-y-2">
+            <div className="mt-10 p-6 bg-background rounded-xl border border-border shadow-sm">
+              <h4 className="font-semibold mb-4 text-foreground">Summary</h4>
+              <div className="space-y-3">
                 {Object.entries(summaryStats).map(([key, stat]) => (
-                  <div key={key} className="flex justify-between">
-                    <span className="text-gray-300">{stat.label}:</span>
-                    <span className="font-bold text-white">
+                  <div key={key} className="flex justify-between items-center">
+                    <span className="text-muted-foreground">{stat.label}:</span>
+                    <span className="font-bold text-foreground">
                       {stat.format ? stat.format(stat.value) : stat.value}
                     </span>
                   </div>

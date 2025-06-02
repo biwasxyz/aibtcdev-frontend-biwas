@@ -146,35 +146,35 @@ export default function DAOs() {
     }, 0) || 0;
 
   return (
-    <div className="w-full min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 py-12">
         {/* Header Section */}
-        <div className="mb-8">
+        <div className="mb-10">
 
 
           {/* Summary Stats Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-[#2A2A2A] rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-white">{totalDAOs}</div>
-              <div className="text-sm text-zinc-400">Total DAOs</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            <div className="bg-card rounded-xl p-6 text-center border border-border shadow-sm">
+              <div className="text-2xl font-bold text-foreground">{totalDAOs}</div>
+              <div className="text-sm text-muted-foreground mt-2">Total DAOs</div>
             </div>
-            <div className="bg-[#2A2A2A] rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-[#FF6B00]">
+            <div className="bg-card rounded-xl p-6 text-center border border-border shadow-sm">
+              <div className="text-2xl font-bold text-primary">
                 {activeDAOs}
               </div>
-              <div className="text-sm text-zinc-400">Active DAOs</div>
+              <div className="text-sm text-muted-foreground mt-2">Active DAOs</div>
             </div>
-            <div className="bg-[#2A2A2A] rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-white">
+            <div className="bg-card rounded-xl p-6 text-center border border-border shadow-sm">
+              <div className="text-2xl font-bold text-foreground">
                 {totalHolders.toLocaleString()}
               </div>
-              <div className="text-sm text-zinc-400">Total Holders</div>
+              <div className="text-sm text-muted-foreground mt-2">Total Holders</div>
             </div>
-            <div className="bg-[#2A2A2A] rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-white">
+            <div className="bg-card rounded-xl p-6 text-center border border-border shadow-sm">
+              <div className="text-2xl font-bold text-foreground">
                 ${totalMarketCap.toLocaleString()}
               </div>
-              <div className="text-sm text-zinc-400">Total Market Cap</div>
+              <div className="text-sm text-muted-foreground mt-2">Total Market Cap</div>
             </div>
           </div>
         </div>
@@ -184,23 +184,23 @@ export default function DAOs() {
           <div className="flex min-h-[50vh] items-center justify-center">
             <div className="text-center">
               <Loader />
-              <p className="text-zinc-400">Loading AI DAOs...</p>
+              <p className="text-muted-foreground mt-4">Loading AI DAOs...</p>
             </div>
           </div>
         ) : !daos || daos.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-6 bg-[#2A2A2A] rounded-full flex items-center justify-center">
-              <Search className="w-12 h-12 text-zinc-400" />
+          <div className="text-center py-20">
+            <div className="w-24 h-24 mx-auto mb-8 bg-card rounded-full flex items-center justify-center border border-border shadow-sm">
+              <Search className="w-12 h-12 text-muted" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-3">
               No DAOs found
             </h3>
-            <p className="text-zinc-400 max-w-md mx-auto">
+            <p className="text-muted-foreground max-w-md mx-auto">
               No AI-powered DAOs available at the moment.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             {daos.map((dao) => (
               <DAOCard
                 key={dao.id}

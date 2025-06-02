@@ -33,10 +33,10 @@ const DAOProposals = ({ proposals, tokenSymbol = "" }: DAOProposalsProps) => {
   const hiddenCount = hiddenProposals.size;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Hidden proposals notice */}
       {hiddenCount > 0 && (
-        <div className="text-sm text-gray-400 bg-gray-800/30 p-3 rounded-md">
+        <div className="text-sm text-muted-foreground bg-muted/30 p-4 rounded-xl border border-border">
           {hiddenCount} proposal{hiddenCount > 1 ? "s" : ""} hidden
         </div>
       )}
@@ -54,22 +54,24 @@ const DAOProposals = ({ proposals, tokenSymbol = "" }: DAOProposalsProps) => {
 
       {/* Hidden proposals toggle */}
       {hiddenCount > 0 && (
-        <div className="pt-4 border-t border-gray-600">
-          <h3 className="text-lg font-semibold mb-4 text-gray-300">
+        <div className="pt-6 border-t border-border">
+          <h3 className="text-xl font-semibold mb-6 text-foreground">
             Hidden Proposals ({hiddenCount})
           </h3>
-          {Array.from(hiddenProposals).map((proposalId) => {
-            const proposal = proposals.find((p) => p.id === proposalId);
-            return proposal ? (
-              <ProposalCard
-                key={proposal.id}
-                proposal={proposal}
-                onToggleVisibility={toggleProposalVisibility}
-                isHidden={true}
-                tokenSymbol={tokenSymbol}
-              />
-            ) : null;
-          })}
+          <div className="space-y-6">
+            {Array.from(hiddenProposals).map((proposalId) => {
+              const proposal = proposals.find((p) => p.id === proposalId);
+              return proposal ? (
+                <ProposalCard
+                  key={proposal.id}
+                  proposal={proposal}
+                  onToggleVisibility={toggleProposalVisibility}
+                  isHidden={true}
+                  tokenSymbol={tokenSymbol}
+                />
+              ) : null;
+            })}
+          </div>
         </div>
       )}
     </div>
