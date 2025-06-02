@@ -68,72 +68,74 @@ export default function AgentLayout({
   };
 
   return (
-    <>
-      <div className="container mx-auto p-4 space-y-4">
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-border">
-          <Link href={`/agents/${id}`} className="mr-6">
-            <div
-              className={`flex items-center gap-2 pb-2 ${
-                isOverview
-                  ? "border-b-2 border-primary text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Info className="h-4 w-4" />
-              <span className="text-sm font-medium">Overview</span>
-            </div>
-          </Link>
-          <Link href={`/agents/${id}/tasks`} className="mr-6">
-            <div
-              className={`flex items-center gap-2 pb-2 ${
-                isTasks
-                  ? "border-b-2 border-primary text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <ListChecks className="h-4 w-4" />
-              <span className="text-sm font-medium">Tasks</span>
-            </div>
-          </Link>
-          <Link href={`/agents/${id}/jobs`} className="mr-6">
-            <div
-              className={`flex items-center gap-2 pb-2 ${
-                isJobs
-                  ? "border-b-2 border-primary text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <PlayCircle className="h-4 w-4" />
-              <span className="text-sm font-medium">Jobs</span>
-            </div>
-          </Link>
+    <main className="w-full min-h-screen">
+      <div className="flex-1 w-full">
+        <div className="container mx-auto p-4 space-y-4">
+          {/* Navigation Tabs */}
+          <div className="flex border-b border-border">
+            <Link href={`/agents/${id}`} className="mr-6">
+              <div
+                className={`flex items-center gap-2 pb-2 ${
+                  isOverview
+                    ? "border-b-2 border-primary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Info className="h-4 w-4" />
+                <span className="text-sm font-medium">Overview</span>
+              </div>
+            </Link>
+            <Link href={`/agents/${id}/tasks`} className="mr-6">
+              <div
+                className={`flex items-center gap-2 pb-2 ${
+                  isTasks
+                    ? "border-b-2 border-primary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <ListChecks className="h-4 w-4" />
+                <span className="text-sm font-medium">Tasks</span>
+              </div>
+            </Link>
+            <Link href={`/agents/${id}/jobs`} className="mr-6">
+              <div
+                className={`flex items-center gap-2 pb-2 ${
+                  isJobs
+                    ? "border-b-2 border-primary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <PlayCircle className="h-4 w-4" />
+                <span className="text-sm font-medium">Jobs</span>
+              </div>
+            </Link>
+          </div>
+
+          {/* Content */}
+          <div className="pt-2">{children}</div>
         </div>
 
-        {/* Content */}
-        <div className="pt-2">{children}</div>
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the
+                agent and all associated tasks.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              agent and all associated tasks.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    </main>
   );
 }

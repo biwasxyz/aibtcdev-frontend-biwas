@@ -17,5 +17,11 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div>{children}</div>;
+  return (
+    <main className="w-full min-h-screen">
+      <div className="flex-1 w-full">
+        {children}
+      </div>
+    </main>
+  );
 }

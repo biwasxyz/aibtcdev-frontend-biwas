@@ -377,6 +377,26 @@ export const fetchAllProposals = async (): Promise<ProposalWithDAO[]> => {
   return data || [];
 };
 
+// Fetches a single proposal by ID with DAO information.
+export const fetchProposalById = async (proposalId: string): Promise<ProposalWithDAO | null> => {
+  const { data, error } = await supabase
+    .from("proposals")
+    .select(
+      `
+            *,
+            daos:dao_id (
+                name,
+                description
+            )
+        `,
+    )
+    .eq("id", proposalId)
+    .single();
+
+  if (error) throw error;
+  return data || null;
+};
+
 // Fetches a single broadcasted DAO record based on its URL-decoded name.
 export const fetchDAOByName = async (
   encodedName: string,

@@ -18,7 +18,7 @@ export interface Vote {
   voted: boolean | null;
 }
 
-interface VoteWithDetails {
+interface VoteWithRelations {
   id: string;
   created_at: string;
   dao_id: string;
@@ -33,8 +33,8 @@ interface VoteWithDetails {
   prompt: string | null;
   confidence: number | null;
   voted: boolean | null;
-  daos: { id: string; name: string }[];
-  proposals: { id: string; title: string }[];
+  daos: { id: string; name: string } | null;
+  proposals: { id: string; title: string } | null;
 }
 
 /**
@@ -78,18 +78,18 @@ export async function fetchVotes(): Promise<Vote[]> {
 
   if (error) throw error;
   if (!data || data.length === 0) return [];
-
+  console.log("data", data);
   // Transform data into the Vote interface
-  const transformedVotes: Vote[] = data.map((vote) => ({
+  const transformedVotes: Vote[] = (data as unknown as VoteWithRelations[]).map((vote) => ({
     id: vote.id,
     created_at: vote.created_at,
     dao_id: vote.dao_id,
-    dao_name: vote.daos?.[0]?.name || "Unknown DAO",
+    dao_name: vote.daos?.name || "Unknown DAO",
     wallet_id: vote.wallet_id,
     profile_id: vote.profile_id,
     answer: vote.answer,
     proposal_id: vote.proposal_id,
-    proposal_title: vote.proposals?.[0]?.title || "Unknown Proposal",
+    proposal_title: vote.proposals?.title || "Unknown Proposal",
     reasoning: vote.reasoning,
     tx_id: vote.tx_id,
     address: vote.address,
@@ -99,6 +99,7 @@ export async function fetchVotes(): Promise<Vote[]> {
     voted: vote.voted,
   }));
 
+  console.log("transformedVotes", transformedVotes);
   return transformedVotes;
 }
 
@@ -150,16 +151,16 @@ export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
     return [];
   }
 
-  const transformedVotes: Vote[] = data.map((vote: VoteWithDetails) => ({
+  const transformedVotes: Vote[] = (data as unknown as VoteWithRelations[]).map((vote) => ({
     id: vote.id,
     created_at: vote.created_at,
     dao_id: vote.dao_id,
-    dao_name: vote.daos?.[0]?.name || "Unknown DAO",
+    dao_name: vote.daos?.name || "Unknown DAO",
     wallet_id: vote.wallet_id,
     profile_id: vote.profile_id,
     answer: vote.answer,
     proposal_id: vote.proposal_id,
-    proposal_title: vote.proposals?.[0]?.title || "Current Proposal",
+    proposal_title: vote.proposals?.title || "Current Proposal",
     reasoning: vote.reasoning,
     tx_id: vote.tx_id,
     address: vote.address,

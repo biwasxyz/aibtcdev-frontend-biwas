@@ -10,7 +10,6 @@ import LabeledField from "./LabeledField";
 import type { Proposal, ProposalWithDAO } from "@/types/supabase";
 import {
   BarChart3,
-  Vote,
   Blocks,
   Layers,
   ArrowRight,
@@ -26,6 +25,7 @@ import {
   formatAction,
 } from "@/helpers/helper";
 import { useQueryClient } from "@tanstack/react-query";
+import { safeNumberFromBigInt, safeString } from "@/helpers/proposal-utils";
 
 interface ProposalDetailsProps {
   proposal: Proposal | ProposalWithDAO;
@@ -43,8 +43,8 @@ const ProposalDetails = ({
 
   const { isActive } = useVotingStatus(
     proposal.status,
-    proposal.vote_start,
-    proposal.vote_end,
+    safeNumberFromBigInt(proposal.vote_start),
+    safeNumberFromBigInt(proposal.vote_end),
   );
 
   const refreshVotesData = useCallback(async () => {
@@ -103,15 +103,23 @@ const ProposalDetails = ({
 
   return (
     <div className={`space-y-6 ${className}`}>
+      {/* Vote Progress Section */}
+      <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
+        <h4 className="text-sm font-medium text-white uppercase tracking-wide mb-3">
+          Voting Progress
+        </h4>
+        <VotesTable proposalId={proposal.id} />
+      </div>
+
       {/* On-chain Message */}
-      {proposal.parameters && (
+      {proposal.content && (
         <div className="bg-[#1A1A1A] rounded-md p-4 border border-gray-600">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-medium text-white uppercase tracking-wide">
               On-chain Message
             </h4>
           </div>
-          <MessageDisplay message={proposal.parameters} />
+          <MessageDisplay message={proposal.content} />
         </div>
       )}
 
@@ -133,21 +141,13 @@ const ProposalDetails = ({
             createdAt={proposal.created_at}
             status={proposal.status}
             concludedBy={proposal.concluded_by}
-            vote_start={proposal.vote_start}
-            vote_end={proposal.vote_end}
+            vote_start={safeNumberFromBigInt(proposal.vote_start)}
+            vote_end={safeNumberFromBigInt(proposal.vote_end)}
           />
         </div>
       </div>
 
-      {/* Vote Details Section */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Vote className="h-5 w-5 text-orange-500" />
-          <h4 className="text-lg font-semibold text-white">Vote Details</h4>
-        </div>
 
-        <VotesTable proposalId={proposal.id} />
-      </div>
 
       {/* Blockchain Section */}
       <div className="space-y-6">
@@ -168,20 +168,20 @@ const ProposalDetails = ({
                 icon={Layers}
                 label="Snapshot block"
                 value={
-                  <BlockVisual value={proposal.created_stx} type="stacks" />
+                  <BlockVisual value={safeNumberFromBigInt(proposal.created_stx)} type="stacks" />
                 }
               />
               <LabeledField
                 icon={ArrowRight}
                 label="Start block"
                 value={
-                  <BlockVisual value={proposal.vote_start} type="bitcoin" />
+                  <BlockVisual value={safeNumberFromBigInt(proposal.vote_start)} type="bitcoin" />
                 }
               />
               <LabeledField
                 icon={Timer}
                 label="End block"
-                value={<BlockVisual value={proposal.vote_end} type="bitcoin" />}
+                value={<BlockVisual value={safeNumberFromBigInt(proposal.vote_end)} type="bitcoin" />}
               />
             </div>
           </div>
@@ -196,8 +196,8 @@ const ProposalDetails = ({
               <LabeledField
                 icon={Wallet}
                 label="Principal"
-                value={formatAction(proposal.contract_principal)}
-                link={getExplorerLink("contract", proposal.contract_principal)}
+                value={formatAction(safeString(proposal.contract_principal))}
+                link={safeString(proposal.contract_principal) ? getExplorerLink("contract", proposal.contract_principal) : undefined}
               />
               <LabeledField
                 icon={Activity}

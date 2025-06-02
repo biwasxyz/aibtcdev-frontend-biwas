@@ -198,7 +198,7 @@ export default function ApplicationLayout({
       </div>
 
       {/* Main Content */}
-      <AssetTracker />
+      {/* <AssetTracker /> */}
       <div className="flex-1 flex min-w-0 max-h-[calc(100vh-3.5rem)] md:max-h-[calc(100vh-4rem)] overflow-hidden">
         {/* Mobile Sidebar */}
         <aside
@@ -268,7 +268,7 @@ export default function ApplicationLayout({
           </div>
         </aside>
 
-        <main className="flex-1 min-w-0 relative">
+        <main className="flex-1 min-w-0 bg-background">
           <ScrollArea className="h-full w-full">{children}</ScrollArea>
         </main>
 

@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { Loader } from "@/components/reusables/Loader";
 import DAOProposals from "@/components/daos/proposal/DAOProposal";
-import { fetchProposals, fetchDAOByName } from "@/queries/dao-queries";
+import { fetchProposals, fetchDAOByName, fetchToken } from "@/queries/dao-queries";
 // import { Button } from "@/components/ui/button";
 // import { format } from "date-fns";
 import { supabase } from "@/utils/supabase/client";
@@ -39,6 +39,16 @@ export default function ProposalsPage() {
 
   // console.log("Found DAO:", dao);
   // console.log("DAO ID:", daoId);
+
+  // Fetch token information for the DAO
+  const {
+    data: token,
+    isLoading: isLoadingToken,
+  } = useQuery({
+    queryKey: ["token", daoId],
+    queryFn: () => (daoId ? fetchToken(daoId) : Promise.resolve(null)),
+    enabled: !!daoId,
+  });
 
   // Then use the ID to fetch proposals
   const {
@@ -91,7 +101,7 @@ export default function ProposalsPage() {
     };
   }, [daoId, queryClient]);
 
-  if (isLoadingDAO || isLoading) {
+  if (isLoadingDAO || isLoading || isLoadingToken) {
     return (
       <div className="flex justify-center items-center min-h-[400px] w-full">
         <div className="text-center space-y-4">
@@ -153,7 +163,10 @@ export default function ProposalsPage() {
           </div>
         }
       >
-        <DAOProposals proposals={proposals || []} />
+        <DAOProposals 
+          proposals={proposals || []} 
+          tokenSymbol={token?.symbol || ""} 
+        />
       </Suspense>
     </div>
   );

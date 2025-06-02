@@ -10,7 +10,6 @@ import {
   HistoryIcon,
   Vote,
 } from "lucide-react";
-import { Loader } from "@/components/reusables/Loader";
 import {
   Table,
   TableBody,
@@ -26,59 +25,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { fetchVotes } from "@/queries/vote-queries";
 import { formatDistanceToNow } from "date-fns";
-import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import { useClipboard } from "@/helpers/clipboard-utils";
 import { Badge } from "@/components/ui/badge";
+import type { Vote as VoteType } from "@/queries/vote-queries";
 
-export function VotesView() {
-  const {
-    data: votes = [],
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ["votes"],
-    queryFn: fetchVotes,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
-  });
+interface VotesViewProps {
+  votes: VoteType[];
+}
 
+export function VotesView({ votes }: VotesViewProps) {
   const { copyToClipboard, copiedText } = useClipboard();
-
-  if (isLoading) {
-    return (
-      <div className="w-full min-h-screen bg-[#1A1A1A] flex items-center justify-center">
-        <Loader />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full min-h-screen bg-[#1A1A1A]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center py-8">
-            <div className="text-red-500 mb-4">
-              <Vote className="h-12 w-12 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold">Error Loading Votes</h2>
-              <p className="text-gray-400 mt-2">
-                {error instanceof Error ? error.message : "Failed to load votes"}
-              </p>
-              <button
-                onClick={() => refetch()}
-                className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-md transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Calculate vote statistics
   const totalVotes = votes.length;
@@ -88,7 +46,7 @@ export function VotesView() {
   const uniqueProposals = new Set(votes.map((vote) => vote.proposal_id)).size;
 
   return (
-    <div className="w-full min-h-screen bg-[#1A1A1A]">
+    <div className="w-full min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
           {/* Header */}

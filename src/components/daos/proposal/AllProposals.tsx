@@ -3,10 +3,7 @@
 import { useRef, useState, useMemo } from "react";
 import { Card, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import VoteProgress from "./VoteProgress";
-import ProposalDetails from "./ProposalDetails";
-import { useVotingStatus } from "./TimeStatus";
+import ProposalCard from "./ProposalCard";
 import {
   FilterSidebar,
   type FilterConfig,
@@ -17,19 +14,10 @@ import { Pagination } from "@/components/reusables/Pagination";
 import type { ProposalWithDAO } from "@/types/supabase";
 import {
   FileText,
-  User,
-  Calendar,
-  ChevronDown,
-  ChevronUp,
-  Eye,
-  EyeOff,
-  Building2,
   Filter,
   X,
 } from "lucide-react";
-import { format } from "date-fns";
-import { truncateString, getExplorerLink } from "@/helpers/helper";
-import Link from "next/link";
+import { useTokens } from "@/hooks/useTokens";
 
 interface AllProposalsProps {
   proposals: ProposalWithDAO[];
@@ -46,6 +34,8 @@ type SortField =
   | "dao";
 
 const AllProposals = ({ proposals }: AllProposalsProps) => {
+  // Fetch tokens and create lookup map
+  const { tokenLookup } = useTokens();
   const proposalsRef = useRef<HTMLDivElement>(null);
   const [hiddenProposals, setHiddenProposals] = useState<Set<string>>(
     new Set(),
@@ -159,7 +149,7 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
       // Creator filter
       if (filterState.creator && typeof filterState.creator === "string") {
         const creatorTerm = filterState.creator.toLowerCase();
-        if (!proposal.creator.toLowerCase().includes(creatorTerm)) return false;
+        if (!proposal.creator?.toLowerCase().includes(creatorTerm)) return false;
       }
 
       return true;
@@ -178,7 +168,7 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
             new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
           );
         case "title":
-          return a.title.localeCompare(b.title);
+          return (a.title || "").localeCompare(b.title || "");
         case "votes":
           const votesA =
             Number(a.votes_for || 0) + Number(a.votes_against || 0);
@@ -186,13 +176,13 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
             Number(b.votes_for || 0) + Number(b.votes_against || 0);
           return votesB - votesA;
         case "status":
-          return a.status.localeCompare(b.status);
+          return (a.status || "").localeCompare(b.status || "");
         case "dao":
           const daoA = a.daos?.name || "";
           const daoB = b.daos?.name || "";
           return daoA.localeCompare(daoB);
         case "creator":
-          return a.creator.localeCompare(b.creator);
+          return (a.creator || "").localeCompare(b.creator || "");
         default:
           return 0;
       }
@@ -277,7 +267,7 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-[#1A1A1A]">
+    <div className="w-full min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Header */}
         <div className="mb-6">
@@ -367,11 +357,13 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
                 </Card>
               ) : (
                 paginatedProposals.map((proposal) => (
-                  <EnhancedAllProposalCard
+                  <ProposalCard
                     key={proposal.id}
                     proposal={proposal}
                     onToggleVisibility={toggleProposalVisibility}
                     isHidden={hiddenProposals.has(proposal.id)}
+                    tokenSymbol={tokenLookup[proposal.dao_id || ""] || ""}
+                    showDAOInfo={true}
                   />
                 ))
               )}
@@ -397,219 +389,6 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   );
 };
 
-// Enhanced Proposal Card Component for the all proposals view
-interface EnhancedAllProposalCardProps {
-  proposal: ProposalWithDAO;
-  onToggleVisibility: (proposalId: string) => void;
-  isHidden: boolean;
-}
 
-const EnhancedAllProposalCard = ({
-  proposal,
-  onToggleVisibility,
-  isHidden,
-}: EnhancedAllProposalCardProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  // Get voting status
-  const { isActive, isEnded } = useVotingStatus(
-    proposal.status,
-    proposal.vote_start,
-    proposal.vote_end,
-  );
-
-  // Get status badge
-  const getStatusBadge = () => {
-    if (isActive) {
-      return (
-        <Badge className="bg-orange-500/20 text-orange-500 hover:bg-orange-500/30 border-orange-500/50">
-          Active
-        </Badge>
-      );
-    } else if (isEnded && proposal.passed) {
-      return (
-        <Badge className="bg-green-500/20 text-green-500 hover:bg-green-500/30 border-green-500/50">
-          Passed
-        </Badge>
-      );
-    } else if (isEnded && !proposal.passed) {
-      return (
-        <Badge className="bg-red-500/20 text-red-500 hover:bg-red-500/30 border-red-500/50">
-          Failed
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge className="bg-gray-500/20 text-gray-500 hover:bg-gray-500/30 border-gray-500/50">
-          Pending
-        </Badge>
-      );
-    }
-  };
-
-  // Get vote count summary
-  const getVoteSummary = () => {
-    const votesFor = Number(proposal.votes_for || 0);
-    const votesAgainst = Number(proposal.votes_against || 0);
-    const totalVotes = votesFor + votesAgainst;
-    if (totalVotes === 0) {
-      return "0 Total Votes";
-    }
-    return `${totalVotes} Total Vote${totalVotes !== 1 ? "s" : ""}`;
-  };
-
-  // Get DAO name with link
-  const getDAOInfo = () => {
-    if (proposal.daos?.name) {
-      const encodedDAOName = encodeURIComponent(proposal.daos.name);
-      return (
-        <Link
-          href={`/daos/${encodedDAOName}`}
-          className="hover:text-white transition-colors"
-        >
-          {proposal.daos.name}
-        </Link>
-      );
-    }
-    return "Unknown DAO";
-  };
-
-  return (
-    <Card className="overflow-hidden bg-zinc-900/50 border-zinc-700/50 hover:border-zinc-600/50 transition-colors">
-      <CardContent className="p-4 sm:p-6">
-        {/* Header Section */}
-        <div className="flex items-start justify-between mb-4">
-          {/* Left side - Title and metadata */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 sm:gap-3 mb-2">
-              {/* Avatar placeholder */}
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-zinc-700 flex-shrink-0" />
-
-              {/* Title and basic info */}
-              <div className="min-w-0 flex-1">
-                <h3 className="text-base sm:text-lg font-semibold text-white mb-1 truncate">
-                  {proposal.title}
-                </h3>
-                {/* Mobile-optimized metadata */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1">
-                      <Building2 className="h-3 w-3" />
-                      {getDAOInfo()}
-                    </span>
-                    <span className="hidden sm:inline">•</span>
-                    <span className="flex items-center gap-1">
-                      <User className="h-3 w-3" />
-                      By{" "}
-                      <a
-                        href={getExplorerLink("address", proposal.creator)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-white transition-colors"
-                      >
-                        {truncateString(proposal.creator, 4, 4)}
-                      </a>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {format(new Date(proposal.created_at), "MMM d, yyyy")}
-                    </span>
-                    <span className="hidden sm:inline">•</span>
-                    <span>{getVoteSummary()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right side - Actions */}
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            {getStatusBadge()}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onToggleVisibility(proposal.id)}
-              className="h-8 w-8 text-gray-400 hover:text-white"
-              title={isHidden ? "Show proposal" : "Hide proposal"}
-            >
-              {isHidden ? (
-                <Eye className="h-4 w-4" />
-              ) : (
-                <EyeOff className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </div>
-
-        {/* Category badge if available */}
-        {proposal.type && (
-          <div className="mb-4">
-            <Badge
-              variant="outline"
-              className="text-purple-400 border-purple-400/50"
-            >
-              {proposal.type}
-            </Badge>
-          </div>
-        )}
-
-        {/* Vote Progress - Always visible */}
-        <div className="mb-4">
-          <VoteProgress
-            contractAddress={proposal.contract_principal}
-            proposalId={proposal.proposal_id}
-            votesFor={proposal.votes_for}
-            votesAgainst={proposal.votes_against}
-            refreshing={false}
-            tokenSymbol={proposal.token_symbol || ""}
-            liquidTokens={
-              proposal.liquid_tokens !== null
-                ? proposal.liquid_tokens.toString()
-                : "0"
-            }
-            isActive={isActive}
-          />
-        </div>
-
-        {/* Expand/Collapse Toggle */}
-        <div className="flex justify-between items-center">
-          <CardDescription className="text-gray-400 text-xs sm:text-sm">
-            {proposal.status || "Awaiting first vote"}
-          </CardDescription>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="self-start text-gray-400 hover:text-white p-2 h-auto text-xs sm:text-sm"
-          >
-            {isExpanded ? (
-              <>
-                <ChevronUp className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Hide Details</span>
-                <span className="sm:hidden">Hide</span>
-              </>
-            ) : (
-              <>
-                <ChevronDown className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">View Details</span>
-                <span className="sm:hidden">Details</span>
-              </>
-            )}
-          </Button>
-        </div>
-
-        {/* Expanded Details - Using the reusable component */}
-        {isExpanded && (
-          <div className="mt-6 pt-6 border-t border-gray-600">
-            <ProposalDetails proposal={proposal} />
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
 
 export default AllProposals;
