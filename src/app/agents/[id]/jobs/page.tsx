@@ -1,6 +1,6 @@
 "use client";
 
-import { JobsTable } from "@/components/tasks/jobs-table";
+import { JobsTable } from "@/components/tasks/JobsTable";
 import { Heading } from "@/components/ui/heading";
 import { useParams } from "next/navigation";
 

@@ -14,8 +14,8 @@ import {
 // Dynamically import TokenTransfer component to avoid SSR issues
 const TokenTransfer = dynamic(
   () =>
-    import("@/components/auth/token-transfer").then((mod) => mod.TokenTransfer),
-  { ssr: false }
+    import("@/components/auth/TokenTransfer").then((mod) => mod.TokenTransfer),
+  { ssr: false },
 );
 
 interface TransferModalProps {
@@ -106,7 +106,7 @@ export const TransferTokenModal = memo(
         </DialogContent>
       </Dialog>
     );
-  }
+  },
 );
 
 TransferTokenModal.displayName = "TransferTokenModal";

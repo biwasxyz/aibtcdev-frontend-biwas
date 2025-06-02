@@ -2,9 +2,9 @@
 
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import DAOExtensions from "@/components/daos/dao-extensions";
+import DAOExtensions from "@/components/daos/DaoExtensions";
 import { fetchDAOExtensions, fetchDAOByName } from "@/queries/dao-queries";
-import { Loader } from "@/components/reusables/loader";
+import { Loader } from "@/components/reusables/Loader";
 
 export const runtime = "edge";
 
@@ -31,13 +31,38 @@ export default function ExtensionsPage() {
   const isLoading = isLoadingDAO || isLoadingExtensions;
 
   if (isLoading) {
-    return <Loader />;
+    return (
+      <div className="flex justify-center items-center min-h-[400px] w-full">
+        <div className="text-center space-y-4">
+          <Loader />
+          <p className="text-zinc-400">Loading extensions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dao) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px] w-full">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-semibold text-white">DAO Not Found</h2>
+          <p className="text-zinc-400">
+            Could not find a DAO with the name &apos;
+            {decodeURIComponent(encodedName)}&apos;
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
-      {daoExtensions && daoExtensions.length > 0 && (
+      {daoExtensions && daoExtensions.length > 0 ? (
         <DAOExtensions extensions={daoExtensions} />
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-zinc-400">No extensions found for this DAO.</p>
+        </div>
       )}
     </div>
   );

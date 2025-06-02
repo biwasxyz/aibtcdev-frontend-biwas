@@ -14,7 +14,7 @@ export const updateSession = async (request: NextRequest) => {
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error(
-        "middleware: missing supabase url or supabase anon key in env vars"
+        "middleware: missing supabase url or supabase anon key in env vars",
       );
     }
 
@@ -25,13 +25,13 @@ export const updateSession = async (request: NextRequest) => {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
+            request.cookies.set(name, value),
           );
           response = NextResponse.next({
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
+            response.cookies.set(name, value, options),
           );
         },
       },
@@ -78,8 +78,11 @@ export const updateSession = async (request: NextRequest) => {
       return NextResponse.redirect(new URL("/daos", request.url));
     }
 
-    if (request.nextUrl.pathname.startsWith("/profile") && (userError || !user)) {
-      return NextResponse.redirect(new URL("/", request.url))
+    if (
+      request.nextUrl.pathname.startsWith("/profile") &&
+      (userError || !user)
+    ) {
+      return NextResponse.redirect(new URL("/", request.url));
     }
 
     if (request.nextUrl.pathname === "/" && !userError) {

@@ -1,22 +1,25 @@
 import React from "react";
-import { Metadata } from "next";
-import { Footer } from "@/components/reusables/footer";
+import { Metadata, Viewport } from "next";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: "Admin",
 };
 
-export default function CrewLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <div>
-        {children}
-        <Footer />
-      </div>
-    </>
+    <main className="w-full min-h-screen">
+      {children}
+    </main>
   );
 }

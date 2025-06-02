@@ -12,7 +12,7 @@ export function FormatMission({ content, inline = false }: FormatMissionProps) {
     // Extract just the mission text (usually after ## Mission)
     // Using a regex without the /s flag for compatibility
     const missionMatch = processedContent.match(
-      /## Mission\s*\n\s*\n([\s\S]*?)(?=\n\n|$)/
+      /## Mission\s*\n\s*\n([\s\S]*?)(?=\n\n|$)/,
     );
     if (missionMatch && missionMatch[1]) {
       return <span>{missionMatch[1].trim()}</span>;

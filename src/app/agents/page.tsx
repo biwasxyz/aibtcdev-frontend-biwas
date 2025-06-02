@@ -86,7 +86,7 @@ export default function AgentsPage() {
         key={agent.id}
         className={cn(
           "group flex flex-col p-4 bg-card hover:bg-muted transition-colors duration-200 rounded-lg",
-          isArchived && "opacity-75 hover:opacity-100"
+          isArchived && "opacity-75 hover:opacity-100",
         )}
       >
         <div className="flex items-center">

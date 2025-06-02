@@ -4,17 +4,16 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Users, Boxes, Menu, X } from "lucide-react";
+import { Users, Boxes, Menu, X, FileText, Vote } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 // import { ThreadList } from "@/components/threads/thread-list";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { supabase } from "@/utils/supabase/client";
-import { NetworkIndicator } from "@/components/reusables/network-indicator";
+import { NetworkIndicator } from "@/components/reusables/NetworkIndicator";
 // import { getStacksAddress } from "@/lib/address";
-import AuthButton from "@/components/home/auth-button";
-import AssetTracker from "@/components/reusables/asset-tracker";
-import { AuthModal } from "@/components/auth/auth-modal";
+import AuthButton from "@/components/home/AuthButton";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 interface ApplicationLayoutProps {
   children: React.ReactNode;
@@ -22,8 +21,10 @@ interface ApplicationLayoutProps {
 
 const navigation = [
   { id: "daos", name: "DAOs", href: "/daos", icon: Boxes },
+  { id: "proposals", name: "Proposals", href: "/proposals", icon: FileText },
   // { id: "chat", name: "Chat", href: "/chat", icon: MessageSquare },
   // { id: "agents", name: "Agents", href: "/agents", icon: Users },
+  { id: "votes", name: "Votes", href: "/votes", icon: Vote },
   { id: "profile", name: "Profile", href: "/profile", icon: Users },
 ];
 
@@ -44,11 +45,11 @@ export default function ApplicationLayout({
       } = await supabase.auth.getUser();
       setHasUser(!!user);
 
-      // If we're on the profile page and not authenticated, show the modal
-      if (pathname === "/profile" && !user) {
+      // If we're on a protected page and not authenticated, show the modal
+      if ((pathname === "/profile" || pathname === "/votes") && !user) {
         setShowAuthModal(true);
-      } else if (pathname === "/profile" && user) {
-        // If we're on the profile page and authenticated, make sure modal is closed
+      } else if ((pathname === "/profile" || pathname === "/votes") && user) {
+        // If we're on a protected page and authenticated, make sure modal is closed
         setShowAuthModal(false);
       }
     };
@@ -80,8 +81,8 @@ export default function ApplicationLayout({
 
   // Handle navigation to protected routes
   const handleNavigation = async (href: string, e: React.MouseEvent) => {
-    // Only intercept navigation to profile page
-    if (href === "/profile") {
+    // Only intercept navigation to protected pages (profile and votes)
+    if (href === "/profile" || href === "/votes") {
       e.preventDefault();
 
       // Check if user is authenticated
@@ -91,21 +92,21 @@ export default function ApplicationLayout({
         // Show auth modal if not authenticated
         setShowAuthModal(true);
       } else {
-        // Navigate to profile if authenticated
+        // Navigate to the page if authenticated
         router.push(href);
       }
     }
   };
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-950">
+    <div className="flex flex-col h-screen bg-[#1A1A1A]">
       {/* Mobile Header */}
-      <div className="md:hidden h-14 px-2 flex items-center justify-between bg-zinc-900">
+      <div className="md:hidden h-14 px-2 flex items-center justify-between bg-[#2A2A2A] border-b border-zinc-800">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setLeftPanelOpen(!leftPanelOpen)}
-          className="text-zinc-400"
+          className="text-zinc-400 hover:text-white hover:bg-zinc-800/50"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -125,7 +126,13 @@ export default function ApplicationLayout({
         </Link>
         <div className="flex items-center gap-2">
           {hasUser ? (
-            <Button onClick={handleSignOut}> Sign out</Button>
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              className="text-sm font-medium"
+            >
+              Sign out
+            </Button>
           ) : (
             <AuthButton />
           )}
@@ -133,7 +140,7 @@ export default function ApplicationLayout({
       </div>
 
       {/* Desktop Header */}
-      <div className="hidden md:flex h-16 bg-zinc-900 items-center px-6">
+      <div className="hidden md:flex h-16  items-center px-6 border-b border-zinc-800">
         <div className="w-1/4">
           <Link href="/daos" className="flex items-center gap-2">
             <Image
@@ -162,11 +169,11 @@ export default function ApplicationLayout({
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 text-base font-medium rounded-lg transition-colors",
                     isActive
-                      ? "text-white"
-                      : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
+                      ? "text-white bg-zinc-800/50"
+                      : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
                   )}
                 >
-                  {/* <item.icon className="h-5 w-5" /> */}
+                  <item.icon className="h-5 w-5" />
                   <span>{item.name}</span>
                 </Link>
               );
@@ -176,8 +183,11 @@ export default function ApplicationLayout({
         <div className="w-1/4 flex justify-end items-center gap-4">
           <NetworkIndicator />
           {hasUser ? (
-            <Button onClick={handleSignOut} variant="outline">
-              {" "}
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              className="text-sm font-medium"
+            >
               Sign out
             </Button>
           ) : (
@@ -187,19 +197,19 @@ export default function ApplicationLayout({
       </div>
 
       {/* Main Content */}
-      <AssetTracker />
+      {/* <AssetTracker /> */}
       <div className="flex-1 flex min-w-0 max-h-[calc(100vh-3.5rem)] md:max-h-[calc(100vh-4rem)] overflow-hidden">
         {/* Mobile Sidebar */}
         <aside
           className={cn(
             "md:hidden fixed inset-y-0 left-0 z-50",
-            "bg-zinc-900 w-[min(100vw,320px)]",
+            "w-[min(100vw,320px)]",
             "transition-transform duration-200 ease-in-out",
-            leftPanelOpen ? "translate-x-0" : "-translate-x-full"
+            leftPanelOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
           {/* Mobile Sidebar Header */}
-          <div className="h-14 px-4 flex items-center justify-between">
+          <div className="h-14 px-4 flex items-center justify-between border-b border-zinc-800">
             <Link href="/daos" className="flex items-center gap-2">
               <Image
                 src="/logos/aibtcdev-avatar-1000px.png"
@@ -219,7 +229,7 @@ export default function ApplicationLayout({
               variant="ghost"
               size="icon"
               onClick={() => setLeftPanelOpen(false)}
-              className="text-zinc-400 h-8 w-8 hover:bg-zinc-800"
+              className="text-zinc-400 h-8 w-8 hover:bg-zinc-800 hover:text-white"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -227,13 +237,6 @@ export default function ApplicationLayout({
 
           {/* Mobile Sidebar Content */}
           <div className="flex flex-col h-[calc(100vh-3.5rem)]">
-            {/* Thread List */}
-            {/* <div className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full">
-                <ThreadList setLeftPanelOpen={setLeftPanelOpen} />
-              </ScrollArea>
-            </div> */}
-
             {/* Navigation */}
             <nav className="flex-shrink-0">
               <div className="p-2 space-y-1">
@@ -251,7 +254,7 @@ export default function ApplicationLayout({
                         "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
                         isActive
                           ? "bg-zinc-800/50 text-white"
-                          : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
+                          : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
                       )}
                     >
                       <item.icon className="h-5 w-5" />
@@ -264,7 +267,7 @@ export default function ApplicationLayout({
           </div>
         </aside>
 
-        <main className="flex-1 min-w-0 relative">
+        <main className="flex-1 min-w-0 bg-background">
           <ScrollArea className="h-full w-full">{children}</ScrollArea>
         </main>
 
@@ -281,7 +284,7 @@ export default function ApplicationLayout({
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        redirectUrl="/profile"
+        redirectUrl={pathname === "/votes" ? "/votes" : "/profile"}
       />
     </div>
   );

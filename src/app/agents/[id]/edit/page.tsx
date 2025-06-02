@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { AgentForm } from "@/components/agents/agent-form";
+import { AgentForm } from "@/components/agents/AgentForm";
 import { Agent } from "@/types/supabase";
 import { supabase } from "@/utils/supabase/client";
 import { useSessionStore } from "@/store/session";
@@ -89,7 +89,7 @@ export default function EditAgentPage() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setAgent((prev) => {
@@ -106,7 +106,7 @@ export default function EditAgentPage() {
           ...prev,
           [name]: value,
           image_url: `https://bitcoinfaces.xyz/api/get-image?name=${encodeURIComponent(
-            imageUrlName
+            imageUrlName,
           )}`,
         };
       }

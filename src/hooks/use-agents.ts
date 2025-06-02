@@ -16,9 +16,8 @@ export function useAgents() {
           .select("*")
           .order("is_archived", { ascending: true })
           .order("name", { ascending: true })
-          .eq("name", "DAO Manager")
+          .eq("name", "DAO Manager");
         // .single()
-
 
         if (error) {
           throw error;

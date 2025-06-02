@@ -22,7 +22,7 @@ async function fetchUserData() {
   let agentBalance = null;
   if (profileData.assigned_agent_address) {
     const agentResponse = await fetch(
-      `/fetch?address=${profileData.assigned_agent_address.toUpperCase()}`
+      `/fetch?address=${profileData.assigned_agent_address.toUpperCase()}`,
     );
 
     if (agentResponse.ok) {
@@ -45,7 +45,7 @@ export function useUserData() {
   return useQuery({
     queryKey: ["userData"],
     queryFn: fetchUserData,
-    staleTime:30000, //5 minutes
-    refetchOnWindowFocus:false
+    staleTime: 30000, //5 minutes
+    refetchOnWindowFocus: false,
   });
 }

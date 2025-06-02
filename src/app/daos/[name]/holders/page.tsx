@@ -2,8 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import DAOHolders from "@/components/daos/dao-holders";
+import { Loader } from "@/components/reusables/Loader";
+import DAOHolders from "@/components/daos/DaoHolders";
 import {
   fetchToken,
   fetchHolders,
@@ -35,11 +35,11 @@ export default function HoldersPage() {
     enabled: !!daoId, // Only run this query when we have the daoId
   });
 
-  // Finally fetch the holders using the token data
+  // Finally fetch the holders using the DAO ID
   const { data: holdersData, isLoading: isLoadingHolders } = useQuery({
-    queryKey: ["holders", token?.contract_principal, token?.symbol],
-    queryFn: () => fetchHolders(token!.contract_principal, token!.symbol),
-    enabled: !!token?.contract_principal && !!token?.symbol,
+    queryKey: ["holders", daoId],
+    queryFn: () => fetchHolders(daoId!),
+    enabled: !!daoId,
   });
 
   // console.log(token?.id);
@@ -49,15 +49,42 @@ export default function HoldersPage() {
   const isLoading = isLoadingDAO || isLoadingToken || isLoadingHolders;
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="flex justify-center items-center min-h-[400px] w-full">
+        <div className="text-center space-y-4">
+          <Loader />
+          <p className="text-zinc-400">Loading holders...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dao) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px] w-full">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-semibold text-white">DAO Not Found</h2>
+          <p className="text-zinc-400">
+            Could not find a DAO with the name &apos;
+            {decodeURIComponent(encodedName)}&apos;
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
-      <DAOHolders
-        holders={holdersData?.holders || []}
-        tokenSymbol={token?.symbol || ""}
-      />
+      {holdersData?.holders && holdersData.holders.length > 0 ? (
+        <DAOHolders
+          holders={holdersData.holders}
+          tokenSymbol={token?.symbol || ""}
+        />
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-zinc-400">No holders found for this DAO.</p>
+        </div>
+      )}
     </div>
   );
 }

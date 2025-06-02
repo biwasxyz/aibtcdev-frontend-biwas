@@ -12,8 +12,9 @@ import type {
 } from "@faktoryfun/styx-sdk";
 import { MIN_DEPOSIT_SATS, MAX_DEPOSIT_SATS } from "@faktoryfun/styx-sdk";
 import { useToast } from "@/hooks/use-toast";
-import { Bitcoin, Loader2 } from "lucide-react";
-import AuthButton from "@/components/home/auth-button";
+import { Bitcoin } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
+import AuthButton from "@/components/home/AuthButton";
 import { useSessionStore } from "@/store/session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,7 +112,7 @@ export default function DepositForm({
       const utxos = await response.json();
       const totalSats = utxos.reduce(
         (sum: number, utxo: UTXO) => sum + utxo.value,
-        0
+        0,
       );
       return totalSats / 100000000; // Convert satoshis to BTC
     },
@@ -130,7 +131,7 @@ export default function DepositForm({
     try {
       console.log("Fetching fee estimates directly from mempool.space");
       const response = await fetch(
-        "https://mempool.space/api/v1/fees/recommended"
+        "https://mempool.space/api/v1/fees/recommended",
       );
       const data = await response.json();
 
@@ -291,7 +292,7 @@ export default function DepositForm({
       let currentFeeRates: FeeEstimates;
       try {
         console.log(
-          "Fetching fresh fee estimates before transaction preparation"
+          "Fetching fresh fee estimates before transaction preparation",
         );
         const estimatesResult = await fetchMempoolFeeEstimates();
         currentFeeRates = {
@@ -354,8 +355,8 @@ export default function DepositForm({
         const shortfallBTC = totalRequiredBTC - currentBalance;
         throw new Error(
           `Insufficient funds. You need ${shortfallBTC.toFixed(
-            8
-          )} BTC more to complete this transaction.`
+            8,
+          )} BTC more to complete this transaction.`,
         );
       }
 
@@ -442,7 +443,7 @@ export default function DepositForm({
 
   function handleAddressTypeError(
     error: Error,
-    walletProvider: "leather" | "xverse" | null
+    walletProvider: "leather" | "xverse" | null,
   ): void {
     if (walletProvider === "leather") {
       toast({
@@ -505,7 +506,7 @@ export default function DepositForm({
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center space-y-4 py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <Loader />
         <p className="text-sm text-muted-foreground">Loading your session...</p>
       </div>
     );
@@ -545,12 +546,12 @@ export default function DepositForm({
               {isBalanceLoading
                 ? "Loading..."
                 : btcBalance !== null && btcBalance !== undefined
-                ? `${btcBalance.toFixed(8)} BTC${
-                    btcUsdPrice
-                      ? ` (${formatUsdValue(btcBalance * (btcUsdPrice || 0))})`
-                      : ""
-                  }`
-                : "Unable to load balance"}
+                  ? `${btcBalance.toFixed(8)} BTC${
+                      btcUsdPrice
+                        ? ` (${formatUsdValue(btcBalance * (btcUsdPrice || 0))})`
+                        : ""
+                    }`
+                  : "Unable to load balance"}
             </span>
           </div>
         )}
@@ -604,7 +605,7 @@ export default function DepositForm({
             <span className="text-xs text-muted-foreground">
               {amount && Number.parseFloat(amount) > 0 && btcUsdPrice
                 ? formatUsdValue(
-                    Number.parseFloat(calculateFee(amount)) * btcUsdPrice
+                    Number.parseFloat(calculateFee(amount)) * btcUsdPrice,
                   )
                 : "$0.00"}{" "}
               ~ {calculateFee(amount)} BTC
@@ -620,7 +621,7 @@ export default function DepositForm({
               <span className="text-xs text-muted-foreground">
                 {formatUsdValue(
                   (poolStatus.estimatedAvailable / 100000000) *
-                    (btcUsdPrice || 0)
+                    (btcUsdPrice || 0),
                 )}{" "}
                 ~ {(poolStatus.estimatedAvailable / 100000000).toFixed(8)} BTC
               </span>

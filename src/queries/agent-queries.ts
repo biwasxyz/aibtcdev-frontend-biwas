@@ -1,5 +1,5 @@
-import { supabase } from "@/utils/supabase/client"
-import type { Agent } from "@/types/supabase"
+import { supabase } from "@/utils/supabase/client";
+import type { Agent } from "@/types/supabase";
 
 /**
  * Fetches all DAO Manager agents that are not archived
@@ -12,25 +12,25 @@ import type { Agent } from "@/types/supabase"
  * - src/components/daos/DaoAgentSelector.tsx
  */
 export const fetchAgents = async (): Promise<Agent[]> => {
-    try {
-        const { data, error } = await supabase
-            .from("agents")
-            .select("*")
-            .eq("name", "DAO Manager")
-            .eq("is_archived", false)
-            .order("name", { ascending: true })
+  try {
+    const { data, error } = await supabase
+      .from("agents")
+      .select("*")
+      .eq("name", "DAO Manager")
+      .eq("is_archived", false)
+      .order("name", { ascending: true });
 
-        if (error) {
-            console.error("Error fetching agents:", error)
-            throw error
-        }
-
-        return data || []
-    } catch (error) {
-        console.error("Error in fetchAgents:", error)
-        return []
+    if (error) {
+      console.error("Error fetching agents:", error);
+      throw error;
     }
-}
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in fetchAgents:", error);
+    return [];
+  }
+};
 
 /**
  * Fetches a single agent by ID
@@ -43,23 +43,29 @@ export const fetchAgents = async (): Promise<Agent[]> => {
  * - src/components/chat/agent-selector.tsx
  * - src/app/agents/[id]/edit/page.tsx
  */
-export const fetchAgentById = async (agentId: string | null | undefined): Promise<Agent | null> => {
-    if (!agentId) return null
+export const fetchAgentById = async (
+  agentId: string | null | undefined,
+): Promise<Agent | null> => {
+  if (!agentId) return null;
 
-    try {
-        const { data, error } = await supabase.from("agents").select("*").eq("id", agentId).single()
+  try {
+    const { data, error } = await supabase
+      .from("agents")
+      .select("*")
+      .eq("id", agentId)
+      .single();
 
-        if (error) {
-            console.error(`Error fetching agent with ID ${agentId}:`, error)
-            throw error
-        }
-
-        return data
-    } catch (error) {
-        console.error(`Error in fetchAgentById for ID ${agentId}:`, error)
-        return null
+    if (error) {
+      console.error(`Error fetching agent with ID ${agentId}:`, error);
+      throw error;
     }
-}
+
+    return data;
+  } catch (error) {
+    console.error(`Error in fetchAgentById for ID ${agentId}:`, error);
+    return null;
+  }
+};
 
 /**
  * Fetches an agent's name by ID
@@ -72,23 +78,29 @@ export const fetchAgentById = async (agentId: string | null | undefined): Promis
  * - src/components/chat/chat-window.tsx
  * - src/components/chat/message-list.tsx
  */
-export const fetchAgentName = async (agentId: string | undefined): Promise<string | null> => {
-    if (!agentId) return null
+export const fetchAgentName = async (
+  agentId: string | undefined,
+): Promise<string | null> => {
+  if (!agentId) return null;
 
-    try {
-        const { data, error } = await supabase.from("agents").select("name").eq("id", agentId).single()
+  try {
+    const { data, error } = await supabase
+      .from("agents")
+      .select("name")
+      .eq("id", agentId)
+      .single();
 
-        if (error) {
-            console.error(`Error fetching agent name for ID ${agentId}:`, error)
-            throw error
-        }
-
-        return data?.name || null
-    } catch (error) {
-        console.error(`Error in fetchAgentName for ID ${agentId}:`, error)
-        return null
+    if (error) {
+      console.error(`Error fetching agent name for ID ${agentId}:`, error);
+      throw error;
     }
-}
+
+    return data?.name || null;
+  } catch (error) {
+    console.error(`Error in fetchAgentName for ID ${agentId}:`, error);
+    return null;
+  }
+};
 
 /**
  * Creates a new agent
@@ -98,21 +110,27 @@ export const fetchAgentName = async (agentId: string | undefined): Promise<strin
  *
  * Mutation key: ['createAgent']
  */
-export const createAgent = async (agent: Partial<Agent>): Promise<Agent | null> => {
-    try {
-        const { data, error } = await supabase.from("agents").insert([agent]).select().single()
+export const createAgent = async (
+  agent: Partial<Agent>,
+): Promise<Agent | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("agents")
+      .insert([agent])
+      .select()
+      .single();
 
-        if (error) {
-            console.error("Error creating agent:", error)
-            throw error
-        }
-
-        return data
-    } catch (error) {
-        console.error("Error in createAgent:", error)
-        return null
+    if (error) {
+      console.error("Error creating agent:", error);
+      throw error;
     }
-}
+
+    return data;
+  } catch (error) {
+    console.error("Error in createAgent:", error);
+    return null;
+  }
+};
 
 /**
  * Updates an existing agent
@@ -123,21 +141,29 @@ export const createAgent = async (agent: Partial<Agent>): Promise<Agent | null> 
  *
  * Mutation key: ['updateAgent', agentId]
  */
-export const updateAgent = async (agentId: string, updates: Partial<Agent>): Promise<Agent | null> => {
-    try {
-        const { data, error } = await supabase.from("agents").update(updates).eq("id", agentId).select().single()
+export const updateAgent = async (
+  agentId: string,
+  updates: Partial<Agent>,
+): Promise<Agent | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("agents")
+      .update(updates)
+      .eq("id", agentId)
+      .select()
+      .single();
 
-        if (error) {
-            console.error(`Error updating agent with ID ${agentId}:`, error)
-            throw error
-        }
-
-        return data
-    } catch (error) {
-        console.error(`Error in updateAgent for ID ${agentId}:`, error)
-        return null
+    if (error) {
+      console.error(`Error updating agent with ID ${agentId}:`, error);
+      throw error;
     }
-}
+
+    return data;
+  } catch (error) {
+    console.error(`Error in updateAgent for ID ${agentId}:`, error);
+    return null;
+  }
+};
 
 /**
  * Archives or unarchives an agent
@@ -148,23 +174,29 @@ export const updateAgent = async (agentId: string, updates: Partial<Agent>): Pro
  *
  * Mutation key: ['archiveAgent', agentId, archive]
  */
-export const archiveAgent = async (agentId: string, archive: boolean): Promise<Agent | null> => {
-    try {
-        const { data, error } = await supabase
-            .from("agents")
-            .update({ is_archived: archive })
-            .eq("id", agentId)
-            .select()
-            .single()
+export const archiveAgent = async (
+  agentId: string,
+  archive: boolean,
+): Promise<Agent | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("agents")
+      .update({ is_archived: archive })
+      .eq("id", agentId)
+      .select()
+      .single();
 
-        if (error) {
-            console.error(`Error ${archive ? "archiving" : "unarchiving"} agent with ID ${agentId}:`, error)
-            throw error
-        }
-
-        return data
-    } catch (error) {
-        console.error(`Error in archiveAgent for ID ${agentId}:`, error)
-        return null
+    if (error) {
+      console.error(
+        `Error ${archive ? "archiving" : "unarchiving"} agent with ID ${agentId}:`,
+        error,
+      );
+      throw error;
     }
-}
+
+    return data;
+  } catch (error) {
+    console.error(`Error in archiveAgent for ID ${agentId}:`, error);
+    return null;
+  }
+};

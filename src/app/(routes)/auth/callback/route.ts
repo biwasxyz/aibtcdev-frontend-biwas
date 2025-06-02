@@ -25,12 +25,9 @@ export async function GET(request: Request) {
   return NextResponse.redirect(`${origin}/chat`);
 }
 
-
-
 /*
 #### OLD CODE ####
 */
-
 
 // import { cookies } from "next/headers";
 // import { NextResponse } from "next/server";

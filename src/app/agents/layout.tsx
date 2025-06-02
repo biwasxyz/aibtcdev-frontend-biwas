@@ -21,14 +21,8 @@ export default function AgentsLayout({
 }) {
   return (
     <main className="min-h-[100dvh] w-full flex flex-col bg-background">
-      <div className="flex-1 relative w-full">
-        {/* Subtle gradient background */}
-        <div
-          className="absolute inset-0 bg-gradient-to-b from-background to-muted/20 pointer-events-none"
-          aria-hidden="true"
-        />
-        {/* Main content */}
-        <div className="relative h-full w-full">{children}</div>
+      <div className="flex-1 w-full">
+        {children}
       </div>
     </main>
   );

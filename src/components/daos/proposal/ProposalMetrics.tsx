@@ -2,7 +2,7 @@
 
 import { CheckCircle2, XCircle, Clock, Info } from "lucide-react";
 import { useVotingStatus } from "./TimeStatus";
-import { TokenBalance } from "@/components/reusables/balance-display";
+import { TokenBalance } from "@/components/reusables/BalanceDisplay";
 import { cn } from "@/lib/utils";
 import type { Proposal } from "@/types/supabase";
 import {
@@ -11,16 +11,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { safeNumberFromBigInt } from "@/helpers/proposal-utils";
 
 interface ProposalMetricsProps {
   proposal: Proposal;
+  tokenSymbol?: string;
 }
 
-const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
+const ProposalMetrics = ({ proposal, tokenSymbol = "" }: ProposalMetricsProps) => {
   const { isActive, isEnded } = useVotingStatus(
     proposal.status,
-    proposal.vote_start,
-    proposal.vote_end
+    safeNumberFromBigInt(proposal.vote_start),
+    safeNumberFromBigInt(proposal.vote_end),
   );
 
   // Check if the proposal has failed
@@ -28,80 +30,92 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
 
   const isNotStartedYet = !isActive && !isEnded;
 
-  // Improved metrics display with 3-column grid
+  // Improved metrics display with better spacing and layout
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      {/* Liquid Tokens - First column */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="bg-zinc-900/10 p-3 rounded-md cursor-pointer">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs uppercase tracking-wide ">
-                    Liquid Tokens
-                  </span>
-                  <Info className="h-3 w-3 " />
+    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      {/* Liquid Tokens - Spans 2 columns */}
+      <div className="lg:col-span-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="bg-zinc-800/30 hover:bg-zinc-800/50 transition-colors p-4 rounded-lg cursor-pointer border border-zinc-700/50">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs uppercase tracking-wide text-zinc-400 font-medium">
+                      Liquid Tokens
+                    </span>
+                    <Info className="h-3 w-3 text-zinc-500" />
+                  </div>
+                  <div className="text-lg font-semibold text-white">
+                    {proposal.liquid_tokens !== null ? (
+                      <TokenBalance
+                        value={proposal.liquid_tokens.toString()}
+                        symbol={tokenSymbol}
+                        decimals={8}
+                        variant="abbreviated"
+                      />
+                    ) : (
+                      "No data"
+                    )}
+                  </div>
                 </div>
-                <span className="text-sm font-medium">
-                  {proposal.liquid_tokens !== null ? (
-                    <TokenBalance
-                      value={proposal.liquid_tokens.toString()}
-                      symbol={proposal.token_symbol || ""}
-                      decimals={8}
-                      variant="abbreviated"
-                    />
-                  ) : (
-                    "No data"
-                  )}
-                </span>
               </div>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="text-xs">Total liquid tokens available for voting</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">
+                Total liquid tokens available for voting
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
 
-      {/* Quorum/Threshold - Second column */}
-      <div className="grid grid-cols-2 gap-2">
-        {/* Quorum */}
+      {/* Quorum - Single column */}
+      <div>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <div
                 className={cn(
-                  "rounded-md p-3 cursor-pointer",
+                  "p-4 rounded-lg cursor-pointer border transition-colors",
                   isActive || isNotStartedYet
-                    ? "bg-primary"
+                    ? "bg-orange-500/10 border-orange-500/30"
                     : proposal.met_quorum
-                    ? "bg-primary"
-                    : "bg-zinc-800/50"
+                      ? "bg-green-500/10 border-green-500/30"
+                      : "bg-red-500/10 border-red-500/30",
                 )}
               >
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs uppercase tracking-wide ">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs uppercase tracking-wide text-zinc-400 font-medium">
                       Quorum
                     </span>
-                    <Info className="h-3 w-3 " />
+                    <Info className="h-3 w-3 text-zinc-500" />
                   </div>
-                  {isActive || isNotStartedYet ? (
-                    <span className="text-sm font-medium">Pending</span>
-                  ) : proposal.met_quorum ? (
-                    <div className="flex items-center gap-1">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      <span className="text-sm font-medium">Met</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <XCircle className="h-3.5 w-3.5 text-zinc-400" />
-                      <span className="text-sm font-medium text-zinc-400">
-                        Missed
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {isActive || isNotStartedYet ? (
+                      <>
+                        <Clock className="h-4 w-4 text-orange-400" />
+                        <span className="text-sm font-semibold text-orange-400">
+                          Pending
+                        </span>
+                      </>
+                    ) : proposal.met_quorum ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 text-green-400" />
+                        <span className="text-sm font-semibold text-green-400">
+                          Met
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="h-4 w-4 text-red-400" />
+                        <span className="text-sm font-semibold text-red-400">
+                          Missed
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </TooltipTrigger>
@@ -110,43 +124,54 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+      </div>
 
-        {/* Threshold */}
+      {/* Threshold - Single column */}
+      <div>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <div
                 className={cn(
-                  "rounded-md p-3 cursor-pointer",
+                  "p-4 rounded-lg cursor-pointer border transition-colors",
                   isActive || isNotStartedYet
-                    ? "bg-primary"
+                    ? "bg-orange-500/10 border-orange-500/30"
                     : proposal.met_threshold
-                    ? "bg-primary"
-                    : "bg-zinc-800/50"
+                      ? "bg-green-500/10 border-green-500/30"
+                      : "bg-red-500/10 border-red-500/30",
                 )}
               >
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs uppercase tracking-wide ">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs uppercase tracking-wide text-zinc-400 font-medium">
                       Threshold
                     </span>
-                    <Info className="h-3 w-3 " />
+                    <Info className="h-3 w-3 text-zinc-500" />
                   </div>
-                  {isActive || isNotStartedYet ? (
-                    <span className="text-sm font-medium">Pending</span>
-                  ) : proposal.met_threshold ? (
-                    <div className="flex items-center gap-1">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      <span className="text-sm font-medium">Met</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <XCircle className="h-3.5 w-3.5 text-zinc-400" />
-                      <span className="text-sm font-medium text-zinc-400">
-                        Missed
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {isActive || isNotStartedYet ? (
+                      <>
+                        <Clock className="h-4 w-4 text-orange-400" />
+                        <span className="text-sm font-semibold text-orange-400">
+                          Pending
+                        </span>
+                      </>
+                    ) : proposal.met_threshold ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 text-green-400" />
+                        <span className="text-sm font-semibold text-green-400">
+                          Met
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="h-4 w-4 text-red-400" />
+                        <span className="text-sm font-semibold text-red-400">
+                          Missed
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </TooltipTrigger>
@@ -157,105 +182,70 @@ const ProposalMetrics = ({ proposal }: ProposalMetricsProps) => {
         </TooltipProvider>
       </div>
 
-      {/* Outcome/Execution - Third column */}
-      <div className="grid grid-cols-2 gap-2">
-        {/* Outcome */}
+      {/* Execution Status - Single column */}
+      <div>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <div
                 className={cn(
-                  "rounded-md p-3 cursor-pointer",
+                  "p-4 rounded-lg cursor-pointer border transition-colors",
                   isActive || isNotStartedYet
-                    ? "bg-primary"
-                    : proposal.passed
-                    ? "bg-primary"
-                    : "bg-zinc-800/50"
-                )}
-              >
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs uppercase tracking-wide ">
-                      Outcome
-                    </span>
-                    <Info className="h-3 w-3 " />
-                  </div>
-                  {isActive || isNotStartedYet ? (
-                    <span className="text-sm font-medium">Pending</span>
-                  ) : proposal.passed ? (
-                    <div className="flex items-center gap-1">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      <span className="text-sm font-medium">Passed</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <XCircle className="h-3.5 w-3.5 text-zinc-400" />
-                      <span className="text-sm font-medium text-zinc-400">
-                        Failed
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="text-xs">Final result of the proposal vote</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        {/* Execution Status */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div
-                className={cn(
-                  "rounded-md p-3 cursor-pointer",
-                  isActive || isNotStartedYet
-                    ? "bg-primary"
+                    ? "bg-orange-500/10 border-orange-500/30"
                     : isFailed
-                    ? "bg-zinc-800/50"
-                    : proposal.executed === true
-                    ? "bg-primary"
-                    : "bg-amber-500/5"
+                      ? "bg-red-500/10 border-red-500/30"
+                      : proposal.executed === true
+                        ? "bg-green-500/10 border-green-500/30"
+                        : proposal.executed === false
+                          ? "bg-red-500/10 border-red-500/30"
+                          : "bg-amber-500/10 border-amber-500/30",
                 )}
               >
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs uppercase tracking-wide ">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs uppercase tracking-wide text-zinc-400 font-medium">
                       Execution
                     </span>
-                    <Info className="h-3 w-3 " />
+                    <Info className="h-3 w-3 text-zinc-500" />
                   </div>
-                  {isActive || isNotStartedYet ? (
-                    <span className="text-sm font-medium">Pending</span>
-                  ) : isFailed ? (
-                    <div className="flex items-center gap-1">
-                      <XCircle className="h-3.5 w-3.5 text-zinc-400" />
-                      <span className="text-sm font-medium text-zinc-400">
-                        Failed
-                      </span>
-                    </div>
-                  ) : proposal.executed === true ? (
-                    <div className="flex items-center gap-1">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      <span className="text-sm font-medium">Executed</span>
-                    </div>
-                  ) : proposal.executed === false ? (
-                    <div className="flex items-center gap-1">
-                      <XCircle className="h-3.5 w-3.5 text-zinc-400" />
-                      <span className="text-sm font-medium text-zinc-400">
-                        Not Executed
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5 text-amber-500" />
-                      <span className="text-sm font-medium text-amber-500">
-                        Pending
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {isActive || isNotStartedYet ? (
+                      <>
+                        <Clock className="h-4 w-4 text-orange-400" />
+                        <span className="text-sm font-semibold text-orange-400">
+                          Pending
+                        </span>
+                      </>
+                    ) : isFailed ? (
+                      <>
+                        <XCircle className="h-4 w-4 text-red-400" />
+                        <span className="text-sm font-semibold text-red-400">
+                          Failed
+                        </span>
+                      </>
+                    ) : proposal.executed === true ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 text-green-400" />
+                        <span className="text-sm font-semibold text-green-400">
+                          Executed
+                        </span>
+                      </>
+                    ) : proposal.executed === false ? (
+                      <>
+                        <XCircle className="h-4 w-4 text-red-400" />
+                        <span className="text-sm font-semibold text-red-400">
+                          Not Executed
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Clock className="h-4 w-4 text-amber-400" />
+                        <span className="text-sm font-semibold text-amber-400">
+                          Pending
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </TooltipTrigger>

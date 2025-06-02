@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProposalVotes } from "@/lib/vote-utils";
-import { TokenBalance } from "@/components/reusables/balance-display";
+import { TokenBalance } from "@/components/reusables/BalanceDisplay";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -114,7 +114,7 @@ const VoteProgress = ({
           return getProposalVotes(
             contractAddress,
             Number(proposalId),
-            bustCache
+            bustCache,
           );
         }
         return null;
@@ -126,7 +126,7 @@ const VoteProgress = ({
         setBustCache(false);
       },
     }),
-    [contractAddress, proposalId, refreshing, bustCache]
+    [contractAddress, proposalId, refreshing, bustCache],
   );
 
   // Use useQuery with memoized options
@@ -146,7 +146,7 @@ const VoteProgress = ({
       liquidTokensNum > 0 ? (votesAgainstNum / liquidTokensNum) * 100 : 0;
     const percentageRemaining = Math.max(
       0,
-      100 - percentageFor - percentageAgainst
+      100 - percentageFor - percentageAgainst,
     );
 
     // Also calculate percentages of cast votes for the tooltip

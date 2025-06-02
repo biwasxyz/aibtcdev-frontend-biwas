@@ -74,6 +74,6 @@ export function useThread(threadId: string) {
     isLoading,
     error,
     clearThread,
-    updateThread
+    updateThread,
   };
 }

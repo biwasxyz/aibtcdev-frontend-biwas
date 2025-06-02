@@ -25,7 +25,7 @@ export const useNotificationCenter = () => {
   const { toast } = useToast();
 
   const addNotification = (
-    notification: Omit<Notification, "id" | "timestamp">
+    notification: Omit<Notification, "id" | "timestamp">,
   ) => {
     const newNotification = {
       ...notification,
@@ -82,10 +82,10 @@ export const NotificationCenter = ({
                   notification.type === "success"
                     ? "bg-green-500/10 border-green-500/20"
                     : notification.type === "error"
-                    ? "bg-red-500/10 border-red-500/20"
-                    : notification.type === "warning"
-                    ? "bg-yellow-500/10 border-yellow-500/20"
-                    : "bg-blue-500/10 border-blue-500/20"
+                      ? "bg-red-500/10 border-red-500/20"
+                      : notification.type === "warning"
+                        ? "bg-yellow-500/10 border-yellow-500/20"
+                        : "bg-blue-500/10 border-blue-500/20"
                 }`}
               >
                 <h4 className="font-medium mb-1">{notification.title}</h4>

@@ -3,9 +3,9 @@
 import { useParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Suspense } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader } from "@/components/reusables/Loader";
 import DAOProposals from "@/components/daos/proposal/DAOProposal";
-import { fetchProposals, fetchDAOByName } from "@/queries/dao-queries";
+import { fetchProposals, fetchDAOByName, fetchToken } from "@/queries/dao-queries";
 // import { Button } from "@/components/ui/button";
 // import { format } from "date-fns";
 import { supabase } from "@/utils/supabase/client";
@@ -39,6 +39,16 @@ export default function ProposalsPage() {
 
   // console.log("Found DAO:", dao);
   // console.log("DAO ID:", daoId);
+
+  // Fetch token information for the DAO
+  const {
+    data: token,
+    isLoading: isLoadingToken,
+  } = useQuery({
+    queryKey: ["token", daoId],
+    queryFn: () => (daoId ? fetchToken(daoId) : Promise.resolve(null)),
+    enabled: !!daoId,
+  });
 
   // Then use the ID to fetch proposals
   const {
@@ -83,7 +93,7 @@ export default function ProposalsPage() {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ["proposals", daoId] });
-        }
+        },
       )
       .subscribe();
     return () => {
@@ -91,10 +101,13 @@ export default function ProposalsPage() {
     };
   }, [daoId, queryClient]);
 
-  if (isLoadingDAO || isLoading) {
+  if (isLoadingDAO || isLoading || isLoadingToken) {
     return (
-      <div className="flex justify-center items-center min-h-[200px] w-full">
-        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-muted-foreground" />
+      <div className="flex justify-center items-center min-h-[400px] w-full">
+        <div className="text-center space-y-4">
+          <Loader />
+          <p className="text-zinc-400">Loading proposals...</p>
+        </div>
       </div>
     );
   }
@@ -102,10 +115,10 @@ export default function ProposalsPage() {
   // Add error state
   if (!dao) {
     return (
-      <div className="flex justify-center items-center min-h-[200px] w-full">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">DAO Not Found</h2>
-          <p className="text-muted-foreground">
+      <div className="flex justify-center items-center min-h-[400px] w-full">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-semibold text-white">DAO Not Found</h2>
+          <p className="text-zinc-400">
             Could not find a DAO with the name &apos;
             {decodeURIComponent(encodedName)}&apos;
           </p>
@@ -142,12 +155,18 @@ export default function ProposalsPage() {
       </div> */}
       <Suspense
         fallback={
-          <div className="flex justify-center items-center min-h-[200px] w-full">
-            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-muted-foreground" />
+          <div className="flex justify-center items-center min-h-[400px] w-full">
+            <div className="text-center space-y-4">
+              <Loader />
+              <p className="text-zinc-400">Loading proposals...</p>
+            </div>
           </div>
         }
       >
-        <DAOProposals proposals={proposals || []} />
+        <DAOProposals 
+          proposals={proposals || []} 
+          tokenSymbol={token?.symbol || ""} 
+        />
       </Suspense>
     </div>
   );

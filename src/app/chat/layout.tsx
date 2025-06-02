@@ -1,5 +1,12 @@
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import React from "react";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export const metadata: Metadata = {
   title: "Chat",
@@ -11,5 +18,11 @@ export default function ChatLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="flex-1 flex flex-col">{children}</div>;
+  return (
+    <main className="min-h-[100dvh] w-full flex flex-col bg-background">
+      <div className="flex-1 w-full">
+        {children}
+      </div>
+    </main>
+  );
 }
