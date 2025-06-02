@@ -200,7 +200,7 @@ const ProposalCard = ({
               variant="outline"
               className="text-secondary border-secondary/50 bg-secondary/10 hover:bg-secondary/20 transition-colors duration-150"
             >
-              {proposal.type}
+              {proposal.type.toUpperCase()}
             </Badge>
           </div>
         )}

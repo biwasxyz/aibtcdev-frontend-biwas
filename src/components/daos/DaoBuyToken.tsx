@@ -25,7 +25,7 @@ export function DAOBuyToken({ daoId }: DAOBuyTokenProps) {
         className="flex-1"
         onClick={() => handleQuickBuy("20000")}
       >
-        20k Sats
+         Quick Buy
       </Button>
       <DAOBuyModal
         daoId={daoId}

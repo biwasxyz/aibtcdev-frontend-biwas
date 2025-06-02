@@ -205,8 +205,6 @@ const VoteProgress = ({
       {/* Header with refresh controls - Always show refresh button */}
       <div className="flex items-center justify-between text-sm">
         <div className="text-muted-foreground">
-          Total Votes: {voteCalculations.totalVotes.toLocaleString()}{" "}
-          {tokenSymbol}
         </div>
 
         <div className="flex items-center gap-2">
@@ -305,6 +303,7 @@ const VoteProgress = ({
                     symbol={tokenSymbol}
                     decimals={8}
                     variant="abbreviated"
+                    showSymbol={false}
                   />
                   <span className="text-green-400 font-medium">
                     ({voteCalculations.percentageFor.toFixed(1)}%)
@@ -325,6 +324,7 @@ const VoteProgress = ({
                     symbol={tokenSymbol}
                     decimals={8}
                     variant="abbreviated"
+                    showSymbol={false}
                   />
                   <span className="text-red-400 font-medium">
                     ({voteCalculations.percentageAgainst.toFixed(1)}%)
@@ -345,6 +345,7 @@ const VoteProgress = ({
                     symbol={tokenSymbol}
                     decimals={8}
                     variant="abbreviated"
+                    showSymbol={false}
                   />
                   <TooltipProvider>
                     <Tooltip>

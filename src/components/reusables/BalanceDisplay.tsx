@@ -14,6 +14,7 @@ interface BalanceDisplayProps {
   decimals?: number;
   variant?: "raw" | "rounded" | "abbreviated";
   className?: string;
+  showSymbol?: boolean;
 }
 
 /**
@@ -25,6 +26,7 @@ export function BalanceDisplay({
   decimals = 6,
   variant = "raw",
   className = "",
+  showSymbol = true,
 }: BalanceDisplayProps) {
   // Convert value to number and handle potential errors
   const numericValue =
@@ -33,7 +35,7 @@ export function BalanceDisplay({
   const displayValue = numericValue / divisor;
 
   if (isNaN(displayValue)) {
-    return <span className={className}>0 {symbol}</span>;
+    return <span className={className}>0{showSymbol && symbol ? ` ${symbol}` : ""}</span>;
   }
 
   // Format the full value with all decimals (used for raw display and tooltips)
@@ -42,7 +44,7 @@ export function BalanceDisplay({
     maximumFractionDigits: decimals,
   });
 
-  const fullDisplay = `${fullFormattedValue}${symbol ? ` ${symbol}` : ""}`;
+  const fullDisplay = `${fullFormattedValue}${showSymbol && symbol ? ` ${symbol}` : ""}`;
 
   // For raw variant, just return the full formatted value
   if (variant === "raw") {
@@ -62,7 +64,7 @@ export function BalanceDisplay({
           <TooltipTrigger asChild>
             <span className={`font-mono ${className}`}>
               {roundedValue}
-              {symbol ? ` ${symbol}` : ""}
+              {showSymbol && symbol ? ` ${symbol}` : ""}
             </span>
           </TooltipTrigger>
           <TooltipContent>
@@ -83,7 +85,7 @@ export function BalanceDisplay({
           <TooltipTrigger asChild>
             <span className={`font-mono ${className}`}>
               {abbreviatedValue}
-              {symbol ? ` ${symbol}` : ""}
+              {showSymbol && symbol ? ` ${symbol}` : ""}
             </span>
           </TooltipTrigger>
           <TooltipContent>
@@ -105,6 +107,7 @@ export function StxBalance({
   value,
   variant = "raw",
   className = "",
+  showSymbol = true,
 }: Omit<BalanceDisplayProps, "symbol" | "decimals">) {
   return (
     <BalanceDisplay
@@ -113,6 +116,7 @@ export function StxBalance({
       decimals={6}
       variant={variant}
       className={className}
+      showSymbol={showSymbol}
     />
   );
 }
@@ -124,6 +128,7 @@ export function BtcBalance({
   value,
   variant = "raw",
   className = "",
+  showSymbol = true,
 }: Omit<BalanceDisplayProps, "symbol" | "decimals">) {
   return (
     <BalanceDisplay
@@ -134,6 +139,7 @@ export function BtcBalance({
       className={`${
         variant === "raw" ? "text-primary font-semibold" : ""
       } ${className}`}
+      showSymbol={showSymbol}
     />
   );
 }
@@ -147,6 +153,7 @@ export function TokenBalance({
   decimals = 8,
   variant = "raw",
   className = "",
+  showSymbol = true,
 }: BalanceDisplayProps) {
   return (
     <BalanceDisplay
@@ -155,6 +162,7 @@ export function TokenBalance({
       decimals={decimals}
       variant={variant}
       className={className}
+      showSymbol={showSymbol}
     />
   );
 }

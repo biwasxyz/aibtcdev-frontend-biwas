@@ -33,81 +33,81 @@ export function WalletInfoCard({
   const { copiedText, copyToClipboard } = useClipboard();
 
   return (
-    <div className="w-full h-full p-6 border border-gray-600 rounded-lg bg-[#1A1A1A]">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <Wallet className="h-5 w-5 text-orange-500" />
-          <h3 className="text-lg font-bold text-white">Agent Account</h3>
+    <div className="w-full h-full p-8 border border-border rounded-xl bg-card shadow-sm">
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center gap-3">
+          <Wallet className="h-6 w-6 text-primary" />
+          <h3 className="text-xl font-bold text-foreground">Agent Account</h3>
         </div>
 
         {walletAddress ? (
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
               {/* Avatar */}
-              <div className="w-8 h-8 rounded-full bg-gray-600 flex-shrink-0" />
+              <div className="w-10 h-10 rounded-full bg-muted flex-shrink-0" />
 
               {/* Address */}
               <div className="flex-1 min-w-0">
-                <p className="font-mono text-sm text-white truncate">
+                <p className="font-mono text-sm text-foreground truncate">
                   {walletAddress}
                 </p>
-                <p className="text-xs text-gray-400">Agent Wallet Address</p>
+                <p className="text-xs text-muted-foreground mt-1">Agent Wallet Address</p>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-3 flex-shrink-0">
               <button
                 onClick={() => copyToClipboard(walletAddress)}
-                className="p-2 hover:bg-gray-700 rounded-md transition-colors"
+                className="p-2.5 hover:bg-muted rounded-lg transition-colors duration-150"
                 title="Copy address"
               >
                 {copiedText === walletAddress ? (
                   <Check className="h-4 w-4 text-green-500" />
                 ) : (
-                  <Copy className="h-4 w-4 text-gray-400" />
+                  <Copy className="h-4 w-4 text-muted-foreground" />
                 )}
               </button>
               <a
                 href={getAddressExplorerUrl(walletAddress)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 hover:bg-gray-700 rounded-md transition-colors"
+                className="p-2.5 hover:bg-muted rounded-lg transition-colors duration-150"
                 title="View on explorer"
               >
-                <ExternalLink className="h-4 w-4 text-gray-400" />
+                <ExternalLink className="h-4 w-4 text-muted-foreground" />
               </a>
             </div>
           </div>
         ) : (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 rounded-full bg-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400">No wallet address</p>
-            <p className="text-sm text-gray-500 mt-1">
+          <div className="text-center py-12">
+            <div className="w-16 h-16 rounded-full bg-muted mx-auto mb-6" />
+            <p className="text-muted-foreground">No wallet address</p>
+            <p className="text-sm text-muted-foreground mt-2">
               Agent wallet will appear here when configured
             </p>
           </div>
         )}
       </div>
 
-      <div className="w-full overflow-x-auto mt-6">
-        <div className="mb-4">
-          <h4 className="text-sm font-medium text-white mb-2">
+      <div className="w-full overflow-x-auto mt-8">
+        <div className="mb-6">
+          <h4 className="text-base font-semibold text-foreground mb-2">
             Asset Balances
           </h4>
         </div>
         <Table>
           <TableHeader>
-            <TableRow className="border-gray-600">
-              <TableHead className="w-1/3 text-gray-300">Asset</TableHead>
-              <TableHead className="w-2/3 text-gray-300">Balance</TableHead>
+            <TableRow className="border-border">
+              <TableHead className="w-1/3 text-muted-foreground">Asset</TableHead>
+              <TableHead className="w-2/3 text-muted-foreground">Balance</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {/* STX Balance */}
             {walletBalance && (
-              <TableRow className="border-gray-600">
-                <TableCell className="font-medium text-white">STX</TableCell>
+              <TableRow className="border-border">
+                <TableCell className="font-medium text-foreground">STX</TableCell>
                 <TableCell>
                   <StxBalance
                     value={walletBalance.stx.balance}
@@ -127,8 +127,8 @@ export function WalletInfoCard({
                   const displaySymbol = isBtc ? "BTC" : tokenSymbol || "Token";
 
                   return (
-                    <TableRow key={tokenId} className="border-gray-600">
-                      <TableCell className="font-medium text-white">
+                    <TableRow key={tokenId} className="border-border">
+                      <TableCell className="font-medium text-foreground">
                         {displaySymbol}
                       </TableCell>
                       <TableCell>
@@ -154,11 +154,11 @@ export function WalletInfoCard({
                   const [, tokenSymbol] = tokenId.split("::");
                   const displaySymbol = tokenSymbol || "NFT";
                   return (
-                    <TableRow key={tokenId} className="border-gray-600">
-                      <TableCell className="font-medium text-white">
+                    <TableRow key={tokenId} className="border-border">
+                      <TableCell className="font-medium text-foreground">
                         {displaySymbol}
                       </TableCell>
-                      <TableCell className="font-mono text-gray-300">
+                      <TableCell className="font-mono text-muted-foreground">
                         {token.count}
                       </TableCell>
                     </TableRow>
@@ -172,14 +172,14 @@ export function WalletInfoCard({
                 Object.entries(walletBalance.non_fungible_tokens).length ===
                   0 &&
                 !walletBalance.stx)) && (
-              <TableRow className="border-gray-600">
+              <TableRow className="border-border">
                 <TableCell
                   colSpan={2}
-                  className="text-center text-gray-400 py-8"
+                  className="text-center text-muted-foreground py-12"
                 >
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex flex-col items-center gap-3">
                     <p>No balances found</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       Asset balances will appear here
                     </p>
                   </div>

@@ -228,14 +228,6 @@ export function DAOLayoutClient({ children }: { children: React.ReactNode }) {
                             {dao?.name}
                           </h1>
                           <div className="space-y-4">
-                            <div className="flex flex-wrap gap-3">
-                              <span className="text-xs px-3 py-1.5 bg-primary/20 text-primary rounded-full border border-primary/30">
-                                Active DAO
-                              </span>
-                              <span className="text-xs px-3 py-1.5 bg-muted text-muted-foreground rounded-full border border-border">
-                                {token?.symbol || "N/A"}
-                              </span>
-                            </div>
                             
                             {/* Buy Token Button */}
                             {id && (
