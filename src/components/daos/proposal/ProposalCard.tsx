@@ -3,7 +3,7 @@
 import { Card, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import VoteProgress from "./VoteProgress";
+import VoteStatusChart from "./VoteStatusChart";
 import { useVotingStatus } from "./TimeStatus";
 import type { Proposal, ProposalWithDAO } from "@/types/supabase";
 import {
@@ -207,7 +207,7 @@ const ProposalCard = ({
 
         {/* Vote Progress - Always visible */}
         <div className="mb-6">
-          <VoteProgress
+          <VoteStatusChart
             contractAddress={safeString(proposal.contract_principal)}
             proposalId={showDAOInfo 
               ? safeStringFromBigInt(proposal.proposal_id) 

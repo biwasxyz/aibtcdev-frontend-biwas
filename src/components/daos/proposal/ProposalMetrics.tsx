@@ -116,6 +116,9 @@ const ProposalMetrics = ({ proposal, tokenSymbol = "" }: ProposalMetricsProps) =
                       </>
                     )}
                   </div>
+                  <div className="text-xs text-zinc-400">
+                    {safeNumberFromBigInt(proposal.voting_quorum)}% required
+                  </div>
                 </div>
               </div>
             </TooltipTrigger>
@@ -171,6 +174,9 @@ const ProposalMetrics = ({ proposal, tokenSymbol = "" }: ProposalMetricsProps) =
                         </span>
                       </>
                     )}
+                  </div>
+                  <div className="text-xs text-zinc-400">
+                    {safeNumberFromBigInt(proposal.voting_threshold)}% approval needed
                   </div>
                 </div>
               </div>
