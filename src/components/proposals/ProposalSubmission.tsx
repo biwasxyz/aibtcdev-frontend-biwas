@@ -107,9 +107,7 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   
   // WebSocket state
-  const [isWaitingForTx, setIsWaitingForTx] = useState(false);
   const [websocketMessage, setWebsocketMessage] = useState<WebSocketTransactionMessage | null>(null);
-  const [websocketError, setWebsocketError] = useState<string | null>(null);
   const websocketRef = useRef<Awaited<ReturnType<typeof connectWebSocketClient>> | null>(null);
   const subscriptionRef = useRef<{ unsubscribe: () => Promise<void> } | null>(null);
 
@@ -143,15 +141,13 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
   /* ---------------------- WebSocket helper functions --------------------- */
   const connectToWebSocket = async (txid: string) => {
     try {
-      setIsWaitingForTx(true);
-      setWebsocketError(null);
       setWebsocketMessage(null);
       setTxStatusView("initial");
 
       // Determine WebSocket URL based on environment
       const isMainnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === 'mainnet';
-      const websocketUrl = isMainnet 
-        ? 'wss://api.mainnet.hiro.so/' 
+      const websocketUrl = isMainnet
+        ? 'wss://api.mainnet.hiro.so/'
         : 'wss://api.testnet.hiro.so/';
       
       const client = await connectWebSocketClient(websocketUrl);
@@ -179,9 +175,6 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
         else if (isFailed) setTxStatusView("confirmed-failure");
 
         if (isFinalState) {
-          // Transaction is complete, stop waiting and close connection
-          setIsWaitingForTx(false);
-          
           // Clean up subscription after receiving final update
           if (subscriptionRef.current) {
             subscriptionRef.current.unsubscribe?.();
@@ -196,8 +189,6 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
 
     } catch (error) {
       console.error('WebSocket connection error:', error);
-      setWebsocketError(error instanceof Error ? error.message : 'Failed to connect to WebSocket');
-      setIsWaitingForTx(false);
     }
   };
 
@@ -323,9 +314,7 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
   const handleRetry = () => {
     setShowResultDialog(false);
     // Reset WebSocket state and modal status view
-    setIsWaitingForTx(false);
     setWebsocketMessage(null);
-    setWebsocketError(null);
     setTxStatusView("initial");
     // Clean up any existing connections
     if (subscriptionRef.current) {
