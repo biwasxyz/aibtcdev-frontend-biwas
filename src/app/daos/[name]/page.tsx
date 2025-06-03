@@ -6,16 +6,12 @@ import { Suspense } from "react";
 import { Loader } from "@/components/reusables/Loader";
 import DAOProposals from "@/components/proposals/DAOProposal";
 import { fetchProposals, fetchDAOByName, fetchToken } from "@/queries/dao-queries";
-// import { Button } from "@/components/ui/button";
-// import { format } from "date-fns";
 
 export const runtime = "edge";
 
 export default function ProposalsPage() {
   const params = useParams();
   const encodedName = params.name as string;
-  // console.log(encodedName);
-  // console.log("DAO name from URL:", encodedName);
 
   // First, fetch the DAO by name to get its ID
   const {
@@ -34,9 +30,6 @@ export default function ProposalsPage() {
 
   const daoId = dao?.id;
 
-  // console.log("Found DAO:", dao);
-  // console.log("DAO ID:", daoId);
-
   // Fetch token information for the DAO
   const {
     data: token,
@@ -51,9 +44,6 @@ export default function ProposalsPage() {
   const {
     data: proposals,
     isLoading,
-    // refetch,
-    // isRefetching,
-    // dataUpdatedAt,
     error: proposalsError,
   } = useQuery({
     queryKey: ["proposals", daoId],
@@ -67,15 +57,6 @@ export default function ProposalsPage() {
     console.error("Error fetching proposals:", proposalsError);
   }
 
-  // const lastUpdated = dataUpdatedAt
-  //   ? format(dataUpdatedAt, "HH:mm:ss")
-  //   : "never";
-
-  // const handleRefetch = () => {
-  //   refetch();
-  // };
-
-  // Note: Realtime updates are now handled globally by SupabaseRealtimeProvider
 
   if (isLoadingDAO || isLoading || isLoadingToken) {
     return (
@@ -105,30 +86,6 @@ export default function ProposalsPage() {
 
   return (
     <div className="w-full px-4 sm:px-0">
-      {/* DON'T NEED THIS */}
-      {/* <div className="flex justify-between items-center mb-4">
-        <p className="text-sm text-muted-foreground">
-          Last updated: {lastUpdated}
-        </p>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefetch}
-          disabled={isRefetching}
-        >
-          {isRefetching ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Updating...
-            </>
-          ) : (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </>
-          )}
-        </Button>
-      </div> */}
       <Suspense
         fallback={
           <div className="flex justify-center items-center min-h-[400px] w-full">
