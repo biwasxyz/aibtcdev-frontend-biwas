@@ -334,53 +334,46 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
         if (isFinalState) {
           // Clean up subscription after receiving final update
           if (subscriptionRef.current) {
-            subscriptionRef.current.unsubscribe?.();
+            subscriptionRef.current.unsubscribe?.()
           }
         } else {
           // Transaction is still pending, keep connection open but update UI
-          console.log(`Transaction still pending with status: ${tx_status}`);
+          console.log(`Transaction still pending with status: ${tx_status}`)
         }
-      });
-      
-      subscriptionRef.current = subscription;
+      })
 
+      subscriptionRef.current = subscription
     } catch (error) {
-      console.error('WebSocket connection error:', error);
+      console.error("WebSocket connection error:", error)
     }
-  };
+  }
 
   /* ---------------------- Helpers – extension data builder --------------------- */
   const buildExtensionData = () => {
-    if (!daoExtensions || daoExtensions.length === 0) return null;
+    if (!daoExtensions || daoExtensions.length === 0) return null
 
     const findExt = (type: string, subtype: string) =>
-      daoExtensions.find((ext) => ext.type === type && ext.subtype === subtype);
+      daoExtensions.find((ext) => ext.type === type && ext.subtype === subtype)
 
-    const actionProposalsVotingExt = findExt(
-      "EXTENSIONS",
-      "ACTION_PROPOSAL_VOTING",
-    );
-    const actionProposalContractExt = findExt("ACTIONS", "SEND_MESSAGE");
-    const daoTokenExt = findExt("TOKEN", "DAO");
+    const actionProposalsVotingExt = findExt("EXTENSIONS", "ACTION_PROPOSAL_VOTING")
+    const actionProposalContractExt = findExt("ACTIONS", "SEND_MESSAGE")
+    const daoTokenExt = findExt("TOKEN", "DAO")
 
-    if (!actionProposalsVotingExt || !actionProposalContractExt || !daoTokenExt)
-      return null;
+    if (!actionProposalsVotingExt || !actionProposalContractExt || !daoTokenExt) return null
 
     return {
-      action_proposals_voting_extension:
-        actionProposalsVotingExt.contract_principal,
-      action_proposal_contract_to_execute:
-        actionProposalContractExt.contract_principal,
+      action_proposals_voting_extension: actionProposalsVotingExt.contract_principal,
+      action_proposal_contract_to_execute: actionProposalContractExt.contract_principal,
       dao_token_contract_address: daoTokenExt.contract_principal,
       message: proposal.trim(),
-    };
-  };
+    }
+  }
 
   /* ------------------------------ API call helper ------------------------------ */
   const sendRequest = async (payload: Record<string, string>) => {
-    if (!accessToken) throw new Error("Missing access token");
+    if (!accessToken) throw new Error("Missing access token")
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       const res = await fetch(
         `https://core-staging.aibtc.dev/tools/dao/action_proposals/propose_send_message?token=${encodeURIComponent(
@@ -391,117 +384,113 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         },
-      );
+      )
 
-      const json = (await res.json()) as ApiResponse;
-      console.log("API Response:", json);
+      const json = (await res.json()) as ApiResponse
+      console.log("API Response:", json)
 
-      return json;
+      return json
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!proposal.trim() || proposal.trim().length < 50) return;
+    e.preventDefault()
+    if (!proposal.trim() || proposal.trim().length < 50) return
 
-    const extensionData = buildExtensionData();
+    const extensionData = buildExtensionData()
     if (!extensionData) {
-      console.error("Could not determine required DAO extensions");
-      return;
+      console.error("Could not determine required DAO extensions")
+      return
     }
 
     try {
-      const response = await sendRequest(extensionData);
+      const response = await sendRequest(extensionData)
 
-      setApiResponse(response);
-      setShowResultDialog(true);
-      setTxStatusView("initial");
+      setApiResponse(response)
+      setShowResultDialog(true)
+      setTxStatusView("initial")
 
       // If successful, start WebSocket monitoring
       if (response.success) {
-        const parsed = parseOutput(response.output);
-        const txid = parsed?.data?.txid;
-        
-        if (txid) {
-          await connectToWebSocket(txid);
-        }
-        
-        // Call success callback and clear form
-        onSubmissionSuccess?.();
-        setProposal("");
-      }
+        const parsed = parseOutput(response.output)
+        const txid = parsed?.data?.txid
 
+        if (txid) {
+          await connectToWebSocket(txid)
+        }
+
+        // Call success callback and clear form
+        onSubmissionSuccess?.()
+        setProposal("")
+      }
     } catch (err) {
       // Handle network errors or other unexpected errors
       const networkErrorResponse: ApiResponse = {
         success: false,
-        error:
-          err instanceof Error
-            ? err.message
-            : "Failed to connect to the server",
+        error: err instanceof Error ? err.message : "Failed to connect to the server",
         output: "",
-      };
+      }
 
-      setApiResponse(networkErrorResponse);
-      setShowResultDialog(true);
-      setTxStatusView("initial");
+      setApiResponse(networkErrorResponse)
+      setShowResultDialog(true)
+      setTxStatusView("initial")
     }
-  };
+  }
 
   const handleAIGenerate = async () => {
-    setIsGenerating(true);
+    setIsGenerating(true)
     try {
       // TODO: Implement AI text generation
-      console.log("Generating AI proposal for DAO:", daoId);
-      
+      console.log("Generating AI proposal for DAO:", daoId)
+
       // Simulate AI generation
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const aiText = "This is a placeholder for AI-generated proposal text. The AI would analyze the DAO context and generate relevant proposal content based on best practices and the DAO's specific needs. This generated content meets the minimum character requirement for submission.";
-      setProposal(aiText);
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      const aiText =
+        "This is a placeholder for AI-generated proposal text. The AI would analyze the DAO context and generate relevant proposal content based on best practices and the DAO's specific needs. This generated content meets the minimum character requirement for submission."
+      setProposal(aiText)
     } catch (error) {
-      console.error("Failed to generate AI text:", error);
+      console.error("Failed to generate AI text:", error)
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  };
+  }
 
   const handleRetry = () => {
-    setShowResultDialog(false);
+    setShowResultDialog(false)
     // Reset WebSocket state and modal status view
-    setWebsocketMessage(null);
-    setTxStatusView("initial");
+    setWebsocketMessage(null)
+    setTxStatusView("initial")
     // Clean up any existing connections
     if (subscriptionRef.current) {
-      subscriptionRef.current.unsubscribe?.();
+      subscriptionRef.current.unsubscribe?.()
     }
-  };
+  }
 
-  const hasAccessToken = !!accessToken && !isSessionLoading;
+  const hasAccessToken = !!accessToken && !isSessionLoading
 
   return (
     <>
       <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-l-4 border-primary rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Edit3 className="h-6 w-6 text-primary" />
+            <Edit3 className="h-6 w-6 text-primary" />;
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground">Create Proposal</h2>
-            <p className="text-muted-foreground">Submit a new governance proposal to the DAO</p>
+            <h2 className="text-xl font-bold text-foreground">Create Proposal</h2>;
+            <p className="text-muted-foreground">Submit a new governance proposal to the DAO</p>;
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
-           
             {/* Textarea on top */}
             <textarea
               value={proposal}
               onChange={(e) => {
-                setProposal(e.target.value);
+                setProposal(e.target.value)
               }}
               placeholder={
                 hasAccessToken
@@ -511,26 +500,20 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
               className="relative w-full min-h-[120px] p-4 bg-background/50 border border-border/50 rounded-xl font-mono text-foreground placeholder-muted-foreground resize-y focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200 caret-foreground"
               disabled={!hasAccessToken || isSubmitting || isGenerating || isLoadingExtensions}
             />
-            
-            {/* Character count */}
+            ;{/* Character count */}
             {proposal.length > 0 && (
               <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
                 {proposal.length} characters
               </div>
             )}
-
             {/* Warning and clean button */}
-            <UnicodeIssueWarning issues={unicodeIssues} />
+            <UnicodeIssueWarning issues={unicodeIssues} />;
             {hasUnicodeIssues && (
               <div className="mt-2 flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setProposal(cleanText)}
-                  className="text-sm"
-                >
+                <Button variant="outline" size="sm" onClick={() => setProposal(cleanText)} className="text-sm">
                   Remove problematic characters
                 </Button>
+                ;
               </div>
             )}
           </div>
@@ -543,10 +526,10 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
               disabled={!hasAccessToken || isSubmitting || isGenerating || isLoadingExtensions}
               className="flex items-center gap-2 border-secondary/50 text-secondary hover:bg-secondary/10 hover:border-secondary"
             >
-              <Sparkles className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-              {isGenerating ? 'Generating...' : 'AI Assist'}
+              <Sparkles className={`h-4 w-4 ${isGenerating ? "animate-spin" : ""}`} />;
+              {isGenerating ? "Generating..." : "AI Assist"}
             </Button>
-
+            ;
             <Button
               type="submit"
               disabled={
@@ -560,13 +543,10 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
               }
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6"
             >
-              {isSubmitting ? (
-                <Loader />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-              {isSubmitting ? 'Submitting...' : 'Submit Proposal'}
+              {isSubmitting ? <Loader /> : <Send className="h-4 w-4" />}
+              {isSubmitting ? "Submitting..." : "Submit Proposal"}
             </Button>
+            ;
           </div>
 
           {/* Error/Status Messages */}
@@ -575,37 +555,40 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
               💡 <strong>Note:</strong> Connect your wallet to submit proposals to the DAO.
             </div>
           )}
-          
+
           {hasAccessToken && proposal.trim().length > 0 && proposal.trim().length < 50 && (
             <div className="text-sm text-red-500 bg-red-50 rounded-lg p-3">
-              <strong>Minimum Length Required:</strong> Proposal needs {50 - proposal.trim().length} more characters (minimum 50 characters)
+              <strong>Minimum Length Required:</strong> Proposal needs {50 - proposal.trim().length} more characters
+              (minimum 50 characters)
             </div>
           )}
 
           {hasAccessToken && proposal.trim().length >= 50 && (
             <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3">
-              💡 <strong>Tip:</strong> Make sure your proposal is clear and includes specific actionable items. The community will vote on this proposal.
+              💡 <strong>Tip:</strong> Make sure your proposal is clear and includes specific actionable items. The
+              community will vote on this proposal.
             </div>
           )}
 
           {isLoadingExtensions && (
-            <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3">
-              ⏳ Loading DAO extensions...
-            </div>
+            <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3">⏳ Loading DAO extensions...</div>
           )}
         </form>
       </div>
 
       {/* ----------------------------- Result modal ----------------------------- */}
-      <Dialog open={showResultDialog} onOpenChange={(open) => {
-        setShowResultDialog(open);
-        if (!open) setTxStatusView("initial");
-      }}>
+      <Dialog
+        open={showResultDialog}
+        onOpenChange={(open) => {
+          setShowResultDialog(open)
+          if (!open) setTxStatusView("initial")
+        }}
+      >
         <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-auto">
           {apiResponse?.success ? (
             <>
               {(() => {
-                const parsed = parseOutput(apiResponse.output);
+                const parsed = parseOutput(apiResponse.output)
                 // Three states: initial (submitted), confirmed-success, confirmed-failure
                 return (
                   <>
@@ -639,7 +622,9 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
                           {parsed?.data?.txid && (
                             <div className="border rounded-lg p-4 bg-muted">
                               <h4 className="font-semibold mb-2">Transaction Monitoring</h4>
-                              <p className="text-sm mb-2">Transaction ID: <code className="px-1 py-0.5 rounded">{parsed.data.txid}</code></p>
+                              <p className="text-sm mb-2">
+                                Transaction ID: <code className="px-1 py-0.5 rounded">{parsed.data.txid}</code>
+                              </p>
                               <div className="flex items-center gap-2 text-sm">
                                 <Loader />
                                 <span>Waiting for transaction confirmation via WebSocket...</span>
@@ -651,8 +636,8 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
                           <Button
                             variant="default"
                             onClick={() => {
-                              setShowResultDialog(false);
-                              setTxStatusView("initial");
+                              setShowResultDialog(false)
+                              setTxStatusView("initial")
                             }}
                           >
                             Close
@@ -719,7 +704,9 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
                               {websocketMessage.tx_result && (
                                 <div className="mt-3">
                                   <span className="font-medium">Result:</span>
-                                  <p className="font-mono mt-1">{websocketMessage.tx_result.repr || websocketMessage.tx_result.hex}</p>
+                                  <p className="font-mono mt-1">
+                                    {websocketMessage.tx_result.repr || websocketMessage.tx_result.hex}
+                                  </p>
                                 </div>
                               )}
                               <details className="mt-3">
@@ -737,8 +724,8 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
                           <Button
                             variant="default"
                             onClick={() => {
-                              setShowResultDialog(false);
-                              setTxStatusView("initial");
+                              setShowResultDialog(false)
+                              setTxStatusView("initial")
                             }}
                           >
                             Close
@@ -807,14 +794,14 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
                                   <span className="font-medium">Error Details:</span>
                                   <p className="font-mono mt-1">
                                     {(() => {
-                                      const raw = websocketMessage.tx_result.repr || websocketMessage.tx_result.hex;
-                                      const match = raw.match(/u?(\d{4,})/);
+                                      const raw = websocketMessage.tx_result.repr || websocketMessage.tx_result.hex
+                                      const match = raw.match(/u?(\d{4,})/)
                                       if (match) {
-                                        const code = parseInt(match[1], 10);
-                                        const description = errorCodeMap[code]?.description;
-                                        return description ? description : raw;
+                                        const code = Number.parseInt(match[1], 10)
+                                        const description = errorCodeMap[code]?.description
+                                        return description ? description : raw
                                       }
-                                      return raw;
+                                      return raw
                                     })()}
                                   </p>
                                 </div>
@@ -834,8 +821,8 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
                           <Button
                             variant="default"
                             onClick={() => {
-                              setShowResultDialog(false);
-                              setTxStatusView("initial");
+                              setShowResultDialog(false)
+                              setTxStatusView("initial")
                             }}
                           >
                             Close
@@ -844,7 +831,7 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
                       </>
                     )}
                   </>
-                );
+                )
               })()}
             </>
           ) : (
@@ -862,14 +849,10 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
               <div className="mt-4">
                 <div className="bg-muted border rounded-lg p-4">
                   <h4 className="font-semibold mb-2">Error Details</h4>
-                  <div className="text-sm">
-                    {apiResponse?.error || "An unknown error occurred"}
-                  </div>
+                  <div className="text-sm">{apiResponse?.error || "An unknown error occurred"}</div>
                   {apiResponse?.output && (
                     <details className="mt-3">
-                      <summary className="cursor-pointer hover:underline">
-                        View full response
-                      </summary>
+                      <summary className="cursor-pointer hover:underline">View full response</summary>
                       <pre className="whitespace-pre-wrap text-xs bg-white p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
                         {apiResponse.output}
                       </pre>
@@ -884,8 +867,8 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
                 <Button
                   variant="default"
                   onClick={() => {
-                    setShowResultDialog(false);
-                    setTxStatusView("initial");
+                    setShowResultDialog(false)
+                    setTxStatusView("initial")
                   }}
                 >
                   Close
@@ -896,5 +879,5 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
         </DialogContent>
       </Dialog>
     </>
-  );
+  )
 }
