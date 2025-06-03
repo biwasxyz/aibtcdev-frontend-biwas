@@ -160,12 +160,20 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
           <div className="h-6 bg-muted rounded-lg overflow-hidden">
             {/* Votes for (green) */}
             <div
-              className="absolute h-full bg-green-500/80 transition-all duration-500 ease-out rounded-lg"
+              className={`absolute left-0 top-0 h-full bg-green-500/80 transition-all duration-500 ease-out ${
+                calculations.votesForPercent > 0 ? 'rounded-l-lg' : ''
+              } ${
+                calculations.votesAgainstPercent === 0 && calculations.votesForPercent > 0 ? 'rounded-r-lg' : ''
+              }`}
               style={{ width: `${Math.min(calculations.votesForPercent, 100)}%` }}
             />
             {/* Votes against (red) */}
             <div
-              className="absolute h-full bg-red-500/80 transition-all duration-500 ease-out"
+              className={`absolute top-0 h-full bg-red-500/80 transition-all duration-500 ease-out ${
+                calculations.votesAgainstPercent > 0 && (calculations.votesForPercent + calculations.votesAgainstPercent >= 100 || calculations.votesForPercent === 0) ? 'rounded-r-lg' : ''
+              } ${
+                calculations.votesForPercent === 0 && calculations.votesAgainstPercent > 0 ? 'rounded-l-lg' : ''
+              }`}
               style={{
                 width: `${Math.min(calculations.votesAgainstPercent, 100)}%`,
                 left: `${Math.min(calculations.votesForPercent, 100)}%`,
@@ -237,7 +245,11 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
           <div className="h-6 bg-muted rounded-lg overflow-hidden">
             {/* Approval rate (green) */}
             <div
-              className="absolute h-full bg-green-500/80 transition-all duration-500 ease-out rounded-lg"
+              className={`absolute left-0 top-0 h-full bg-green-500/80 transition-all duration-500 ease-out ${
+                calculations.approvalRate > 0 ? 'rounded-l-lg' : ''
+              } ${
+                calculations.approvalRate >= 95 ? 'rounded-r-lg' : ''
+              }`}
               style={{ width: `${Math.min(calculations.approvalRate, 100)}%` }}
             />
           </div>

@@ -101,42 +101,32 @@ export default function ApplicationLayout({
   return (
     <div className="flex flex-col h-screen bg-[#1A1A1A]">
       {/* Mobile Header */}
-      <div className="md:hidden h-14 px-2 flex items-center justify-between bg-[#2A2A2A] border-b border-zinc-800">
+      <div className="md:hidden h-16 px-4 flex items-center justify-between bg-[#121212] border-b border-zinc-800/50">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setLeftPanelOpen(!leftPanelOpen)}
-          className="text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+          className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-lg h-10 w-10 p-0 transition-colors duration-150"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-6 w-6" />
         </Button>
-        <Link href="/daos" className="flex items-center gap-2">
+        <Link href="/daos" className="flex items-center gap-3 flex-1 justify-center">
           <Image
             src="/logos/aibtcdev-avatar-1000px.png"
             alt="AIBTCDEV"
-            width={20}
-            height={20}
+            width={24}
+            height={24}
+            className="flex-shrink-0"
           />
           <Image
             src="/logos/aibtcdev-primary-logo-white-wide-1000px.png"
             alt="AIBTCDEV"
-            width={150}
-            height={300}
+            width={120}
+            height={240}
+            className="h-5 w-auto"
           />
         </Link>
-        <div className="flex items-center gap-2">
-          {hasUser ? (
-            <Button
-              onClick={handleSignOut}
-              variant="outline"
-              className="text-sm font-medium"
-            >
-              Sign out
-            </Button>
-          ) : (
-            <AuthButton />
-          )}
-        </div>
+        <div className="w-10"></div>
       </div>
 
       {/* Desktop Header */}
@@ -198,48 +188,33 @@ export default function ApplicationLayout({
 
       {/* Main Content */}
       {/* <AssetTracker /> */}
-      <div className="flex-1 flex min-w-0 max-h-[calc(100vh-3.5rem)] md:max-h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="flex-1 flex min-w-0 max-h-[calc(100vh-4rem)] overflow-hidden">
         {/* Mobile Sidebar */}
         <aside
           className={cn(
             "md:hidden fixed inset-y-0 left-0 z-50",
-            "w-[min(100vw,320px)]",
-            "transition-transform duration-200 ease-in-out",
+            "w-80 bg-[#121212] border-r border-zinc-800/50",
+            "transition-transform duration-250 ease-[cubic-bezier(0.4,0,0.2,1)]",
             leftPanelOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          {/* Mobile Sidebar Header */}
-          <div className="h-14 px-4 flex items-center justify-between border-b border-zinc-800">
-            <Link href="/daos" className="flex items-center gap-2">
-              <Image
-                src="/logos/aibtcdev-avatar-1000px.png"
-                alt="AIBTCDEV"
-                width={24}
-                height={24}
-                className="flex-shrink-0"
-              />
-              <Image
-                src="/logos/aibtcdev-primary-logo-white-wide-1000px.png"
-                alt="AIBTCDEV"
-                width={150}
-                height={300}
-              />
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setLeftPanelOpen(false)}
-              className="text-zinc-400 h-8 w-8 hover:bg-zinc-800 hover:text-white"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-
           {/* Mobile Sidebar Content */}
-          <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+          <div className="flex flex-col h-full bg-[#121212]">
+            {/* Close Button */}
+            <div className="flex justify-end p-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setLeftPanelOpen(false)}
+                className="text-zinc-400 h-10 w-10 hover:bg-zinc-800/50 hover:text-white rounded-lg transition-colors duration-150"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
             {/* Navigation */}
-            <nav className="flex-shrink-0">
-              <div className="p-2 space-y-1">
+            <nav className="flex-1 px-6 pb-6">
+              <div className="space-y-3">
                 {navigation.map((item) => {
                   const isActive = pathname === item.href;
                   return (
@@ -251,19 +226,45 @@ export default function ApplicationLayout({
                         setLeftPanelOpen(false);
                       }}
                       className={cn(
-                        "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+                        "group flex items-center gap-4 px-4 py-3 text-base font-medium rounded-xl transition-all duration-150",
                         isActive
-                          ? "bg-zinc-800/50 text-white"
-                          : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
+                          ? "bg-[#FF4F03] text-white shadow-sm"
+                          : "text-zinc-300 hover:bg-zinc-800/50 hover:text-white",
                       )}
                     >
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.name}</span>
+                      <item.icon className={cn(
+                        "h-6 w-6 transition-colors duration-150",
+                        isActive ? "text-white" : "text-zinc-400 group-hover:text-white"
+                      )} />
+                      <span className="font-medium">{item.name}</span>
                     </Link>
                   );
                 })}
               </div>
             </nav>
+
+            {/* Mobile Sidebar Footer */}
+            <div className="p-6 border-t border-zinc-800/50">
+              <div className="flex flex-col gap-3">
+                <NetworkIndicator />
+                {hasUser ? (
+                  <Button
+                    onClick={() => {
+                      handleSignOut();
+                      setLeftPanelOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full justify-center text-sm font-medium border-zinc-700 text-zinc-300 hover:bg-zinc-800/50 hover:text-white"
+                  >
+                    Sign out
+                  </Button>
+                ) : (
+                  <div className="w-full">
+                    <AuthButton />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </aside>
 
@@ -274,7 +275,7 @@ export default function ApplicationLayout({
         {/* Mobile Overlay */}
         {leftPanelOpen && (
           <div
-            className="md:hidden fixed inset-0 bg-black/80 z-10"
+            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
             onClick={() => setLeftPanelOpen(false)}
           />
         )}
