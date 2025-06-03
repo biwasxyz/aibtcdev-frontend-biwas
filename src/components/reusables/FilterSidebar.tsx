@@ -110,18 +110,20 @@ export function FilterSidebar({
   };
 
   return (
-    <div className={`w-80 flex-shrink-0 ${className}`}>
+    <div className={className || "w-80 flex-shrink-0"}>
       <Card className="sticky top-6 bg-card border-border shadow-sm">
-        <CardContent className="p-8">
-          <div className="flex items-center gap-3 mb-8">
-            <Filter className="w-5 h-5 text-primary" />
-            <h3 className="text-xl font-semibold text-foreground">{title}</h3>
-          </div>
+        <CardContent className="p-4 sm:p-6 lg:p-8">
+          {title && (
+            <div className="flex items-center gap-3 mb-6 sm:mb-8">
+              <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground">{title}</h3>
+            </div>
+          )}
 
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {filters.map((filter) => (
               <div key={filter.key}>
-                <label className="text-sm font-medium text-muted-foreground mb-3 block">
+                <label className="text-sm font-medium text-muted-foreground mb-2 sm:mb-3 block">
                   {filter.label}
                 </label>
                 {renderFilterInput(filter)}
@@ -131,11 +133,11 @@ export function FilterSidebar({
 
           {/* Summary Stats Card */}
           {summaryStats && (
-            <div className="mt-10 p-6 bg-background rounded-xl border border-border shadow-sm">
-              <h4 className="font-semibold mb-4 text-foreground">Summary</h4>
-              <div className="space-y-3">
+            <div className="mt-6 sm:mt-10 p-4 sm:p-6 bg-background rounded-xl border border-border shadow-sm">
+              <h4 className="font-semibold mb-3 sm:mb-4 text-foreground">Summary</h4>
+              <div className="space-y-2 sm:space-y-3">
                 {Object.entries(summaryStats).map(([key, stat]) => (
-                  <div key={key} className="flex justify-between items-center">
+                  <div key={key} className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground">{stat.label}:</span>
                     <span className="font-bold text-foreground">
                       {stat.format ? stat.format(stat.value) : stat.value}
