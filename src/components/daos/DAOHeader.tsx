@@ -117,7 +117,7 @@ export function DAOHeader({
               
               {/* Buy Token Button */}
               {dao.id && (
-                <DAOBuyToken daoId={dao.id} />
+                <DAOBuyToken daoId={dao.id} daoName={dao.name}/> 
               )}
             </div>
           </div>

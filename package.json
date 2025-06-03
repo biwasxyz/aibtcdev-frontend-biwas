@@ -13,6 +13,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@aibtc/types": "^0.2.13",
     "@faktoryfun/core-sdk": "^0.2.23",
     "@faktoryfun/styx-sdk": "^1.1.4",
     "@headlessui/react": "^2.2.2",

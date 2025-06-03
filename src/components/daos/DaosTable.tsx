@@ -239,7 +239,7 @@ export const DAOTable = ({
             </div>
             <div className="flex items-center gap-2">
               {/* WE NO LONGER NEED THE FILTER HERE CAUSE WE'RE ONLY FETCHING 3 DAOs from table */}
-              <DAOBuyToken daoId={dao.id} />
+              <DAOBuyToken daoId={dao.id} daoName={dao.name}/>
             </div>
           </div>
 
@@ -530,7 +530,7 @@ export const DAOTable = ({
                     >
                       <div className="flex justify-center">
                         {/* WE NO LONGER NEED THE FILTER HERE CAUSE WE'RE ONLY FETCHING 3 DAOs from table */}
-                        <DAOBuyToken daoId={dao.id} />
+                        <DAOBuyToken daoId={dao.id} daoName={dao.name}/>
                       </div>
                     </td>
                   </tr>

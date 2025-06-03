@@ -504,7 +504,7 @@ export function DAOSendProposal({
                                       <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                                         <h6 className="font-medium text-red-800 mb-2">❌ Transaction Failed</h6>
                                         <div className="text-sm text-red-700">
-                                          <span className="font-medium">Error Details:</span>
+                                          {/* <span className="font-medium">Error Details:</span> */}
                                           <p className="font-mono mt-1">{tx_result.repr || tx_result.hex}</p>
                                         </div>
                                       </div>
@@ -523,7 +523,7 @@ export function DAOSendProposal({
                                       <summary className="cursor-pointer hover:underline text-sm text-gray-600">
                                         View raw WebSocket data
                                       </summary>
-                                      <pre className="whitespace-pre-wrap text-xs bg-gray-50 p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
+                                      <pre className="whitespace-pre-wrap text-xs  p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
                                         {JSON.stringify(websocketMessage, null, 2)}
                                       </pre>
                                     </details>
@@ -572,7 +572,7 @@ export function DAOSendProposal({
                       <summary className="cursor-pointer hover:underline">
                         View full response
                       </summary>
-                      <pre className="whitespace-pre-wrap text-xs bg-white p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
+                      <pre className="whitespace-pre-wrap text-xs  p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
                         {apiResponse.output}
                       </pre>
                     </details>
