@@ -315,3 +315,13 @@ export interface Wallet {
   testnet_address: string;
   secret_id: string;
 }
+
+export interface ChainState {
+  id: string;
+  created_at: string;
+  updated_at: string | null;
+  network: string | null;
+  block_hash: string | null;
+  block_height: string | null;
+  bitcoin_block_height: string | null;
+}

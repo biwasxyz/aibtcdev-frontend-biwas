@@ -122,14 +122,16 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
     return met ? "Met" : "Missed";
   };
 
-  return (
+      return (
     <div className="space-y-6">
       {/* Participation Progress Bar */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            <span className="text-sm font-medium text-foreground">Participation</span>
+            <span className="text-sm font-medium text-foreground">
+              Participation: {calculations.participationRate.toFixed(1)}% 
+            </span>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -143,8 +145,13 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className="text-sm text-muted-foreground">
-            {calculations.participationRate.toFixed(1)}%
+          <div className="text-sm">
+            <span className={cn(
+              "font-medium",
+              calculations.metQuorum ? "text-green-400" : "text-red-400"
+            )}>
+              {calculations.metQuorum ? "✓ Quorum Met" : "✗ Quorum Missed"}
+            </span>
           </div>
         </div>
 
@@ -153,7 +160,7 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
           <div className="h-6 bg-muted rounded-lg overflow-hidden">
             {/* Votes for (green) */}
             <div
-              className="absolute h-full bg-green-500/80 transition-all duration-500 ease-out"
+              className="absolute h-full bg-green-500/80 transition-all duration-500 ease-out rounded-lg"
               style={{ width: `${Math.min(calculations.votesForPercent, 100)}%` }}
             />
             {/* Votes against (red) */}
@@ -169,9 +176,9 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
           {/* Quorum line indicator */}
           <div
             className="absolute top-0 bottom-0 w-0.5 bg-primary z-10"
-            style={{ left: `${Math.min(calculations.quorumRate, 100)}%` }}
+            style={{ left: `calc(${Math.min(calculations.quorumRate, 100)}% - 1px)` }}
           >
-            <div className="absolute -top-1 -left-1 w-3 h-3 bg-primary rounded-full border-2 border-background" />
+            <div className="absolute -top-1 w-3 h-3 bg-primary rounded-full border-2 border-background" style={{ left: '-5px' }} />
           </div>
         </div>
 
@@ -190,6 +197,69 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-primary rounded-full" />
             <span>Quorum: <TokenBalance value={calculations.quorumTokensRequired.toString()} decimals={8} variant="abbreviated" symbol={tokenSymbol} /> ({calculations.quorumPercentage}%)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Approval Rate Progress Bar */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Target className="h-5 w-5 text-primary" />
+            <span className="text-sm font-medium text-foreground">
+              Approval Rate: {calculations.approvalRate.toFixed(1)}% 
+            </span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-3 w-3 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">
+                    Percentage of votes in favor out of total votes cast
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <div className="text-sm">
+            <span className={cn(
+              "font-medium",
+              calculations.metThreshold ? "text-green-400" : "text-red-400"
+            )}>
+              {calculations.metThreshold ? "✓ Threshold Met" : "✗ Threshold Missed"}
+            </span>
+          </div>
+        </div>
+
+        <div className="relative">
+          {/* Background bar */}
+          <div className="h-6 bg-muted rounded-lg overflow-hidden">
+            {/* Approval rate (green) */}
+            <div
+              className="absolute h-full bg-green-500/80 transition-all duration-500 ease-out rounded-lg"
+              style={{ width: `${Math.min(calculations.approvalRate, 100)}%` }}
+            />
+          </div>
+
+          {/* Threshold line indicator */}
+          <div
+            className="absolute top-0 bottom-0 w-0.5 bg-primary z-10"
+            style={{ left: `calc(${Math.min(calculations.thresholdPercentage, 100)}% - 1px)` }}
+          >
+            <div className="absolute -top-1 w-3 h-3 bg-primary rounded-full border-2 border-background" style={{ left: '-5px' }} />
+          </div>
+        </div>
+
+        {/* Approval breakdown */}
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-green-500 rounded-full" />
+            <span>Approval: {calculations.approvalRate.toFixed(1)}% of votes cast</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-2 h-2 bg-primary rounded-full" />
+            <span>Threshold: {calculations.thresholdPercentage}%</span>
           </div>
         </div>
       </div>
@@ -219,7 +289,7 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
               </span>
             </div>
             <div className="text-xs text-muted-foreground">
-              {calculations.participationRate.toFixed(1)}% of {calculations.quorumPercentage}% needed
+              Participation: {calculations.participationRate.toFixed(1)}% {calculations.metQuorum ? '≥' : '<'} Quorum: {calculations.quorumPercentage}%
             </div>
           </div>
         </div>
@@ -247,7 +317,7 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
               </span>
             </div>
             <div className="text-xs text-muted-foreground">
-              {calculations.approvalRate.toFixed(1)}% of {calculations.thresholdPercentage}% needed
+              Approval: {calculations.approvalRate.toFixed(1)}% {calculations.metThreshold ? '≥' : '<'} Threshold: {calculations.thresholdPercentage}%
             </div>
           </div>
         </div>
@@ -275,7 +345,18 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
               </span>
             </div>
             <div className="text-xs text-muted-foreground">
-              {calculations.totalVotes > 0 ? `${calculations.totalVotes} total votes` : "No votes yet"}
+              {calculations.totalVotes > 0 ? (
+                <div className="space-y-1">
+                  <div>{calculations.totalVotes} total votes</div>
+                  {!isActive && isEnded && !proposal.passed && calculations.metQuorum && calculations.metThreshold && (
+                    <div className="text-orange-400">
+                      ⚠️ Failed despite meeting quorum & threshold
+                    </div>
+                  )}
+                </div>
+              ) : (
+                "No votes yet"
+              )}
             </div>
           </div>
         </div>

@@ -113,7 +113,7 @@ const ProposalDetails = ({
         </h4>
         <VotingProgressChart proposal={proposal} tokenSymbol={tokenSymbol} />
         
-        <div className="mt-6">
+        {/* <div className="mt-6">
           <VoteStatusChart
             votesFor={proposal.votes_for?.toString()}
             votesAgainst={proposal.votes_against?.toString()}
@@ -123,7 +123,7 @@ const ProposalDetails = ({
             liquidTokens={proposal.liquid_tokens?.toString() || "0"}
             isActive={isActive}
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Detailed Votes Table */}
