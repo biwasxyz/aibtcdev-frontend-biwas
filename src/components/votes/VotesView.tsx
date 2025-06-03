@@ -16,6 +16,7 @@ import {
   Clock,
   // AlertTriangle,
   Ban,
+  ArrowRight,
 } from "lucide-react";
 import {
   Dialog,
@@ -435,15 +436,30 @@ export function VotesView({ votes }: VotesViewProps) {
   const getTabTitle = (tab: TabType): string => {
     switch (tab) {
       case 'evaluation':
-        return 'Evaluation';
+        return 'Evaluation Window';
       case 'voting':
         return 'Voting Window';
       case 'veto':
         return 'Veto Window';
       case 'completed':
-        return 'Completed';
+        return 'Execution Window';
       default:
         return 'All Votes';
+    }
+  };
+
+  const getTabNumber = (tab: TabType): number => {
+    switch (tab) {
+      case 'evaluation':
+        return 1;
+      case 'voting':
+        return 2;
+      case 'veto':
+        return 3;
+      case 'completed':
+        return 4;
+      default:
+        return 0;
     }
   };
 
@@ -466,27 +482,27 @@ export function VotesView({ votes }: VotesViewProps) {
     switch (tab) {
       case 'evaluation':
         return {
-          title: 'No proposals under evaluation',
-          description: 'All proposals are currently being evaluated by the AI agents before voting.',
-          hint: 'New proposals will appear here when they are being analyzed.'
+          title: 'No proposals in evaluation window',
+          description: 'All proposals are currently being analyzed by AI agents before entering the voting phase.',
+          hint: 'This is the first step in the proposal lifecycle where proposals are being evaluated.'
         };
       case 'voting':
         return {
-          title: 'No votes in voting window',
-          description: 'There are no proposals currently in the voting window.',
-          hint: 'Proposals move here after evaluation is complete and are within the voting period.'
+          title: 'No proposals in voting window',
+          description: 'There are no proposals currently in the active voting period.',
+          hint: 'Proposals move here after evaluation is complete and are ready for community voting.'
         };
       case 'veto':
         return {
-          title: 'No votes in veto window',
-          description: 'There are no proposals currently in the veto window.',
-          hint: 'Proposals move here during their veto period after voting ends.'
+          title: 'No proposals in veto window',
+          description: 'There are no proposals currently in the veto period.',
+          hint: 'Proposals enter this window after voting ends, allowing for potential vetoes before execution.'
         };
       case 'completed':
         return {
-          title: 'No completed votes',
-          description: 'You haven\'t completed any votes yet.',
-          hint: 'Completed votes will appear here after the execution period has ended.'
+          title: 'No proposals in execution window',
+          description: 'No proposals have completed their full lifecycle yet.',
+          hint: 'This is the final stage where proposals have finished their veto period and are ready for or have been executed.'
         };
       default:
         return {
@@ -524,38 +540,98 @@ export function VotesView({ votes }: VotesViewProps) {
             </div>
           </div>
 
-          {/* Tab Navigation */}
+          {/* Tab Navigation with Lifecycle Flow */}
           <div className="bg-card rounded-xl shadow-sm border border-border p-6 mb-8">
-            <div className="flex flex-wrap gap-6">
-              {(['evaluation', 'voting', 'veto', 'completed'] as TabType[]).map((tab) => {
+            {/* Lifecycle Flow Header */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-foreground mb-2">Proposal Lifecycle Flow</h3>
+              <p className="text-sm text-muted-foreground">
+                Each proposal moves through these sequential windows. Track your votes across the entire governance lifecycle.
+              </p>
+            </div>
+            
+            {/* Tab Navigation with Flow Indicators */}
+            <div className="flex flex-wrap items-center gap-2">
+              {(['evaluation', 'voting', 'veto', 'completed'] as TabType[]).map((tab, index) => {
                 const Icon = getTabIcon(tab);
                 const isActive = activeTab === tab;
                 const tabCount = getTabCount(tab);
+                const tabNumber = getTabNumber(tab);
+                const isLast = index === 3;
                 
                 return (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-150 ${
-                      isActive
-                        ? "bg-primary text-primary-foreground font-semibold shadow-md"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span className="text-sm">{getTabTitle(tab)}</span>
-                    <Badge 
-                      className={`text-xs ${
-                        isActive 
-                          ? "bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30"
-                          : "bg-muted text-muted-foreground border-muted-foreground/30"
+                  <div key={tab} className="flex items-center">
+                    <button
+                      onClick={() => setActiveTab(tab)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 ${
+                        isActive
+                          ? "bg-primary text-primary-foreground font-semibold shadow-md"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                       }`}
                     >
-                      {tabCount}
-                    </Badge>
-                  </button>
+                      {/* Step Number */}
+                      <div 
+                        className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                          isActive 
+                            ? "bg-primary-foreground/20 text-primary-foreground" 
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {tabNumber}
+                      </div>
+                      
+                      <Icon className="h-4 w-4" />
+                      
+                      <div className="flex flex-col items-start">
+                        <span className="text-sm font-medium">{getTabTitle(tab)}</span>
+                        <Badge 
+                          className={`text-xs mt-1 ${
+                            isActive 
+                              ? "bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30"
+                              : "bg-muted text-muted-foreground border-muted-foreground/30"
+                          }`}
+                        >
+                          {tabCount} active
+                        </Badge>
+                      </div>
+                    </button>
+                    
+                    {/* Flow Arrow */}
+                    {!isLast && (
+                      <ArrowRight className="h-5 w-5 text-muted-foreground mx-2 flex-shrink-0" />
+                    )}
+                  </div>
                 );
               })}
+            </div>
+            
+            {/* Current Window Description */}
+            <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                {(() => {
+                  const Icon = getTabIcon(activeTab);
+                  return <Icon className="h-4 w-4 text-primary" />;
+                })()}
+                <span className="font-medium text-foreground">
+                  Window {getTabNumber(activeTab)}: {getTabTitle(activeTab)}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {(() => {
+                  switch (activeTab) {
+                    case 'evaluation':
+                      return 'Proposals are being analyzed and evaluated by AI agents before entering the voting phase.';
+                    case 'voting':
+                      return 'Active voting period where community members can cast their votes on proposals.';
+                    case 'veto':
+                      return 'Post-voting period where proposals can be vetoed before execution.';
+                    case 'completed':
+                      return 'Final stage where proposals have completed their lifecycle and are ready for or have been executed.';
+                    default:
+                      return 'Select a window to view proposals in that stage of the lifecycle.';
+                  }
+                })()}
+              </p>
             </div>
           </div>
 
