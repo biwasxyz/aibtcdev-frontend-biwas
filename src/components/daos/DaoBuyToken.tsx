@@ -7,9 +7,10 @@ import { TokenPurchaseModal } from "@/components/daos/TokenPurchaseModal";
 
 interface DAOBuyTokenProps {
   daoId: string;
+  daoName: string;
 }
 
-export function DAOBuyToken({ daoId }: DAOBuyTokenProps) {
+export function DAOBuyToken({ daoId, daoName }: DAOBuyTokenProps) {
   const [presetAmount, setPresetAmount] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -22,10 +23,9 @@ export function DAOBuyToken({ daoId }: DAOBuyTokenProps) {
     <div className="flex flex-col sm:flex-row gap-2">
       <Button
         variant="primary"
-        className="flex-1"
         onClick={() => handleQuickBuy("20000")}
       >
-         Quick Buy
+         Buy {daoName}
       </Button>
       <TokenPurchaseModal
         daoId={daoId}
