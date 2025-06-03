@@ -178,10 +178,10 @@ const VoteStatusChart = ({
   if (isLoading && !isRefreshingAny) {
     return (
       <div className="space-y-2">
-        <div className="h-4 bg-zinc-700 rounded-full animate-pulse"></div>
+        <div className="h-3 sm:h-4 bg-muted rounded-full animate-pulse"></div>
         <div className="flex justify-between">
-          <div className="h-4 w-16 bg-zinc-700 rounded animate-pulse"></div>
-          <div className="h-4 w-16 bg-zinc-700 rounded animate-pulse"></div>
+          <div className="h-3 w-12 sm:h-4 sm:w-16 bg-muted rounded animate-pulse"></div>
+          <div className="h-3 w-12 sm:h-4 sm:w-16 bg-muted rounded animate-pulse"></div>
         </div>
       </div>
     );
@@ -231,115 +231,196 @@ const VoteStatusChart = ({
         </div>
       </div>
 
-             <div className="relative h-4 bg-zinc-800 rounded-md overflow-hidden">
-         {voteCalculations.totalVotes > 0 ? (
-           <>
-             {/* For votes */}
-             <div
-               className="absolute h-full bg-green-500/80 left-0 transition-all duration-500 ease-out flex items-center justify-start pl-2"
-               style={{ width: `${voteCalculations.barPercentageFor}%` }}
-             >
-               {voteCalculations.barPercentageFor > 10 && (
-                 <div className="flex items-center gap-1 text-white text-xs font-medium">
-                   <ThumbsUp className="h-2 w-2" />
-                   <span>{voteCalculations.barPercentageFor.toFixed(1)}%</span>
-                 </div>
-               )}
-             </div>
+      <div className="relative h-3 sm:h-4 bg-muted rounded-md overflow-hidden">
+        {voteCalculations.totalVotes > 0 ? (
+          <>
+            {/* For votes */}
+            <div
+              className="absolute h-full bg-green-500/80 left-0 transition-all duration-500 ease-out flex items-center justify-start pl-1 sm:pl-2"
+              style={{ width: `${voteCalculations.barPercentageFor}%` }}
+            >
+              {voteCalculations.barPercentageFor > 15 && (
+                <div className="flex items-center gap-0.5 sm:gap-1 text-white text-xs font-medium">
+                  <ThumbsUp className="h-1.5 w-1.5 sm:h-2 sm:w-2" />
+                  <span className="hidden sm:inline">{voteCalculations.barPercentageFor.toFixed(1)}%</span>
+                </div>
+              )}
+            </div>
 
-             {/* Against votes */}
-             <div
-               className="absolute h-full bg-red-500/80 transition-all duration-500 ease-out flex items-center justify-start pl-2"
-               style={{
-                 width: `${voteCalculations.barPercentageAgainst}%`,
-                 left: `${voteCalculations.barPercentageFor}%`,
-               }}
-             >
-               {voteCalculations.barPercentageAgainst > 10 && (
-                 <div className="flex items-center gap-1 text-white text-xs font-medium">
-                   <ThumbsDown className="h-2 w-2" />
-                   <span>{voteCalculations.barPercentageAgainst.toFixed(1)}%</span>
-                 </div>
-               )}
-             </div>
-           </>
-         ) : (
-           <div className="w-full h-full bg-zinc-700"></div>
-         )}
-       </div>
+            {/* Against votes */}
+            <div
+              className="absolute h-full bg-red-500/80 transition-all duration-500 ease-out flex items-center justify-start pl-1 sm:pl-2"
+              style={{
+                width: `${voteCalculations.barPercentageAgainst}%`,
+                left: `${voteCalculations.barPercentageFor}%`,
+              }}
+            >
+              {voteCalculations.barPercentageAgainst > 15 && (
+                <div className="flex items-center gap-0.5 sm:gap-1 text-white text-xs font-medium">
+                  <ThumbsDown className="h-1.5 w-1.5 sm:h-2 sm:w-2" />
+                  <span className="hidden sm:inline">{voteCalculations.barPercentageAgainst.toFixed(1)}%</span>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="w-full h-full bg-muted/50"></div>
+        )}
+      </div>
 
-      <div className="grid grid-cols-3 gap-2 text-xs">
-        <div>
-          <div className="flex items-center gap-2">
+      {/* Mobile: Stacked Layout */}
+      <div className="space-y-2 sm:hidden text-xs">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
+            <span className="text-muted-foreground">For:</span>
+          </div>
+          <div className="flex items-center gap-1 min-w-0 flex-1 justify-end">
+            <TokenBalance
+              value={parsedVotes.votesFor}
+              symbol={tokenSymbol}
+              decimals={8}
+              variant="abbreviated"
+              showSymbol={false}
+              className="truncate text-right"
+            />
+            <span className="text-green-400 font-medium flex-shrink-0 text-xs">
+              ({voteCalculations.liquidPercentageFor.toFixed(1)}%)
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0"></div>
+            <span className="text-muted-foreground">Against:</span>
+          </div>
+          <div className="flex items-center gap-1 min-w-0 flex-1 justify-end">
+            <TokenBalance
+              value={parsedVotes.votesAgainst}
+              symbol={tokenSymbol}
+              decimals={8}
+              variant="abbreviated"
+              showSymbol={false}
+              className="truncate text-right"
+            />
+            <span className="text-red-400 font-medium flex-shrink-0 text-xs">
+              ({voteCalculations.liquidPercentageAgainst.toFixed(1)}%)
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <div className="w-2 h-2 rounded-full bg-muted-foreground flex-shrink-0"></div>
+            <span className="text-muted-foreground">Total:</span>
+          </div>
+          <div className="flex items-center gap-1 min-w-0 flex-1 justify-end">
+            <TokenBalance
+              value={liquidTokens || "0"}
+              symbol={tokenSymbol}
+              decimals={8}
+              variant="abbreviated"
+              showSymbol={false}
+              className="truncate text-right"
+            />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-pointer flex-shrink-0">
+                    <Info className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs max-w-xs">
+                  <p>
+                    Total liquid tokens available for voting.
+                    <br />
+                    {(100 - voteCalculations.liquidPercentageFor - voteCalculations.liquidPercentageAgainst).toFixed(1)}%
+                    have not voted.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop: Grid Layout */}
+      <div className="hidden sm:grid grid-cols-3 gap-2 text-xs">
+        <div className="min-w-0">
+          <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
               <span className="text-muted-foreground">For:</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 min-w-0">
               <TokenBalance
                 value={parsedVotes.votesFor}
                 symbol={tokenSymbol}
                 decimals={8}
                 variant="abbreviated"
                 showSymbol={false}
+                className="truncate"
               />
-                             <span className="text-green-400 font-medium">
-                 ({voteCalculations.liquidPercentageFor.toFixed(1)}%)
-               </span>
-             </div>
-           </div>
-         </div>
-
-         <div>
-           <div className="flex items-center gap-2">
-             <div className="flex items-center gap-1">
-               <div className="w-2 h-2 rounded-full bg-red-500"></div>
-               <span className="text-muted-foreground">Against:</span>
-             </div>
-             <div className="flex items-center gap-1">
-               <TokenBalance
-                 value={parsedVotes.votesAgainst}
-                 symbol={tokenSymbol}
-                 decimals={8}
-                 variant="abbreviated"
-                 showSymbol={false}
-               />
-               <span className="text-red-400 font-medium">
-                 ({voteCalculations.liquidPercentageAgainst.toFixed(1)}%)
-               </span>
+              <span className="text-green-400 font-medium flex-shrink-0">
+                ({voteCalculations.liquidPercentageFor.toFixed(1)}%)
+              </span>
             </div>
           </div>
         </div>
 
-        <div>
-          <div className="flex items-center gap-2">
+        <div className="min-w-0">
+          <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full bg-zinc-600"></div>
+              <div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0"></div>
+              <span className="text-muted-foreground">Against:</span>
+            </div>
+            <div className="flex items-center gap-1 min-w-0">
+              <TokenBalance
+                value={parsedVotes.votesAgainst}
+                symbol={tokenSymbol}
+                decimals={8}
+                variant="abbreviated"
+                showSymbol={false}
+                className="truncate"
+              />
+              <span className="text-red-400 font-medium flex-shrink-0">
+                ({voteCalculations.liquidPercentageAgainst.toFixed(1)}%)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="min-w-0">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-muted-foreground flex-shrink-0"></div>
               <span className="text-muted-foreground">Total:</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 min-w-0">
               <TokenBalance
                 value={liquidTokens || "0"}
                 symbol={tokenSymbol}
                 decimals={8}
                 variant="abbreviated"
                 showSymbol={false}
+                className="truncate"
               />
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="cursor-pointer ml-1">
-                      <Info className="h-3.5 w-3.5 text-zinc-400" />
+                    <div className="cursor-pointer flex-shrink-0">
+                      <Info className="h-3.5 w-3.5 text-muted-foreground" />
                     </div>
                   </TooltipTrigger>
-                                        <TooltipContent side="top" className="text-xs">
-                        <p>
-                          Total liquid tokens available for voting.
-                          <br />
-                          {(100 - voteCalculations.liquidPercentageFor - voteCalculations.liquidPercentageAgainst).toFixed(1)}%
-                          have not voted.
-                        </p>
-                      </TooltipContent>
+                  <TooltipContent side="top" className="text-xs max-w-xs">
+                    <p>
+                      Total liquid tokens available for voting.
+                      <br />
+                      {(100 - voteCalculations.liquidPercentageFor - voteCalculations.liquidPercentageAgainst).toFixed(1)}%
+                      have not voted.
+                    </p>
+                  </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>

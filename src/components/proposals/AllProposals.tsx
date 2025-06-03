@@ -301,113 +301,125 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 relative overflow-x-hidden">
       {/* Ambient Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 right-20 w-48 h-48 bg-secondary/5 rounded-full blur-3xl delay-1000" />
-        <div className="absolute top-60 right-40 w-32 h-32 bg-primary/3 rounded-full blur-2xl delay-500" />
+        <div className="absolute top-10 left-4 md:top-20 md:left-20 w-32 h-32 md:w-64 md:h-64 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-4 md:bottom-40 md:right-20 w-24 h-24 md:w-48 md:h-48 bg-secondary/5 rounded-full blur-3xl delay-1000" />
+        <div className="absolute top-32 right-8 md:top-60 md:right-40 w-16 h-16 md:w-32 md:h-32 bg-primary/3 rounded-full blur-2xl delay-500" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-8 py-16">
-        <div className="space-y-12">
+      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 md:px-8 py-6 sm:py-8 md:py-16">
+        <div className="space-y-6 sm:space-y-8 md:space-y-16">
           {/* Enhanced Hero Header Section */}
-          <div className="text-center space-y-10">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2rem] bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 backdrop-blur-sm mb-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-500 ease-out group">
-              <Vote className="h-12 w-12 text-primary group-hover:scale-110 transition-transform duration-300" />
-              <Sparkles className="absolute -top-2 -right-2 h-5 w-5 text-secondary" />
+          <div className="text-center space-y-4 sm:space-y-6 md:space-y-10">
+            <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 md:w-24 md:h-24 rounded-xl sm:rounded-2xl md:rounded-[2rem] bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 backdrop-blur-sm mb-4 sm:mb-6 md:mb-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-500 ease-out group">
+              <Vote className="h-6 w-6 sm:h-8 sm:w-8 md:h-12 md:w-12 text-primary group-hover:scale-110 transition-transform duration-300" />
+              <Sparkles className="absolute -top-1 -right-1 md:-top-2 md:-right-2 h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 text-secondary" />
             </div>
             
-            <div className="space-y-6 max-w-4xl mx-auto">
-              <h1 className="text-5xl font-bold text-foreground tracking-tight leading-tight">
+            <div className="space-y-3 sm:space-y-4 md:space-y-6 max-w-4xl mx-auto px-2 sm:px-4">
+              <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-foreground tracking-tight leading-tight">
                 Governance Proposals
-                <span className="block text-2xl font-medium text-primary mt-2 tracking-wide">
+                <span className="block text-base sm:text-lg md:text-2xl font-medium text-primary mt-1 md:mt-2 tracking-wide">
                   Decision Hub
                 </span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
+              <p className="text-sm sm:text-base md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
                 Explore and participate in DAO governance decisions across all 
                 <span className="text-primary font-medium"> autonomous organizations</span>
               </p>
             </div>
+          </div>
 
-            {/* Enhanced Quick Stats Bento Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-              {heroStats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-xl rounded-2xl p-6 border border-border/30 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group"
-                >
-                  <div className="flex flex-col items-center space-y-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <stat.icon className={`h-6 w-6 ${stat.color}`} />
+          {/* Enhanced Metrics Bento Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-8 px-1 sm:px-4">
+            {heroStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-xl rounded-lg sm:rounded-xl md:rounded-2xl p-3 sm:p-4 md:p-8 border border-border/30 shadow-xl hover:shadow-2xl hover:border-border/60 transition-all duration-500 ease-out group overflow-hidden relative"
+              >
+                {/* Card Background Pattern */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div className="relative flex flex-col items-center space-y-1 sm:space-y-2 md:space-y-4">
+                  <div className={`w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-lg sm:rounded-xl md:rounded-2xl bg-gradient-to-br ${stat.color === 'text-primary' ? 'from-primary/20 to-primary/10' : stat.color === 'text-blue-500' ? 'from-blue-500/20 to-blue-500/10' : stat.color === 'text-emerald-500' ? 'from-emerald-500/20 to-emerald-500/10' : 'from-rose-500/20 to-rose-500/10'} border border-primary/20 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
+                    <stat.icon className={`h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 ${stat.color}`} />
+                  </div>
+                  <div className="text-center space-y-0.5 sm:space-y-1 md:space-y-2">
+                    <div className="text-lg sm:text-xl md:text-3xl font-bold text-foreground">
+                      {stat.value}
                     </div>
-                    <div className="text-center space-y-1">
-                      <div className="text-2xl font-bold text-foreground">
-                        {stat.value}
-                      </div>
-                      <div className="text-sm text-muted-foreground font-medium">
-                        {stat.label}
-                      </div>
+                    <div className="text-xs md:text-sm font-semibold text-muted-foreground tracking-wide">
+                      {stat.label}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
           {/* Filter Toggle for Mobile */}
-          <div className="lg:hidden flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-foreground">
-              All Proposals
-            </h2>
+          <div className="lg:hidden flex justify-between items-center px-3 sm:px-4">
+            <div className="space-y-1 min-w-0 flex-1">
+              <h2 className="text-base sm:text-lg md:text-xl font-semibold text-foreground truncate">
+                All Proposals
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {filteredAndSortedProposals.length > 0 
+                  ? `${filteredAndSortedProposals.length} ${filteredAndSortedProposals.length === 1 ? 'proposal' : 'proposals'}`
+                  : 'No proposals found'
+                }
+              </p>
+            </div>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-              className="flex items-center gap-2 bg-card/50 border-border/50 text-foreground hover:bg-card hover:border-border transition-all duration-300"
+              className="flex items-center gap-2 bg-card/50 border-border/50 text-foreground hover:bg-card hover:border-border transition-all duration-300 flex-shrink-0 ml-3"
             >
               <Filter className="h-4 w-4" />
-              Filters
+              <span className="hidden min-[420px]:inline">Filters</span>
             </Button>
           </div>
 
-          {/* Main Content Layout */}
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Mobile Filter Overlay */}
-            {isMobileFilterOpen && (
+          {/* Mobile Filter Overlay */}
+          {isMobileFilterOpen && (
+            <div
+              className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-opacity duration-300"
+              onClick={() => setIsMobileFilterOpen(false)}
+            >
               <div
-                className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-opacity duration-300"
-                onClick={() => setIsMobileFilterOpen(false)}
+                className="absolute right-0 top-0 h-full w-[85vw] max-w-[320px] bg-card/95 backdrop-blur-xl border-l border-border/50 overflow-y-auto shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
               >
-                <div
-                  className="absolute right-0 top-0 h-full w-full max-w-sm bg-card/95 backdrop-blur-xl border-l border-border/50 overflow-y-auto shadow-2xl"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="p-6 border-b border-border/30 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-foreground">Filters</h3>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setIsMobileFilterOpen(false)}
-                      className="text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all duration-300"
-                    >
-                      <X className="h-5 w-5" />
-                    </Button>
-                  </div>
-                  <div className="p-6">
-                    <FilterSidebar
-                      title=""
-                      filters={filterConfig}
-                      filterState={filterState}
-                      onFilterChange={handleFilterChange}
-                      summaryStats={summaryStats}
-                    />
-                  </div>
+                <div className="p-3 sm:p-4 md:p-6 border-b border-border/30 flex items-center justify-between">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Filters</h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsMobileFilterOpen(false)}
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all duration-300 flex-shrink-0"
+                  >
+                    <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </Button>
+                </div>
+                <div className="p-3 sm:p-4 md:p-6">
+                  <FilterSidebar
+                    title=""
+                    filters={filterConfig}
+                    filterState={filterState}
+                    onFilterChange={handleFilterChange}
+                    summaryStats={summaryStats}
+                    className="w-full"
+                  />
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
+          {/* Main Content Layout */}
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 px-3 sm:px-4 lg:px-0">
             {/* Desktop Filter Sidebar */}
             <div className="hidden lg:block lg:w-80 flex-shrink-0">
               <FilterSidebar
@@ -421,32 +433,34 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
 
             {/* Main Content */}
             <div className="flex-1 min-w-0">
-              {/* Desktop Section Header */}
-              <div className="hidden lg:block mb-8">
-                <h2 className="text-2xl font-bold text-foreground tracking-tight">
-                  All Proposals
-                </h2>
-                <p className="text-muted-foreground mt-2">
-                  {filteredAndSortedProposals.length > 0 
-                    ? `Showing ${filteredAndSortedProposals.length} ${filteredAndSortedProposals.length === 1 ? 'proposal' : 'proposals'}`
-                    : 'No proposals match your current filters'
-                  }
-                </p>
+              {/* Content Section Header */}
+              <div className="space-y-1 sm:space-y-2 md:space-y-3 mb-4 sm:mb-6 md:mb-8">
+                <div className="text-center lg:text-left">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground tracking-tight">
+                    All Proposals
+                  </h2>
+                  <p className="text-sm md:text-base text-muted-foreground mt-0.5 sm:mt-1 md:mt-2">
+                    {filteredAndSortedProposals.length > 0 
+                      ? `${filteredAndSortedProposals.length > 0 ? 'Showing ' : ''}${filteredAndSortedProposals.length} ${filteredAndSortedProposals.length === 1 ? 'proposal' : 'proposals'}`
+                      : 'No proposals match your current filters'
+                    }
+                  </p>
+                </div>
               </div>
 
               {/* Proposals List */}
-              <div ref={proposalsRef} className="space-y-6">
+              <div ref={proposalsRef} className="space-y-3 sm:space-y-4 md:space-y-6">
                 {paginatedProposals.length === 0 ? (
-                  <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/50 py-24">
-                    <div className="text-center space-y-6">
-                      <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-muted/50">
-                        <FileText className="h-12 w-12 text-muted-foreground/50" />
+                  <div className="bg-card/30 backdrop-blur-sm rounded-lg sm:rounded-xl md:rounded-2xl border border-border/50 py-12 sm:py-16 md:py-24">
+                    <div className="text-center space-y-3 sm:space-y-4 md:space-y-6 px-4">
+                      <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 md:w-24 md:h-24 rounded-xl sm:rounded-2xl md:rounded-3xl bg-muted/50">
+                        <FileText className="h-6 w-6 sm:h-8 sm:w-8 md:h-12 md:w-12 text-muted-foreground/50" />
                       </div>
-                      <div className="space-y-3">
-                        <h3 className="text-xl font-medium text-foreground">
+                      <div className="space-y-1 sm:space-y-2 md:space-y-3">
+                        <h3 className="text-base sm:text-lg md:text-xl font-medium text-foreground">
                           No Proposals Found
                         </h3>
-                        <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
+                        <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
                           {totalProposals === 0 
                             ? "No proposals have been created yet. Check back later for new governance proposals."
                             : "No proposals match your current search and filter criteria. Try adjusting your filters or search terms."
@@ -471,16 +485,18 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
 
               {/* Pagination */}
               {filteredAndSortedProposals.length > 0 && (
-                <div className="mt-12">
-                  <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/50 p-6">
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      totalItems={filteredAndSortedProposals.length}
-                      itemsPerPage={itemsPerPage}
-                      onPageChange={handlePageChange}
-                      onItemsPerPageChange={handleItemsPerPageChange}
-                    />
+                <div className="mt-6 sm:mt-8 md:mt-12">
+                  <div className="bg-card/30 backdrop-blur-sm rounded-lg sm:rounded-xl md:rounded-2xl border border-border/50 p-3 sm:p-4 md:p-6 overflow-x-auto">
+                    <div className="min-w-[320px]">
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredAndSortedProposals.length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={handlePageChange}
+                        onItemsPerPageChange={handleItemsPerPageChange}
+                      />
+                    </div>
                   </div>
                 </div>
               )}

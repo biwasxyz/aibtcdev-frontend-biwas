@@ -46,15 +46,15 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
   if (isLoading) {
     return (
       <div className="space-y-2 p-3 rounded-md">
-        <div className="h-4 bg-white/10 rounded-full animate-pulse w-full"></div>
-        <div className="h-4 bg-white/10 rounded-full animate-pulse w-5/6"></div>
+        <div className="h-3 sm:h-4 bg-muted rounded-full animate-pulse w-full"></div>
+        <div className="h-3 sm:h-4 bg-muted rounded-full animate-pulse w-5/6"></div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="text-red-400 p-3 text-center rounded-md text-sm">
+      <div className="text-destructive p-3 text-center rounded-md text-sm">
         Error loading votes: {error?.message || "Unknown error"}
       </div>
     );
@@ -63,7 +63,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
   // --- Empty State ---
   if (!votes || votes.length === 0) {
     return (
-      <div className="py-4 text-center text-gray-400 rounded-md text-sm">
+      <div className="py-4 text-center text-muted-foreground rounded-md text-sm">
         No votes have been recorded for this proposal yet.
       </div>
     );
@@ -85,16 +85,16 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-blue-400 font-medium">
+            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               Vote
             </TableHead>
-            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-blue-400 font-medium">
+            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               Confidence
             </TableHead>
-            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-blue-400 font-medium">
+            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               Reasoning
             </TableHead>
-            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-blue-400 font-medium">
+            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               TX
             </TableHead>
           </TableRow>
