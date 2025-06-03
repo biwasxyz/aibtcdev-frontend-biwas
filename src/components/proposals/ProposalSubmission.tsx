@@ -57,6 +57,59 @@ interface WebSocketTransactionMessage {
   contract_call?: unknown;
 }
 
+// Proposal Recommendation API Types
+interface ProposalRecommendationRequest {
+  dao_id: string;
+  focus_area?: string;
+  specific_needs?: string;
+  model_name?: string;
+  temperature?: number;
+}
+
+interface TokenUsage {
+  input_tokens: number;
+  output_tokens: number;
+}
+
+interface TokenUsageBreakdown {
+  proposal_recommendation_agent: TokenUsage;
+}
+
+type ProposalPriority = "high" | "medium" | "low";
+
+interface ProposalRecommendationResponse {
+  title: string;
+  content: string;
+  rationale: string;
+  priority: ProposalPriority;
+  estimated_impact: string;
+  suggested_action?: string;
+  dao_id: string;
+  dao_name: string;
+  proposals_analyzed: number;
+  token_usage: TokenUsageBreakdown;
+}
+
+interface ProposalRecommendationError {
+  error: string;
+  title: "";
+  content: "";
+  rationale: string;
+  priority: "low";
+  estimated_impact: "None";
+  dao_id?: string;
+  dao_name?: string;
+}
+
+type ProposalRecommendationResult = ProposalRecommendationResponse | ProposalRecommendationError;
+
+// Type guard to check if the response is an error
+function isProposalRecommendationError(
+  result: ProposalRecommendationResult
+): result is ProposalRecommendationError {
+  return "error" in result;
+}
+
 interface ProposalSubmissionProps {
   daoId: string;
   dao?: DAO;
@@ -294,18 +347,84 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
   };
 
   const handleAIGenerate = async () => {
+    if (!accessToken) {
+      console.error("No access token available for AI generation");
+      return;
+    }
+
     setIsGenerating(true);
     try {
-      // TODO: Implement AI text generation
       console.log("Generating AI proposal for DAO:", daoId);
       
-      // Simulate AI generation
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Create the API request
+      const request: ProposalRecommendationRequest = {
+        dao_id: daoId,
+        focus_area: "governance", // Default focus area, could be made configurable
+        specific_needs: "Generate a comprehensive proposal that addresses current DAO needs and opportunities",
+        model_name: "gpt-4.1", // Use the recommended model
+        temperature: 0.3, // Balance between creativity and focus
+      };
+
+      // Make the API call
+      const response = await fetch(
+        `https://core-staging.aibtc.dev/tools/dao/proposal_recommendations/generate?token=${encodeURIComponent(accessToken)}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(request),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result: ProposalRecommendationResult = await response.json();
+
+      if (isProposalRecommendationError(result)) {
+        throw new Error(result.error);
+      }
+
+      // Set the generated content as the proposal text
+      setProposal(result.content);
       
-      const aiText = "This is a placeholder for AI-generated proposal text. The AI would analyze the DAO context and generate relevant proposal content based on best practices and the DAO's specific needs. This generated content meets the minimum character requirement for submission.";
-      setProposal(aiText);
+      console.log("AI proposal generated successfully:", {
+        title: result.title,
+        priority: result.priority,
+        proposalsAnalyzed: result.proposals_analyzed,
+        tokenUsage: result.token_usage,
+      });
+
     } catch (error) {
-      console.error("Failed to generate AI text:", error);
+      console.error("Failed to generate AI proposal:", error);
+      
+      // Fallback to a basic template if the API fails
+      const fallbackText = `## Proposal Title
+[Insert your proposal title here]
+
+## Objective
+Describe the main goal and purpose of this proposal.
+
+## Rationale
+Explain why this proposal is needed and how it benefits the DAO.
+
+## Implementation Plan
+Detail the specific steps needed to execute this proposal.
+
+## Success Metrics
+Define how success will be measured.
+
+## Timeline
+Provide an estimated timeline for completion.
+
+## Budget Requirements
+List any resources or funding needed.
+
+Note: This is a template generated after AI assistance encountered an issue. Please customize it with your specific proposal details.`;
+      
+      setProposal(fallbackText);
     } finally {
       setIsGenerating(false);
     }
