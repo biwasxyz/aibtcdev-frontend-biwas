@@ -18,32 +18,32 @@ interface MissionContentProps {
 export function MissionContent({ description }: MissionContentProps) {
   const markdownComponents = {
     h1: ({ children, ...props }: MarkdownComponentProps) => (
-      <h1 className="text-3xl font-bold text-foreground mb-6 mt-8 first:mt-0" {...props}>
+      <h1 className="text-2xl font-bold text-foreground mb-4 mt-6 first:mt-0" {...props}>
         {children}
       </h1>
     ),
     h2: ({ children, ...props }: MarkdownComponentProps) => (
-      <h2 className="text-2xl font-bold text-foreground mb-4 mt-8 first:mt-0" {...props}>
+      <h2 className="text-xl font-bold text-foreground mb-3 mt-6 first:mt-0" {...props}>
         {children}
       </h2>
     ),
     h3: ({ children, ...props }: MarkdownComponentProps) => (
-      <h3 className="text-xl font-semibold text-foreground mb-3 mt-6 first:mt-0" {...props}>
+      <h3 className="text-lg font-semibold text-foreground mb-2 mt-4 first:mt-0" {...props}>
         {children}
       </h3>
     ),
     p: ({ children, ...props }: MarkdownComponentProps) => (
-      <p className="text-muted-foreground leading-relaxed mb-6 last:mb-0 text-base" {...props}>
+      <p className="text-muted-foreground leading-relaxed mb-4 last:mb-0 text-base" {...props}>
         {children}
       </p>
     ),
     ul: ({ children, ...props }: MarkdownComponentProps) => (
-      <ul className="list-disc list-inside text-muted-foreground mb-6 space-y-2 ml-6" {...props}>
+      <ul className="list-disc list-inside text-muted-foreground mb-4 space-y-1 ml-4" {...props}>
         {children}
       </ul>
     ),
     ol: ({ children, ...props }: MarkdownComponentProps) => (
-      <ol className="list-decimal list-inside text-muted-foreground mb-6 space-y-2 ml-6" {...props}>
+      <ol className="list-decimal list-inside text-muted-foreground mb-4 space-y-1 ml-4" {...props}>
         {children}
       </ol>
     ),
@@ -74,7 +74,7 @@ export function MissionContent({ description }: MissionContentProps) {
       </a>
     ),
     blockquote: ({ children, ...props }: MarkdownComponentProps) => (
-      <blockquote className="border-l-4 border-primary pl-6 italic text-muted-foreground my-6 bg-muted/20 py-4 rounded-r-xl" {...props}>
+      <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-4 bg-muted/20 py-3 rounded-r-lg" {...props}>
         {children}
       </blockquote>
     ),
@@ -84,21 +84,21 @@ export function MissionContent({ description }: MissionContentProps) {
       </code>
     ),
     pre: ({ children, ...props }: MarkdownComponentProps) => (
-      <pre className="bg-muted/50 text-foreground p-6 rounded-2xl overflow-x-auto mb-6 border border-border/30" {...props}>
+      <pre className="bg-muted/50 text-foreground p-4 rounded-xl overflow-x-auto mb-4 border border-border/30" {...props}>
         {children}
       </pre>
     ),
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center">
-          <Info className="h-6 w-6 text-secondary" />
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center">
+          <Info className="h-5 w-5 text-secondary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Mission Statement</h2>
-          <p className="text-muted-foreground">Learn about our vision and goals</p>
+          <h2 className="text-lg font-semibold text-foreground">Mission Statement</h2>
+          <p className="text-sm text-muted-foreground">Learn about our vision and goals</p>
         </div>
       </div>
       
@@ -114,12 +114,12 @@ export function MissionContent({ description }: MissionContentProps) {
             </ReactMarkdown>
           </div>
         ) : (
-          <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-muted/50 mb-6">
-              <Info className="h-10 w-10 text-muted-foreground/50" />
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-muted/50 mb-4">
+              <Info className="h-8 w-8 text-muted-foreground/50" />
             </div>
-            <div className="space-y-3">
-              <h3 className="text-xl font-medium text-foreground">
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium text-foreground">
                 No Mission Statement
               </h3>
               <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">

@@ -2,13 +2,11 @@
 
 import type React from "react";
 import { usePathname } from "next/navigation";
-import { Building2, FileText } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
 import { DAOHeader } from "./DAOHeader";
-import { DAONavigation } from "./DAONavigation";
-import { PageSection } from "./PageSection";
 import { MissionContent } from "./MissionContent";
-import { DAOSendProposal } from "@/components/proposals/DAOSendProposal";
+import { ProposalSubmission } from "./ProposalSubmission";
 
 interface DAOInfo {
   id: string;
@@ -91,48 +89,38 @@ export function DAOLayout({
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
-      <div className="max-w-7xl mx-auto px-8 py-12">
-        <div className="space-y-12">
-          {/* DAO Header Section */}
-          <div>
-            <DAOHeader
-              dao={dao}
-              token={token}
-              marketStats={marketStats}
-              proposalCount={proposalCount}
-              isLoading={false}
-            />
-            <DAONavigation daoName={daoName} currentPath={pathname} />
-          </div>
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="space-y-8">
+          {/* Integrated DAO Header with Navigation */}
+          <DAOHeader
+            dao={dao}
+            token={token}
+            marketStats={marketStats}
+            proposalCount={proposalCount}
+            isLoading={false}
+            daoName={daoName}
+            currentPath={pathname}
+          />
 
-          {/* Main Content Section */}
+          {/* Main Content */}
           {isProposals ? (
-            /* Proposals Page Layout */
             <div className="space-y-8">
-              {/* Send Proposal Section */}
-              <PageSection
-                title="Send Proposal"
-                description="Create a new governance proposal"
-                icon={FileText}
-              >
-                <DAOSendProposal daoId={dao.id} />
-              </PageSection>
+              {/* Proposal Submission Section */}
+              <ProposalSubmission daoId={dao.id} />
 
-              {/* Proposals Content */}
-              <PageSection className="p-10">
+              {/* Proposals Display */}
+              <div className="space-y-4">
                 {children}
-              </PageSection>
+              </div>
             </div>
           ) : isMission ? (
-            /* Mission Page Layout */
-            <PageSection className="p-10">
+            <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/30 p-8">
               <MissionContent description={dao.description} />
-            </PageSection>
+            </div>
           ) : (
-            /* Other Pages Layout */
-            <PageSection className="p-10">
+            <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/30 p-8">
               {children}
-            </PageSection>
+            </div>
           )}
         </div>
       </div>
