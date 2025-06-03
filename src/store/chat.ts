@@ -3,10 +3,14 @@ import { Message } from "@/lib/chat/types";
 import { useThreadsStore } from "./threads";
 import { getStacksAddress } from "@/lib/address";
 
-// Local storage key for active thread
-const address = getStacksAddress();
-const ACTIVE_THREAD_KEY = `${address}_activeThreadId`;
-const SELECTED_AGENT_KEY = `${address}_selectedAgentId`;
+// Helper to get storage keys for current user
+const getStorageKeys = () => {
+  const address = getStacksAddress();
+  return {
+    activeThreadKey: `${address}_activeThreadId`,
+    selectedAgentKey: `${address}_selectedAgentId`,
+  };
+};
 
 // Global WebSocket instance
 let globalWs: WebSocket | null = null;
@@ -49,13 +53,15 @@ interface ChatState {
 // Helper function to get stored thread ID
 const getStoredThreadId = (): string | null => {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(ACTIVE_THREAD_KEY);
+  const { activeThreadKey } = getStorageKeys();
+  return localStorage.getItem(activeThreadKey);
 };
 
 // Helper function to get stored agent ID
 const getStoredAgentId = (): string | null => {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(SELECTED_AGENT_KEY);
+  const { selectedAgentKey } = getStorageKeys();
+  return localStorage.getItem(selectedAgentKey);
 };
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -209,7 +215,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }));
 
     // Clear from localStorage
-    localStorage.removeItem(ACTIVE_THREAD_KEY);
+    const { activeThreadKey } = getStorageKeys();
+    localStorage.removeItem(activeThreadKey);
 
     // Remove thread from threads store
     useThreadsStore.getState().removeThread(threadId);
@@ -219,7 +226,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ activeThreadId: threadId });
 
     // Store in localStorage
-    localStorage.setItem(ACTIVE_THREAD_KEY, threadId);
+    const { activeThreadKey } = getStorageKeys();
+    localStorage.setItem(activeThreadKey, threadId);
 
     // Only get thread history if we haven't fetched it before
     const state = get();
@@ -237,7 +245,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   clearActiveThread: () => {
     set({ activeThreadId: null });
-    localStorage.removeItem(ACTIVE_THREAD_KEY);
+    const { activeThreadKey } = getStorageKeys();
+    localStorage.removeItem(activeThreadKey);
   },
 
   // Rest of the store implementation remains the same

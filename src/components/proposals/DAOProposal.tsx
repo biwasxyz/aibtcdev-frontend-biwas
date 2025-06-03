@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import ProposalCard from "@/components/daos/proposal/ProposalCard";
+import ProposalCard from "@/components/proposals/ProposalCard";
 import type { Proposal } from "@/types/supabase";
 
 interface DAOProposalsProps {

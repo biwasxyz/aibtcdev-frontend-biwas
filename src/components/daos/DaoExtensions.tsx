@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Extension } from "@/types/supabase";
-import CopyButton from "@/components/daos/proposal/CopyButton";
+import CopyButton from "@/components/proposals/CopyButton";
 
 interface DAOExtensionsProps {
   extensions: Extension[];

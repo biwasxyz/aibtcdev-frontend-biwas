@@ -10,6 +10,7 @@ import {
   Users,
   DollarSign,
   TrendingUp,
+  Building2,
 } from "lucide-react";
 import type { DAO, Token, Holder } from "@/types/supabase";
 import { Loader } from "@/components/reusables/Loader";
@@ -78,14 +79,14 @@ export const DAOCard = ({
   }) => {
     if (tradeData.isLoading) {
       return (
-        <div className="flex h-16 items-center justify-center">
+        <div className="flex h-20 items-center justify-center">
           <Loader />
         </div>
       );
     }
     if (tradeData.data.length > 0) {
       return (
-        <ResponsiveContainer width="100%" height={60}>
+        <ResponsiveContainer width="100%" height={80}>
           <LineChart data={tradeData.data}>
             <XAxis dataKey="timestamp" hide />
             <RechartsTooltip
@@ -97,13 +98,10 @@ export const DAOCard = ({
                   payload[0].value !== undefined
                 ) {
                   return (
-                    <div className="bg-card text-muted-foreground rounded-lg shadow-lg p-3 text-xs border border-border">
-                      <p>Price: ${Number(payload[0].value).toFixed(8)}</p>
-                      <p>
-                        Time:{" "}
-                        {new Date(
-                          payload[0].payload.timestamp,
-                        ).toLocaleString()}
+                    <div className="bg-card/95 backdrop-blur-sm text-foreground rounded-xl shadow-lg p-3 text-xs border border-border/50">
+                      <p className="font-medium">Price: ${Number(payload[0].value).toFixed(8)}</p>
+                      <p className="text-muted-foreground">
+                        {new Date(payload[0].payload.timestamp).toLocaleString()}
                       </p>
                     </div>
                   );
@@ -116,16 +114,18 @@ export const DAOCard = ({
               dataKey="price"
               stroke={getChartColor(tradeData.data)}
               dot={false}
-              strokeWidth={2}
+              strokeWidth={3}
             />
           </LineChart>
         </ResponsiveContainer>
       );
     }
     return (
-      <div className="flex h-16 items-center justify-center">
-        <BarChart className="h-4 w-4 text-muted opacity-50" />
-        <span className="ml-2 text-xs text-muted-foreground">No data</span>
+      <div className="flex h-20 items-center justify-center">
+        <div className="text-center space-y-2">
+          <BarChart className="h-6 w-6 text-muted-foreground/50 mx-auto" />
+          <span className="text-xs text-muted-foreground">No trading data</span>
+        </div>
       </div>
     );
   };
@@ -134,7 +134,7 @@ export const DAOCard = ({
     if (change === null || change === undefined) {
       return (
         <div className="flex items-center gap-1 text-muted-foreground">
-          <span className="text-sm">0%</span>
+          <span className="text-sm font-medium">0%</span>
         </div>
       );
     }
@@ -144,12 +144,14 @@ export const DAOCard = ({
 
     return (
       <div
-        className={`flex items-center gap-1 ${
-          isPositive ? "text-green-500" : "text-destructive"
+        className={`flex items-center gap-1 px-2 py-1 rounded-lg ${
+          isPositive 
+            ? "text-emerald-500 bg-emerald-500/10" 
+            : "text-rose-500 bg-rose-500/10"
         }`}
       >
-        <Icon className="h-3.5 w-3.5" />
-        <span className="text-sm font-medium">
+        <Icon className="h-4 w-4" />
+        <span className="text-sm font-semibold">
           {Math.abs(change).toFixed(2)}%
         </span>
       </div>
@@ -170,28 +172,33 @@ export const DAOCard = ({
 
   return (
     <Link href={`/daos/${encodeURIComponent(dao.name)}`}>
-      <Card className="group h-full hover:shadow-lg transition-all duration-150 bg-card border-border hover:border-primary/50 cursor-pointer shadow-sm">
-        <CardHeader className="pb-4">
+      <Card className="group h-full hover:shadow-lg transition-all duration-300 bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/30 cursor-pointer hover:bg-card/70">
+        <CardHeader className="pb-6">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4 flex-1 min-w-0">
-              <div className="relative h-12 w-12 overflow-hidden rounded-xl flex-shrink-0 bg-gradient-to-br from-primary/20 to-secondary/20">
-                <Image
-                  src={token?.image_url || dao.image_url || "/placeholder.svg"}
-                  alt={dao.name}
-                  width={48}
-                  height={48}
-                  className="object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "/placeholder.svg";
-                  }}
-                />
+              {/* Enhanced Logo */}
+              <div className="relative">
+                <div className="h-16 w-16 overflow-hidden rounded-2xl flex-shrink-0 bg-gradient-to-br from-primary/20 to-secondary/20 group-hover:scale-105 transition-transform duration-300">
+                  <Image
+                    src={token?.image_url || dao.image_url || "/placeholder.svg"}
+                    alt={dao.name}
+                    width={64}
+                    height={64}
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/placeholder.svg";
+                    }}
+                  />
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
+
+              {/* DAO Info */}
+              <div className="flex-1 min-w-0 space-y-2">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-150 truncate">
+                      <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300 truncate">
                         {truncateName(dao.name)}
                       </h3>
                     </TooltipTrigger>
@@ -200,74 +207,84 @@ export const DAOCard = ({
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
+                
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Building2 className="h-4 w-4" />
+                  <span className="text-sm">
+                    Created {new Date(dao.created_at).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className="pt-0">
-          <div className="space-y-6">
-            {/* Price Chart */}
-            <div className="bg-background rounded-xl p-4 border border-border">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-muted-foreground">
-                  Price Trend
-                </span>
-                {renderPriceChange(tokenPrice?.price24hChanges)}
-              </div>
+        <CardContent className="pt-0 space-y-8">
+          {/* Price Chart Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-foreground">Price Trend</h4>
+              {renderPriceChange(tokenPrice?.price24hChanges)}
+            </div>
+            <div className="bg-muted/20 rounded-2xl p-4 border border-border/30">
               {renderChart(trades)}
             </div>
+          </div>
 
-            {/* Key Metrics */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-3 bg-background rounded-xl border border-border">
-                <div className="flex items-center justify-center gap-1 mb-2">
-                  <DollarSign className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Price</span>
+          {/* Key Metrics Grid */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-foreground">Key Metrics</h4>
+            <div className="grid grid-cols-3 gap-3">
+              {/* Price */}
+              <div className="text-center space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mx-auto">
+                  <DollarSign className="h-6 w-6 text-primary" />
                 </div>
-                <div className="text-sm font-semibold text-foreground">
-                  {isFetchingPrice ? (
-                    <Loader />
-                  ) : tokenPrice?.price ? (
-                    `$${formatNumber(tokenPrice.price)}`
-                  ) : (
-                    "—"
-                  )}
+                <div className="space-y-1">
+                  <div className="text-xs text-muted-foreground font-medium">Price</div>
+                  <div className="text-sm font-bold text-foreground">
+                    {isFetchingPrice ? (
+                      <Loader />
+                    ) : tokenPrice?.price ? (
+                      `$${formatNumber(tokenPrice.price)}`
+                    ) : (
+                      "—"
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="text-center p-3 bg-background rounded-xl border border-border">
-                <div className="flex items-center justify-center gap-1 mb-2">
-                  <Users className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Holders</span>
+              {/* Holders */}
+              <div className="text-center space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-500/10 flex items-center justify-center mx-auto">
+                  <Users className="h-6 w-6 text-blue-500" />
                 </div>
-                <div className="text-sm font-semibold text-foreground">
-                  {getHolderCount()}
+                <div className="space-y-1">
+                  <div className="text-xs text-muted-foreground font-medium">Holders</div>
+                  <div className="text-sm font-bold text-foreground">
+                    {getHolderCount()}
+                  </div>
                 </div>
               </div>
 
-              <div className="text-center p-3 bg-background rounded-xl border border-border">
-                <div className="flex items-center justify-center gap-1 mb-2">
-                  <TrendingUp className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Market Cap</span>
+              {/* Market Cap */}
+              <div className="text-center space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 flex items-center justify-center mx-auto">
+                  <TrendingUp className="h-6 w-6 text-emerald-500" />
                 </div>
-                <div className="text-sm font-semibold text-foreground">
-                  {isFetchingPrice ? (
-                    <Loader />
-                  ) : tokenPrice?.marketCap ? (
-                    `$${formatNumber(tokenPrice.marketCap)}`
-                  ) : (
-                    "—"
-                  )}
+                <div className="space-y-1">
+                  <div className="text-xs text-muted-foreground font-medium">Market Cap</div>
+                  <div className="text-sm font-bold text-foreground">
+                    {isFetchingPrice ? (
+                      <Loader />
+                    ) : tokenPrice?.marketCap ? (
+                      `$${formatNumber(tokenPrice.marketCap)}`
+                    ) : (
+                      "—"
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-center pt-3 border-t border-border">
-              <span className="text-xs text-muted-foreground">
-                Created {new Date(dao.created_at).toLocaleDateString()}
-              </span>
             </div>
           </div>
         </CardContent>

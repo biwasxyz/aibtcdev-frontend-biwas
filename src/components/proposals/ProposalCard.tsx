@@ -13,6 +13,7 @@ import {
   EyeOff,
   Building2,
   ExternalLink,
+  Vote,
 } from "lucide-react";
 import { format } from "date-fns";
 import { truncateString, getExplorerLink, formatAction } from "@/helpers/helper";
@@ -43,25 +44,25 @@ const ProposalCard = ({
   const getStatusBadge = () => {
     if (isActive) {
       return (
-        <Badge className="bg-primary/20 text-primary hover:bg-primary/30 border-primary/50 transition-colors duration-150">
+        <Badge className="bg-blue-500/20 text-blue-500 hover:bg-blue-500/30 border-blue-500/50 transition-all duration-300 font-medium px-3 py-1.5">
           Active
         </Badge>
       );
     } else if (isEnded && proposal.passed) {
       return (
-        <Badge className="bg-green-500/20 text-green-500 hover:bg-green-500/30 border-green-500/50 transition-colors duration-150">
+        <Badge className="bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30 border-emerald-500/50 transition-all duration-300 font-medium px-3 py-1.5">
           Passed
         </Badge>
       );
     } else if (isEnded && !proposal.passed) {
       return (
-        <Badge className="bg-destructive/20 text-destructive hover:bg-destructive/30 border-destructive/50 transition-colors duration-150">
+        <Badge className="bg-rose-500/20 text-rose-500 hover:bg-rose-500/30 border-rose-500/50 transition-all duration-300 font-medium px-3 py-1.5">
           Failed
         </Badge>
       );
     } else {
       return (
-        <Badge className="bg-muted/50 text-muted-foreground hover:bg-muted/70 border-muted transition-colors duration-150">
+        <Badge className="bg-muted/50 text-muted-foreground hover:bg-muted/70 border-muted/50 transition-all duration-300 font-medium px-3 py-1.5">
           Pending
         </Badge>
       );
@@ -88,7 +89,7 @@ const ProposalCard = ({
       return (
         <Link
           href={`/daos/${encodedDAOName}`}
-          className="hover:text-foreground transition-colors duration-150"
+          className="hover:text-foreground transition-colors duration-300 font-medium"
         >
           {proposalWithDAO.daos.name}
         </Link>
@@ -100,74 +101,78 @@ const ProposalCard = ({
   };
 
   return (
-    <Card className="overflow-hidden bg-card border-border shadow-sm hover:border-border/80 transition-colors duration-150">
-      <CardContent className={showDAOInfo ? "p-6 sm:p-8" : "p-8"}>
+    <Card className="overflow-hidden bg-card/30 backdrop-blur-sm border-border/30 hover:border-border/50 hover:bg-card/40 transition-all duration-300 group">
+      <CardContent className="p-8">
         {/* Header Section */}
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex items-start justify-between mb-8">
           {/* Left side - Title and metadata */}
           <div className="flex-1 min-w-0">
-            <div className={`flex items-center ${showDAOInfo ? "gap-3 sm:gap-4" : "gap-4"} mb-3`}>
-              {/* Avatar placeholder */}
-              <div className={`${showDAOInfo ? "w-10 h-10 sm:w-12 sm:h-12" : "w-12 h-12"} rounded-full bg-muted flex-shrink-0`} />
+            <div className="flex items-center gap-4 mb-4">
+              {/* Enhanced Avatar */}
+              <div className="relative">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+                  <Vote className="h-8 w-8 text-primary" />
+                </div>
+              </div>
 
               {/* Title and basic info */}
               <div className="min-w-0 flex-1">
-                <h3 className={`${showDAOInfo ? "text-lg sm:text-xl" : "text-xl"} font-semibold text-foreground mb-2 truncate`}>
+                <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors duration-300">
                   {proposal.title}
                 </h3>
                 
-                {/* Metadata - different layout for cross-DAO vs single DAO */}
+                {/* Enhanced Metadata */}
                 {showDAOInfo ? (
-                  // Mobile-optimized metadata for cross-DAO view
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm sm:text-base text-muted-foreground">
-                    <div className="flex items-center gap-3">
+                  // Cross-DAO view with clean styling
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-4 text-muted-foreground">
                       <span className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4" />
+                        <Building2 className="h-4 w-4 text-primary" />
                         {getDAOInfo()}
                       </span>
-                      <span className="hidden sm:inline text-muted">•</span>
                       <span className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
+                        <User className="h-4 w-4 text-muted-foreground" />
                         By{" "}
                         <a
                           href={getExplorerLink("address", proposal.creator)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="hover:text-foreground transition-colors duration-150"
+                          className="hover:text-foreground transition-colors duration-300 font-medium"
                         >
                           {truncateString(proposal.creator, 4, 4)}
                         </a>
                       </span>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4 text-muted-foreground">
                       <span className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
                         {format(new Date(proposal.created_at), "MMM d, yyyy")}
                       </span>
-                      <span className="hidden sm:inline text-muted">•</span>
-                      <span className="font-medium">{getVoteSummary()}</span>
+                      <span className="text-primary font-medium">
+                        {getVoteSummary()}
+                      </span>
                     </div>
                   </div>
                 ) : (
-                  // Standard metadata for single DAO view
-                  <div className="flex items-center gap-3 text-base text-muted-foreground">
+                  // Single DAO view with clean styling
+                  <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
                     <span className="flex items-center gap-2">
-                      <span>{getDAOInfo()}</span>
+                      <Building2 className="h-4 w-4 text-primary" />
+                      {getDAOInfo()}
                     </span>
-                    <span className="text-muted">•</span>
                     <span className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
+                      <User className="h-4 w-4 text-muted-foreground" />
                       By {truncateString(proposal.creator, 6, 4)}
                     </span>
-                    <span className="text-muted">•</span>
                     <span className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
                       {proposal.created_at
                         ? format(new Date(proposal.created_at), "MMM dd, yyyy")
                         : "Unknown date"}
                     </span>
-                    <span className="text-muted">•</span>
-                    <span className="font-medium">{getVoteSummary()}</span>
+                    <span className="text-primary font-medium">
+                      {getVoteSummary()}
+                    </span>
                   </div>
                 )}
               </div>
@@ -175,19 +180,19 @@ const ProposalCard = ({
           </div>
 
           {/* Right side - Actions */}
-          <div className={`flex items-center ${showDAOInfo ? "gap-2 sm:gap-3" : "gap-3"} flex-shrink-0`}>
+          <div className="flex items-center gap-3 flex-shrink-0">
             {getStatusBadge()}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onToggleVisibility(proposal.id)}
-              className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors duration-150"
+              className="h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all duration-300"
               title={isHidden ? "Show proposal" : "Hide proposal"}
             >
               {isHidden ? (
-                <Eye className="h-4 w-4" />
+                <Eye className="h-5 w-5" />
               ) : (
-                <EyeOff className="h-4 w-4" />
+                <EyeOff className="h-5 w-5" />
               )}
             </Button>
           </div>
@@ -198,15 +203,15 @@ const ProposalCard = ({
           <div className="mb-6">
             <Badge
               variant="outline"
-              className="text-secondary border-secondary/50 bg-secondary/10 hover:bg-secondary/20 transition-colors duration-150"
+              className="text-secondary border-secondary/50 bg-secondary/10 hover:bg-secondary/20 transition-all duration-300 px-4 py-2 rounded-xl font-medium"
             >
               {proposal.type.toUpperCase()}
             </Badge>
           </div>
         )}
 
-        {/* Vote Progress - Always visible */}
-        <div className="mb-6">
+        {/* Vote Progress - Clean integration */}
+        <div className="mb-8">
           <VoteStatusChart
             contractAddress={safeString(proposal.contract_principal)}
             proposalId={showDAOInfo 
@@ -226,19 +231,22 @@ const ProposalCard = ({
           />
         </div>
 
-        {/* Bottom section with status and view details link */}
-        <div className="flex justify-between items-center">
-          <CardDescription className={`text-muted-foreground ${showDAOInfo ? "text-sm sm:text-base" : "text-base"}`}>
-            {proposal.status || "Awaiting first vote"}
-          </CardDescription>
+        {/* Bottom section - simplified */}
+        <div className="flex justify-between items-center pt-6 border-t border-border/20">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-primary/60" />
+            <CardDescription className="text-muted-foreground">
+              {proposal.status || "Awaiting first vote"}
+            </CardDescription>
+          </div>
 
           <Link href={`/proposals/${proposal.id}`}>
             <Button
               variant="ghost"
               size="sm"
-              className={`text-muted-foreground hover:text-foreground transition-colors duration-150 ${showDAOInfo ? "text-sm sm:text-base px-3 py-2" : "px-4 py-2"}`}
+              className="text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all duration-300 px-4 py-2 rounded-xl group/button"
             >
-              <ExternalLink className={`h-4 w-4 ${showDAOInfo ? "mr-2 sm:mr-3" : "mr-3"}`} />
+              <ExternalLink className="h-4 w-4 mr-3 group-hover/button:scale-110 transition-transform duration-300" />
               {showDAOInfo ? (
                 <>
                   <span className="hidden sm:inline">View Details</span>

@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { Trash2, Check, X, Pencil } from "lucide-react";
+import { Trash2, Check, X, Pencil, Settings } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -337,63 +337,59 @@ export function AgentPromptForm() {
 
   return (
     <div className="w-full space-y-8">
-      <div className="space-y-8">
-        {/* Wallet Info Section */}
-        <div className="w-full">
-          {daoManagerAgentId && (
-            <WalletInfoCard
-              walletAddress={daoManagerWalletAddress}
-              walletBalance={daoManagerWalletBalance}
-            />
-          )}
+      {/* Wallet Info Section */}
+      {daoManagerAgentId && (
+        <WalletInfoCard
+          walletAddress={daoManagerWalletAddress}
+          walletBalance={daoManagerWalletBalance}
+        />
+      )}
+
+      {/* Agent Prompts Section */}
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-foreground">AI Agent Configuration</h3>
+          <p className="text-muted-foreground">
+            Configure how your AI agent responds to DAO proposals across different organizations
+          </p>
         </div>
 
-        {/* Agent Prompts Section */}
-        <div className="w-full space-y-6">
-          <div className="w-full overflow-x-auto border border-border rounded-xl p-8 bg-card shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
-              <div>
-                <h3 className="text-xl font-bold text-foreground">Agent Prompts</h3>
-                <p className="text-muted-foreground text-sm mt-2">
-                  Configure how your agent responds to DAO proposals
-                </p>
-              </div>
-            </div>
+        <div className="bg-muted/20 rounded-2xl border border-border/30 overflow-hidden">
+          <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-border">
-                  <TableHead className="w-1/5 text-muted-foreground">DAO</TableHead>
-                  <TableHead className="w-1/7 text-muted-foreground">Status</TableHead>
-                  <TableHead className="w-1/7 text-muted-foreground">Model</TableHead>
-                  <TableHead className="w-1/7 text-muted-foreground">
-                    Temperature
-                  </TableHead>
-                  <TableHead className="w-1/3 text-muted-foreground">
-                    Prompt Text
-                  </TableHead>
-                  <TableHead className="w-1/9 text-right text-muted-foreground">
-                    Actions
-                  </TableHead>
+                <TableRow className="border-border/50 bg-muted/30">
+                  <TableHead className="text-foreground font-semibold px-6 py-4">DAO</TableHead>
+                  <TableHead className="text-foreground font-semibold px-6 py-4">Status</TableHead>
+                  <TableHead className="text-foreground font-semibold px-6 py-4">Model</TableHead>
+                  <TableHead className="text-foreground font-semibold px-6 py-4">Temperature</TableHead>
+                  <TableHead className="text-foreground font-semibold px-6 py-4">Prompt</TableHead>
+                  <TableHead className="text-right text-foreground font-semibold px-6 py-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading && uniqueDaoIds.length === 0 ? (
-                  <TableRow className="border-border">
-                    <TableCell colSpan={6} className="text-center py-12">
-                      <Loader />
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-16">
+                      <div className="flex flex-col items-center space-y-4">
+                        <Loader />
+                        <p className="text-muted-foreground">Loading configurations...</p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : uniqueDaoIds.length === 0 ? (
-                  <TableRow className="border-border">
-                    <TableCell
-                      colSpan={6}
-                      className="text-center py-12 text-muted-foreground"
-                    >
-                      <div className="flex flex-col items-center gap-3">
-                        <p>No DAOs found.</p>
-                        <p className="text-sm text-muted-foreground">
-                          Available DAOs will appear here for configuration
-                        </p>
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-16">
+                      <div className="flex flex-col items-center space-y-4">
+                        <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center">
+                          <Settings className="h-8 w-8 text-muted-foreground/50" />
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-foreground font-medium">No DAOs Available</p>
+                          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                            Available DAOs will appear here for AI agent configuration
+                          </p>
+                        </div>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -404,24 +400,24 @@ export function AgentPromptForm() {
                     const isEditing = editingDaoId === daoId;
 
                     return (
-                      <TableRow key={daoId} className="border-border">
-                        <TableCell className="font-medium text-foreground">
+                      <TableRow key={daoId} className="border-border/30 hover:bg-muted/20 transition-colors duration-300">
+                        <TableCell className="font-semibold text-foreground px-6 py-4">
                           {daoName}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="px-6 py-4">
                           {prompt?.is_active ? (
-                            <Badge className="bg-green-500/20 text-green-500 border-green-500/50 text-xs px-3 py-1 transition-colors duration-150">
+                            <Badge className="bg-emerald-500/20 text-emerald-500 border-emerald-500/50 px-3 py-1.5 font-medium">
                               Active
                             </Badge>
                           ) : (
-                            <Badge className="bg-muted/50 text-muted-foreground border-muted text-xs px-3 py-1 transition-colors duration-150">
+                            <Badge className="bg-muted/50 text-muted-foreground border-muted/50 px-3 py-1.5 font-medium">
                               Disabled
                             </Badge>
                           )}
                         </TableCell>
 
                         {/* Model Selection */}
-                        <TableCell>
+                        <TableCell className="px-6 py-4">
                           {isEditing ? (
                             <Select
                               value={editingData.model}
@@ -429,45 +425,33 @@ export function AgentPromptForm() {
                                 setEditingData({ ...editingData, model: value })
                               }
                             >
-                              <SelectTrigger className="h-9 w-full bg-card border-border text-foreground">
+                              <SelectTrigger className="h-10 w-full bg-card/50 border-border/50 text-foreground rounded-xl">
                                 <SelectValue placeholder="Select model" />
                               </SelectTrigger>
-                              <SelectContent className="bg-card border-border">
-                                <SelectItem
-                                  value="gpt-4o"
-                                  className="text-foreground hover:bg-muted"
-                                >
+                              <SelectContent className="bg-card/95 backdrop-blur-sm border-border/50 rounded-xl">
+                                <SelectItem value="gpt-4o" className="text-foreground hover:bg-muted/50 rounded-lg">
                                   GPT-4o
                                 </SelectItem>
-                                <SelectItem
-                                  value="gpt-4o-mini"
-                                  className="text-foreground hover:bg-muted"
-                                >
+                                <SelectItem value="gpt-4o-mini" className="text-foreground hover:bg-muted/50 rounded-lg">
                                   GPT-4o Mini
                                 </SelectItem>
-                                <SelectItem
-                                  value="gpt-4.1-nano"
-                                  className="text-foreground hover:bg-muted"
-                                >
+                                <SelectItem value="gpt-4.1-nano" className="text-foreground hover:bg-muted/50 rounded-lg">
                                   GPT-4.1 Nano
                                 </SelectItem>
-                                <SelectItem
-                                  value="gpt-4.1-mini"
-                                  className="text-foreground hover:bg-muted"
-                                >
+                                <SelectItem value="gpt-4.1-mini" className="text-foreground hover:bg-muted/50 rounded-lg">
                                   GPT-4.1 Mini
                                 </SelectItem>
                               </SelectContent>
                             </Select>
                           ) : (
-                            <span className="text-muted-foreground">
+                            <span className="text-muted-foreground font-medium">
                               {prompt?.model || "gpt-4o"}
                             </span>
                           )}
                         </TableCell>
 
                         {/* Temperature */}
-                        <TableCell>
+                        <TableCell className="px-6 py-4">
                           {isEditing ? (
                             <div>
                               <Input
@@ -478,91 +462,91 @@ export function AgentPromptForm() {
                                 step="0.1"
                                 value={editingData.temperature}
                                 onChange={handleInputChange}
-                                className="h-9 w-20 bg-card border-border text-foreground"
+                                className="h-10 w-24 bg-card/50 border-border/50 text-foreground rounded-xl"
                               />
                               {errors.temperature && (
-                                <p className="text-xs text-destructive mt-1">
+                                <p className="text-xs text-destructive mt-2">
                                   {errors.temperature}
                                 </p>
                               )}
                             </div>
                           ) : (
-                            <span className="text-muted-foreground">
+                            <span className="text-muted-foreground font-medium">
                               {prompt?.temperature || 0.1}
                             </span>
                           )}
                         </TableCell>
 
                         {/* Prompt Text */}
-                        <TableCell>
+                        <TableCell className="px-6 py-4 max-w-xs">
                           {isEditing ? (
                             <div>
                               <Textarea
                                 name="prompt_text"
                                 value={editingData.prompt_text}
                                 onChange={handleInputChange}
-                                placeholder="Enter prompt text"
-                                className="min-h-[80px] text-sm bg-card border-border text-foreground placeholder:text-muted-foreground"
+                                placeholder="Enter AI agent instructions..."
+                                className="min-h-[100px] text-sm bg-card/50 border-border/50 text-foreground placeholder:text-muted-foreground rounded-xl"
                               />
                               {errors.prompt_text && (
-                                <p className="text-xs text-destructive mt-1">
+                                <p className="text-xs text-destructive mt-2">
                                   {errors.prompt_text}
                                 </p>
                               )}
                             </div>
                           ) : (
-                            <p className="truncate text-sm text-muted-foreground">
-                              {prompt?.prompt_text || (
-                                <span className="text-muted-foreground">
-                                  No prompt configured
+                            <div className="max-w-xs">
+                              {prompt?.prompt_text ? (
+                                <p className="text-sm text-muted-foreground line-clamp-3">
+                                  {prompt.prompt_text}
+                                </p>
+                              ) : (
+                                <span className="text-muted-foreground/70 italic text-sm">
+                                  No configuration set
                                 </span>
                               )}
-                            </p>
+                            </div>
                           )}
                         </TableCell>
 
                         {/* Actions */}
-                        <TableCell className="text-right">
+                        <TableCell className="text-right px-6 py-4">
                           {isEditing ? (
-                            <div className="flex justify-end space-x-2">
+                            <div className="flex justify-end items-center gap-2">
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleCancelEditing}
-                                className="h-9 w-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-150"
+                                className="h-10 w-10 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all duration-300"
                                 title="Cancel"
                               >
                                 <X className="h-4 w-4" />
-                                <span className="sr-only">Cancel</span>
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleSavePrompt(daoId)}
                                 disabled={isLoading}
-                                className="h-9 w-9 p-0 text-primary hover:text-primary/80 hover:bg-primary/10 transition-colors duration-150"
+                                className="h-10 w-10 p-0 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10 rounded-xl transition-all duration-300"
                                 title="Save"
                               >
-                                {createMutation.isPending ||
-                                updateMutation.isPending ? (
+                                {createMutation.isPending || updateMutation.isPending ? (
                                   <Loader />
                                 ) : (
                                   <Check className="h-4 w-4" />
                                 )}
-                                <span className="sr-only">Save</span>
                               </Button>
                             </div>
                           ) : (
-                            <div className="flex justify-end space-x-2">
+                            <div className="flex justify-end items-center gap-2">
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleStartEditing(daoId)}
-                                className="h-9 w-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-150"
-                                title="Edit"
+                                className="h-10 w-10 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all duration-300"
+                                title="Configure"
                               >
                                 <Pencil className="h-4 w-4" />
-                                <span className="sr-only">Edit</span>
                               </Button>
                               {prompt && (
                                 <Button
@@ -570,7 +554,7 @@ export function AgentPromptForm() {
                                   size="sm"
                                   onClick={() => handleDelete(prompt.id)}
                                   disabled={deleteMutation.isPending}
-                                  className="h-9 w-9 p-0 text-destructive hover:text-destructive/80 hover:bg-destructive/10 transition-colors duration-150"
+                                  className="h-10 w-10 p-0 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-xl transition-all duration-300"
                                   title="Delete"
                                 >
                                   {deleteMutation.isPending ? (
@@ -578,7 +562,6 @@ export function AgentPromptForm() {
                                   ) : (
                                     <Trash2 className="h-4 w-4" />
                                   )}
-                                  <span className="sr-only">Delete</span>
                                 </Button>
                               )}
                             </div>

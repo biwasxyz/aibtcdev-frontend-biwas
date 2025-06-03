@@ -1,51 +1,41 @@
-export interface Tool {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  parameters?: string;
-}
+/**
+ * @deprecated This file has been deprecated in favor of src/queries/tools-queries.ts
+ * 
+ * The manual cache pattern used here has been replaced with React Query
+ * for better performance and consistency with the rest of the application.
+ * 
+ * Please import from @/queries/tools-queries instead.
+ */
 
-let toolsCache: Tool[] | null = null;
+// Re-export types and main fetch function for backward compatibility
+export type { Tool } from "@/queries/tools-queries";
+export { fetchTools } from "@/queries/tools-queries";
 
-export async function fetchTools(): Promise<Tool[]> {
-  if (toolsCache) return toolsCache;
-
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/tools/available`,
-    );
-    const data = (await response.json()) as Tool[];
-
-    toolsCache = data;
-    return data;
-  } catch (error) {
-    console.error("Failed to fetch tools:", error);
-    throw new Error("Failed to fetch tools from API");
-  }
-}
-
-export const getToolsByCategory = async (category: string): Promise<Tool[]> => {
+// Legacy wrapper functions for backward compatibility
+export const getToolsByCategory = async (category: string) => {
+  const { filterToolsByCategory, fetchTools } = await import("@/queries/tools-queries");
   const tools = await fetchTools();
-  return tools.filter((tool) => tool.category === category);
+  return filterToolsByCategory(tools, category);
 };
 
-export const getToolsByIds = async (ids: string[]): Promise<Tool[]> => {
+export const getToolsByIds = async (ids: string[]) => {
+  const { filterToolsByIds, fetchTools } = await import("@/queries/tools-queries");
   const tools = await fetchTools();
-  return tools.filter((tool) => ids.includes(tool.id));
+  return filterToolsByIds(tools, ids);
 };
 
-export const getTool = async (id: string): Promise<Tool> => {
+export const getTool = async (id: string) => {
+  const { findToolById, fetchTools } = await import("@/queries/tools-queries");
   const tools = await fetchTools();
-  const tool = tools.find((tool) => tool.id === id);
+  const tool = findToolById(tools, id);
   if (!tool) {
     throw new Error(`Tool with id "${id}" not found`);
   }
   return tool;
 };
 
-// Helper function to get all available tool IDs
-export const getAvailableTools = async (): Promise<string[]> => {
+export const getAvailableTools = async () => {
+  const { getToolIds, fetchTools } = await import("@/queries/tools-queries");
   const tools = await fetchTools();
-  return tools.map((tool) => tool.id);
+  return getToolIds(tools);
 };

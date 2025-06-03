@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { AuthProvider } from "@/components/providers/AuthProvider";
+import { AuthProvider } from "@/providers/AuthProvider";
 
 export const viewport: Viewport = {
   width: "device-width",

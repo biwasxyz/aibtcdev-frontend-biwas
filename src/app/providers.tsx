@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 import { NextStepProvider, NextStep } from "nextstepjs";
 import CustomCard from "@/components/reusables/CustomCard";
 import { tourSteps } from "@/helpers/steps";
-import { SupabaseRealtimeProvider } from "@/components/providers/SupabaseRealtimeProvider";
+import { SupabaseRealtimeProvider } from "@/providers/SupabaseRealtimeProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

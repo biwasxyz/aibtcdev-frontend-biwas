@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import ReactMarkdown from "react-markdown";
-import CopyButton from "@/components/daos/proposal/CopyButton";
+import CopyButton from "@/components/proposals/CopyButton";
 
 interface VotesTableProps {
   proposalId: string;

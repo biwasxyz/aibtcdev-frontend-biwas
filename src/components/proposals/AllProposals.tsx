@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useState, useMemo } from "react";
-import { Card, CardDescription, CardContent } from "@/components/ui/card";
+// Removed unused Card imports
 import { Button } from "@/components/ui/button";
-import ProposalCard from "./ProposalCard";
+import ProposalCard from "@/components/proposals/ProposalCard";
 import {
   FilterSidebar,
   type FilterConfig,
@@ -16,6 +16,11 @@ import {
   FileText,
   Filter,
   X,
+  Vote,
+  TrendingUp,
+  Activity,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { useTokens } from "@/hooks/useTokens";
 
@@ -266,129 +271,207 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
     });
   };
 
+  // Calculate summary metrics for hero section
+  const heroStats = [
+    {
+      icon: Activity,
+      label: "Total",
+      value: totalProposals,
+      color: "text-primary",
+    },
+    {
+      icon: TrendingUp,
+      label: "Active",
+      value: activeProposals,
+      color: "text-blue-500",
+    },
+    {
+      icon: CheckCircle,
+      label: "Passed",
+      value: passedProposals,
+      color: "text-emerald-500",
+    },
+    {
+      icon: XCircle,
+      label: "Failed",
+      value: failedProposals,
+      color: "text-rose-500",
+    },
+  ];
+
   return (
-    <div className="w-full min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-6 md:px-8 py-6 sm:py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-foreground">
-                Proposals
-              </h2>
-              <p className="text-muted-foreground mt-3 text-sm sm:text-base">
-                View and filter proposals across all DAOs
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
+      <div className="max-w-7xl mx-auto px-8 py-16">
+        <div className="space-y-12">
+          {/* Hero Header Section */}
+          <div className="text-center space-y-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/20 mb-6">
+              <Vote className="h-10 w-10 text-primary" />
+            </div>
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold text-foreground tracking-tight">
+                Governance Proposals
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                Explore and participate in DAO governance decisions across all autonomous organizations
               </p>
             </div>
-            {/* Mobile Filter Toggle */}
+
+            {/* Quick Stats Bento Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+              {heroStats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="bg-card/30 backdrop-blur-sm rounded-2xl p-6 border border-border/30"
+                >
+                  <div className="flex flex-col items-center space-y-2">
+                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                    <div className="text-2xl font-bold text-foreground">
+                      {stat.value}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {stat.label}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Filter Toggle for Mobile */}
+          <div className="lg:hidden flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-foreground">
+              All Proposals
+            </h2>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-              className="lg:hidden flex items-center gap-2 bg-card border-border text-foreground hover:bg-muted/50 transition-colors duration-150"
+              className="flex items-center gap-2 bg-card/50 border-border/50 text-foreground hover:bg-card hover:border-border transition-all duration-300"
             >
               <Filter className="h-4 w-4" />
               Filters
             </Button>
           </div>
-        </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          {/* Mobile Filter Overlay */}
-          {isMobileFilterOpen && (
-            <div
-              className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
-              onClick={() => setIsMobileFilterOpen(false)}
-            >
+          {/* Main Content Layout */}
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Mobile Filter Overlay */}
+            {isMobileFilterOpen && (
               <div
-                className="absolute right-0 top-0 h-full w-full max-w-sm bg-card border-l border-border overflow-y-auto shadow-lg"
-                onClick={(e) => e.stopPropagation()}
+                className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm transition-opacity duration-300"
+                onClick={() => setIsMobileFilterOpen(false)}
               >
-                <div className="p-6 border-b border-border flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-foreground">Filters</h3>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsMobileFilterOpen(false)}
-                    className="text-muted-foreground hover:text-foreground transition-colors duration-150"
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
+                <div
+                  className="absolute right-0 top-0 h-full w-full max-w-sm bg-card/95 backdrop-blur-xl border-l border-border/50 overflow-y-auto shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="p-6 border-b border-border/30 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-foreground">Filters</h3>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsMobileFilterOpen(false)}
+                      className="text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all duration-300"
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </div>
+                  <div className="p-6">
+                    <FilterSidebar
+                      title=""
+                      filters={filterConfig}
+                      filterState={filterState}
+                      onFilterChange={handleFilterChange}
+                      summaryStats={summaryStats}
+                    />
+                  </div>
                 </div>
-                <div className="p-6">
-                  <FilterSidebar
-                    title=""
-                    filters={filterConfig}
-                    filterState={filterState}
-                    onFilterChange={handleFilterChange}
-                    summaryStats={summaryStats}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Desktop Filter Sidebar */}
-          <div className="hidden lg:block">
-            <FilterSidebar
-              title="Filters"
-              filters={filterConfig}
-              filterState={filterState}
-              onFilterChange={handleFilterChange}
-              summaryStats={summaryStats}
-            />
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1 min-w-0">
-            {/* Proposals List */}
-            <div ref={proposalsRef} className="space-y-4 sm:space-y-6">
-              {paginatedProposals.length === 0 ? (
-                <Card className="bg-card border-border shadow-sm">
-                  <CardContent className="p-8 sm:p-12 text-center">
-                    <FileText className="h-12 w-12 sm:h-16 sm:w-16 text-muted mx-auto mb-6" />
-                    <CardDescription className="text-muted-foreground text-base sm:text-lg mb-3">
-                      No proposals found.
-                    </CardDescription>
-                    <p className="text-muted-foreground text-sm">
-                      Try adjusting your search terms or filters.
-                    </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                paginatedProposals.map((proposal) => (
-                  <ProposalCard
-                    key={proposal.id}
-                    proposal={proposal}
-                    onToggleVisibility={toggleProposalVisibility}
-                    isHidden={hiddenProposals.has(proposal.id)}
-                    tokenSymbol={tokenLookup[proposal.dao_id || ""] || ""}
-                    showDAOInfo={true}
-                  />
-                ))
-              )}
-            </div>
-
-            {/* Pagination */}
-            {filteredAndSortedProposals.length > 0 && (
-              <div className="mt-8 sm:mt-12">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  totalItems={filteredAndSortedProposals.length}
-                  itemsPerPage={itemsPerPage}
-                  onPageChange={handlePageChange}
-                  onItemsPerPageChange={handleItemsPerPageChange}
-                />
               </div>
             )}
+
+            {/* Desktop Filter Sidebar */}
+            <div className="hidden lg:block lg:w-80 flex-shrink-0">
+              <FilterSidebar
+                title="Filters"
+                filters={filterConfig}
+                filterState={filterState}
+                onFilterChange={handleFilterChange}
+                summaryStats={summaryStats}
+              />
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 min-w-0">
+              {/* Desktop Section Header */}
+              <div className="hidden lg:block mb-8">
+                <h2 className="text-2xl font-bold text-foreground tracking-tight">
+                  All Proposals
+                </h2>
+                <p className="text-muted-foreground mt-2">
+                  {filteredAndSortedProposals.length > 0 
+                    ? `Showing ${filteredAndSortedProposals.length} ${filteredAndSortedProposals.length === 1 ? 'proposal' : 'proposals'}`
+                    : 'No proposals match your current filters'
+                  }
+                </p>
+              </div>
+
+              {/* Proposals List */}
+              <div ref={proposalsRef} className="space-y-6">
+                {paginatedProposals.length === 0 ? (
+                  <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/50 py-24">
+                    <div className="text-center space-y-6">
+                      <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-muted/50">
+                        <FileText className="h-12 w-12 text-muted-foreground/50" />
+                      </div>
+                      <div className="space-y-3">
+                        <h3 className="text-xl font-medium text-foreground">
+                          No Proposals Found
+                        </h3>
+                        <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
+                          {totalProposals === 0 
+                            ? "No proposals have been created yet. Check back later for new governance proposals."
+                            : "No proposals match your current search and filter criteria. Try adjusting your filters or search terms."
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  paginatedProposals.map((proposal) => (
+                    <ProposalCard
+                      key={proposal.id}
+                      proposal={proposal}
+                      onToggleVisibility={toggleProposalVisibility}
+                      isHidden={hiddenProposals.has(proposal.id)}
+                      tokenSymbol={tokenLookup[proposal.dao_id || ""] || ""}
+                      showDAOInfo={true}
+                    />
+                  ))
+                )}
+              </div>
+
+              {/* Pagination */}
+              {filteredAndSortedProposals.length > 0 && (
+                <div className="mt-12">
+                  <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/50 p-6">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      totalItems={filteredAndSortedProposals.length}
+                      itemsPerPage={itemsPerPage}
+                      onPageChange={handlePageChange}
+                      onItemsPerPageChange={handleItemsPerPageChange}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 };
-
-
 
 export default AllProposals;

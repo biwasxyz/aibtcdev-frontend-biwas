@@ -29,7 +29,7 @@ import {
 } from "@/helpers/format-utils";
 import { getWalletAddress } from "@/helpers/wallet-utils";
 
-interface DAOChatModalProps {
+interface TokenPurchaseModalProps {
   daoId: string;
   dao?: DAO;
   token?: Token;
@@ -45,14 +45,14 @@ type ParsedOutput = {
   data?: { link?: string };
 };
 
-export function DAOBuyModal({
+export function TokenPurchaseModal({
   daoId,
   trigger,
   open: controlledOpen,
   onOpenChange: setControlledOpen,
   token,
   presetAmount = "",
-}: DAOChatModalProps) {
+}: TokenPurchaseModalProps) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
   const setOpen = setControlledOpen || setUncontrolledOpen;

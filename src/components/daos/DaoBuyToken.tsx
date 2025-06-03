@@ -3,7 +3,7 @@
 import type React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DAOBuyModal } from "@/components/daos/DaoBuyModalUpdated";
+import { TokenPurchaseModal } from "@/components/daos/TokenPurchaseModal";
 
 interface DAOBuyTokenProps {
   daoId: string;
@@ -27,7 +27,7 @@ export function DAOBuyToken({ daoId }: DAOBuyTokenProps) {
       >
          Quick Buy
       </Button>
-      <DAOBuyModal
+      <TokenPurchaseModal
         daoId={daoId}
         open={isModalOpen}
         onOpenChange={setIsModalOpen}

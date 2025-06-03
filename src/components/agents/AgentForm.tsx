@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, X } from "lucide-react";
 import { Agent } from "@/types/supabase";
-import { fetchTools, Tool } from "@/lib/tools";
+import { fetchTools, Tool } from "@/queries/tools-queries";
 import Link from "next/link";
 
 interface AgentFormProps {
@@ -34,25 +35,15 @@ export function AgentForm({
   onChange,
   onToolsChange,
 }: AgentFormProps) {
-  const [availableTools, setAvailableTools] = useState<Tool[]>([]);
-  const [isLoadingTools, setIsLoadingTools] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isToolDialogOpen, setIsToolDialogOpen] = useState(false);
 
-  useEffect(() => {
-    const loadTools = async () => {
-      setIsLoadingTools(true);
-      try {
-        const tools = await fetchTools();
-        setAvailableTools(tools);
-      } catch (error) {
-        console.error("Failed to load tools:", error);
-      } finally {
-        setIsLoadingTools(false);
-      }
-    };
-    loadTools();
-  }, []);
+  // Fetch tools using React Query
+  const { data: availableTools = [], isLoading: isLoadingTools } = useQuery({
+    queryKey: ["tools"],
+    queryFn: fetchTools,
+    staleTime: 10 * 60 * 1000, // 10 minutes (tools don't change often)
+  });
 
   const handleToolToggle = (tool: string) => {
     const currentTools = formData.agent_tools || [];
