@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { connectWebSocketClient } from '@stacks/blockchain-api-client';
+import { getAllErrorDetails } from "@aibtc/types";
 
 interface WebSocketTransactionMessage {
   tx_id: string;
@@ -113,6 +114,13 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
   const subscriptionRef = useRef<{ unsubscribe: () => Promise<void> } | null>(null);
 
   const { accessToken, isLoading: isSessionLoading } = useSessionStore();
+
+  // Error code mapping
+  const errorDetailsArray = getAllErrorDetails();
+  const errorCodeMap = errorDetailsArray.reduce((map, err) => {
+    map[err.code] = err;
+    return map;
+  }, {} as Record<number, typeof errorDetailsArray[0]>);
 
   const { data: daoExtensions, isLoading: isLoadingExtensions } = useQuery({
     queryKey: ["daoExtensions", daoId],
@@ -529,7 +537,18 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
                                         <h6 className="font-medium text-red-800 mb-2">❌ Transaction Failed</h6>
                                         <div className="text-sm text-red-700">
                                           <span className="font-medium">Error Details:</span>
-                                          <p className="font-mono mt-1">{tx_result.repr || tx_result.hex}</p>
+                                          <p className="font-mono mt-1">
+                                            {(() => {
+                                              const raw = tx_result.repr || tx_result.hex;
+                                              const match = raw.match(/u?(\d{4,})/);
+                                              if (match) {
+                                                const code = parseInt(match[1], 10);
+                                                const description = errorCodeMap[code]?.description;
+                                                return description ? description : raw;
+                                              }
+                                              return raw;
+                                            })()}
+                                          </p>
                                         </div>
                                       </div>
                                     )}
@@ -547,7 +566,7 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
                                       <summary className="cursor-pointer hover:underline text-sm text-gray-600">
                                         View raw WebSocket data
                                       </summary>
-                                      <pre className="whitespace-pre-wrap text-xs bg-gray-50 p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
+                                      <pre className="whitespace-pre-wrap text-xs  p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
                                         {JSON.stringify(websocketMessage, null, 2)}
                                       </pre>
                                     </details>
