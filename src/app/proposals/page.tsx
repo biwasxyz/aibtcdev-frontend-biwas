@@ -1,17 +1,13 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Loader } from "@/components/reusables/Loader";
 import AllProposals from "@/components/daos/proposal/AllProposals";
 import { fetchAllProposals } from "@/queries/dao-queries";
-import { supabase } from "@/utils/supabase/client";
-import React from "react";
 
 export const runtime = "edge";
 
 export default function AllProposalsPage() {
-  const queryClient = useQueryClient();
-
   // Fetch all proposals across all DAOs
   const {
     data: proposals,
@@ -28,26 +24,7 @@ export default function AllProposalsPage() {
     console.error("Error fetching all proposals:", proposalsError);
   }
 
-  // Supabase Realtime subscription for proposals table changes
-  React.useEffect(() => {
-    const channel = supabase
-      .channel("all-proposals-table-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*", // listen to INSERT, UPDATE, DELETE
-          schema: "public",
-          table: "proposals",
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["allProposals"] });
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
+  // Note: Realtime updates are now handled globally by SupabaseRealtimeProvider
 
   if (isLoading) {
     return (

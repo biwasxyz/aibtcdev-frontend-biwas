@@ -1,17 +1,13 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Loader } from "@/components/reusables/Loader";
 import { VotesView } from "@/components/votes/VotesView";
 import { fetchVotes } from "@/queries/vote-queries";
-import { supabase } from "@/utils/supabase/client";
-import React from "react";
 
 export const runtime = "edge";
 
 export default function VotesPage() {
-  const queryClient = useQueryClient();
-
   // Fetch all votes
   const {
     data: votes,
@@ -29,26 +25,7 @@ export default function VotesPage() {
     console.error("Error fetching votes:", votesError);
   }
 
-  // Supabase Realtime subscription for votes table changes
-  React.useEffect(() => {
-    const channel = supabase
-      .channel("votes-table-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*", // listen to INSERT, UPDATE, DELETE
-          schema: "public",
-          table: "votes",
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["votes"] });
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
+  // Note: Realtime updates are now handled globally by SupabaseRealtimeProvider
 
   if (isLoading) {
     return (

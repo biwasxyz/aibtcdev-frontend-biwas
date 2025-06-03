@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 import { NextStepProvider, NextStep } from "nextstepjs";
 import CustomCard from "@/components/reusables/CustomCard";
 import { tourSteps } from "@/helpers/steps";
+import { SupabaseRealtimeProvider } from "@/components/providers/SupabaseRealtimeProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -44,11 +45,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <QueryClientProvider client={queryClient}>
-        <NextStepProvider>
-          <NextStep steps={tourSteps} cardComponent={CustomCard}>
-            {content}
-          </NextStep>
-        </NextStepProvider>
+        <SupabaseRealtimeProvider>
+          <NextStepProvider>
+            <NextStep steps={tourSteps} cardComponent={CustomCard}>
+              {content}
+            </NextStep>
+          </NextStepProvider>
+        </SupabaseRealtimeProvider>
         <Toaster />
         {/* Add React Query Devtools here */}
         {process.env.NODE_ENV === "development" && <ReactQueryDevtools />}

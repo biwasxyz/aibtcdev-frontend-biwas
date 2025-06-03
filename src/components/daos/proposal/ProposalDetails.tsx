@@ -6,7 +6,7 @@ import TimeStatus, { useVotingStatus } from "./TimeStatus";
 import BlockVisual from "./BlockVisual";
 import VotesTable from "./VotesTable";
 import VotingProgressChart from "./VotingProgressChart";
-import VoteStatusChart from "./VoteStatusChart";
+// import VoteStatusChart from "./VoteStatusChart";
 import LabeledField from "./LabeledField";
 import type { Proposal, ProposalWithDAO } from "@/types/supabase";
 import {

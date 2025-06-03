@@ -14,7 +14,7 @@ import {
   Search,
   CheckCircle,
   Clock,
-  AlertTriangle,
+  // AlertTriangle,
   Ban,
 } from "lucide-react";
 import {
@@ -264,7 +264,7 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
   );
 }
 
-function TabStatistics({ votes, title }: { votes: VoteType[]; title: string }) {
+function TabStatistics({ votes }: { votes: VoteType[]; title: string }) {
   const totalVotes = votes.length;
   const yesVotes = votes.filter((vote) => vote.answer === true).length;
   const noVotes = votes.filter((vote) => vote.answer === false).length;

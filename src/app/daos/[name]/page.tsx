@@ -1,22 +1,19 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { Loader } from "@/components/reusables/Loader";
 import DAOProposals from "@/components/daos/proposal/DAOProposal";
 import { fetchProposals, fetchDAOByName, fetchToken } from "@/queries/dao-queries";
 // import { Button } from "@/components/ui/button";
 // import { format } from "date-fns";
-import { supabase } from "@/utils/supabase/client";
-import React from "react";
 
 export const runtime = "edge";
 
 export default function ProposalsPage() {
   const params = useParams();
   const encodedName = params.name as string;
-  const queryClient = useQueryClient();
   // console.log(encodedName);
   // console.log("DAO name from URL:", encodedName);
 
@@ -78,28 +75,7 @@ export default function ProposalsPage() {
   //   refetch();
   // };
 
-  // --- Supabase Realtime subscription for proposals ---
-  React.useEffect(() => {
-    if (!daoId) return;
-    const channel = supabase
-      .channel("proposals-table-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*", // listen to INSERT, UPDATE, DELETE
-          schema: "public",
-          table: "proposals",
-          filter: `dao_id=eq.${daoId}`,
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["proposals", daoId] });
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [daoId, queryClient]);
+  // Note: Realtime updates are now handled globally by SupabaseRealtimeProvider
 
   if (isLoadingDAO || isLoading || isLoadingToken) {
     return (
