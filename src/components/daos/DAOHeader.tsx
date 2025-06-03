@@ -3,7 +3,7 @@
 import type React from "react";
 import Image from "next/image";
 import { DAOBuyToken } from "@/components/daos/DaoBuyToken";
-import { Activity, Info, Blocks, Users, CoinsIcon as CoinIcon, TrendingUp, Users2, FileText } from "lucide-react";
+import { Activity, Info, Blocks, CoinsIcon as CoinIcon, TrendingUp, Users2, FileText } from "lucide-react";
 import Link from "next/link";
 
 interface DAOInfo {
@@ -28,7 +28,6 @@ interface DAOHeaderProps {
   token?: TokenInfo;
   marketStats: MarketStats;
   proposalCount: number;
-  isLoading: boolean;
   daoName: string;
   currentPath: string;
 }
@@ -37,8 +36,7 @@ export function DAOHeader({
   dao, 
   token, 
   marketStats, 
-  proposalCount, 
-  isLoading,
+    proposalCount,
   daoName,
   currentPath
 }: DAOHeaderProps) {

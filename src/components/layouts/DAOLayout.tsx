@@ -4,9 +4,9 @@ import type React from "react";
 import { usePathname } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
-import { DAOHeader } from "./DAOHeader";
-import { MissionContent } from "./MissionContent";
-import { ProposalSubmission } from "./ProposalSubmission";
+import { DAOHeader } from "../daos/DAOHeader";
+import { MissionContent } from "../daos/MissionContent";
+import { ProposalSubmission } from "@/components/proposals/ProposalSubmission";
 
 interface DAOInfo {
   id: string;
@@ -97,7 +97,6 @@ export function DAOLayout({
             token={token}
             marketStats={marketStats}
             proposalCount={proposalCount}
-            isLoading={false}
             daoName={daoName}
             currentPath={pathname}
           />

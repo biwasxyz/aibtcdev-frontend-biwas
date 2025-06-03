@@ -21,6 +21,7 @@ import {
   Activity,
   CheckCircle,
   XCircle,
+  Sparkles,
 } from "lucide-react";
 import { useTokens } from "@/hooks/useTokens";
 
@@ -300,37 +301,54 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
-      <div className="max-w-7xl mx-auto px-8 py-16">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 relative overflow-hidden">
+      {/* Ambient Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 right-20 w-48 h-48 bg-secondary/5 rounded-full blur-3xl delay-1000" />
+        <div className="absolute top-60 right-40 w-32 h-32 bg-primary/3 rounded-full blur-2xl delay-500" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-8 py-16">
         <div className="space-y-12">
-          {/* Hero Header Section */}
-          <div className="text-center space-y-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/20 mb-6">
-              <Vote className="h-10 w-10 text-primary" />
+          {/* Enhanced Hero Header Section */}
+          <div className="text-center space-y-10">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2rem] bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 backdrop-blur-sm mb-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-500 ease-out group">
+              <Vote className="h-12 w-12 text-primary group-hover:scale-110 transition-transform duration-300" />
+              <Sparkles className="absolute -top-2 -right-2 h-5 w-5 text-secondary" />
             </div>
-            <div className="space-y-4">
-              <h1 className="text-4xl font-bold text-foreground tracking-tight">
+            
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <h1 className="text-5xl font-bold text-foreground tracking-tight leading-tight">
                 Governance Proposals
+                <span className="block text-2xl font-medium text-primary mt-2 tracking-wide">
+                  Decision Hub
+                </span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Explore and participate in DAO governance decisions across all autonomous organizations
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
+                Explore and participate in DAO governance decisions across all 
+                <span className="text-primary font-medium"> autonomous organizations</span>
               </p>
             </div>
 
-            {/* Quick Stats Bento Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            {/* Enhanced Quick Stats Bento Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
               {heroStats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="bg-card/30 backdrop-blur-sm rounded-2xl p-6 border border-border/30"
+                  className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-xl rounded-2xl p-6 border border-border/30 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 group"
                 >
-                  <div className="flex flex-col items-center space-y-2">
-                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                    <div className="text-2xl font-bold text-foreground">
-                      {stat.value}
+                  <div className="flex flex-col items-center space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <stat.icon className={`h-6 w-6 ${stat.color}`} />
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {stat.label}
+                    <div className="text-center space-y-1">
+                      <div className="text-2xl font-bold text-foreground">
+                        {stat.value}
+                      </div>
+                      <div className="text-sm text-muted-foreground font-medium">
+                        {stat.label}
+                      </div>
                     </div>
                   </div>
                 </div>

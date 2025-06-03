@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useMemo } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
-import { Search, Users, TrendingUp, Activity, Coins, BarChart3 } from "lucide-react";
+import { Search, Users, TrendingUp, Activity, Coins, BarChart3, Sparkles } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
 
 import { DAOCard } from "@/components/daos/DaoCard";
@@ -177,41 +177,56 @@ export default function DAOs() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
-      <div className="max-w-7xl mx-auto px-8 py-16">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 relative overflow-hidden">
+      {/* Ambient Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-40 right-20 w-48 h-48 bg-secondary/5 rounded-full blur-3xl delay-1000" />
+        <div className="absolute top-60 right-40 w-32 h-32 bg-primary/3 rounded-full blur-2xl delay-500" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-8 py-16">
         <div className="space-y-16">
-          {/* Hero Header Section */}
-          <div className="text-center space-y-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/20 mb-6">
-              <BarChart3 className="h-10 w-10 text-primary" />
+          {/* Enhanced Hero Header Section */}
+          <div className="text-center space-y-10">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2rem] bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 backdrop-blur-sm mb-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-500 ease-out group">
+              <BarChart3 className="h-12 w-12 text-primary group-hover:scale-110 transition-transform duration-300" />
+              <Sparkles className="absolute -top-2 -right-2 h-5 w-5 text-secondary" />
             </div>
-            <div className="space-y-4">
-              <h1 className="text-4xl font-bold text-foreground tracking-tight">
+            
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <h1 className="text-5xl font-bold text-foreground tracking-tight leading-tight">
                 AI-Powered DAOs
+                <span className="block text-2xl font-medium text-primary mt-2 tracking-wide">
+                  Innovation Network
+                </span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
                 Discover autonomous organizations powered by artificial intelligence, 
-                driving the future of decentralized governance and innovation.
+                driving the future of <span className="text-primary font-medium">decentralized governance and innovation</span>.
               </p>
             </div>
           </div>
 
-          {/* Metrics Bento Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {/* Enhanced Metrics Bento Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="bg-card/50 backdrop-blur-sm rounded-2xl p-8 border border-border/50 hover:border-border/80 transition-all duration-300 group"
+                className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-xl rounded-2xl p-8 border border-border/30 shadow-xl hover:shadow-2xl hover:border-border/60 transition-all duration-500 ease-out group overflow-hidden relative"
               >
-                <div className="flex flex-col items-center space-y-4">
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${stat.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                {/* Card Background Pattern */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div className="relative flex flex-col items-center space-y-4">
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${stat.bgColor} border border-primary/20 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
                     <stat.icon className={`h-8 w-8 ${stat.color}`} />
                   </div>
-                  <div className="text-center space-y-1">
+                  <div className="text-center space-y-2">
                     <div className="text-3xl font-bold text-foreground">
                       {stat.value}
                     </div>
-                    <div className="text-sm font-medium text-muted-foreground">
+                    <div className="text-sm font-semibold text-muted-foreground tracking-wide">
                       {stat.label}
                     </div>
                   </div>

@@ -14,6 +14,7 @@ import { NetworkIndicator } from "@/components/reusables/NetworkIndicator";
 // import { getStacksAddress } from "@/lib/address";
 import AuthButton from "@/components/home/AuthButton";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { Footer } from "@/components/reusables/Footer";
 
 interface ApplicationLayoutProps {
   children: React.ReactNode;
@@ -25,7 +26,7 @@ const navigation = [
   // { id: "chat", name: "Chat", href: "/chat", icon: MessageSquare },
   // { id: "agents", name: "Agents", href: "/agents", icon: Users },
   { id: "votes", name: "Votes", href: "/votes", icon: Vote },
-  { id: "profile", name: "Profile", href: "/profile", icon: Users },
+  { id: "profile", name: "Agent", href: "/profile", icon: Users },
 ];
 
 export default function ApplicationLayout({
@@ -101,23 +102,23 @@ export default function ApplicationLayout({
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-background via-background to-background/95">
       {/* Mobile Header */}
-      <div className="md:hidden h-20 px-6 flex items-center justify-between bg-card/50 backdrop-blur-md border-b border-border/30 shadow-sm">
+      <div className="md:hidden h-20 px-6 flex items-center justify-between bg-card/30 backdrop-blur-xl border-b border-border/20 shadow-lg">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setLeftPanelOpen(!leftPanelOpen)}
-          className="text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl h-12 w-12 p-0 transition-all duration-300"
+          className="text-muted-foreground hover:text-foreground hover:bg-primary/10 hover:scale-105 rounded-2xl h-12 w-12 p-0 transition-all duration-300 ease-in-out hover:shadow-lg"
         >
           <Menu className="h-6 w-6" />
         </Button>
         <Link href="/daos" className="flex items-center gap-4 flex-1 justify-center">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 transition-transform duration-300 ease-in-out hover:scale-105">
             <Image
               src="/logos/aibtcdev-avatar-1000px.png"
               alt="AIBTCDEV"
               width={32}
               height={32}
-              className="flex-shrink-0 rounded-lg"
+              className="flex-shrink-0 rounded-xl shadow-sm"
             />
             <Image
               src="/logos/aibtcdev-primary-logo-white-wide-1000px.png"
@@ -132,32 +133,38 @@ export default function ApplicationLayout({
       </div>
 
       {/* Desktop Header */}
-      <div className="hidden md:flex h-20 items-center px-8 bg-card/30 backdrop-blur-md border-b border-border/30 shadow-sm">
-        <div className="w-1/4">
+      <div className="hidden md:flex h-20 items-center px-8 bg-card/20 backdrop-blur-2xl border-b border-border/20 shadow-lg relative overflow-hidden">
+        {/* Subtle gradient overlay for futuristic feel */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
+        
+        <div className="w-1/4 relative z-10">
           <Link href="/daos" className="flex items-center gap-3 group">
-            <div className="flex items-center gap-3 transition-transform duration-300 group-hover:scale-105">
-              <Image
-                src="/logos/aibtcdev-avatar-1000px.png"
-                alt="AIBTCDEV"
-                width={32}
-                height={32}
-                className="rounded-lg"
-              />
+            <div className="flex items-center gap-3 transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:drop-shadow-lg">
+              <div className="relative">
+                <Image
+                  src="/logos/aibtcdev-avatar-1000px.png"
+                  alt="AIBTCDEV"
+                  width={36}
+                  height={36}
+                  className="rounded-xl shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/20"
+                />
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
               <Image
                 src="/logos/aibtcdev-primary-logo-white-wide-1000px.png"
                 alt="AIBTCDEV"
                 width={150}
                 height={300}
-                className="h-7 w-auto"
+                className="h-7 w-auto transition-all duration-300 group-hover:brightness-110"
               />
             </div>
           </Link>
         </div>
         
-        {/* Desktop Navigation - Centered with Modern Pill Design */}
-        <nav className="flex-1 flex justify-center">
-          <div className="inline-flex items-center p-2 bg-muted/30 rounded-2xl backdrop-blur-sm border border-border/20">
-            {navigation.map((item) => {
+        {/* Desktop Navigation - Enhanced with Futuristic Styling */}
+        <nav className="flex-1 flex justify-center relative z-10">
+          <div className="inline-flex items-center gap-2">
+            {navigation.map((item, index) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -165,35 +172,70 @@ export default function ApplicationLayout({
                   href={item.href}
                   onClick={(e) => handleNavigation(item.href, e)}
                   className={cn(
-                    "flex items-center gap-3 px-6 py-3 text-sm font-medium rounded-xl transition-all duration-300 relative",
+                    "flex items-center gap-3 px-6 py-4 text-sm font-semibold rounded-2xl transition-all duration-300 ease-in-out relative group",
+                    "hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50",
                     isActive
-                      ? "text-foreground bg-background shadow-lg"
-                      : "text-muted-foreground hover:text-foreground hover:bg-background/50",
+                      ? "text-primary-foreground bg-primary shadow-lg hover:shadow-xl hover:shadow-primary/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-card/30 hover:shadow-md hover:backdrop-blur-sm",
                   )}
+                  style={{
+                    animationDelay: `${index * 0.1}s`
+                  }}
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.name}</span>
+                  {/* Icon with enhanced styling */}
+                  <div className={cn(
+                    "relative transition-all duration-300",
+                    isActive ? "drop-shadow-sm" : "group-hover:scale-110"
+                  )}>
+                    <item.icon className="h-5 w-5 relative z-10" />
+                    {isActive && (
+                      <div className="absolute inset-0 bg-primary-foreground/20 rounded-full scale-150 blur-sm" />
+                    )}
+                  </div>
+                  
+                  {/* Text with better typography */}
+                  <span className={cn(
+                    "font-medium tracking-wide transition-all duration-300",
+                    isActive ? "text-primary-foreground" : "group-hover:tracking-wider"
+                  )}>
+                    {item.name}
+                  </span>
+                  
+                  {/* Active indicator with glow effect */}
                   {isActive && (
-                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-primary rounded-full" />
+                    <>
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-primary-foreground rounded-full shadow-sm" />
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-primary-foreground/20 rounded-full blur-sm" />
+                    </>
                   )}
+                  
+                  {/* Subtle hover glow effect */}
+                  <div className={cn(
+                    "absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+                    "bg-gradient-to-r from-primary/5 to-secondary/5"
+                  )} />
                 </Link>
               );
             })}
           </div>
         </nav>
         
-        <div className="w-1/4 flex justify-end items-center gap-6">
-          <NetworkIndicator />
+        <div className="w-1/4 flex justify-end items-center gap-6 relative z-10">
+          <div className="transition-all duration-300 hover:scale-105">
+            <NetworkIndicator />
+          </div>
           {hasUser ? (
             <Button
               onClick={handleSignOut}
-              variant="outline"
-              className="text-sm font-medium border-border/50 hover:border-border hover:bg-muted/30 transition-all duration-300"
+              variant="ghost"
+              className="text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-card/30 hover:scale-105 transition-all duration-300 ease-in-out rounded-2xl px-4 py-3 backdrop-blur-sm"
             >
               Sign out
             </Button>
           ) : (
-            <AuthButton />
+            <div className="transition-transform duration-300 hover:scale-105">
+              <AuthButton />
+            </div>
           )}
         </div>
       </div>
@@ -204,29 +246,32 @@ export default function ApplicationLayout({
         <aside
           className={cn(
             "md:hidden fixed inset-y-0 left-0 z-50",
-            "w-80 bg-card/95 backdrop-blur-xl border-r border-border/50 shadow-2xl",
-            "transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-            leftPanelOpen ? "translate-x-0" : "-translate-x-full",
+            "w-80 bg-card/95 backdrop-blur-2xl border-r border-border/30 shadow-2xl",
+            "transition-all duration-300 ease-&lsqb;cubic-bezier(0.4,0,0.2,1)&rsqb;",
+            leftPanelOpen ? "translate-x-0 shadow-3xl" : "-translate-x-full",
           )}
         >
           {/* Mobile Sidebar Content */}
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full relative overflow-hidden">
+            {/* Gradient overlay for mobile sidebar */}
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
+            
             {/* Close Button */}
-            <div className="flex justify-end p-6">
+            <div className="flex justify-end p-6 relative z-10">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setLeftPanelOpen(false)}
-                className="text-muted-foreground h-12 w-12 hover:bg-muted/50 hover:text-foreground rounded-xl transition-all duration-300"
+                className="text-muted-foreground h-12 w-12 hover:bg-primary/10 hover:text-primary hover:scale-110 hover:shadow-lg rounded-2xl transition-all duration-300 ease-in-out"
               >
                 <X className="h-6 w-6" />
               </Button>
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-6 pb-6">
+            <nav className="flex-1 px-6 pb-6 relative z-10">
               <div className="space-y-3">
-                {navigation.map((item) => {
+                {navigation.map((item, index) => {
                   const isActive = pathname === item.href;
                   return (
                     <Link
@@ -237,24 +282,42 @@ export default function ApplicationLayout({
                         setLeftPanelOpen(false);
                       }}
                       className={cn(
-                        "group flex items-center gap-4 px-6 py-4 text-base font-medium rounded-xl transition-all duration-300 relative",
+                        "group flex items-center gap-4 px-6 py-4 text-base font-semibold rounded-2xl transition-all duration-300 ease-in-out relative overflow-hidden hover:scale-105",
                         isActive
-                          ? "bg-primary text-primary-foreground shadow-lg scale-105"
-                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:scale-105",
+                          ? "bg-primary text-primary-foreground shadow-xl scale-105 hover:shadow-2xl hover:shadow-primary/30"
+                          : "text-muted-foreground hover:bg-background/60 hover:text-foreground hover:shadow-lg",
                       )}
+                      style={{
+                        animationDelay: `${index * 0.1}s`
+                      }}
                     >
+                      {/* Background glow effect */}
                       <div className={cn(
-                        "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
-                        isActive ? "bg-primary-foreground/20" : "group-hover:bg-muted/50"
+                        "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+                        isActive ? "bg-primary/20" : "bg-gradient-to-r from-primary/10 to-secondary/10"
+                      )} />
+                      
+                      <div className={cn(
+                        "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 relative z-10",
+                        isActive 
+                          ? "bg-primary-foreground/20 shadow-lg" 
+                          : "bg-muted/30 group-hover:bg-primary/20 group-hover:scale-110"
                       )}>
                         <item.icon className={cn(
-                          "h-5 w-5 transition-colors duration-300",
-                          isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
+                          "h-6 w-6 transition-all duration-300",
+                          isActive ? "text-primary-foreground drop-shadow-sm" : "text-muted-foreground group-hover:text-primary group-hover:scale-110"
                         )} />
                       </div>
-                      <span className="font-medium">{item.name}</span>
+                      
+                      <span className={cn(
+                        "font-semibold tracking-wide transition-all duration-300 relative z-10",
+                        isActive ? "text-primary-foreground" : "group-hover:tracking-wider"
+                      )}>
+                        {item.name}
+                      </span>
+                      
                       {isActive && (
-                        <div className="absolute right-4 w-2 h-2 bg-primary-foreground rounded-full" />
+                        <div className="absolute right-4 w-3 h-3 bg-primary-foreground rounded-full shadow-lg animate-pulse" />
                       )}
                     </Link>
                   );
@@ -263,22 +326,24 @@ export default function ApplicationLayout({
             </nav>
 
             {/* Mobile Sidebar Footer */}
-            <div className="p-6 border-t border-border/30 bg-muted/20 backdrop-blur-sm">
+            <div className="p-6 border-t border-border/20 bg-card/30 backdrop-blur-xl relative z-10">
               <div className="space-y-4">
-                <NetworkIndicator />
+                <div className="transition-transform duration-300 hover:scale-105">
+                  <NetworkIndicator />
+                </div>
                 {hasUser ? (
                   <Button
                     onClick={() => {
                       handleSignOut();
                       setLeftPanelOpen(false);
                     }}
-                    variant="outline"
-                    className="w-full justify-center text-sm font-medium border-border/50 text-muted-foreground hover:bg-muted/30 hover:text-foreground hover:border-border transition-all duration-300"
+                    variant="ghost"
+                    className="w-full justify-center text-sm font-semibold text-muted-foreground hover:bg-card/30 hover:text-foreground hover:scale-105 transition-all duration-300 ease-in-out rounded-2xl py-3"
                   >
                     Sign out
                   </Button>
                 ) : (
-                  <div className="w-full">
+                  <div className="w-full transition-transform duration-300 hover:scale-105">
                     <AuthButton />
                   </div>
                 )}
@@ -288,13 +353,20 @@ export default function ApplicationLayout({
         </aside>
 
         <main className="flex-1 min-w-0 bg-background">
-          <ScrollArea className="h-full w-full">{children}</ScrollArea>
+          <ScrollArea className="h-full w-full">
+            <div className="min-h-full flex flex-col">
+              <div className="flex-1">
+                {children}
+              </div>
+              <Footer />
+            </div>
+          </ScrollArea>
         </main>
 
         {/* Mobile Overlay */}
         {leftPanelOpen && (
           <div
-            className="md:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40 transition-opacity duration-300"
+            className="md:hidden fixed inset-0 bg-background/60 backdrop-blur-md z-40 transition-all duration-300 ease-in-out"
             onClick={() => setLeftPanelOpen(false)}
           />
         )}
