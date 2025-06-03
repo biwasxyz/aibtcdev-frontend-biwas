@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useWalletStore } from "@/store/wallet";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import type { WalletBalance } from "@/store/wallet";
 
 const AssetTracker = () => {
   const { balances, agentWallets, fetchSingleBalance, fetchWallets } =
     useWalletStore();
-  const { userId, isLoading: isSessionLoading } = useSessionStore();
+  const { userId, isLoading: isSessionLoading } = useAuth();
   const [agentSbtcStatus, setAgentSbtcStatus] = useState<
     Record<string, boolean>
   >({});

@@ -6,7 +6,7 @@ import { Send, Sparkles, Edit3, Check, ExternalLink, AlertCircle } from "lucide-
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/reusables/Loader";
 import type { DAO, Token } from "@/types/supabase";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDAOExtensions } from "@/queries/dao-queries";
 import {
@@ -114,7 +114,7 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
   // Modal view state: "initial" = submitted, "confirmed-success" = chain confirmed, "confirmed-failure" = chain failed
   const [txStatusView, setTxStatusView] = useState<"initial" | "confirmed-success" | "confirmed-failure">("initial");
 
-  const { accessToken, isLoading: isSessionLoading } = useSessionStore();
+  const { accessToken, isLoading: isSessionLoading } = useAuth();
 
   // Error code mapping
   const errorDetailsArray = getAllErrorDetails();

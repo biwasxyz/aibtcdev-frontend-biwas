@@ -12,7 +12,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Copy, Check, AlertTriangle } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 import { useClipboard } from "@/helpers/clipboard-utils";
 import type {
   QueryObserverResult,
@@ -123,12 +123,9 @@ export default function TransactionConfirmation({
   const { copiedText, copyToClipboard } = useClipboard();
 
   // Get session state from Zustand store
-  const { accessToken, isLoading, initialize } = useSessionStore();
+  const { accessToken, isLoading } = useAuth();
 
-  // Initialize session on component mount
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
+  // Session is automatically initialized by the useAuth hook
 
   const [feeEstimates, setFeeEstimates] = useState<{
     low: { rate: number; fee: number; time: string };

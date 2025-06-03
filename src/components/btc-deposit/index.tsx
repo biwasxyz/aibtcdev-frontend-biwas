@@ -10,7 +10,7 @@ import TransactionConfirmation from "@/components/btc-deposit/TransactionConfirm
 import MyHistory from "@/components/btc-deposit/MyHistory";
 import AllDeposits from "@/components/btc-deposit/AllDeposits";
 import { getStacksAddress, getBitcoinAddress } from "@/lib/address";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 import AuthButton from "@/components/home/AuthButton";
 import { useFormattedBtcPrice } from "@/hooks/deposit/useSdkBtcPrice";
 import useSdkPoolStatus from "@/hooks/deposit/useSdkPoolStatus";
@@ -28,7 +28,7 @@ export type ConfirmationData = {
 
 export default function BitcoinDeposit() {
   // Get session state from Zustand store
-  const { accessToken } = useSessionStore();
+  const { accessToken } = useAuth();
 
   // State management
   const [showConfirmation, setShowConfirmation] = useState(false);

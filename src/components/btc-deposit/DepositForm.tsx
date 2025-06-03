@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Bitcoin } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
 import AuthButton from "@/components/home/AuthButton";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -65,12 +65,9 @@ export default function DepositForm({
   });
 
   // Get session state from Zustand store
-  const { accessToken, isLoading, initialize } = useSessionStore();
+  const { accessToken, isLoading } = useAuth();
 
-  // Initialize session on component mount
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
+  // Session is automatically initialized by the useAuth hook
 
   // Use the activeWalletProvider state with a default value
   // const [activeWalletProvider, setActiveWalletProvider] = useState<

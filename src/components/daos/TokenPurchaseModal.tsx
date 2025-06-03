@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
 import { TokenBuyInput, type ApiResponse } from "@/components/daos/DaoBuy";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 import { useWalletStore } from "@/store/wallet";
 import { fetchDAOExtensions, fetchToken } from "@/queries/dao-queries";
 import type { DAO, Token, Extension } from "@/types/supabase";
@@ -60,7 +60,7 @@ export function TokenPurchaseModal({
   const [currentAmount, setCurrentAmount] = useState(presetAmount);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
 
-  const { accessToken } = useSessionStore();
+  const { accessToken } = useAuth();
   const { balances, userWallet } = useWalletStore();
 
   const { data: tokenData } = useQuery({

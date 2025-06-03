@@ -39,7 +39,7 @@ import {
   deleteAgentPrompt,
 } from "@/queries/agent-prompt-queries";
 import { useWalletStore } from "@/store/wallet";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface AgentPrompt {
   id: string;
@@ -345,7 +345,7 @@ function MobileConfigCard({
 export function AgentPromptForm() {
   const queryClient = useQueryClient();
   const { agentWallets, balances, fetchWallets } = useWalletStore();
-  const { userId } = useSessionStore();
+  const { userId } = useAuth();
   const { toast } = useToast();
 
   // Fetch wallet information when userId is available

@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Copy, Check, X, Wallet as WalletIcon } from "lucide-react";
 import { useWalletStore } from "@/store/wallet";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import dynamic from "next/dynamic";
 import { truncateAddress } from "@/helpers/format-utils";
@@ -28,7 +28,7 @@ interface WalletPanelProps {
 export function WalletPanel({ onClose }: WalletPanelProps) {
   const { balances, userWallet, agentWallets, isLoading, error, fetchWallets } =
     useWalletStore();
-  const { userId } = useSessionStore();
+  const { userId } = useAuth();
   // const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [stxAmounts, setStxAmounts] = useState<{ [key: string]: string }>({});
   const { toast } = useToast();
