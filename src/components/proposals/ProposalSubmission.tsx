@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState, useEffect, useRef } from "react";
-import { Send, Sparkles, Edit3, Check, ExternalLink, AlertCircle } from 'lucide-react';
+import { Send, Sparkles, Edit3, Check, ExternalLink, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/reusables/Loader";
 import type { DAO, Token } from "@/types/supabase";
@@ -18,157 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { connectWebSocketClient } from '@stacks/blockchain-api-client';
 import { getAllErrorDetails } from "@aibtc/types";
-
-// ---------------------- Unicode validation hook and warning ----------------------
-import { useMemo } from 'react';
-import { AlertTriangle } from 'lucide-react';
-
-interface UnicodeIssue {
-  char: string;
-  code: number;
-  position: number;
-  type: 'control' | 'non-ascii' | 'suspicious';
-  description: string;
-}
-
-export function useUnicodeValidation(text: string) {
-  const issues = useMemo((): UnicodeIssue[] => {
-    const found: UnicodeIssue[] = [];
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-      const code = char.charCodeAt(0);
-      // Control characters (0-31, except tab, newline, carriage return)
-      if (code >= 0 && code <= 31 && ![9, 10, 13].includes(code)) {
-        found.push({
-          char,
-          code,
-          position: i,
-          type: 'control',
-          description: `Invisible control character U+${code.toString(16).padStart(4, '0').toUpperCase()}`
-        });
-      }
-      // Non-ASCII characters (128+)
-      else if (code > 127) {
-        found.push({
-          char,
-          code,
-          position: i,
-          type: 'non-ascii',
-          description: `Non-ASCII character U+${code.toString(16).padStart(4, '0').toUpperCase()}`
-        });
-      }
-      // Zero-width and other suspicious characters
-      else if ([0x200B, 0x200C, 0x200D, 0x2060, 0xFEFF].includes(code)) {
-        found.push({
-          char,
-          code,
-          position: i,
-          type: 'suspicious',
-          description: `Zero-width or suspicious character U+${code.toString(16).padStart(4, '0').toUpperCase()}`
-        });
-      }
-    }
-    return found;
-  }, [text]);
-
-  const hasControlChars = issues.some(issue => issue.type === 'control');
-  const hasNonAscii = issues.some(issue => issue.type === 'non-ascii');
-  const hasSuspicious = issues.some(issue => issue.type === 'suspicious');
-  const hasAnyIssues = issues.length > 0;
-
-  const cleanText = text.replace(/[\x00-\x1F\x7F-\uFFFF]/g, '');
-  const asciiLength = cleanText.length;
-
-  return {
-    issues,
-    hasControlChars,
-    hasNonAscii,
-    hasSuspicious,
-    hasAnyIssues,
-    cleanText,
-    asciiLength,
-    originalLength: text.length,
-    nonAsciiCount: text.length - asciiLength
-  };
-}
-
-export function UnicodeIssueWarning({ issues }: { issues: UnicodeIssue[] }) {
-  if (issues.length === 0) return null;
-  
-  const controlCount = issues.filter(i => i.type === 'control').length;
-  const nonAsciiCount = issues.filter(i => i.type === 'non-ascii').length;
-  const suspiciousCount = issues.filter(i => i.type === 'suspicious').length;
-  
-  return (
-    <div className="mt-1 p-3 bg-primary/10 border border-primary/20 rounded-lg">
-      <div className="flex items-start gap-1">
-        <AlertTriangle className="w-4 h-4 text-primary-600 mt-0.5 flex-shrink-0" />
-        <div className="text-sm flex-1 text-primary-700">
-          <p className="font-medium text-primary-700 mb-1">
-            Input contains {issues.length} problematic character{issues.length !== 1 ? 's' : ''}:
-          </p>
-          
-          <div className="space-y-4">
-            {controlCount > 0 && (
-              <div>
-                <p className="text-primary-700 font-medium mb-1">
-                  • {controlCount} invisible control character{controlCount !== 1 ? 's' : ''} (security risk):
-                </p>
-                <div className="ml-4 space-y-1">
-                  {issues.filter(i => i.type === 'control').map((issue, idx) => (
-                    <div key={idx} className="text-sm font-mono bg-primary/20 p-2 rounded border border-primary/30 text-primary-800">
-                      <span className="text-primary-800">
-                        Position {issue.position}: "{issue.char === '\t' ? '\\t' : issue.char === '\n' ? '\\n' : issue.char === '\r' ? '\\r' : `\\x${issue.code.toString(16).padStart(2, '0')}`}" 
-                      </span>
-                      <span className="text-primary-600 ml-2">({issue.description})</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {nonAsciiCount > 0 && (
-              <div>
-                <p className="text-primary-700 font-medium mb-1">
-                  • {nonAsciiCount} non-ASCII character{nonAsciiCount !== 1 ? 's' : ''} (will be rejected):
-                </p>
-                <div className="ml-4 space-y-1">
-                  {issues.filter(i => i.type === 'non-ascii').map((issue, idx) => (
-                    <div key={idx} className="text-sm font-mono bg-primary/20 p-2 rounded border border-primary/30 text-primary-800">
-                      <span className="text-primary-800">
-                        Position {issue.position}: "{issue.char}" 
-                      </span>
-                      <span className="text-primary-600 ml-2">({issue.description})</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {suspiciousCount > 0 && (
-              <div>
-                <p className="text-primary-700 font-medium mb-1">
-                  • {suspiciousCount} suspicious character{suspiciousCount !== 1 ? 's' : ''} (potential issue):
-                </p>
-                <div className="ml-4 space-y-1">
-                  {issues.filter(i => i.type === 'suspicious').map((issue, idx) => (
-                    <div key={idx} className="text-sm font-mono bg-primary/20 p-2 rounded border border-primary/30 text-primary-800">
-                      <span className="text-primary-800">
-                        Position {issue.position}: "{issue.char}" 
-                      </span>
-                      <span className="text-primary-600 ml-2">({issue.description})</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-// --------------------------------------------------------------------------------
+import { useUnicodeValidation, UnicodeIssueWarning } from "@/hooks/use-unicode-validation";
 
 interface WebSocketTransactionMessage {
   tx_id: string;
@@ -305,17 +155,15 @@ function parseOutput(raw: string): ParsedOutput | null {
 
 export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmissionProps) {
   const [proposal, setProposal] = useState("");
+  const { issues, hasAnyIssues, cleanText } = useUnicodeValidation(proposal);
+  const handleClean = () => {
+    setProposal(cleanText);
+  };
   const [showResultDialog, setShowResultDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
   
-  const {
-    issues: unicodeIssues,
-    hasAnyIssues: hasUnicodeIssues,
-    cleanText,
-  } = useUnicodeValidation(proposal);
-
   // WebSocket state
   const [websocketMessage, setWebsocketMessage] = useState<WebSocketTransactionMessage | null>(null);
   const websocketRef = useRef<Awaited<ReturnType<typeof connectWebSocketClient>> | null>(null);
@@ -387,46 +235,53 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
         if (isFinalState) {
           // Clean up subscription after receiving final update
           if (subscriptionRef.current) {
-            subscriptionRef.current.unsubscribe?.()
+            subscriptionRef.current.unsubscribe?.();
           }
         } else {
           // Transaction is still pending, keep connection open but update UI
-          console.log(`Transaction still pending with status: ${tx_status}`)
+          console.log(`Transaction still pending with status: ${tx_status}`);
         }
-      })
+      });
+      
+      subscriptionRef.current = subscription;
 
-      subscriptionRef.current = subscription
     } catch (error) {
-      console.error("WebSocket connection error:", error)
+      console.error('WebSocket connection error:', error);
     }
-  }
+  };
 
   /* ---------------------- Helpers – extension data builder --------------------- */
   const buildExtensionData = () => {
-    if (!daoExtensions || daoExtensions.length === 0) return null
+    if (!daoExtensions || daoExtensions.length === 0) return null;
 
     const findExt = (type: string, subtype: string) =>
-      daoExtensions.find((ext) => ext.type === type && ext.subtype === subtype)
+      daoExtensions.find((ext) => ext.type === type && ext.subtype === subtype);
 
-    const actionProposalsVotingExt = findExt("EXTENSIONS", "ACTION_PROPOSAL_VOTING")
-    const actionProposalContractExt = findExt("ACTIONS", "SEND_MESSAGE")
-    const daoTokenExt = findExt("TOKEN", "DAO")
+    const actionProposalsVotingExt = findExt(
+      "EXTENSIONS",
+      "ACTION_PROPOSAL_VOTING",
+    );
+    const actionProposalContractExt = findExt("ACTIONS", "SEND_MESSAGE");
+    const daoTokenExt = findExt("TOKEN", "DAO");
 
-    if (!actionProposalsVotingExt || !actionProposalContractExt || !daoTokenExt) return null
+    if (!actionProposalsVotingExt || !actionProposalContractExt || !daoTokenExt)
+      return null;
 
     return {
-      action_proposals_voting_extension: actionProposalsVotingExt.contract_principal,
-      action_proposal_contract_to_execute: actionProposalContractExt.contract_principal,
+      action_proposals_voting_extension:
+        actionProposalsVotingExt.contract_principal,
+      action_proposal_contract_to_execute:
+        actionProposalContractExt.contract_principal,
       dao_token_contract_address: daoTokenExt.contract_principal,
       message: proposal.trim(),
-    }
-  }
+    };
+  };
 
   /* ------------------------------ API call helper ------------------------------ */
   const sendRequest = async (payload: Record<string, string>) => {
-    if (!accessToken) throw new Error("Missing access token")
+    if (!accessToken) throw new Error("Missing access token");
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       const res = await fetch(
         `https://core-staging.aibtc.dev/tools/dao/action_proposals/propose_send_message?token=${encodeURIComponent(
@@ -437,67 +292,70 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         },
-      )
+      );
 
-      const json = (await res.json()) as ApiResponse
-      console.log("API Response:", json)
+      const json = (await res.json()) as ApiResponse;
+      console.log("API Response:", json);
 
-      return json
+      return json;
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!proposal.trim() || proposal.trim().length < 50) return
+    e.preventDefault();
+    if (!proposal.trim() || proposal.trim().length < 50) return;
 
-    const extensionData = buildExtensionData()
+    const extensionData = buildExtensionData();
     if (!extensionData) {
-      console.error("Could not determine required DAO extensions")
-      return
+      console.error("Could not determine required DAO extensions");
+      return;
     }
 
     try {
-      const response = await sendRequest(extensionData)
+      const response = await sendRequest(extensionData);
 
-      setApiResponse(response)
-      setShowResultDialog(true)
-      setTxStatusView("initial")
+      setApiResponse(response);
+      setShowResultDialog(true);
+      setTxStatusView("initial");
 
       // If successful, start WebSocket monitoring
       if (response.success) {
-        const parsed = parseOutput(response.output)
-        const txid = parsed?.data?.txid
-
+        const parsed = parseOutput(response.output);
+        const txid = parsed?.data?.txid;
+        
         if (txid) {
-          await connectToWebSocket(txid)
+          await connectToWebSocket(txid);
         }
-
+        
         // Call success callback and clear form
-        onSubmissionSuccess?.()
-        setProposal("")
+        onSubmissionSuccess?.();
+        setProposal("");
       }
+
     } catch (err) {
       // Handle network errors or other unexpected errors
       const networkErrorResponse: ApiResponse = {
         success: false,
-        error: err instanceof Error ? err.message : "Failed to connect to the server",
+        error:
+          err instanceof Error
+            ? err.message
+            : "Failed to connect to the server",
         output: "",
-      }
+      };
 
-      setApiResponse(networkErrorResponse)
-      setShowResultDialog(true)
-      setTxStatusView("initial")
+      setApiResponse(networkErrorResponse);
+      setShowResultDialog(true);
+      setTxStatusView("initial");
     }
-  }
+  };
 
   const handleAIGenerate = async () => {
     if (!accessToken) {
-      console.error("Missing access token");
+      console.error("No access token available for AI generation");
       return;
     }
-
 
     setIsGenerating(true);
     try {
@@ -572,24 +430,23 @@ List any resources or funding needed.
 Note: This is a template generated after AI assistance encountered an issue. Please customize it with your specific proposal details.`;
       
       setProposal(fallbackText);
-
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
 
   const handleRetry = () => {
-    setShowResultDialog(false)
+    setShowResultDialog(false);
     // Reset WebSocket state and modal status view
-    setWebsocketMessage(null)
-    setTxStatusView("initial")
+    setWebsocketMessage(null);
+    setTxStatusView("initial");
     // Clean up any existing connections
     if (subscriptionRef.current) {
-      subscriptionRef.current.unsubscribe?.()
+      subscriptionRef.current.unsubscribe?.();
     }
-  }
+  };
 
-  const hasAccessToken = !!accessToken && !isSessionLoading
+  const hasAccessToken = !!accessToken && !isSessionLoading;
 
   return (
     <>
@@ -606,36 +463,24 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
-            {/* Textarea on top */}
             <textarea
               value={proposal}
-              onChange={(e) => {
-                setProposal(e.target.value)
-              }}
+              onChange={(e) => setProposal(e.target.value)}
               placeholder={
                 hasAccessToken
                   ? "Describe your proposal in detail. What changes do you want to make? What are the benefits? Include any relevant context or rationale..."
                   : "Connect your wallet to create a proposal"
               }
-              className="relative w-full min-h-[120px] p-4 bg-background/50 border border-border/50 rounded-xl font-mono text-foreground placeholder-muted-foreground resize-y focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200 caret-foreground"
+              className="w-full min-h-[120px] p-4 bg-background/50 border border-border/50 rounded-xl text-foreground placeholder-muted-foreground resize-y focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200"
               disabled={!hasAccessToken || isSubmitting || isGenerating || isLoadingExtensions}
             />
-            
             {proposal.length > 0 && (
               <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
                 {proposal.length} characters
               </div>
             )}
-            {/* Warning and clean button */}
-            <UnicodeIssueWarning issues={unicodeIssues} />
-            {hasUnicodeIssues && (
-              <div className="mt-2 flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setProposal(cleanText)} className="text-sm">
-                  Remove problematic characters
-                </Button>
-              </div>
-            )}
           </div>
+          <UnicodeIssueWarning issues={issues} />
 
           <div className="flex items-center gap-3">
             <Button
@@ -643,28 +488,33 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
               variant="outline"
               onClick={handleAIGenerate}
               disabled={!hasAccessToken || isSubmitting || isGenerating || isLoadingExtensions}
-              className="flex items-center gap-2 border-secondary/50 hover:bg-secondary/10 hover:border-secondary"
+              className="flex items-center gap-2 border-secondary/50 text-secondary hover:bg-secondary/10 hover:border-secondary"
             >
-              <Sparkles className={`h-4 w-4 ${isGenerating ? "animate-spin" : ""}`} />
-              {isGenerating ? "Generating..." : "Generate message"}
+              <Sparkles className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
+              {isGenerating ? 'Generating...' : 'AI Assist'}
             </Button>
+            {hasAnyIssues && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClean}
+                className="flex items-center gap-2 border-secondary/50 text-secondary hover:bg-secondary/10 hover:border-secondary"
+              >
+                Remove Issues
+              </Button>
+            )}
             <Button
               type="submit"
-              disabled={
-                !hasAccessToken ||
-                !proposal.trim() ||
-                proposal.trim().length < 50 ||
-                hasUnicodeIssues ||
-                isSubmitting ||
-                isGenerating ||
-                isLoadingExtensions
-              }
+              disabled={!hasAccessToken || !proposal.trim() || proposal.trim().length < 50 || isSubmitting || isGenerating || isLoadingExtensions || hasAnyIssues}
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6"
             >
-              {isSubmitting ? <Loader /> : <Send className="h-4 w-4" />}
-              {isSubmitting ? "Submitting..." : "Submit Proposal"}
+              {isSubmitting ? (
+                <Loader />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {isSubmitting ? 'Submitting...' : 'Submit Proposal'}
             </Button>
-            
           </div>
 
           {/* Error/Status Messages */}
@@ -673,42 +523,37 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
               💡 <strong>Note:</strong> Connect your wallet to submit proposals to the DAO.
             </div>
           )}
-
+          
           {hasAccessToken && proposal.trim().length > 0 && proposal.trim().length < 50 && (
             <div className="text-sm text-red-500 bg-red-50 rounded-lg p-3">
-              <strong>Minimum Length Required:</strong> Proposal needs {50 - proposal.trim().length} more characters
-              (minimum 50 characters)
+              <strong>Minimum Length Required:</strong> Proposal needs {50 - proposal.trim().length} more characters (minimum 50 characters)
             </div>
           )}
 
           {hasAccessToken && proposal.trim().length >= 50 && (
             <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3">
-              💡 <strong>Tip:</strong> Make sure your proposal is clear and includes specific actionable items. The
-              community will vote on this proposal.
+              💡 <strong>Tip:</strong> Make sure your proposal is clear and includes specific actionable items. The community will vote on this proposal.
             </div>
           )}
 
           {isLoadingExtensions && (
-            <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3">⏳ Loading DAO extensions...</div>
+            <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3">
+              ⏳ Loading DAO extensions...
+            </div>
           )}
         </form>
       </div>
 
       {/* ----------------------------- Result modal ----------------------------- */}
-
-      <Dialog
-        open={showResultDialog}
-        onOpenChange={(open) => {
-          setShowResultDialog(open)
-          if (!open) setTxStatusView("initial")
-        }}
-      >
-        <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-auto">
-
+      <Dialog open={showResultDialog} onOpenChange={(open) => {
+        setShowResultDialog(open);
+        if (!open) setTxStatusView("initial");
+      }}>
+        <DialogContent className="sm:max-w-2xl">
           {apiResponse?.success ? (
             <>
               {(() => {
-                const parsed = parseOutput(apiResponse.output)
+                const parsed = parseOutput(apiResponse.output);
                 // Three states: initial (submitted), confirmed-success, confirmed-failure
                 return (
                   <>
@@ -751,32 +596,16 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                                   View on Explorer
                                 </a>
                               </Button>
-                            </div>
-                          )}
-                          {parsed?.data?.txid && (
-                            <div className="border rounded-lg p-4 bg-muted">
-                              <h4 className="font-semibold mb-2">Transaction Monitoring</h4>
-                              <p className="text-sm mb-2">
-                                Transaction ID: <code className="px-1 py-0.5 rounded">{parsed.data.txid}</code>
-                              </p>
-                              <div className="flex items-center gap-2 text-sm">
-                                <Loader />
-                                <span>Waiting for transaction confirmation via WebSocket...</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex justify-end mt-6">
-                          <Button
-                            variant="default"
-                            onClick={() => {
-                              setShowResultDialog(false)
-                              setTxStatusView("initial")
-                            }}
-                          >
-                            Close
-                          </Button>
-
+                            )}
+                            <Button
+                              onClick={() => {
+                                setShowResultDialog(false);
+                                setTxStatusView("initial");
+                              }}
+                            >
+                              Close
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -824,68 +653,16 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                                   View on Explorer
                                 </a>
                               </Button>
-                            </div>
-                          )}
-                          {websocketMessage && (
-                            <div className="border rounded-lg p-4">
-                              <h4 className="font-semibold mb-2 text-green-800">✅ Transaction Confirmed</h4>
-                              <div className="text-sm mb-2">
-                                <span className="font-medium">Status:</span>{" "}
-                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  {websocketMessage.tx_status?.toUpperCase()}
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                                {websocketMessage.tx_id && (
-                                  <div>
-                                    <span className="font-medium">Transaction ID:</span>
-                                    <p className="font-mono text-xs mt-1 break-all">{websocketMessage.tx_id}</p>
-                                  </div>
-                                )}
-                                {websocketMessage.block_height && (
-                                  <div>
-                                    <span className="font-medium">Block Height:</span>
-                                    <p className="mt-1">{websocketMessage.block_height.toLocaleString()}</p>
-                                  </div>
-                                )}
-                                {websocketMessage.block_time_iso && (
-                                  <div>
-                                    <span className="font-medium">Block Time:</span>
-                                    <p className="mt-1">{new Date(websocketMessage.block_time_iso).toLocaleString()}</p>
-                                  </div>
-                                )}
-                              </div>
-                              {websocketMessage.tx_result && (
-                                <div className="mt-3">
-                                  <span className="font-medium">Result:</span>
-                                  <p className="font-mono mt-1">
-                                    {websocketMessage.tx_result.repr || websocketMessage.tx_result.hex}
-                                  </p>
-                                </div>
-                              )}
-                              <details className="mt-3">
-                                <summary className="cursor-pointer hover:underline text-sm text-gray-600">
-                                  View raw WebSocket data
-                                </summary>
-                                <pre className="whitespace-pre-wrap text-xs p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
-                                  {JSON.stringify(websocketMessage, null, 2)}
-                                </pre>
-                              </details>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex justify-end mt-6">
-                          <Button
-                            variant="default"
-                            onClick={() => {
-                              setShowResultDialog(false)
-                              setTxStatusView("initial")
-                            }}
-                          >
-                            Close
-                          </Button>
                             )}
-
+                            <Button
+                              onClick={() => {
+                                setShowResultDialog(false);
+                                setTxStatusView("initial");
+                              }}
+                            >
+                              Close
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -947,80 +724,21 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                                   View Details
                                 </a>
                               </Button>
-                            </div>
-                          )}
-                          {websocketMessage && (
-                            <div className="border rounded-lg p-4 ">
-                              <h4 className="font-semibold mb-2 text-red-800">❌ Transaction Failed</h4>
-                              <div className="text-sm mb-2">
-                                <span className="font-medium">Status:</span>{" "}
-                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                  {websocketMessage.tx_status?.toUpperCase()}
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                                {websocketMessage.tx_id && (
-                                  <div>
-                                    <span className="font-medium">Transaction ID:</span>
-                                    <p className="font-mono text-xs mt-1 break-all">{websocketMessage.tx_id}</p>
-                                  </div>
-                                )}
-                                {websocketMessage.block_height && (
-                                  <div>
-                                    <span className="font-medium">Block Height:</span>
-                                    <p className="mt-1">{websocketMessage.block_height.toLocaleString()}</p>
-                                  </div>
-                                )}
-                                {websocketMessage.block_time_iso && (
-                                  <div>
-                                    <span className="font-medium">Block Time:</span>
-                                    <p className="mt-1">{new Date(websocketMessage.block_time_iso).toLocaleString()}</p>
-                                  </div>
-                                )}
-                              </div>
-                              {websocketMessage.tx_result && (
-                                <div className="mt-3">
-                                  <span className="font-medium">Error Details:</span>
-                                  <p className="font-mono mt-1">
-                                    {(() => {
-                                      const raw = websocketMessage.tx_result.repr || websocketMessage.tx_result.hex
-                                      const match = raw.match(/u?(\d{4,})/)
-                                      if (match) {
-                                        const code = Number.parseInt(match[1], 10)
-                                        const description = errorCodeMap[code]?.description
-                                        return description ? description : raw
-                                      }
-                                      return raw
-                                    })()}
-                                  </p>
-                                </div>
-                              )}
-                              <details className="mt-3">
-                                <summary className="cursor-pointer hover:underline text-sm text-gray-600">
-                                  View raw WebSocket data
-                                </summary>
-                                <pre className="whitespace-pre-wrap text-xs p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
-                                  {JSON.stringify(websocketMessage, null, 2)}
-                                </pre>
-                              </details>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex justify-end mt-6">
-                          <Button
-                            variant="default"
-                            onClick={() => {
-                              setShowResultDialog(false)
-                              setTxStatusView("initial")
-                            }}
-                          >
-                            Close
-                          </Button>
+                            )}
+                            <Button
+                              onClick={() => {
+                                setShowResultDialog(false);
+                                setTxStatusView("initial");
+                              }}
+                            >
+                              Close
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )}
                   </>
-                )
+                );
               })()}
             </>
           ) : (
@@ -1037,38 +755,35 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                   There was an error processing your proposal. Please check your connection and try again.
                 </DialogDescription>
               </DialogHeader>
-              <div className="mt-4">
-                <div className="bg-muted border rounded-lg p-4">
-                  <h4 className="font-semibold mb-2">Error Details</h4>
-                  <div className="text-sm">{apiResponse?.error || "An unknown error occurred"}</div>
-                  {apiResponse?.output && (
-                    <details className="mt-3">
-                      <summary className="cursor-pointer hover:underline">View full response</summary>
-                      <pre className="whitespace-pre-wrap text-xs bg-white p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
-                        {apiResponse.output}
-                      </pre>
-                    </details>
-                  )}
+              
+              <div className="mt-8 space-y-4">
+                {apiResponse?.error && (
+                  <div className="bg-background/50 border border-border/50 rounded-xl p-4">
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Error: </span>
+                      <span className="font-medium">{apiResponse.error}</span>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button variant="outline" onClick={handleRetry}>
+                    Try Again
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowResultDialog(false);
+                      setTxStatusView("initial");
+                    }}
+                  >
+                    Close
+                  </Button>
                 </div>
               </div>
-              <div className="flex justify-end gap-2 mt-6">
-                <Button variant="outline" onClick={handleRetry}>
-                  Try Again
-                </Button>
-                <Button
-                  variant="default"
-                  onClick={() => {
-                    setShowResultDialog(false)
-                    setTxStatusView("initial")
-                  }}
-                >
-                  Close
-                </Button>
-              </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
     </>
-  )
-}
+  );
+} 
