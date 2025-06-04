@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { connectWebSocketClient } from '@stacks/blockchain-api-client';
 import { getAllErrorDetails } from "@aibtc/types";
+import { useUnicodeValidation, UnicodeIssueWarning } from "@/hooks/use-unicode-validation";
 
 interface WebSocketTransactionMessage {
   tx_id: string;
@@ -154,6 +155,10 @@ function parseOutput(raw: string): ParsedOutput | null {
 
 export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmissionProps) {
   const [proposal, setProposal] = useState("");
+  const { issues, hasAnyIssues, cleanText } = useUnicodeValidation(proposal);
+  const handleClean = () => {
+    setProposal(cleanText);
+  };
   const [showResultDialog, setShowResultDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -475,6 +480,7 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
               </div>
             )}
           </div>
+          <UnicodeIssueWarning issues={issues} />
 
           <div className="flex items-center gap-3">
             <Button
@@ -487,10 +493,19 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
               <Sparkles className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
               {isGenerating ? 'Generating...' : 'AI Assist'}
             </Button>
-
+            {hasAnyIssues && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClean}
+                className="flex items-center gap-2 border-secondary/50 text-secondary hover:bg-secondary/10 hover:border-secondary"
+              >
+                Remove Issues
+              </Button>
+            )}
             <Button
               type="submit"
-              disabled={!hasAccessToken || !proposal.trim() || proposal.trim().length < 50 || isSubmitting || isGenerating || isLoadingExtensions}
+              disabled={!hasAccessToken || !proposal.trim() || proposal.trim().length < 50 || isSubmitting || isGenerating || isLoadingExtensions || hasAnyIssues}
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6"
             >
               {isSubmitting ? (
