@@ -9,11 +9,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Proposals",
-  description: "View all DAO proposals across all organizations in one place.",
+  title: "Profile",
+  description: "View your profile.",
 };
 
-export default function ProposalsLayout({
+export default function ProfileLayout({
   children,
 }: {
   children: React.ReactNode;

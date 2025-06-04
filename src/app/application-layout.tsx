@@ -23,8 +23,6 @@ interface ApplicationLayoutProps {
 const navigation = [
   { id: "daos", name: "DAOs", href: "/daos", icon: Boxes },
   { id: "proposals", name: "Proposals", href: "/proposals", icon: FileText },
-  // { id: "chat", name: "Chat", href: "/chat", icon: MessageSquare },
-  // { id: "agents", name: "Agents", href: "/agents", icon: Users },
   { id: "votes", name: "Votes", href: "/votes", icon: Vote },
   { id: "profile", name: "Agent", href: "/profile", icon: Users },
 ];

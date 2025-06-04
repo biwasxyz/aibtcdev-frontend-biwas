@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getProposalVotes } from "@/lib/vote-utils";
+import { fetchProposalVotes } from "@/queries/vote-queries";
 import { TokenBalance } from "@/components/reusables/BalanceDisplay";
 import {
   Tooltip,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { CheckCircle2, XCircle, Clock, Info, Users, Target, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { safeNumberFromBigInt, safeString, safeStringFromBigInt } from "@/helpers/proposal-utils";
+import { safeNumberFromBigInt, safeStringFromBigInt } from "@/helpers/proposal-utils";
 import type { Proposal, ProposalWithDAO } from "@/types/supabase";
 import { useVotingStatus } from "./TimeStatus";
 
@@ -35,31 +35,48 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
   });
 
   // Fetch live vote data
-  const contractAddress = safeString(proposal.contract_principal);
   const proposalId = safeStringFromBigInt(proposal.proposal_id);
 
-  const { data: liveVoteData } = useQuery({
-    queryKey: ["proposalVotes", contractAddress, proposalId],
+  const { data: individualVotes } = useQuery({
+    queryKey: ["proposalVotes", proposalId],
     queryFn: async () => {
-      if (contractAddress && proposalId) {
-        return getProposalVotes(contractAddress, Number(proposalId));
+      if (proposalId) {
+        return fetchProposalVotes(proposalId);
       }
-      return null;
+      return [];
     },
-    enabled: !!contractAddress && !!proposalId,
+    enabled: !!proposalId,
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60, // 1 minute
   });
 
-  // Update parsed votes when live data changes
+  // Calculate vote totals from individual votes
   useEffect(() => {
-    if (liveVoteData) {
+    if (individualVotes && individualVotes.length > 0) {
+      let votesFor = 0;
+      let votesAgainst = 0;
+
+      individualVotes.forEach(vote => {
+        const amount = Number(vote.amount || "0");
+        if (vote.answer === true) {
+          votesFor += amount;
+        } else if (vote.answer === false) {
+          votesAgainst += amount;
+        }
+      });
+
       setParsedVotes({
-        votesFor: liveVoteData.votesFor || "0",
-        votesAgainst: liveVoteData.votesAgainst || "0",
+        votesFor: votesFor.toString(),
+        votesAgainst: votesAgainst.toString(),
+      });
+    } else {
+      // If no individual votes, fall back to proposal data
+      setParsedVotes({
+        votesFor: proposal.votes_for ? proposal.votes_for.replace(/n$/, "") : "0",
+        votesAgainst: proposal.votes_against ? proposal.votes_against.replace(/n$/, "") : "0",
       });
     }
-  }, [liveVoteData]);
+  }, [individualVotes, proposal.votes_for, proposal.votes_against]);
 
   const calculations = useMemo(() => {
     const votesFor = Number(parsedVotes.votesFor || 0);
