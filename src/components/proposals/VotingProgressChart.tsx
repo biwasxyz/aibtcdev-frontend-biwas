@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProposalVotes } from "@/queries/vote-queries";
+import { fetchLatestChainState } from "@/queries/chain-state-queries";
 import { TokenBalance } from "@/components/reusables/BalanceDisplay";
 import {
   Tooltip,
@@ -10,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CheckCircle2, XCircle, Clock, Info, Users, Target, Zap } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Info, Users, Target, Zap, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { safeNumberFromBigInt } from "@/helpers/proposal-utils";
 import type { Proposal, ProposalWithDAO } from "@/types/supabase";
@@ -34,7 +35,7 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
     votesAgainst: proposal.votes_against ? proposal.votes_against.replace(/n$/, "") : "0",
   });
 
-  // Fetch live vote data
+  // Fetch live vote data with real-time updates
   const proposalId = proposal.id
 
   const { data: individualVotes } = useQuery({
@@ -47,7 +48,16 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
     },
     enabled: !!proposalId,
     refetchOnWindowFocus: false,
-    staleTime: 1000 * 60, // 1 minute
+    staleTime: 0, // Always fresh data for real-time updates
+    refetchInterval: false, // Disable polling since we have real-time updates
+  });
+
+  // Fetch current chain state to check execution deadline
+  const { data: chainState } = useQuery({
+    queryKey: ['latestChainState'],
+    queryFn: fetchLatestChainState,
+    staleTime: 60000,
+    refetchInterval: 60000,
   });
 
   // Calculate vote totals from individual votes
@@ -104,6 +114,14 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
     // Calculate if requirements are actually met based on current data
     const actuallyMetQuorum = participationRate >= quorumPercentage;
     const actuallyMetThreshold = totalVotes > 0 ? approvalRate >= thresholdPercentage : false;
+
+    // Check if proposal failed to be concluded within execution window
+    const currentBitcoinHeight = chainState?.bitcoin_block_height 
+      ? parseInt(chainState.bitcoin_block_height) 
+      : 0;
+    const execEnd = safeNumberFromBigInt(proposal.exec_end);
+    const concludedBy = proposal.concluded_by;
+    const failedToExecute = currentBitcoinHeight > execEnd && !concludedBy;
     
     return {
       votesFor,
@@ -121,8 +139,9 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
       votesAgainstPercent,
       metQuorum: actuallyMetQuorum,
       metThreshold: actuallyMetThreshold,
+      failedToExecute,
     };
-  }, [proposal, parsedVotes]);
+  }, [proposal, parsedVotes, chainState]);
 
   const getStatusColor = (met: boolean, isActive: boolean) => {
     if (isActive) return "text-orange-400";
@@ -139,7 +158,46 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
     return met ? "Met" : "Missed";
   };
 
-      return (
+  // Enhanced result status logic
+  const getResultStatus = () => {
+    if (isActive || !isEnded) {
+      return {
+        status: "Pending",
+        color: "text-orange-400",
+        icon: <Clock className="h-4 w-4" />,
+        bgColor: "bg-orange-500/10 border-orange-500/30",
+      };
+    }
+    
+    if (calculations.failedToExecute) {
+      return {
+        status: "Failed to Execute",
+        color: "text-red-400",
+        icon: <AlertTriangle className="h-4 w-4" />,
+        bgColor: "bg-red-500/10 border-red-500/30",
+      };
+    }
+    
+    if (proposal.passed) {
+      return {
+        status: "Passed",
+        color: "text-green-400",
+        icon: <CheckCircle2 className="h-4 w-4" />,
+        bgColor: "bg-green-500/10 border-green-500/30",
+      };
+    }
+    
+    return {
+      status: "Failed",
+      color: "text-red-400",
+      icon: <XCircle className="h-4 w-4" />,
+      bgColor: "bg-red-500/10 border-red-500/30",
+    };
+  };
+
+  const resultStatus = getResultStatus();
+
+  return (
     <div className="space-y-6">
       {/* Participation Progress Bar */}
       <div className="space-y-3">
@@ -354,11 +412,7 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
         {/* Overall Result */}
         <div className={cn(
           "p-4 rounded-lg border transition-colors",
-          isActive || !isEnded
-            ? "bg-orange-500/10 border-orange-500/30"
-            : proposal.passed
-              ? "bg-green-500/10 border-green-500/30"
-              : "bg-red-500/10 border-red-500/30"
+          resultStatus.bgColor
         )}>
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
@@ -368,16 +422,21 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
               </span>
             </div>
             <div className="flex items-center gap-2">
-              {getStatusIcon(proposal.passed, isActive || !isEnded)}
-              <span className={cn("text-sm font-semibold", getStatusColor(proposal.passed, isActive || !isEnded))}>
-                {isActive || !isEnded ? "Pending" : proposal.passed ? "Passed" : "Failed"}
+              {resultStatus.icon}
+              <span className={cn("text-sm font-semibold", resultStatus.color)}>
+                {resultStatus.status}
               </span>
             </div>
             <div className="text-xs text-muted-foreground">
               {calculations.totalVotes > 0 ? (
                 <div className="space-y-1">
                   <div>{calculations.totalVotes} total votes</div>
-                  {!isActive && isEnded && !proposal.passed && calculations.metQuorum && calculations.metThreshold && (
+                  {calculations.failedToExecute && (
+                    <div className="text-orange-400">
+                      ⚠️ Execution deadline passed without conclusion
+                    </div>
+                  )}
+                  {!isActive && isEnded && !proposal.passed && !calculations.failedToExecute && calculations.metQuorum && calculations.metThreshold && (
                     <div className="text-orange-400">
                       ⚠️ Failed despite meeting quorum & threshold
                     </div>

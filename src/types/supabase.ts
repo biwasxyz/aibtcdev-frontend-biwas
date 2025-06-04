@@ -89,6 +89,7 @@ export interface Extension {
 
 export interface Proposal {
   id: string;
+  summary: string;
   created_at: string;
   title: string;
   status: string;

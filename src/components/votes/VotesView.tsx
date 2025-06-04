@@ -71,6 +71,13 @@ const isInVetoWindow = (vote: VoteType, currentBitcoinHeight: number): boolean =
   return currentBitcoinHeight > voteEnd && currentBitcoinHeight <= execStart;
 };
 
+// Helper function to get explorer URL for transaction
+const getExplorerUrl = (txId: string) => {
+  const baseUrl = "https://explorer.hiro.so/txid";
+  const isTestnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "testnet";
+  return `${baseUrl}/${txId}${isTestnet ? "?chain=testnet" : ""}`;
+};
+
 function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: VoteCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -163,18 +170,20 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
           {/* Quick Actions Row */}
           <div className="flex items-center justify-between pt-2 border-t border-border/30">
             <div className="flex items-center gap-2">
-              <Link href="/proposals" className="inline-flex">
+              <Link href={`/proposals/${vote.proposal_id}`} className="inline-flex">
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary h-7 px-2 text-xs">
                   <FileText className="h-3 w-3 mr-1" />
-                  View Proposals
+                  View Proposal
                 </Button>
               </Link>
               
               {vote.tx_id && (
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary h-7 px-2 text-xs">
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  Explorer
-                </Button>
+                <Link href={getExplorerUrl(vote.tx_id)} target="_blank" rel="noopener noreferrer" className="inline-flex">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary h-7 px-2 text-xs">
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    Explorer
+                  </Button>
+                </Link>
               )}
             </div>
             

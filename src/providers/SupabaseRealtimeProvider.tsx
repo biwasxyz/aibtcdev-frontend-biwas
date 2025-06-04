@@ -89,10 +89,16 @@ export function SupabaseRealtimeProvider({ children }: SupabaseRealtimeProviderP
           // Invalidate proposal-specific votes if we have proposal_id
           if (payload.new && typeof payload.new === 'object' && 'proposal_id' in payload.new) {
             queryClient.invalidateQueries({ 
+              queryKey: ["proposalVotes", payload.new.proposal_id] 
+            });
+            queryClient.invalidateQueries({ 
               queryKey: ["proposalVotesTable", payload.new.proposal_id] 
             });
           }
           if (payload.old && typeof payload.old === 'object' && 'proposal_id' in payload.old) {
+            queryClient.invalidateQueries({ 
+              queryKey: ["proposalVotes", payload.old.proposal_id] 
+            });
             queryClient.invalidateQueries({ 
               queryKey: ["proposalVotesTable", payload.old.proposal_id] 
             });
