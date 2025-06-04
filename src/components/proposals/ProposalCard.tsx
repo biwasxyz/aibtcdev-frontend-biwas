@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { Clock, User, BarChart3, CheckCircle, XCircle, AlertCircle, Building2, Eye, EyeOff, ExternalLink } from "lucide-react";
+import { Clock, User, BarChart3, CheckCircle, XCircle, AlertCircle, Building2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useVotingStatus } from "./TimeStatus";
 import type { Proposal, ProposalWithDAO } from "@/types/supabase";
@@ -162,6 +162,7 @@ export default function ProposalCard({
             href={getExplorerLink("address", proposal.creator)}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="hover:text-foreground transition-colors duration-300 truncate"
           >
             {truncateString(proposal.creator, 4, 4)}
