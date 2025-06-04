@@ -121,9 +121,9 @@ export default function ProposalCard({
             </div>
           </div>
           
-          {proposal.content && (
+          {proposal.summary && (
             <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
-              {proposal.content}
+              {proposal.summary}
             </p>
           )}
         </div>

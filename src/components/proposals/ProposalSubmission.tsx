@@ -534,7 +534,7 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
         setShowResultDialog(open);
         if (!open) setTxStatusView("initial");
       }}>
-        <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-auto">
+        <DialogContent className="sm:max-w-2xl">
           {apiResponse?.success ? (
             <>
               {(() => {
@@ -543,71 +543,91 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                 return (
                   <>
                     {txStatusView === "initial" && (
-                      <>
-                        <DialogHeader>
-                          <DialogTitle className="text-xl flex items-center gap-2">
-                            <Check className="w-6 h-6" />
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                          <Loader />
+                        </div>
+                        <DialogHeader className="text-center">
+                          <DialogTitle className="text-2xl font-bold mb-2">
                             Proposal Submitted
                           </DialogTitle>
-                          <DialogDescription className="text-base">
-                            Your DAO proposal has been submitted. Waiting for blockchain confirmation...
+                          <DialogDescription className="text-base text-muted-foreground">
+                            Your proposal is being processed on the blockchain. This may take a few minutes.
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="mt-4 space-y-4">
-                          {parsed?.data?.link && (
-                            <div className="flex">
-                              <Button asChild>
-                                <a
-                                  href={parsed.data.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-2"
-                                >
-                                  <ExternalLink className="w-4 h-4" />
-                                  View on Explorer
-                                </a>
-                              </Button>
-                            </div>
-                          )}
+                        
+                        <div className="mt-8 space-y-4">
                           {parsed?.data?.txid && (
-                            <div className="border rounded-lg p-4 bg-muted">
-                              <h4 className="font-semibold mb-2">Transaction Monitoring</h4>
-                              <p className="text-sm mb-2">Transaction ID: <code className="px-1 py-0.5 rounded">{parsed.data.txid}</code></p>
-                              <div className="flex items-center gap-2 text-sm">
-                                <Loader />
-                                <span>Waiting for transaction confirmation via WebSocket...</span>
+                            <div className="bg-background/50 border border-border/50 rounded-xl p-4">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground">Transaction Status</span>
+                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                                  Processing
+                                </span>
                               </div>
                             </div>
                           )}
+                          
+                          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            {parsed?.data?.link && (
+                              <Button variant="outline" asChild>
+                                <a
+                                  href={parsed.data.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2"
+                                >
+                                  <ExternalLink className="w-4 h-4" />
+                                  View on Explorer
+                                </a>
+                              </Button>
+                            )}
+                            <Button
+                              onClick={() => {
+                                setShowResultDialog(false);
+                                setTxStatusView("initial");
+                              }}
+                            >
+                              Close
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex justify-end mt-6">
-                          <Button
-                            variant="default"
-                            onClick={() => {
-                              setShowResultDialog(false);
-                              setTxStatusView("initial");
-                            }}
-                          >
-                            Close
-                          </Button>
-                        </div>
-                      </>
+                      </div>
                     )}
+                    
                     {txStatusView === "confirmed-success" && (
-                      <>
-                        <DialogHeader>
-                          <DialogTitle className="text-xl flex items-center gap-2">
-                            <Check className="w-6 h-6 text-green-700" />
-                            Proposal Confirmed on Blockchain
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                          <Check className="w-8 h-8 text-primary" />
+                        </div>
+                        <DialogHeader className="text-center">
+                          <DialogTitle className="text-2xl font-bold mb-2">
+                            Proposal Confirmed
                           </DialogTitle>
-                          <DialogDescription className="text-base">
-                            Your proposal was successfully confirmed on-chain.
+                          <DialogDescription className="text-base text-muted-foreground">
+                            Your proposal has been successfully submitted to the DAO and is now live for voting.
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="mt-4 space-y-4">
-                          {parsed?.data?.link && (
-                            <div className="flex">
-                              <Button asChild>
+                        
+                        <div className="mt-8 space-y-4">
+                          <div className="bg-background/50 border border-border/50 rounded-xl p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-sm text-muted-foreground">Transaction Status</span>
+                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                                Confirmed
+                              </span>
+                            </div>
+                            {websocketMessage?.block_height && (
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">Block Height</span>
+                                <span className="font-mono">{websocketMessage.block_height.toLocaleString()}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            {parsed?.data?.link && (
+                              <Button variant="outline" asChild>
                                 <a
                                   href={parsed.data.link}
                                   target="_blank"
@@ -618,82 +638,67 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                                   View on Explorer
                                 </a>
                               </Button>
-                            </div>
-                          )}
-                          {websocketMessage && (
-                            <div className="border rounded-lg p-4">
-                              <h4 className="font-semibold mb-2 text-green-800">✅ Transaction Confirmed</h4>
-                              <div className="text-sm mb-2">
-                                <span className="font-medium">Status:</span>{" "}
-                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  {websocketMessage.tx_status?.toUpperCase()}
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                                {websocketMessage.tx_id && (
-                                  <div>
-                                    <span className="font-medium">Transaction ID:</span>
-                                    <p className="font-mono text-xs mt-1 break-all">{websocketMessage.tx_id}</p>
-                                  </div>
-                                )}
-                                {websocketMessage.block_height && (
-                                  <div>
-                                    <span className="font-medium">Block Height:</span>
-                                    <p className="mt-1">{websocketMessage.block_height.toLocaleString()}</p>
-                                  </div>
-                                )}
-                                {websocketMessage.block_time_iso && (
-                                  <div>
-                                    <span className="font-medium">Block Time:</span>
-                                    <p className="mt-1">{new Date(websocketMessage.block_time_iso).toLocaleString()}</p>
-                                  </div>
-                                )}
-                              </div>
-                              {websocketMessage.tx_result && (
-                                <div className="mt-3">
-                                  <span className="font-medium">Result:</span>
-                                  <p className="font-mono mt-1">{websocketMessage.tx_result.repr || websocketMessage.tx_result.hex}</p>
-                                </div>
-                              )}
-                              <details className="mt-3">
-                                <summary className="cursor-pointer hover:underline text-sm text-gray-600">
-                                  View raw WebSocket data
-                                </summary>
-                                <pre className="whitespace-pre-wrap text-xs p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
-                                  {JSON.stringify(websocketMessage, null, 2)}
-                                </pre>
-                              </details>
-                            </div>
-                          )}
+                            )}
+                            <Button
+                              onClick={() => {
+                                setShowResultDialog(false);
+                                setTxStatusView("initial");
+                              }}
+                            >
+                              Close
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex justify-end mt-6">
-                          <Button
-                            variant="default"
-                            onClick={() => {
-                              setShowResultDialog(false);
-                              setTxStatusView("initial");
-                            }}
-                          >
-                            Close
-                          </Button>
-                        </div>
-                      </>
+                      </div>
                     )}
+                    
                     {txStatusView === "confirmed-failure" && (
-                      <>
-                        <DialogHeader>
-                          <DialogTitle className="text-xl flex items-center gap-2">
-                            <AlertCircle className="w-6 h-6 text-red-700" />
-                            Proposal Failed on Blockchain
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-6">
+                          <AlertCircle className="w-8 h-8 text-secondary" />
+                        </div>
+                        <DialogHeader className="text-center">
+                          <DialogTitle className="text-2xl font-bold mb-2">
+                            Proposal Failed
                           </DialogTitle>
-                          <DialogDescription className="text-base">
-                            The proposal transaction failed on-chain.
+                          <DialogDescription className="text-base text-muted-foreground">
+                            The proposal transaction could not be completed. Please try again.
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="mt-4 space-y-4">
-                          {parsed?.data?.link && (
-                            <div className="flex">
-                              <Button asChild>
+                        
+                        <div className="mt-8 space-y-4">
+                          <div className="bg-background/50 border border-border/50 rounded-xl p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <span className="text-sm text-muted-foreground">Transaction Status</span>
+                              <span className="px-3 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary border border-secondary/20">
+                                Failed
+                              </span>
+                            </div>
+                            {websocketMessage?.tx_result && (
+                              <div className="text-sm">
+                                <span className="text-muted-foreground">Reason: </span>
+                                <span className="font-medium">
+                                  {(() => {
+                                    const raw = websocketMessage.tx_result.repr || websocketMessage.tx_result.hex;
+                                    const match = raw.match(/u?(\d{4,})/);
+                                    if (match) {
+                                      const code = parseInt(match[1], 10);
+                                      const description = errorCodeMap[code]?.description;
+                                      return description || "Transaction failed";
+                                    }
+                                    return "Transaction failed";
+                                  })()}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                            <Button variant="outline" onClick={handleRetry}>
+                              Try Again
+                            </Button>
+                            {parsed?.data?.link && (
+                              <Button variant="outline" asChild>
                                 <a
                                   href={parsed.data.link}
                                   target="_blank"
@@ -701,80 +706,21 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                                   className="inline-flex items-center gap-2"
                                 >
                                   <ExternalLink className="w-4 h-4" />
-                                  View on Explorer
+                                  View Details
                                 </a>
                               </Button>
-                            </div>
-                          )}
-                          {websocketMessage && (
-                            <div className="border rounded-lg p-4 ">
-                              <h4 className="font-semibold mb-2 text-red-800">❌ Transaction Failed</h4>
-                              <div className="text-sm mb-2">
-                                <span className="font-medium">Status:</span>{" "}
-                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                  {websocketMessage.tx_status?.toUpperCase()}
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                                {websocketMessage.tx_id && (
-                                  <div>
-                                    <span className="font-medium">Transaction ID:</span>
-                                    <p className="font-mono text-xs mt-1 break-all">{websocketMessage.tx_id}</p>
-                                  </div>
-                                )}
-                                {websocketMessage.block_height && (
-                                  <div>
-                                    <span className="font-medium">Block Height:</span>
-                                    <p className="mt-1">{websocketMessage.block_height.toLocaleString()}</p>
-                                  </div>
-                                )}
-                                {websocketMessage.block_time_iso && (
-                                  <div>
-                                    <span className="font-medium">Block Time:</span>
-                                    <p className="mt-1">{new Date(websocketMessage.block_time_iso).toLocaleString()}</p>
-                                  </div>
-                                )}
-                              </div>
-                              {websocketMessage.tx_result && (
-                                <div className="mt-3">
-                                  <span className="font-medium">Error Details:</span>
-                                  <p className="font-mono mt-1">
-                                    {(() => {
-                                      const raw = websocketMessage.tx_result.repr || websocketMessage.tx_result.hex;
-                                      const match = raw.match(/u?(\d{4,})/);
-                                      if (match) {
-                                        const code = parseInt(match[1], 10);
-                                        const description = errorCodeMap[code]?.description;
-                                        return description ? description : raw;
-                                      }
-                                      return raw;
-                                    })()}
-                                  </p>
-                                </div>
-                              )}
-                              <details className="mt-3">
-                                <summary className="cursor-pointer hover:underline text-sm text-gray-600">
-                                  View raw WebSocket data
-                                </summary>
-                                <pre className="whitespace-pre-wrap text-xs p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
-                                  {JSON.stringify(websocketMessage, null, 2)}
-                                </pre>
-                              </details>
-                            </div>
-                          )}
+                            )}
+                            <Button
+                              onClick={() => {
+                                setShowResultDialog(false);
+                                setTxStatusView("initial");
+                              }}
+                            >
+                              Close
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex justify-end mt-6">
-                          <Button
-                            variant="default"
-                            onClick={() => {
-                              setShowResultDialog(false);
-                              setTxStatusView("initial");
-                            }}
-                          >
-                            Close
-                          </Button>
-                        </div>
-                      </>
+                      </div>
                     )}
                   </>
                 );
@@ -782,49 +728,44 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
             </>
           ) : (
             // Error state (API/network)
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-xl flex items-center gap-2">
-                  <AlertCircle className="w-6 h-6" />
-                  Proposal Submission Failed
+            <div className="text-center py-8">
+              <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-6">
+                <AlertCircle className="w-8 h-8 text-secondary" />
+              </div>
+              <DialogHeader className="text-center">
+                <DialogTitle className="text-2xl font-bold mb-2">
+                  Submission Failed
                 </DialogTitle>
-                <DialogDescription className="text-base">
-                  There was an error processing your DAO proposal.
+                <DialogDescription className="text-base text-muted-foreground">
+                  There was an error processing your proposal. Please check your connection and try again.
                 </DialogDescription>
               </DialogHeader>
-              <div className="mt-4">
-                <div className="bg-muted border rounded-lg p-4">
-                  <h4 className="font-semibold mb-2">Error Details</h4>
-                  <div className="text-sm">
-                    {apiResponse?.error || "An unknown error occurred"}
+              
+              <div className="mt-8 space-y-4">
+                {apiResponse?.error && (
+                  <div className="bg-background/50 border border-border/50 rounded-xl p-4">
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Error: </span>
+                      <span className="font-medium">{apiResponse.error}</span>
+                    </div>
                   </div>
-                  {apiResponse?.output && (
-                    <details className="mt-3">
-                      <summary className="cursor-pointer hover:underline">
-                        View full response
-                      </summary>
-                      <pre className="whitespace-pre-wrap text-xs bg-white p-3 rounded border mt-2 max-h-48 overflow-auto font-mono">
-                        {apiResponse.output}
-                      </pre>
-                    </details>
-                  )}
+                )}
+                
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button variant="outline" onClick={handleRetry}>
+                    Try Again
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowResultDialog(false);
+                      setTxStatusView("initial");
+                    }}
+                  >
+                    Close
+                  </Button>
                 </div>
               </div>
-              <div className="flex justify-end gap-2 mt-6">
-                <Button variant="outline" onClick={handleRetry}>
-                  Try Again
-                </Button>
-                <Button
-                  variant="default"
-                  onClick={() => {
-                    setShowResultDialog(false);
-                    setTxStatusView("initial");
-                  }}
-                >
-                  Close
-                </Button>
-              </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
