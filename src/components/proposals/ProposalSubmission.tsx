@@ -493,6 +493,10 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
   }
 
   const handleAIGenerate = async () => {
+    if (!accessToken) {
+      console.error("Missing access token");
+      return;
+    }
 
 
     setIsGenerating(true);
@@ -592,11 +596,11 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
       <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-l-4 border-primary rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Edit3 className="h-6 w-6 text-primary" />;
+            <Edit3 className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground">Create Proposal</h2>;
-            <p className="text-muted-foreground">Submit a new governance proposal to the DAO</p>;
+            <h2 className="text-xl font-bold text-foreground">Create Proposal</h2>
+            <p className="text-muted-foreground">Submit a new governance proposal to the DAO</p>
           </div>
         </div>
 
@@ -616,20 +620,19 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
               className="relative w-full min-h-[120px] p-4 bg-background/50 border border-border/50 rounded-xl font-mono text-foreground placeholder-muted-foreground resize-y focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200 caret-foreground"
               disabled={!hasAccessToken || isSubmitting || isGenerating || isLoadingExtensions}
             />
-            ;{/* Character count */}
+            
             {proposal.length > 0 && (
               <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
                 {proposal.length} characters
               </div>
             )}
             {/* Warning and clean button */}
-            <UnicodeIssueWarning issues={unicodeIssues} />;
+            <UnicodeIssueWarning issues={unicodeIssues} />
             {hasUnicodeIssues && (
               <div className="mt-2 flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => setProposal(cleanText)} className="text-sm">
                   Remove problematic characters
                 </Button>
-                ;
               </div>
             )}
           </div>
@@ -640,12 +643,11 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
               variant="outline"
               onClick={handleAIGenerate}
               disabled={!hasAccessToken || isSubmitting || isGenerating || isLoadingExtensions}
-              className="flex items-center gap-2 border-secondary/50 text-secondary hover:bg-secondary/10 hover:border-secondary"
+              className="flex items-center gap-2 border-secondary/50 hover:bg-secondary/10 hover:border-secondary"
             >
-              <Sparkles className={`h-4 w-4 ${isGenerating ? "animate-spin" : ""}`} />;
-              {isGenerating ? "Generating..." : "AI Assist"}
+              <Sparkles className={`h-4 w-4 ${isGenerating ? "animate-spin" : ""}`} />
+              {isGenerating ? "Generating..." : "Generate message"}
             </Button>
-            ;
             <Button
               type="submit"
               disabled={
@@ -662,7 +664,7 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
               {isSubmitting ? <Loader /> : <Send className="h-4 w-4" />}
               {isSubmitting ? "Submitting..." : "Submit Proposal"}
             </Button>
-            ;
+            
           </div>
 
           {/* Error/Status Messages */}
