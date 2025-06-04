@@ -16,7 +16,7 @@ import {
   Ban,
   Activity,
   TrendingUp,
-  Sparkles,
+  FileText,
 } from "lucide-react";
 import {
   Dialog,
@@ -35,6 +35,7 @@ import { DAOVetoProposal } from "@/components/proposals/DAOVetoProposal";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLatestChainState } from "@/queries/chain-state-queries";
+import Link from "next/link";
 
 interface VotesViewProps {
   votes: VoteType[];
@@ -73,90 +74,117 @@ const isInVetoWindow = (vote: VoteType, currentBitcoinHeight: number): boolean =
 function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: VoteCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const getStatusBadge = () => {
+    if (vote.voted === false) {
+      return (
+        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+          <Search className="h-3 w-3 mr-1" />
+          Evaluating
+        </Badge>
+      );
+    }
+
+    if (isInVetoWindow(vote, currentBitcoinHeight)) {
+      return (
+        <Badge variant="outline" className="bg-secondary/10 text-secondary border-secondary/20">
+          <Ban className="h-3 w-3 mr-1" />
+          Veto Period
+        </Badge>
+      );
+    }
+
+    return (
+      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+        <CheckCircle className="h-3 w-3 mr-1" />
+        Completed
+      </Badge>
+    );
+  };
+
+  const getVoteResult = () => {
+    if (vote.voted === false) return null;
+    
+    return (
+      <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${
+        vote.answer 
+          ? "bg-primary/10 text-primary" 
+          : "bg-secondary/10 text-secondary"
+      }`}>
+        {vote.answer ? (
+          <><ThumbsUp className="h-3 w-3" />Voted Yes</>
+        ) : (
+          <><ThumbsDown className="h-3 w-3" />Voted No</>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <Card className="group bg-card/50 backdrop-blur-sm border-border/50 hover:border-border transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
-      <CardContent className="p-4 md:p-8">
-        {/* Minimalist Header - Increased spacing */}
-        <div className="space-y-4 md:space-y-6">
-          {/* Clean Top Row with Better Visual Hierarchy */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex-shrink-0 flex items-center justify-center">
-                <Vote className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+    <Card className="hover:shadow-md transition-all duration-200 border-border/50">
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          {/* Header Row - Compact and Functional */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Vote className="h-4 w-4 text-primary" />
               </div>
-              <div className="space-y-1 min-w-0 flex-1">
-                <p className="font-medium text-foreground text-base md:text-lg truncate">{vote.dao_name}</p>
-                <p className="text-xs md:text-sm text-muted-foreground/80">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="font-medium text-sm text-foreground truncate">{vote.dao_name}</p>
+                  {getStatusBadge()}
+                </div>
+                <p className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(vote.created_at), { addSuffix: true })}
                 </p>
               </div>
             </div>
             
-            {/* Simplified Badge Design */}
-            <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-              <Badge 
-                variant="outline"
-                className={`px-2 md:px-4 py-1 md:py-2 text-xs md:text-sm font-medium border-2 ${
-                  vote.answer 
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800" 
-                    : "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800"
-                }`}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {getVoteResult()}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="p-1 h-6 w-6"
               >
-                {vote.answer ? (
-                  <><ThumbsUp className="h-2 w-2 md:h-3 md:w-3 mr-1 md:mr-2" />Yes</>
-                ) : (
-                  <><ThumbsDown className="h-2 w-2 md:h-3 md:w-3 mr-1 md:mr-2" />No</>
-                )}
-              </Badge>
-              
-              {vote.confidence !== null && (
-                <Badge 
-                  variant="secondary"
-                  className="px-2 md:px-3 py-1 text-xs font-medium bg-muted/50 hidden sm:inline-flex"
-                >
-                  {Math.round(vote.confidence * 100)}% confidence
-                </Badge>
-              )}
+                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </Button>
             </div>
           </div>
 
-          {/* Clean Proposal Title with Better Typography */}
-          <div className="py-2 md:py-4">
-            <h3 className="text-lg md:text-xl font-medium text-foreground leading-relaxed line-clamp-2" title={vote.proposal_title}>
+          {/* Proposal Title - Prominent but Concise */}
+          <div className="py-2">
+            <h3 className="text-base font-medium text-foreground leading-snug line-clamp-2" title={vote.proposal_title}>
               {vote.proposal_title}
             </h3>
           </div>
 
-          {/* Minimal Action Row */}
-          <div className="flex items-center justify-between pt-4 md:pt-6 border-t border-border/30">
-            <div className="flex items-center gap-2 md:gap-4 overflow-x-auto">
-              {vote.tx_id && (
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary h-8 md:h-9 px-2 md:px-4 flex-shrink-0">
-                  <ExternalLink className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-                  <span className="text-xs md:text-sm">Explorer</span>
+          {/* Quick Actions Row */}
+          <div className="flex items-center justify-between pt-2 border-t border-border/30">
+            <div className="flex items-center gap-2">
+              <Link href="/proposals" className="inline-flex">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary h-7 px-2 text-xs">
+                  <FileText className="h-3 w-3 mr-1" />
+                  View Proposals
                 </Button>
-              )}
+              </Link>
               
-              {vote.reasoning && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary h-8 md:h-9 px-2 md:px-4 flex-shrink-0">
-                      <span className="text-xs md:text-sm">View Reasoning</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="w-[95vw] md:w-[90vw] max-w-4xl bg-card/95 backdrop-blur-md border-border/50 max-h-[85vh] overflow-y-auto">
-                    <DialogHeader className="pb-4 md:pb-6">
-                      <DialogTitle className="text-lg md:text-xl font-medium text-foreground">Vote Reasoning</DialogTitle>
-                    </DialogHeader>
-                    <div className="prose prose-sm md:prose-base dark:prose-invert max-w-none leading-relaxed">
-                      <ReactMarkdown>{vote.reasoning}</ReactMarkdown>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+              {vote.tx_id && (
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary h-7 px-2 text-xs">
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Explorer
+                </Button>
               )}
             </div>
             
-            <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              {vote.confidence !== null && (
+                <span className="text-xs text-muted-foreground">
+                  {Math.round(vote.confidence * 100)}% confidence
+                </span>
+              )}
+              
               {vote.dao_id && vote.proposal_id && isInVetoWindow(vote, currentBitcoinHeight) && (
                 <DAOVetoProposal
                   daoId={vote.dao_id}
@@ -165,87 +193,121 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
                   variant="outline"
                 />
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="p-1 md:p-2 text-muted-foreground hover:text-foreground"
-              >
-                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              </Button>
             </div>
           </div>
 
-          {/* Expanded Details with Bento Grid Layout */}
+          {/* Expanded Details - Clean and Organized */}
           {isExpanded && (
-            <div className="pt-4 md:pt-8 space-y-4 md:space-y-6 animate-in slide-in-from-top-2 duration-300">
-              {/* Bento Grid for Vote Details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
+            <div className="pt-3 space-y-3 border-t border-border/30">
+              {/* Key Information Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {vote.amount !== null && vote.amount !== "0" && (
-                  <div className="bg-muted/30 rounded-lg md:rounded-xl p-3 md:p-4">
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 md:mb-2">Vote Amount</div>
-                    <div className="text-base md:text-lg font-medium text-foreground">{vote.amount}</div>
+                  <div className="bg-muted/50 rounded-lg p-2">
+                    <div className="text-xs text-muted-foreground mb-1">Vote Amount</div>
+                    <div className="text-sm font-medium">{vote.amount}</div>
                   </div>
                 )}
                 
-                <div className="bg-muted/30 rounded-lg md:rounded-xl p-3 md:p-4">
-                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 md:mb-2">Proposal ID</div>
-                  <div className="text-base md:text-lg font-medium text-foreground">{vote.proposal_id}</div>
+                <div className="bg-muted/50 rounded-lg p-2">
+                  <div className="text-xs text-muted-foreground mb-1">Proposal ID</div>
+                  <div className="text-sm font-medium">{vote.proposal_id}</div>
                 </div>
                 
-                <div className="bg-muted/30 rounded-lg md:rounded-xl p-3 md:p-4">
-                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 md:mb-2">Status</div>
-                  <div className="text-base md:text-lg font-medium text-foreground">
-                    {vote.voted ? "Voted" : "Evaluating"}
+                {vote.vote_start && (
+                  <div className="bg-muted/50 rounded-lg p-2">
+                    <div className="text-xs text-muted-foreground mb-1">Vote Start</div>
+                    <div className="text-sm font-medium">{safeNumberFromBigInt(vote.vote_start)}</div>
                   </div>
-                </div>
+                )}
+                
+                {vote.vote_end && (
+                  <div className="bg-muted/50 rounded-lg p-2">
+                    <div className="text-xs text-muted-foreground mb-1">Vote End</div>
+                    <div className="text-sm font-medium">{safeNumberFromBigInt(vote.vote_end)}</div>
+                  </div>
+                )}
               </div>
-
-              {/* Block Heights in Clean Grid */}
-              {(vote.vote_start || vote.vote_end || vote.exec_end) && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-                  {vote.vote_start && (
-                    <div className="text-center py-3 md:py-4 rounded-lg bg-muted/20">
-                      <div className="text-xs text-muted-foreground mb-1">Vote Start</div>
-                      <div className="text-sm font-medium text-foreground">{safeNumberFromBigInt(vote.vote_start)}</div>
+              
+              {/* Proposal Context */}
+              {vote.prompt && (
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-medium">Proposal Context</h4>
+                    <div className="flex items-center gap-1">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                            Read Full
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>Proposal Context</DialogTitle>
+                          </DialogHeader>
+                          <div className="prose prose-sm dark:prose-invert max-w-none">
+                            <ReactMarkdown>{vote.prompt}</ReactMarkdown>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(vote.prompt || "")}
+                        className="h-6 w-6 p-0"
+                      >
+                        {copiedText === vote.prompt ? (
+                          <Check className="h-3 w-3 text-primary" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                      </Button>
                     </div>
-                  )}
-                  {vote.vote_end && (
-                    <div className="text-center py-3 md:py-4 rounded-lg bg-muted/20">
-                      <div className="text-xs text-muted-foreground mb-1">Vote End</div>
-                      <div className="text-sm font-medium text-foreground">{safeNumberFromBigInt(vote.vote_end)}</div>
-                    </div>
-                  )}
-                  {vote.exec_end && (
-                    <div className="text-center py-3 md:py-4 rounded-lg bg-muted/20">
-                      <div className="text-xs text-muted-foreground mb-1">Exec End</div>
-                      <div className="text-sm font-medium text-foreground">{safeNumberFromBigInt(vote.exec_end)}</div>
-                    </div>
-                  )}
+                  </div>
+                  <div className="text-xs text-muted-foreground leading-relaxed">
+                    {(vote.prompt || "").substring(0, 200)}
+                    {(vote.prompt || "").length > 200 && "..."}
+                  </div>
                 </div>
               )}
               
-              {/* Reasoning with Improved Layout */}
+              {/* Reasoning - Compact Preview */}
               {vote.reasoning && (
-                <div className="bg-muted/20 rounded-lg md:rounded-xl p-4 md:p-6 space-y-3 md:space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium text-foreground">Reasoning</h4>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(vote.reasoning || "")}
-                      className="p-1 md:p-2"
-                    >
-                      {copiedText === (vote.reasoning || "") ? (
-                        <Check className="h-3 w-3 md:h-4 md:w-4 text-emerald-500" />
-                      ) : (
-                        <Copy className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
-                      )}
-                    </Button>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-medium">Reasoning</h4>
+                    <div className="flex items-center gap-1">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                            Read Full
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>Vote Reasoning</DialogTitle>
+                          </DialogHeader>
+                          <div className="prose prose-sm dark:prose-invert max-w-none">
+                            <ReactMarkdown>{vote.reasoning}</ReactMarkdown>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => copyToClipboard(vote.reasoning || "")}
+                        className="h-6 w-6 p-0"
+                      >
+                                               {copiedText === vote.reasoning ? (
+                         <Check className="h-3 w-3 text-primary" />
+                       ) : (
+                         <Copy className="h-3 w-3" />
+                       )}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="text-xs md:text-sm text-muted-foreground leading-relaxed">
-                    {(vote.reasoning || "").substring(0, 300)}
-                    {(vote.reasoning || "").length > 300 && "..."}
+                  <div className="text-xs text-muted-foreground leading-relaxed">
+                    {(vote.reasoning || "").substring(0, 200)}
+                    {(vote.reasoning || "").length > 200 && "..."}
                   </div>
                 </div>
               )}
@@ -257,7 +319,7 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
   );
 }
 
-function MetricsGrid({ votes }: { votes: VoteType[] }) {
+function CompactMetrics({ votes }: { votes: VoteType[] }) {
   const totalVotes = votes.length;
   const yesVotes = votes.filter((vote) => vote.answer === true).length;
   const noVotes = votes.filter((vote) => vote.answer === false).length;
@@ -265,57 +327,24 @@ function MetricsGrid({ votes }: { votes: VoteType[] }) {
   const uniqueProposals = new Set(votes.map((vote) => vote.proposal_id)).size;
 
   const metrics = [
-    { label: "Total", value: totalVotes, icon: Activity, color: "text-primary" },
-    { label: "Yes", value: yesVotes, icon: ThumbsUp, color: "text-emerald-500" },
-    { label: "No", value: noVotes, icon: ThumbsDown, color: "text-rose-500" },
-    { label: "DAOs", value: uniqueDAOs, icon: Vote, color: "text-blue-500" },
-    { label: "Proposals", value: uniqueProposals, icon: TrendingUp, color: "text-purple-500" },
+    { label: "Total", value: totalVotes, icon: Activity },
+    { label: "Yes", value: yesVotes, icon: ThumbsUp },
+    { label: "No", value: noVotes, icon: ThumbsDown },
+    { label: "DAOs", value: uniqueDAOs, icon: Vote },
+    { label: "Proposals", value: uniqueProposals, icon: TrendingUp },
   ];
 
   return (
-    <>
-      {/* Mobile: Compact Horizontal Layout */}
-      <div className="md:hidden mb-6">
-        <div className="bg-gradient-to-r from-card/60 via-card/40 to-card/20 backdrop-blur-sm border border-border/30 rounded-xl p-3">
-          <div className="flex items-center justify-between">
-            {metrics.map((metric, index) => (
-              <div key={metric.label} className="flex flex-col items-center space-y-1">
-                <div className={`w-6 h-6 rounded-lg bg-gradient-to-br ${metric.color === 'text-primary' ? 'from-primary/20 to-primary/10' : metric.color === 'text-emerald-500' ? 'from-emerald-500/20 to-emerald-500/10' : metric.color === 'text-rose-500' ? 'from-rose-500/20 to-rose-500/10' : metric.color === 'text-blue-500' ? 'from-blue-500/20 to-blue-500/10' : 'from-purple-500/20 to-purple-500/10'} border border-primary/20 flex items-center justify-center`}>
-                  <metric.icon className={`h-3 w-3 ${metric.color}`} />
-                </div>
-                <div className="text-sm font-bold text-foreground">{metric.value}</div>
-                <div className="text-xs text-muted-foreground font-medium">{metric.label}</div>
-                {index < metrics.length - 1 && (
-                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-px h-8 bg-border/30" />
-                )}
-              </div>
-            ))}
-          </div>
+    <div className="flex items-center justify-center gap-4 p-3 bg-muted/30 rounded-lg">
+      {metrics.map((metric, index) => (
+        <div key={metric.label} className="flex items-center gap-2 text-sm">
+          <metric.icon className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium">{metric.value}</span>
+          <span className="text-muted-foreground">{metric.label}</span>
+          {index < metrics.length - 1 && <div className="w-px h-4 bg-border/50 ml-2" />}
         </div>
-      </div>
-
-      {/* Desktop: Grid Layout */}
-      <div className="hidden md:grid grid-cols-5 gap-4 mb-8">
-        {metrics.map((metric) => (
-          <Card key={metric.label} className="bg-gradient-to-br from-card/60 via-card/40 to-card/20 backdrop-blur-sm border-border/30 hover:border-border/60 transition-all duration-300 group overflow-hidden relative">
-            <CardContent className="p-4 text-center">
-              {/* Card Background Pattern */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.01] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              
-              <div className="relative flex flex-col items-center space-y-2">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${metric.color === 'text-primary' ? 'from-primary/20 to-primary/10' : metric.color === 'text-emerald-500' ? 'from-emerald-500/20 to-emerald-500/10' : metric.color === 'text-rose-500' ? 'from-rose-500/20 to-rose-500/10' : metric.color === 'text-blue-500' ? 'from-blue-500/20 to-blue-500/10' : 'from-purple-500/20 to-purple-500/10'} border border-primary/20 flex items-center justify-center group-hover:scale-105 transition-transform duration-300`}>
-                  <metric.icon className={`h-5 w-5 ${metric.color}`} />
-                </div>
-                <div className="space-y-1">
-                  <div className="text-2xl font-bold text-foreground">{metric.value}</div>
-                  <div className="text-xs font-medium text-muted-foreground tracking-wide leading-tight">{metric.label}</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </>
+      ))}
+    </div>
   );
 }
 
@@ -430,159 +459,95 @@ export function VotesView({ votes }: VotesViewProps) {
     }
   };
 
-  const getEmptyStateMessage = (tab: TabType) => {
-    switch (tab) {
-      case 'evaluation':
-        return {
-          title: 'No proposals being evaluated',
-          description: 'All proposals have moved beyond the evaluation stage.',
-          action: 'Check other windows for active proposals.'
-        };
-      case 'voting':
-        return {
-          title: 'No active voting',
-          description: 'No proposals are currently open for voting.',
-          action: 'New voting opportunities will appear here.'
-        };
-      case 'veto':
-        return {
-          title: 'No veto periods active',
-          description: 'No proposals are currently in the veto window.',
-          action: 'Completed votes will enter this stage after voting ends.'
-        };
-      case 'completed':
-        return {
-          title: 'No completed proposals',
-          description: 'No proposals have finished their full lifecycle yet.',
-          action: 'Completed proposals will appear here over time.'
-        };
-      default:
-        return {
-          title: 'No votes found',
-          description: 'Your voting activity will appear here.',
-          action: 'Visit the Proposals page to start voting.'
-        };
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 relative overflow-hidden">
-      {/* Ambient Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-2 md:top-20 md:left-20 w-24 h-24 md:w-64 md:h-64 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-2 md:bottom-40 md:right-20 w-20 h-20 md:w-48 md:h-48 bg-secondary/5 rounded-full blur-3xl delay-1000" />
-        <div className="absolute top-32 right-4 md:top-60 md:right-40 w-12 h-12 md:w-32 md:h-32 bg-primary/3 rounded-full blur-2xl delay-500" />
-      </div>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+                 {/* Compact Header */}
+         <div className="flex items-center gap-3">
+           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+             <Vote className="h-5 w-5 text-primary" />
+           </div>
+           <div>
+             <h1 className="text-2xl font-bold text-foreground">Voting Dashboard</h1>
+             <p className="text-sm text-muted-foreground">
+               Track your governance participation
+               {chainState?.bitcoin_block_height && (
+                 <span className="ml-2 text-primary">• Block {chainState.bitcoin_block_height}</span>
+               )}
+             </p>
+           </div>
+         </div>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-2 md:px-8 py-8 md:py-16 overflow-hidden">
-        <div className="space-y-8 md:space-y-16">
-          {/* Enhanced Hero Header */}
-          <div className="text-center space-y-6 md:space-y-10">
-            <div className="inline-flex items-center justify-center w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-[2rem] bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/20 backdrop-blur-sm mb-6 md:mb-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-500 ease-out group">
-              <Vote className="h-8 w-8 md:h-12 md:w-12 text-primary group-hover:scale-110 transition-transform duration-300" />
-              <Sparkles className="absolute -top-1 -right-1 md:-top-2 md:-right-2 h-4 w-4 md:h-5 md:w-5 text-secondary" />
-            </div>
-            
-            <div className="space-y-4 md:space-y-6 max-w-4xl mx-auto px-2 md:px-4">
-              <h1 className="text-3xl md:text-5xl font-bold text-foreground tracking-tight leading-tight">
-                Voting Dashboard
-                <span className="block text-lg md:text-2xl font-medium text-primary mt-1 md:mt-2 tracking-wide">
-                  Governance Center
-                </span>
-              </h1>
-              <p className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
-                Track your governance participation across all 
-                <span className="text-primary font-medium"> proposal lifecycle stages</span>
-              </p>
-              {chainState?.bitcoin_block_height && (
-                <div className="inline-flex items-center gap-2 md:gap-3 px-3 md:px-6 py-2 md:py-3 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent text-primary rounded-xl md:rounded-2xl border border-primary/20 backdrop-blur-sm shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300">
-                  <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-sm" />
-                  <span className="text-xs md:text-sm font-semibold tracking-wide">
-                    Bitcoin Block {chainState.bitcoin_block_height}
-                  </span>
-                </div>
-              )}
-            </div>
+        {/* Compact Metrics */}
+        <CompactMetrics votes={filteredVotes} />
+
+        {/* Tab Navigation */}
+        <div className="flex items-center justify-center">
+          <div className="flex items-center p-1 bg-muted/50 rounded-lg">
+            {(['evaluation', 'voting', 'veto', 'completed'] as TabType[]).map((tab) => {
+              const Icon = getTabIcon(tab);
+              const isActive = activeTab === tab;
+              const tabCount = getTabCount(tab);
+              
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md transition-all text-sm ${
+                    isActive
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{getTabTitle(tab)}</span>
+                  <span className="text-xs opacity-70">({tabCount})</span>
+                </button>
+              );
+            })}
           </div>
+        </div>
 
-          {/* Simplified Tab Navigation */}
-          <div className="w-full overflow-x-auto scrollbar-hide px-2 md:px-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            <div className="flex items-center justify-center min-w-max">
-              <div className="flex items-center p-1 md:p-2 bg-muted/30 rounded-xl md:rounded-2xl backdrop-blur-sm">
-                {(['evaluation', 'voting', 'veto', 'completed'] as TabType[]).map((tab) => {
-                  const Icon = getTabIcon(tab);
-                  const isActive = activeTab === tab;
-                  const tabCount = getTabCount(tab);
-                  
-                  return (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`relative flex items-center gap-1 md:gap-3 px-2 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl transition-all duration-300 flex-shrink-0 whitespace-nowrap text-xs md:text-sm ${
-                        isActive
-                          ? "bg-background text-foreground shadow-lg"
-                          : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                      }`}
-                    >
-                      <Icon className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
-                      <span className="font-medium">{getTabTitle(tab)}</span>
-                      <span className="text-xs opacity-70 hidden lg:inline-block">({tabCount})</span>
-                      {isActive && (
-                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 md:w-6 h-0.5 md:h-1 bg-primary rounded-full" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Metrics Bento Grid */}
-          <div className="px-2 md:px-4">
-            <MetricsGrid votes={filteredVotes} />
-          </div>
-
-          {/* Content Area */}
-          <div className="space-y-6 md:space-y-8 px-2 md:px-4 lg:px-0">
-            <div className="text-center">
-              <h2 className="text-xl md:text-2xl font-semibold text-foreground mb-2">{getTabTitle(activeTab)}</h2>
-              <p className="text-sm md:text-base text-muted-foreground">
-                {filteredVotes.length > 0 
-                  ? `${filteredVotes.length} ${filteredVotes.length === 1 ? 'proposal' : 'proposals'} in this stage`
-                  : 'No proposals in this stage'
-                }
-              </p>
-            </div>
-            
-            {filteredVotes.length === 0 ? (
-              <Card className="bg-card/30 backdrop-blur-sm border-border/50">
-                <CardContent className="text-center py-16 md:py-24">
+        {/* Content */}
+        <div className="space-y-4">
+          {filteredVotes.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="text-center py-12">
+                <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
                   {(() => {
                     const Icon = getTabIcon(activeTab);
-                    const emptyState = getEmptyStateMessage(activeTab);
-                    return (
-                      <div className="space-y-4 md:space-y-6">
-                        <div className="inline-flex items-center justify-center w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl bg-muted/50">
-                          <Icon className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground/50" />
-                        </div>
-                        <div className="space-y-2 md:space-y-3">
-                          <h3 className="text-lg md:text-xl font-medium text-foreground">
-                            {emptyState.title}
-                          </h3>
-                          <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
-                            {emptyState.description}
-                          </p>
-                          <p className="text-xs md:text-sm text-muted-foreground/80">
-                            {emptyState.action}
-                          </p>
-                        </div>
-                      </div>
-                    );
+                    return <Icon className="h-6 w-6 text-muted-foreground" />;
                   })()}
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 md:gap-6">
+                </div>
+                <h3 className="text-lg font-medium text-foreground mb-2">
+                  No {getTabTitle(activeTab).toLowerCase()} found
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {activeTab === 'evaluation' && "All proposals have moved beyond evaluation."}
+                  {activeTab === 'voting' && "No proposals are currently open for voting."}
+                  {activeTab === 'veto' && "No proposals are in the veto window."}
+                  {activeTab === 'completed' && "No proposals have completed their lifecycle yet."}
+                </p>
+                <Link href="/proposals">
+                  <Button variant="outline" className="gap-2">
+                    <FileText className="h-4 w-4" />
+                    Browse Proposals
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-medium text-foreground">
+                  {getTabTitle(activeTab)} ({filteredVotes.length})
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {filteredVotes.length === 1 ? '1 proposal' : `${filteredVotes.length} proposals`} in this stage
+                </p>
+              </div>
+              
+              <div className="space-y-3">
                 {filteredVotes.map((vote) => (
                   <VoteCard
                     key={vote.id}
@@ -593,8 +558,8 @@ export function VotesView({ votes }: VotesViewProps) {
                   />
                 ))}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>

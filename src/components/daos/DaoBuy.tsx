@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 
 /* exact API envelope coming back from FastAPI */
 export interface ApiResponse {
@@ -35,7 +35,7 @@ export function TokenBuyInput({
   const [amount, setAmount] = useState(initialAmount);
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { accessToken } = useSessionStore();
+  const { accessToken } = useAuth();
 
   /* keep in sync with preset */
   useEffect(() => {

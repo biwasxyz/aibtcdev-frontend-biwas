@@ -23,8 +23,6 @@ interface ApplicationLayoutProps {
 const navigation = [
   { id: "daos", name: "DAOs", href: "/daos", icon: Boxes },
   { id: "proposals", name: "Proposals", href: "/proposals", icon: FileText },
-  // { id: "chat", name: "Chat", href: "/chat", icon: MessageSquare },
-  // { id: "agents", name: "Agents", href: "/agents", icon: Users },
   { id: "votes", name: "Votes", href: "/votes", icon: Vote },
   { id: "profile", name: "Agent", href: "/profile", icon: Users },
 ];
@@ -165,7 +163,7 @@ export default function ApplicationLayout({
         <nav className="flex-1 flex justify-center relative z-10">
           <div className="inline-flex items-center gap-2">
             {navigation.map((item, index) => {
-              const isActive = pathname === item.href;
+              const isActive = pathname.startsWith(item.href);
               return (
                 <Link
                   key={item.id}
@@ -272,7 +270,7 @@ export default function ApplicationLayout({
             <nav className="flex-1 px-6 pb-6 relative z-10">
               <div className="space-y-3">
                 {navigation.map((item, index) => {
-                  const isActive = pathname === item.href;
+                  const isActive = pathname.startsWith(item.href);
                   return (
                     <Link
                       key={item.id}

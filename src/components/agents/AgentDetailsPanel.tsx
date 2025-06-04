@@ -6,7 +6,7 @@ import type { Agent } from "@/types/supabase";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useWalletStore } from "@/store/wallet";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { truncateAddress } from "@/helpers/format-utils";
 import { useClipboard } from "@/helpers/clipboard-utils";
@@ -20,7 +20,7 @@ interface AgentDetailsPanelProps {
 export function AgentDetailsPanel({ agent }: AgentDetailsPanelProps) {
   const router = useRouter();
   const { agentWallets, balances, fetchWallets } = useWalletStore();
-  const { userId } = useSessionStore();
+  const { userId } = useAuth();
   const { copiedText, copyToClipboard } = useClipboard();
   const { toast } = useToast();
 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Shield, Check, ExternalLink, AlertCircle } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
 import type { DAO } from "@/types/supabase";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDAOExtensions } from "@/queries/dao-queries";
 import {
@@ -117,7 +117,7 @@ export function DAOVetoProposal({
   const websocketRef = useRef<Awaited<ReturnType<typeof connectWebSocketClient>> | null>(null);
   const subscriptionRef = useRef<{ unsubscribe: () => Promise<void> } | null>(null);
 
-  const { accessToken, isLoading: isSessionLoading } = useSessionStore();
+  const { accessToken, isLoading: isSessionLoading } = useAuth();
 
   const { data: daoExtensions, isLoading: isLoadingExtensions } = useQuery({
     queryKey: ["daoExtensions", daoId],

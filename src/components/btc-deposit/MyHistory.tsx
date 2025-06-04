@@ -2,7 +2,7 @@
 import { ExternalLink } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
 import type { Deposit } from "@faktoryfun/styx-sdk";
-import { useSessionStore } from "@/store/session";
+import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { Card } from "@/components/ui/card";
 import {
@@ -29,7 +29,7 @@ export default function MyHistory({
   btcUsdPrice,
   isRefetching = false,
 }: MyHistoryProps) {
-  const { accessToken } = useSessionStore();
+  const { accessToken } = useAuth();
 
   // Format BTC amount for display
   const formatBtcAmount = (amount: number | null): string => {
