@@ -35,7 +35,7 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
   });
 
   // Fetch live vote data
-  const proposalId = safeStringFromBigInt(proposal.proposal_id);
+  const proposalId = proposal.id
 
   const { data: individualVotes } = useQuery({
     queryKey: ["proposalVotes", proposalId],
