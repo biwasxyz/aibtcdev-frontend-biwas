@@ -107,7 +107,8 @@ export default function ProposalCard({
   };
 
   return (
-    <div className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-border/60 transition-all duration-300 group overflow-hidden">
+    <Link href={`/proposals/${proposal.id}`} className="block group cursor-pointer">
+      <div className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-border/60 transition-all duration-300 group overflow-hidden">
       {/* Header */}
       <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
         <div className="flex-1 min-w-0">
@@ -143,16 +144,7 @@ export default function ProposalCard({
               <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             )}
           </Button>
-          <Link href={`/proposals/${proposal.id}`}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300"
-              title="View details"
-            >
-              <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            </Button>
-          </Link>
+          {/* ExternalLink button removed since the whole card is now clickable */}
         </div>
       </div>
 
@@ -246,6 +238,7 @@ export default function ProposalCard({
            />
          </div>
        )}
-    </div>
+      </div>
+    </Link>
   );
 } 
