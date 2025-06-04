@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { CheckCircle2, XCircle, Clock, Info, Users, Target, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { safeNumberFromBigInt, safeStringFromBigInt } from "@/helpers/proposal-utils";
+import { safeNumberFromBigInt } from "@/helpers/proposal-utils";
 import type { Proposal, ProposalWithDAO } from "@/types/supabase";
 import { useVotingStatus } from "./TimeStatus";
 
