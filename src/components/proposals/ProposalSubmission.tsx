@@ -491,7 +491,7 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
               className="flex items-center gap-2 border-secondary/50 text-secondary hover:bg-secondary/10 hover:border-secondary"
             >
               <Sparkles className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-              {isGenerating ? 'Generating...' : 'AI Assist'}
+              {isGenerating ? 'Generating...' : 'Generate Message'}
             </Button>
             {hasAnyIssues && (
               <Button
