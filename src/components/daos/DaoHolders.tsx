@@ -100,20 +100,20 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
           </div>
 
           <div className="rounded-md border overflow-x-auto">
-            <Table className="min-w-full">
+            <Table className="min-w-full table-fixed">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50px]">Rank</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead className="text-right">Balance</TableHead>
-                  <TableHead className="text-right">Percentage</TableHead>
+                  <TableHead className="w-[50px] px-2 sm:px-4">Rank</TableHead>
+                  <TableHead className="px-2 sm:px-4">Address</TableHead>
+                  <TableHead className="text-right px-2 sm:px-4">Balance</TableHead>
+                  <TableHead className="text-right px-2 sm:px-4">Percentage</TableHead>
                   {holders[0]?.value_usd && (
-                    <TableHead className="text-right hidden md:table-cell">
+                    <TableHead className="text-right hidden md:table-cell px-2 sm:px-4">
                       Value (USD)
                     </TableHead>
                   )}
                   {holders[0]?.last_transaction && (
-                    <TableHead className="hidden lg:table-cell">
+                    <TableHead className="hidden lg:table-cell px-2 sm:px-4">
                       Last Transaction
                     </TableHead>
                   )}
@@ -122,24 +122,24 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
               <TableBody>
                 {sortedHolders.map((holder, index) => (
                   <TableRow key={holder.address}>
-                    <TableCell className="font-medium">{index + 1}</TableCell>
-                    <TableCell className="max-w-[120px] sm:max-w-[200px] truncate">
-                      <code className="text-xs px-1.5 py-0.5 rounded">
+                    <TableCell className="font-medium px-2 sm:px-4">{index + 1}</TableCell>
+                    <TableCell className="break-all whitespace-normal px-2 sm:px-4">
+                      <code className="text-xs break-all px-1.5 py-0.5 rounded">
                         {holder.address}
                       </code>
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right tabular-nums px-2 sm:px-4">
                       <TokenBalance
                         value={holder.balance}
                         symbol={tokenSymbol}
                         variant="rounded"
                       />
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className="text-right tabular-nums px-2 sm:px-4">
                       {holder.percentage.toFixed(2)}%
                     </TableCell>
                     {holders[0]?.value_usd && (
-                      <TableCell className="text-right tabular-nums hidden md:table-cell">
+                      <TableCell className="text-right tabular-nums hidden md:table-cell px-2 sm:px-4">
                         $
                         {Number.parseFloat(
                           holder.value_usd || "0",
@@ -147,7 +147,7 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
                       </TableCell>
                     )}
                     {holders[0]?.last_transaction && (
-                      <TableCell className="hidden lg:table-cell">
+                      <TableCell className="hidden lg:table-cell break-all px-2 sm:px-4">
                         {holder.last_transaction}
                       </TableCell>
                     )}
