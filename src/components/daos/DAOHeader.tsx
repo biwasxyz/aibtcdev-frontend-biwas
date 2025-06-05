@@ -122,8 +122,8 @@ export function DAOHeader({
             </div>
           </div>
 
-          {/* Compact Metrics - Right Side */}
-          <div className="flex flex-wrap gap-4 lg:gap-6">
+            {/* Compact Metrics - Right Side */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 lg:gap-6">
             <div className="text-center">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                 <CoinIcon className="h-3 w-3" />
