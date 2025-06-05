@@ -3,6 +3,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"; // Assuming this is the correct path for your table components
 import type { Extension } from "@/types/supabase";
 import CopyButton from "@/components/proposals/CopyButton";
 
@@ -10,28 +18,10 @@ interface DAOExtensionsProps {
   extensions: Extension[];
 }
 
-function truncateString(str: string): string {
-  if (!str || str.length <= 11) return str;
-  return `${str.slice(0, 5)}...${str.slice(-30)}`;
-}
-
 // Function to format extension type for display
 function formatExtensionType(type: string): string {
   // Replace hyphens with spaces
   return type.replace(/-/g, " ");
-}
-
-// Function to format extension type for mobile display
-function formatExtensionTypeMobile(type: string): string {
-  // Replace hyphens with spaces and limit length
-  const formattedType = type.replace(/-/g, " ");
-
-  // If type is too long, truncate it for mobile displays
-  if (formattedType.length > 15) {
-    return formattedType.slice(0, 15) + "...";
-  }
-
-  return formattedType;
 }
 
 const getStatusColor = (status: Extension["status"]) => {
@@ -116,71 +106,76 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
             />
           </div>
 
-          <div className="space-y-4">
-            {filteredExtensions.map((extension) => (
-              <div
-                key={extension.id}
-                className="group relative rounded-lg border bg-background/50 backdrop-blur-sm p-4 transition-all hover:bg-background/80"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-3 mb-2">
-                      <h3 className="text-base font-medium capitalize break-all sm:break-normal">
-                        {/* Show truncated on mobile, full on desktop */}
-                        <span className="sm:hidden">
-                          {formatExtensionTypeMobile(extension.type)}
-                        </span>
-                        <span className="hidden sm:inline">
-                          {formatExtensionType(extension.type)}
-                        </span>
-                      </h3>
-                      <Badge
-                        variant="secondary"
-                        className={`${getStatusColor(
-                          extension.status,
-                        )} border capitalize shrink-0`}
-                      >
-                        {extension.status}
-                      </Badge>
-                    </div>
-                    {extension.contract_principal && (
-                      <div className="flex items-center gap-2 mb-2">
-                        <code className="text-xs bg-muted px-2 py-1 rounded overflow-hidden text-ellipsis">
-                          <span className="sm:hidden">
-                            {truncateString(extension.contract_principal)}
-                          </span>
-                          <span className="hidden sm:inline">
-                            {extension.contract_principal}
-                          </span>
-                        </code>
-                      </div>
-                    )}
-                    {extension.tx_id && (
-                      <div className="flex items-center gap-1 mb-2">
-                        <a
-                          href={getExplorerUrl(extension.tx_id)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors break-all"
+          {filteredExtensions.length > 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Contract Principal</TableHead>
+                    <TableHead>Transaction ID</TableHead>
+                    <TableHead className="text-right">Created At</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredExtensions.map((extension) => (
+                    <TableRow key={extension.id}>
+                      <TableCell className="font-medium capitalize">
+                        {formatExtensionType(extension.type)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="secondary"
+                          className={`${getStatusColor(
+                            extension.status,
+                          )} border capitalize shrink-0`}
                         >
-                          <span className="sm:hidden">
-                            TX: {truncateString(extension.tx_id)}
-                          </span>
-                          <span className="hidden sm:inline">
-                            TX: {extension.tx_id}
-                          </span>
-                        </a>
-                        <CopyButton text={extension.tx_id} />
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-xs text-muted-foreground whitespace-nowrap mt-2 sm:mt-0">
-                    {new Date(extension.created_at).toLocaleDateString()}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                          {extension.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {extension.contract_principal && (
+                          <div className="flex items-center gap-2">
+                            <code className="text-xs bg-muted px-2 py-1 rounded text-ellipsis overflow-hidden whitespace-nowrap max-w-[200px] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg">
+                              {extension.contract_principal}
+                            </code>
+                            <CopyButton text={extension.contract_principal} />
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {extension.tx_id && (
+                          <div className="flex items-center gap-1">
+                            <a
+                              href={getExplorerUrl(extension.tx_id)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-muted-foreground hover:text-primary transition-colors break-all hover:underline"
+                            >
+                              <span className="truncate max-w-[150px] sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg inline-block">
+                                {extension.tx_id}
+                              </span>
+                            </a>
+                            <CopyButton text={extension.tx_id} />
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {new Date(extension.created_at).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-zinc-400">
+                No extensions found for the selected status.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
