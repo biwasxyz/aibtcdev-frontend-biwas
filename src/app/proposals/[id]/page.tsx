@@ -117,10 +117,10 @@ export default function ProposalDetailsPage() {
             <div className="flex items-center gap-4 mb-3">
               <div className="w-12 h-12 rounded-full bg-muted flex-shrink-0" />
               <div>
-                <h1 className="text-2xl font-bold text-foreground mb-2">
+                <h1 className="text-2xl font-bold text-foreground mb-2 break-words">
                   {proposal.title}
                 </h1>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                   {proposal.daos?.name && (
                     <>
                       <Link
