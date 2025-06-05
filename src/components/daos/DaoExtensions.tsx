@@ -45,9 +45,8 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Type</TableHead>
-                    <TableHead>Created At</TableHead>
+                    <TableHead>Subtype</TableHead>
                     <TableHead>Contract Principal</TableHead>
-                    <TableHead>TXID</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -57,25 +56,23 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                         {formatExtensionType(extension.type)}
                       </TableCell>
                       <TableCell className="text-xs">
-                        {new Date(extension.created_at).toLocaleDateString()}
+                        {extension.subtype}
                       </TableCell>
                       <TableCell>
-                        {extension.contract_principal && (
-                          <span className="text-xs">
-                            {extension.contract_principal}
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {extension.tx_id && (
+                        {extension.contract_principal && extension.tx_id && (
                           <a
                             href={getExplorerUrl(extension.tx_id)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-xs text-muted-foreground hover:text-primary transition-colors hover:underline"
                           >
-                            {extension.tx_id}
+                            {extension.contract_principal}
                           </a>
+                        )}
+                        {!extension.tx_id && extension.contract_principal && (
+                          <span className="text-xs">
+                            {extension.contract_principal}
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>
