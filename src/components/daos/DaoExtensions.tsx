@@ -45,6 +45,7 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Type</TableHead>
+                    <TableHead>Created At</TableHead>
                     <TableHead>Contract Principal</TableHead>
                     <TableHead>TXID</TableHead>
                   </TableRow>
@@ -54,6 +55,9 @@ export default function DAOExtensions({ extensions }: DAOExtensionsProps) {
                     <TableRow key={extension.id}>
                       <TableCell className="font-medium capitalize">
                         {formatExtensionType(extension.type)}
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {new Date(extension.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
                         {extension.contract_principal && (
