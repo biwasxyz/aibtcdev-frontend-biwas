@@ -80,7 +80,7 @@ export default function ProposalDetailsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto px-4 sm:px-6 py-6">
         <div className="h-full flex items-center justify-center text-base text-muted-foreground">
           Loading proposal...
         </div>
@@ -90,7 +90,7 @@ export default function ProposalDetailsPage() {
 
   if (error || !proposal) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto px-4 sm:px-6 py-6">
         <div className="h-full flex items-center justify-center text-base text-muted-foreground">
           {error || "Proposal not found"}
         </div>
@@ -99,7 +99,7 @@ export default function ProposalDetailsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto px-4 sm:px-6 py-6 max-w-4xl">
       {/* Header Section */}
       <div className="mb-8">
         <Button
@@ -112,15 +112,15 @@ export default function ProposalDetailsPage() {
           Back
         </Button>
 
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-start justify-between gap-4 mb-6">
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-3">
               <div className="w-12 h-12 rounded-full bg-muted flex-shrink-0" />
               <div>
-                <h1 className="text-2xl font-bold text-foreground mb-2">
+                <h1 className="text-2xl font-bold text-foreground mb-2 break-words">
                   {proposal.title}
                 </h1>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                   {proposal.daos?.name && (
                     <>
                       <Link
@@ -150,7 +150,7 @@ export default function ProposalDetailsPage() {
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {getStatusBadge()}
           </div>
         </div>

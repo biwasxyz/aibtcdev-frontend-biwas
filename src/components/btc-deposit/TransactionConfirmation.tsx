@@ -786,7 +786,7 @@ export default function TransactionConfirmation({
 
           {/* Transaction details */}
           <div className="bg-zinc-900 p-4 rounded-md">
-            <div className="grid grid-cols-3 gap-x-2 gap-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-3">
               <div className="text-xs font-medium text-zinc-300">Amount:</div>
               <div className="col-span-2 relative">
                 <div className="bg-zinc-800 p-2 rounded-md font-mono text-xs break-all whitespace-normal leading-tight">
@@ -843,7 +843,7 @@ export default function TransactionConfirmation({
           <div className="bg-zinc-900 p-4 rounded-md">
             <p className="text-sm mb-3 font-medium">Select priority</p>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <Card
                 className={cn(
                   "rounded-lg overflow-hidden border border-zinc-700 hover:border-primary cursor-pointer",

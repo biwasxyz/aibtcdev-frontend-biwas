@@ -161,8 +161,8 @@ export default function AllDeposits({
 
       {/* Stats summary box */}
       {!isLoading && hasData && (
-        <Card className="bg-card border-border/30 p-4 mb-4">
-          <div className="grid grid-cols-3 gap-4">
+          <Card className="bg-card border-border/30 p-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Total Deposits</p>
               <p className="text-xl font-bold text-primary">

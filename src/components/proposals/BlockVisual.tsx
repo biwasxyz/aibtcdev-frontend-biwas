@@ -36,7 +36,7 @@ const BlockVisual = ({ value, type }: BlockVisualProps) => {
         >
           {type === "bitcoin" ? "BTC" : "STX"}
         </Badge>
-        <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-xs">
+        <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-xs break-all">
           {value}
         </code>
         <Tooltip>

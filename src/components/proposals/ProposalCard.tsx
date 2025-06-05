@@ -110,7 +110,7 @@ export default function ProposalCard({
     <Link href={`/proposals/${proposal.id}`} className="block group cursor-pointer">
       <div className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-border/60 transition-all duration-300 group overflow-hidden">
       {/* Header */}
-      <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 sm:mb-4 gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
             <h3 className="text-base sm:text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-200 line-clamp-2 min-w-0">

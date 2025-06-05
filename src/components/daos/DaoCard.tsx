@@ -234,7 +234,7 @@ export const DAOCard = ({
           {/* Key Metrics Grid */}
           <div className="space-y-4">
             <h4 className="text-sm font-semibold text-foreground">Key Metrics</h4>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {/* Price */}
               <div className="text-center space-y-3">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mx-auto">

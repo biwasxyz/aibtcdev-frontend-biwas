@@ -2,14 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -99,62 +92,30 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
             </Select>
           </div>
 
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">Rank</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead className="text-right">Balance</TableHead>
-                  <TableHead className="text-right">Percentage</TableHead>
-                  {holders[0]?.value_usd && (
-                    <TableHead className="text-right hidden md:table-cell">
-                      Value (USD)
-                    </TableHead>
-                  )}
-                  {holders[0]?.last_transaction && (
-                    <TableHead className="hidden lg:table-cell">
-                      Last Transaction
-                    </TableHead>
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedHolders.map((holder, index) => (
-                  <TableRow key={holder.address}>
-                    <TableCell className="font-medium">{index + 1}</TableCell>
-                    <TableCell className="max-w-[120px] sm:max-w-[200px] truncate">
-                      <code className="text-xs px-1.5 py-0.5 rounded">
-                        {holder.address}
-                      </code>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      <TokenBalance
-                        value={holder.balance}
-                        symbol={tokenSymbol}
-                        variant="rounded"
-                      />
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {holder.percentage.toFixed(2)}%
-                    </TableCell>
-                    {holders[0]?.value_usd && (
-                      <TableCell className="text-right tabular-nums hidden md:table-cell">
-                        $
-                        {Number.parseFloat(
-                          holder.value_usd || "0",
-                        ).toLocaleString()}
-                      </TableCell>
-                    )}
-                    {holders[0]?.last_transaction && (
-                      <TableCell className="hidden lg:table-cell">
-                        {holder.last_transaction}
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {sortedHolders.map((holder, index) => (
+              <Card
+                key={holder.address}
+                className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl p-4 space-y-3"
+              >
+                <CardContent className="p-0 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-muted-foreground">#{index + 1}</span>
+                    <TokenBalance
+                      value={holder.balance}
+                      symbol={tokenSymbol}
+                      variant="rounded"
+                    />
+                  </div>
+                  <code className="block break-all text-xs text-muted-foreground">
+                    {holder.address}
+                  </code>
+                  <div className="text-right text-sm font-semibold">
+                    {holder.percentage.toFixed(2)}%
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </div>

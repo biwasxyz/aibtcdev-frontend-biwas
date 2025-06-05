@@ -198,10 +198,10 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
   const resultStatus = getResultStatus();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-auto">
       {/* Participation Progress Bar */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium text-foreground">
@@ -266,8 +266,8 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
         </div>
 
         {/* Vote breakdown */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-4 flex-wrap">
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 bg-green-500 rounded-full" />
               <span>For: <TokenBalance value={calculations.votesFor.toString()} decimals={8} variant="abbreviated" symbol={tokenSymbol} /></span>
@@ -286,7 +286,7 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
 
       {/* Approval Rate Progress Bar */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Target className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium text-foreground">
@@ -339,7 +339,7 @@ const VotingProgressChart = ({ proposal, tokenSymbol = "" }: VotingProgressChart
         </div>
 
         {/* Approval breakdown */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 bg-green-500 rounded-full" />
             <span>Approval: {calculations.approvalRate.toFixed(1)}% of votes cast</span>

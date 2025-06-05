@@ -45,7 +45,7 @@ function CompactMetrics({
   ];
 
   return (
-    <div className="flex items-center justify-center gap-4 p-3 bg-muted/30 rounded-lg">
+    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 p-3 bg-muted/30 rounded-lg">
       {metrics.map((metric, index) => (
         <div key={metric.label} className="flex items-center gap-2 text-sm">
           <metric.icon className="h-4 w-4 text-muted-foreground" />
@@ -244,7 +244,7 @@ export default function DAOs() {
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {daos.map((dao) => (
                   <DAOCard
                     key={dao.id}

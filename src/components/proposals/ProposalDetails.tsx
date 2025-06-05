@@ -105,7 +105,7 @@ const ProposalDetails = ({
     <div className={`space-y-12 ${className}`}>
       {/* On-chain Message - Top Priority */}
       {proposal.content && (
-        <div className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-border/50 shadow-lg">
+        <div className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-sm rounded-2xl p-4 sm:p-8 md:p-12 border border-border/50 shadow-lg">
           <div className="flex items-center gap-4 mb-8">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
               <FileText className="h-6 w-6 text-primary" />
@@ -120,7 +120,7 @@ const ProposalDetails = ({
       )}
 
       {/* Hero Progress Section - Full Width */}
-      <div className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-border/50 shadow-lg">
+      <div className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-sm rounded-2xl p-4 sm:p-8 md:p-12 border border-border/50 shadow-lg overflow-x-auto">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
             <TrendingUp className="h-6 w-6 text-primary" />
@@ -134,7 +134,7 @@ const ProposalDetails = ({
       </div>
 
       {/* Vote Details - Full Width */}
-      <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-8 border border-border/50 hover:border-border/80 transition-all duration-300">
+      <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-4 sm:p-8 border border-border/50 hover:border-border/80 transition-all duration-300 overflow-x-auto">
         <div className="flex items-center gap-3 mb-6">
           <Vote className="h-6 w-6 text-primary" />
           <h4 className="text-xl font-semibold text-foreground">Vote Details</h4>
@@ -143,14 +143,14 @@ const ProposalDetails = ({
       </div>
 
       {/* Blockchain Information - Compact Layout */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <div className="bg-card border border-border rounded-xl p-4 sm:p-6 md:p-8 overflow-x-auto">
         <div className="flex items-center gap-3 mb-6">
           <Blocks className="h-5 w-5 text-[#2A5CFF]" />
           <h3 className="text-lg font-semibold text-foreground">Blockchain Details</h3>
         </div>
 
         {/* Compact Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Block Information */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-[#2A5CFF] font-medium">

@@ -89,7 +89,7 @@ export function DAOLayout({
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-background/95">
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="space-y-8">
           {/* Integrated DAO Header with Navigation */}
           <DAOHeader
@@ -113,11 +113,11 @@ export function DAOLayout({
               </div>
             </div>
           ) : isMission ? (
-            <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/30 p-8">
+            <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/30 p-4 sm:p-8">
               <MissionContent description={dao.description} />
             </div>
           ) : (
-            <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/30 p-8">
+            <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/30 p-4 sm:p-8">
               {children}
             </div>
           )}
