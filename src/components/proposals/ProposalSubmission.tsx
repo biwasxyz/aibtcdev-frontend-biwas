@@ -482,7 +482,7 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
           </div>
           <UnicodeIssueWarning issues={issues} />
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-3">
             <Button
               type="button"
               variant="outline"

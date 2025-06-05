@@ -85,7 +85,7 @@ export function DAOHeader({
   return (
     <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 shadow-sm overflow-hidden hover:border-border/80 transition-all duration-300">
       {/* Main Header Content */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
           {/* DAO Info - Left Side */}
           <div className="flex items-center gap-4 flex-1">
@@ -168,7 +168,7 @@ export function DAOHeader({
       </div>
 
       {/* Integrated Navigation */}
-      <div className="border-t border-border/50 bg-muted/20 px-6 py-4">
+      <div className="border-t border-border/50 bg-muted/20 px-4 sm:px-6 py-4">
         <div className="flex flex-wrap gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;

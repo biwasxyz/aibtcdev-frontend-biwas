@@ -105,7 +105,7 @@ const ProposalDetails = ({
     <div className={`space-y-12 ${className}`}>
       {/* On-chain Message - Top Priority */}
       {proposal.content && (
-        <div className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-border/50 shadow-lg">
+        <div className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-sm rounded-2xl p-4 sm:p-8 md:p-12 border border-border/50 shadow-lg">
           <div className="flex items-center gap-4 mb-8">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
               <FileText className="h-6 w-6 text-primary" />
@@ -120,7 +120,7 @@ const ProposalDetails = ({
       )}
 
       {/* Hero Progress Section - Full Width */}
-      <div className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-border/50 shadow-lg">
+      <div className="bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-sm rounded-2xl p-4 sm:p-8 md:p-12 border border-border/50 shadow-lg">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
             <TrendingUp className="h-6 w-6 text-primary" />
@@ -134,7 +134,7 @@ const ProposalDetails = ({
       </div>
 
       {/* Vote Details - Full Width */}
-      <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-8 border border-border/50 hover:border-border/80 transition-all duration-300">
+      <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-4 sm:p-8 border border-border/50 hover:border-border/80 transition-all duration-300">
         <div className="flex items-center gap-3 mb-6">
           <Vote className="h-6 w-6 text-primary" />
           <h4 className="text-xl font-semibold text-foreground">Vote Details</h4>
