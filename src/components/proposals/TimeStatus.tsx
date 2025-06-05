@@ -259,9 +259,9 @@ const TimeStatus = ({ status, vote_start, vote_end }: TimeStatusProps) => {
       : null;
 
   return (
-    <div className="bg-zinc-800/30 rounded-md p-2 w-full">
+    <div className="bg-zinc-800/30 rounded-md p-2 w-full text-xs sm:text-sm break-words">
       {/* Header (Active/Ended status) */}
-      <div className="flex items-center justify-between gap-2 mb-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-1.5">
           <Timer className="h-3.5 w-3.5 text-muted-foreground" />
           {isActive ? (

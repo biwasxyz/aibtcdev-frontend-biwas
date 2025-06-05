@@ -82,7 +82,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
   // --- Render Votes Table ---
   return (
     <div className="overflow-x-auto relative rounded-md">
-      <Table>
+      <Table className="min-w-full">
         <TableHeader>
           <TableRow>
             <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
@@ -91,7 +91,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
             <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               Confidence
             </TableHead>
-            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
+            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium max-w-[8rem]">
               Reasoning
             </TableHead>
             <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
@@ -146,9 +146,9 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
               </TableCell>
 
               {/* Reasoning */}
-              <TableCell className="px-2 py-1.5 text-xs">
+              <TableCell className="px-2 py-1.5 text-xs break-words">
                 {vote.reasoning ? (
-                  <div className="flex items-center gap-1 max-w-xs">
+                  <div className="flex items-center gap-1 max-w-[10rem]">
                     <Dialog>
                       <DialogTrigger className="cursor-pointer text-orange-500 hover:text-orange-400 hover:underline truncate text-left">
                         {(vote.reasoning || "")

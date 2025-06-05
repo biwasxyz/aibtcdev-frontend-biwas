@@ -112,7 +112,7 @@ export default function ProposalDetailsPage() {
           Back
         </Button>
 
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-start justify-between gap-4 mb-6">
           <div className="flex-1">
             <div className="flex items-center gap-4 mb-3">
               <div className="w-12 h-12 rounded-full bg-muted flex-shrink-0" />
@@ -150,7 +150,7 @@ export default function ProposalDetailsPage() {
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {getStatusBadge()}
           </div>
         </div>
