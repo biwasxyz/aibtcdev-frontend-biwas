@@ -110,7 +110,7 @@ export function FilterSidebar({
   };
 
   return (
-    <div className={className || "w-80 flex-shrink-0"}>
+    <div className={className || "w-full lg:w-80 flex-shrink-0"}>
       <Card className="sticky top-6 bg-card border-border shadow-sm">
         <CardContent className="p-4 sm:p-6 lg:p-8">
           {title && (

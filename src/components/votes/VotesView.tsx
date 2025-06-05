@@ -344,7 +344,7 @@ function CompactMetrics({ votes }: { votes: VoteType[] }) {
   ];
 
   return (
-    <div className="flex items-center justify-center gap-4 p-3 bg-muted/30 rounded-lg">
+    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 p-3 bg-muted/30 rounded-lg">
       {metrics.map((metric, index) => (
         <div key={metric.label} className="flex items-center gap-2 text-sm">
           <metric.icon className="h-4 w-4 text-muted-foreground" />
