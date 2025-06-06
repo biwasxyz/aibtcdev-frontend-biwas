@@ -155,6 +155,12 @@ function MobileConfigCard({
                 <SelectValue placeholder="Select model" />
               </SelectTrigger>
               <SelectContent className="bg-card/95 backdrop-blur-xl border-border/40 rounded-xl shadow-xl">
+                <SelectItem value="gpt-4.1" className="text-foreground hover:bg-primary/10 rounded-lg p-2 font-medium text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-primary to-secondary" />
+                    GPT-4.1
+                  </div>
+                </SelectItem>
                 <SelectItem value="gpt-4o" className="text-foreground hover:bg-primary/10 rounded-lg p-2 font-medium text-sm">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -185,7 +191,7 @@ function MobileConfigCard({
             <div className="flex items-center gap-2 p-3 bg-muted/20 rounded-xl border border-border/20">
               <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
               <span className="text-muted-foreground font-semibold text-sm">
-                {prompt?.model || "gpt-4o"}
+                {prompt?.model || "gpt-4.1"}
               </span>
             </div>
           )}
@@ -461,7 +467,7 @@ export function AgentPromptForm() {
   const [editingData, setEditingData] = useState({
     id: "",
     prompt_text: "",
-    model: "gpt-4o",
+    model: "gpt-4.1",
     temperature: 0.1,
   });
 
@@ -477,7 +483,7 @@ export function AgentPromptForm() {
       setEditingData({
         id: existingPrompt.id,
         prompt_text: existingPrompt.prompt_text,
-        model: existingPrompt.model || "gpt-4o",
+        model: existingPrompt.model || "gpt-4.1",
         temperature: existingPrompt.temperature || 0.1,
       });
     } else {
@@ -485,7 +491,7 @@ export function AgentPromptForm() {
       setEditingData({
         id: "",
         prompt_text: "",
-        model: "gpt-4o",
+        model: "gpt-4.1",
         temperature: 0.1,
       });
     }
@@ -813,6 +819,12 @@ export function AgentPromptForm() {
                                 <SelectValue placeholder="Select model" />
                               </SelectTrigger>
                               <SelectContent className="bg-card/95 backdrop-blur-xl border-border/40 rounded-xl shadow-xl">
+                                <SelectItem value="gpt-4.1" className="text-foreground hover:bg-primary/10 rounded-lg p-2 font-medium text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-primary to-secondary" />
+                                    GPT-4.1
+                                  </div>
+                                </SelectItem>
                                 <SelectItem value="gpt-4o" className="text-foreground hover:bg-primary/10 rounded-lg p-2 font-medium text-sm">
                                   <div className="flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -843,7 +855,7 @@ export function AgentPromptForm() {
                             <div className="flex items-center gap-2">
                               <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
                               <span className="text-muted-foreground font-semibold text-sm truncate">
-                                {prompt?.model || "gpt-4o"}
+                                {prompt?.model || "gpt-4.1"}
                               </span>
                             </div>
                           )}
