@@ -3,7 +3,7 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import {
   Info,
 
@@ -344,6 +344,9 @@ export function TokenPurchaseModal({
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[600px] max-h-[85vh] h-[500px] p-0 rounded-lg overflow-hidden">
+        <DialogTitle className="sr-only">
+          {apiResponse ? "Transaction Result" : `Buy ${tokenName} Tokens`}
+        </DialogTitle>
         {body}
       </DialogContent>
     </Dialog>
