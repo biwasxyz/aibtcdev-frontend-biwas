@@ -59,14 +59,14 @@ export function FilterSidebar({
       case "search":
         return (
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 transform text-muted-foreground" />
             <Input
               placeholder={
                 filter.placeholder || `Search ${filter.label.toLowerCase()}...`
               }
               value={value as string}
               onChange={(e) => onFilterChange(filter.key, e.target.value)}
-              className="pl-10 bg-background border-border text-foreground placeholder-muted-foreground focus:border-primary transition-colors duration-150"
+              className="pl-8 h-8 text-sm bg-background border-border text-foreground placeholder-muted-foreground focus:border-primary transition-colors duration-150"
             />
           </div>
         );
@@ -77,7 +77,7 @@ export function FilterSidebar({
             value={value as string}
             onValueChange={(newValue) => onFilterChange(filter.key, newValue)}
           >
-            <SelectTrigger className="bg-background border-border text-foreground hover:bg-muted/50 transition-colors duration-150">
+            <SelectTrigger className="h-8 text-sm bg-background border-border text-foreground hover:bg-muted/50 transition-colors duration-150">
               <SelectValue
                 placeholder={
                   filter.placeholder || `Select ${filter.label.toLowerCase()}`
@@ -89,10 +89,10 @@ export function FilterSidebar({
                 <SelectItem
                   key={option.value}
                   value={option.value}
-                  className="text-foreground hover:bg-muted/50 transition-colors duration-150"
+                  className="text-sm text-foreground hover:bg-muted/50 transition-colors duration-150"
                 >
                   {option.badge ? (
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
                       {option.label}
                     </Badge>
                   ) : (
@@ -111,19 +111,21 @@ export function FilterSidebar({
 
   return (
     <div className={className || "w-full lg:w-80 flex-shrink-0"}>
-      <Card className="sticky top-6 bg-card border-border shadow-sm">
-        <CardContent className="p-4 sm:p-6 lg:p-8">
+      <Card className="sticky top-6 bg-card/95 backdrop-blur-sm border-border/50 shadow-sm">
+        <CardContent className="p-3">
           {title && (
-            <div className="flex items-center gap-3 mb-6 sm:mb-8">
-              <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-              <h3 className="text-lg sm:text-xl font-semibold text-foreground">{title}</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Filter className="w-3 h-3 text-primary" />
+              </div>
+              <h3 className="text-sm font-semibold text-foreground">{title}</h3>
             </div>
           )}
 
-          <div className="space-y-6 sm:space-y-8">
+          <div className="space-y-3">
             {filters.map((filter) => (
               <div key={filter.key}>
-                <label className="text-sm font-medium text-muted-foreground mb-2 sm:mb-3 block">
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
                   {filter.label}
                 </label>
                 {renderFilterInput(filter)}
@@ -131,17 +133,19 @@ export function FilterSidebar({
             ))}
           </div>
 
-          {/* Summary Stats Card */}
+          {/* Compact Summary Stats */}
           {summaryStats && (
-            <div className="mt-6 sm:mt-10 p-4 sm:p-6 bg-background rounded-xl border border-border shadow-sm">
-              <h4 className="font-semibold mb-3 sm:mb-4 text-foreground">Summary</h4>
-              <div className="space-y-2 sm:space-y-3">
+            <div className="mt-4 p-2.5 bg-muted/20 rounded-lg border border-border/30">
+              <h4 className="text-xs font-semibold mb-2 text-foreground">Summary</h4>
+              <div className="grid grid-cols-2 gap-2">
                 {Object.entries(summaryStats).map(([key, stat]) => (
-                  <div key={key} className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">{stat.label}:</span>
-                    <span className="font-bold text-foreground">
+                  <div key={key} className="text-center">
+                    <div className="text-xs font-bold text-foreground">
                       {stat.format ? stat.format(stat.value) : stat.value}
-                    </span>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground leading-tight">
+                      {stat.label}
+                    </div>
                   </div>
                 ))}
               </div>
