@@ -43,21 +43,21 @@ body {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
+
   /* Prevent horizontal overflow on mobile */
   .prevent-horizontal-scroll {
     overflow-x: hidden;
     max-width: 100vw;
   }
-  
+
   .tsqd-parent-container {
     --tsqd-panel-width: 430px !important;
   }
-  
+
   /* Force text truncation on very small screens */
   @media (max-width: 375px) {
     .mobile-truncate {

@@ -111,19 +111,19 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
             <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               Confidence
             </TableHead>
-            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
+            <TableHead className="hidden sm:table-cell whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               Core
             </TableHead>
-            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
+            <TableHead className="hidden sm:table-cell whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               Historical
             </TableHead>
-            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
+            <TableHead className="hidden sm:table-cell whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               Financial
             </TableHead>
-            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
+            <TableHead className="hidden sm:table-cell whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               Social
             </TableHead>
-            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
+            <TableHead className="hidden sm:table-cell whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               Final
             </TableHead>
             <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium max-w-[8rem]">
@@ -166,7 +166,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
                     <div className="w-12 h-1.5 bg-gray-700 rounded-full mr-1.5 overflow-hidden">
                       <div
                         className={`h-1.5 ${getConfidenceColor(
-                          vote.confidence,
+                          vote.confidence
                         )}`}
                         style={{ width: `${vote.confidence * 100}%` }}
                       ></div>
@@ -181,7 +181,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
               </TableCell>
 
               {/* Core Score */}
-              <TableCell className="px-2 py-1.5 text-xs text-center">
+              <TableCell className="hidden sm:table-cell px-2 py-1.5 text-xs text-center">
                 {vote.evaluation_score?.core !== undefined ? (
                   <span className="tabular-nums text-orange-500 font-medium">
                     {vote.evaluation_score.core}
@@ -192,7 +192,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
               </TableCell>
 
               {/* Historical Score */}
-              <TableCell className="px-2 py-1.5 text-xs text-center">
+              <TableCell className="hidden sm:table-cell px-2 py-1.5 text-xs text-center">
                 {vote.evaluation_score?.historical !== undefined ? (
                   <span className="tabular-nums text-orange-500 font-medium">
                     {vote.evaluation_score.historical}
@@ -203,7 +203,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
               </TableCell>
 
               {/* Financial Score */}
-              <TableCell className="px-2 py-1.5 text-xs text-center">
+              <TableCell className="hidden sm:table-cell px-2 py-1.5 text-xs text-center">
                 {vote.evaluation_score?.financial !== undefined ? (
                   <span className="tabular-nums text-orange-500 font-medium">
                     {vote.evaluation_score.financial}
@@ -214,7 +214,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
               </TableCell>
 
               {/* Social Score */}
-              <TableCell className="px-2 py-1.5 text-xs text-center">
+              <TableCell className="hidden sm:table-cell px-2 py-1.5 text-xs text-center">
                 {vote.evaluation_score?.social !== undefined ? (
                   <span className="tabular-nums text-orange-500 font-medium">
                     {vote.evaluation_score.social}
@@ -225,7 +225,7 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
               </TableCell>
 
               {/* Final Score */}
-              <TableCell className="px-2 py-1.5 text-xs text-center">
+              <TableCell className="hidden sm:table-cell px-2 py-1.5 text-xs text-center">
                 {vote.evaluation_score?.final !== undefined ? (
                   <span className="tabular-nums text-orange-500 font-medium">
                     {vote.evaluation_score.final}
@@ -253,10 +253,12 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
                         <div className="mt-3 px-1 overflow-y-auto flex-1">
                           {/* Flag Badges */}
                           {renderFlagBadges(vote.flags)}
-                          
+
                           {/* Reasoning Content */}
                           <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-li:my-1">
-                            <ReactMarkdown>{vote.reasoning || ""}</ReactMarkdown>
+                            <ReactMarkdown>
+                              {vote.reasoning || ""}
+                            </ReactMarkdown>
                           </div>
                         </div>
                       </DialogContent>
