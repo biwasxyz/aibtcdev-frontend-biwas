@@ -21,12 +21,17 @@ export function DAOBuyToken({ daoId, daoName }: DAOBuyTokenProps) {
 
   return (
     <div className="flex flex-col sm:flex-row gap-2">
-      <Button
-        variant="primary"
-        onClick={() => handleQuickBuy("20000")}
-      >
-         Buy {daoName}
-      </Button>
+      
+       <Button
+  variant="primary"
+  onClick={e => {
+    e.stopPropagation();
+    handleQuickBuy("20000");
+  }}
+>
+  Buy {daoName}
+</Button>
+     
       <TokenPurchaseModal
         daoId={daoId}
         open={isModalOpen}

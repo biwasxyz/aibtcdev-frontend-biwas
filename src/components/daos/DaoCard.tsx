@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { formatNumber } from "@/helpers/format-utils";
+import { DAOBuyToken } from "./DaoBuyToken";
 
 interface DAOCardProps {
   dao: DAO;
@@ -170,12 +172,16 @@ export const DAOCard = ({
     return tokenPrice?.holders?.toLocaleString() || "—";
   };
 
+  const router = useRouter();
   return (
-    <Link href={`/daos/${encodeURIComponent(dao.name)}`}>
+    <div
+      onClick={() => router.push(`/daos/${encodeURIComponent(dao.name)}`)}
+      className=""
+    >
       <Card className="group h-full hover:shadow-lg transition-all duration-300 bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/30 cursor-pointer hover:bg-card/70">
         <CardHeader className="pb-6">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4 flex-1 min-w-0">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-0">
+            <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
               {/* Enhanced Logo */}
               <div className="relative">
                 <div className="h-16 w-16 overflow-hidden rounded-2xl flex-shrink-0 bg-gradient-to-br from-primary/20 to-secondary/20 group-hover:scale-105 transition-transform duration-300">
@@ -216,6 +222,12 @@ export const DAOCard = ({
                 </div>
               </div>
             </div>
+            <div
+              className="min-w-0 mt-2 sm:mt-0 sm:ml-4"
+              onClick={e => e.stopPropagation()}
+            >
+              <DAOBuyToken daoId={dao.id} daoName={dao.name} />
+            </div>
           </div>
         </CardHeader>
 
@@ -234,7 +246,7 @@ export const DAOCard = ({
           {/* Key Metrics Grid */}
           <div className="space-y-4">
             <h4 className="text-sm font-semibold text-foreground">Key Metrics</h4>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-3">
               {/* Price */}
               <div className="text-center space-y-3">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mx-auto">
@@ -289,6 +301,6 @@ export const DAOCard = ({
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </div>
   );
 };
