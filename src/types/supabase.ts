@@ -126,6 +126,8 @@ export interface Proposal {
   voting_quorum: bigint;
   voting_reward: string;
   voting_threshold: bigint;
+  evaluation_score: Record<string, number>;
+  flags: string[];
 }
 
 // Enhanced Proposal type with DAO information for all proposals view

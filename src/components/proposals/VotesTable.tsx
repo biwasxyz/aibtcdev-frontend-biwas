@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import ReactMarkdown from "react-markdown";
 import CopyButton from "@/components/proposals/CopyButton";
 
@@ -79,6 +80,25 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
     return "bg-gray-500";
   };
 
+  // --- Helper function to render flag badges ---
+  const renderFlagBadges = (flags: string[] | null) => {
+    if (!flags || flags.length === 0) return null;
+
+    return (
+      <div className="flex flex-wrap gap-2 mb-4">
+        {flags.map((flag, index) => (
+          <Badge
+            key={`${flag}-${index}`}
+            variant={index % 2 === 0 ? "default" : "secondary"}
+            className="font-medium text-xs"
+          >
+            {flag}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
+
   // --- Render Votes Table ---
   return (
     <div className="overflow-x-auto relative rounded-md">
@@ -90,6 +110,21 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
             </TableHead>
             <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
               Confidence
+            </TableHead>
+            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
+              Core
+            </TableHead>
+            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
+              Historical
+            </TableHead>
+            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
+              Financial
+            </TableHead>
+            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
+              Social
+            </TableHead>
+            <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium">
+              Final
             </TableHead>
             <TableHead className="whitespace-nowrap px-2 py-1.5 text-xs text-primary font-medium max-w-[8rem]">
               Reasoning
@@ -145,6 +180,61 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
                 )}
               </TableCell>
 
+              {/* Core Score */}
+              <TableCell className="px-2 py-1.5 text-xs text-center">
+                {vote.evaluation_score?.core !== undefined ? (
+                  <span className="tabular-nums text-orange-500 font-medium">
+                    {vote.evaluation_score.core}
+                  </span>
+                ) : (
+                  <span className="text-gray-500">-</span>
+                )}
+              </TableCell>
+
+              {/* Historical Score */}
+              <TableCell className="px-2 py-1.5 text-xs text-center">
+                {vote.evaluation_score?.historical !== undefined ? (
+                  <span className="tabular-nums text-orange-500 font-medium">
+                    {vote.evaluation_score.historical}
+                  </span>
+                ) : (
+                  <span className="text-gray-500">-</span>
+                )}
+              </TableCell>
+
+              {/* Financial Score */}
+              <TableCell className="px-2 py-1.5 text-xs text-center">
+                {vote.evaluation_score?.financial !== undefined ? (
+                  <span className="tabular-nums text-orange-500 font-medium">
+                    {vote.evaluation_score.financial}
+                  </span>
+                ) : (
+                  <span className="text-gray-500">-</span>
+                )}
+              </TableCell>
+
+              {/* Social Score */}
+              <TableCell className="px-2 py-1.5 text-xs text-center">
+                {vote.evaluation_score?.social !== undefined ? (
+                  <span className="tabular-nums text-orange-500 font-medium">
+                    {vote.evaluation_score.social}
+                  </span>
+                ) : (
+                  <span className="text-gray-500">-</span>
+                )}
+              </TableCell>
+
+              {/* Final Score */}
+              <TableCell className="px-2 py-1.5 text-xs text-center">
+                {vote.evaluation_score?.final !== undefined ? (
+                  <span className="tabular-nums text-orange-500 font-medium">
+                    {vote.evaluation_score.final}
+                  </span>
+                ) : (
+                  <span className="text-gray-500">-</span>
+                )}
+              </TableCell>
+
               {/* Reasoning */}
               <TableCell className="px-2 py-1.5 text-xs break-words">
                 {vote.reasoning ? (
@@ -160,8 +250,14 @@ const VotesTable = ({ proposalId }: VotesTableProps) => {
                         <DialogHeader>
                           <DialogTitle>Vote Reasoning</DialogTitle>
                         </DialogHeader>
-                        <div className="mt-3 prose prose-sm dark:prose-invert max-w-none px-1 overflow-y-auto flex-1 prose-p:my-2 prose-li:my-1">
-                          <ReactMarkdown>{vote.reasoning || ""}</ReactMarkdown>
+                        <div className="mt-3 px-1 overflow-y-auto flex-1">
+                          {/* Flag Badges */}
+                          {renderFlagBadges(vote.flags)}
+                          
+                          {/* Reasoning Content */}
+                          <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-li:my-1">
+                            <ReactMarkdown>{vote.reasoning || ""}</ReactMarkdown>
+                          </div>
                         </div>
                       </DialogContent>
                     </Dialog>

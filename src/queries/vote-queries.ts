@@ -16,6 +16,8 @@ export interface Vote {
   prompt: string | null;
   confidence: number | null;
   voted: boolean | null;
+  evaluation_score: Record<string, number> | null;
+  flags: string[] | null;
   // Proposal timing fields for block height filtering
   vote_start: bigint | null;
   vote_end: bigint | null;
@@ -38,6 +40,8 @@ interface VoteWithRelations {
   prompt: string | null;
   confidence: number | null;
   voted: boolean | null;
+  evaluation_score: Record<string, number> | null;
+  flags: string[] | null;
   daos: { id: string; name: string } | null;
   proposals: {
     id: string;
@@ -81,6 +85,8 @@ export async function fetchVotes(): Promise<Vote[]> {
       prompt,
       confidence,
       voted,
+      evaluation_score,
+      flags,
       daos ( id, name ),
       proposals ( 
         id, 
@@ -116,6 +122,8 @@ export async function fetchVotes(): Promise<Vote[]> {
     prompt: vote.prompt,
     confidence: vote.confidence ?? null,
     voted: vote.voted,
+    evaluation_score: vote.evaluation_score ?? null,
+    flags: vote.flags ?? null,
     vote_start: vote.proposals?.vote_start || null,
     vote_end: vote.proposals?.vote_end || null,
     exec_start: vote.proposals?.exec_start || null,
@@ -155,6 +163,8 @@ export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
       prompt,
       confidence,
       voted,
+      evaluation_score,
+      flags,
       daos ( id, name ),
       proposals ( 
         id, 
@@ -198,6 +208,8 @@ export async function fetchProposalVotes(proposalId: string): Promise<Vote[]> {
     prompt: vote.prompt,
     confidence: vote.confidence ?? null,
     voted: vote.voted,
+    evaluation_score: vote.evaluation_score ?? null,
+    flags: vote.flags ?? null,
     vote_start: vote.proposals?.vote_start || null,
     vote_end: vote.proposals?.vote_end || null,
     exec_start: vote.proposals?.exec_start || null,
