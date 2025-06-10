@@ -3,16 +3,17 @@
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import DAOExtensions from "@/components/daos/DaoExtensions";
+import { MissionContent } from "@/components/daos/MissionContent";
 import { fetchDAOExtensions, fetchDAOByName } from "@/queries/dao-queries";
 import { Loader } from "@/components/reusables/Loader";
 
 export const runtime = "edge";
 
-export default function ExtensionsPage() {
+export default function AboutDAOPage() {
   const params = useParams();
   const encodedName = params.name as string;
 
-  // First, fetch the DAO by name to get its ID
+  // First, fetch the DAO by name to get its ID and description
   const { data: dao, isLoading: isLoadingDAO } = useQuery({
     queryKey: ["dao", encodedName],
     queryFn: () => fetchDAOByName(encodedName),
@@ -35,7 +36,7 @@ export default function ExtensionsPage() {
       <div className="flex justify-center items-center min-h-[400px] w-full">
         <div className="text-center space-y-4">
           <Loader />
-          <p className="text-zinc-400">Loading extensions...</p>
+          <p className="text-zinc-400">Loading DAO information...</p>
         </div>
       </div>
     );
@@ -56,14 +57,32 @@ export default function ExtensionsPage() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-6">
-      {daoExtensions && daoExtensions.length > 0 ? (
-        <DAOExtensions extensions={daoExtensions} />
-      ) : (
-        <div className="text-center py-12">
-          <p className="text-zinc-400">No extensions found for this DAO.</p>
+    <div className="max-w-[1400px] mx-auto space-y-8">
+      {/* Mission Section */}
+      <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/30 p-4 sm:p-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Mission</h2>
+          <div className="h-px bg-gradient-to-r from-border via-border/50 to-transparent"></div>
         </div>
-      )}
+        <MissionContent description={dao.description} />
+      </div>
+
+      {/* Extensions Section */}
+      <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/30 p-4 sm:p-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
+            Extensions
+          </h2>
+          <div className="h-px bg-gradient-to-r from-border via-border/50 to-transparent"></div>
+        </div>
+        {daoExtensions && daoExtensions.length > 0 ? (
+          <DAOExtensions extensions={daoExtensions} />
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-zinc-400">No extensions found for this DAO.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
