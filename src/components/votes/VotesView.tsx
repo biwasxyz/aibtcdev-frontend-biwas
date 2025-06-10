@@ -33,7 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Vote as VoteType } from "@/queries/vote-queries";
 import { DAOVetoProposal } from "@/components/proposals/DAOVetoProposal";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLatestChainState } from "@/queries/chain-state-queries";
 import Link from "next/link";
@@ -490,8 +490,8 @@ export function VotesView({ votes }: VotesViewProps) {
     ? Number.parseInt(chainState.bitcoin_block_height)
     : 0;
 
-  // Determine default tab based on available votes
-  const getDefaultTab = (): TabType => {
+  // Determine default tab based on available votes using useCallback
+  const getDefaultTab = useCallback((): TabType => {
     const evaluationCount = votes.filter((vote) => vote.voted === false).length;
     if (evaluationCount > 0) return "evaluation";
 
@@ -507,14 +507,14 @@ export function VotesView({ votes }: VotesViewProps) {
     if (votingCount > 0) return "voting";
 
     return "passed";
-  };
+  }, [votes, currentBitcoinHeight]);
 
   const [activeTab, setActiveTab] = useState<TabType>(getDefaultTab());
 
-  // Add this useEffect after the useState declaration
+  // Update activeTab when votes or currentBitcoinHeight changes
   useEffect(() => {
     setActiveTab(getDefaultTab());
-  }, [votes, currentBitcoinHeight]);
+  }, [getDefaultTab]);
 
   // Filter votes based on tab with block height logic
   const filteredVotes = useMemo(() => {
