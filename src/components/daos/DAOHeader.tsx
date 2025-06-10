@@ -6,7 +6,6 @@ import { DAOBuyToken } from "@/components/daos/DaoBuyToken";
 import {
   Activity,
   Info,
-  Blocks,
   CoinsIcon as CoinIcon,
   TrendingUp,
   Users2,

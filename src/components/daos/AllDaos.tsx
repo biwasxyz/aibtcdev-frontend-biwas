@@ -164,9 +164,7 @@ export default function DAOs() {
 
   // Calculate summary stats
   const totalDAOs = daos?.length || 0;
-  const activeDAOs =
-    daos?.filter((dao) => dao.extensions && dao.extensions.length > 0).length ||
-    0;
+
   const totalHolders =
     daos?.reduce((sum, dao) => {
       const holders =
