@@ -11,7 +11,7 @@ interface DAOProposalsProps {
 
 const DAOProposals = ({ proposals, tokenSymbol = "" }: DAOProposalsProps) => {
   const [hiddenProposals, setHiddenProposals] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
   const toggleProposalVisibility = (proposalId: string) => {
@@ -27,7 +27,7 @@ const DAOProposals = ({ proposals, tokenSymbol = "" }: DAOProposalsProps) => {
   };
 
   const visibleProposals = proposals.filter(
-    (proposal) => !hiddenProposals.has(proposal.id),
+    (proposal) => !hiddenProposals.has(proposal.id)
   );
 
   const hiddenCount = hiddenProposals.size;
@@ -46,8 +46,6 @@ const DAOProposals = ({ proposals, tokenSymbol = "" }: DAOProposalsProps) => {
         <ProposalCard
           key={proposal.id}
           proposal={proposal}
-          onToggleVisibility={toggleProposalVisibility}
-          isHidden={false}
           tokenSymbol={tokenSymbol}
         />
       ))}
@@ -65,8 +63,6 @@ const DAOProposals = ({ proposals, tokenSymbol = "" }: DAOProposalsProps) => {
                 <ProposalCard
                   key={proposal.id}
                   proposal={proposal}
-                  onToggleVisibility={toggleProposalVisibility}
-                  isHidden={true}
                   tokenSymbol={tokenSymbol}
                 />
               ) : null;
@@ -77,7 +73,5 @@ const DAOProposals = ({ proposals, tokenSymbol = "" }: DAOProposalsProps) => {
     </div>
   );
 };
-
-
 
 export default DAOProposals;
