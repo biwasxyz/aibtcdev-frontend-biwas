@@ -1,8 +1,17 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Copy, Check, User, Wallet, Coins } from "lucide-react";
+import {
+  ExternalLink,
+  Copy,
+  Check,
+  User,
+  Wallet,
+  Coins,
+  Settings,
+} from "lucide-react";
 import { getStacksAddress } from "@/lib/address";
+import { getExplorerLink } from "@/helpers/helper";
 import { useClipboard } from "@/helpers/clipboard-utils";
 import { getAddressExplorerUrl } from "@/helpers/explorer";
 import { useState, useEffect } from "react";
@@ -133,6 +142,8 @@ function AccountRow({
   icon: Icon,
   iconBg = "bg-primary/10",
   iconColor = "text-primary",
+  linkType = "address",
+  explorerId,
 }: {
   title: string;
   subtitle: string;
@@ -140,6 +151,8 @@ function AccountRow({
   icon: React.ElementType;
   iconBg?: string;
   iconColor?: string;
+  linkType?: "address" | "tx" | "contract";
+  explorerId?: string | null;
 }) {
   const { copyToClipboard, copiedText } = useClipboard();
 
@@ -187,7 +200,15 @@ function AccountRow({
         />
         <IconButton
           icon={ExternalLink}
-          href={getAddressExplorerUrl(address)}
+          href={
+            linkType === "address" || linkType === "contract"
+              ? address
+                ? getExplorerLink(linkType, address)
+                : undefined
+              : explorerId
+                ? getExplorerLink(linkType, explorerId)
+                : undefined
+          }
           size="xs"
         />
       </div>
@@ -569,16 +590,38 @@ export function ProfileView() {
                 icon={User}
                 iconBg="bg-primary/10"
                 iconColor="text-primary"
+                linkType="address"
               />
               {daoManagerWalletAddress && (
-                <AccountRow
-                  title="Agent Wallet"
-                  subtitle="Automated governance account"
-                  address={daoManagerWalletAddress}
-                  icon={Wallet}
-                  iconBg="bg-secondary/10"
-                  iconColor="text-secondary"
-                />
+                <>
+                  <AccountRow
+                    title="Agent Wallet"
+                    subtitle="Automated governance account"
+                    address={daoManagerWalletAddress}
+                    icon={Wallet}
+                    iconBg="bg-secondary/10"
+                    iconColor="text-secondary"
+                    linkType="address"
+                  />
+                  <AccountRow
+                    title="Agent Account"
+                    subtitle="Smart contract account for secure delegation"
+                    address={
+                      stacksAddress && daoManagerWalletAddress
+                        ? `.aibtc-user-agent-account-${stacksAddress.slice(0, 5)}-${stacksAddress.slice(-5)}-${daoManagerWalletAddress.slice(0, 5)}-${daoManagerWalletAddress.slice(-5)}`
+                        : null
+                    }
+                    explorerId={
+                      stacksAddress && daoManagerWalletAddress
+                        ? `.aibtc-user-agent-account-${stacksAddress.slice(0, 5)}-${stacksAddress.slice(-5)}-${daoManagerWalletAddress.slice(0, 5)}-${daoManagerWalletAddress.slice(-5)}`
+                        : null
+                    }
+                    icon={Settings}
+                    iconBg="bg-muted/20"
+                    iconColor="text-muted-foreground"
+                    linkType="tx"
+                  />
+                </>
               )}
             </div>
           )}
