@@ -264,8 +264,10 @@ export function ProposalSubmission({
         const isFinalState = isSuccess || isFailed;
 
         // Update modal state based on status
-        if (isSuccess) setTxStatusView("confirmed-success");
-        else if (isFailed) setTxStatusView("confirmed-failure");
+        if (isSuccess) {
+          setTxStatusView("confirmed-success");
+          setProposal(""); // Clear proposal only after successful confirmation
+        } else if (isFailed) setTxStatusView("confirmed-failure");
 
         if (isFinalState) {
           // Clean up subscription after receiving final update
@@ -363,9 +365,9 @@ export function ProposalSubmission({
           await connectToWebSocket(txid);
         }
 
-        // Call success callback and clear form
+        // Call success callback
         onSubmissionSuccess?.();
-        setProposal("");
+        // setProposal(""); // Do NOT clear here; will clear after confirmed-success
       }
     } catch (err) {
       // Handle network errors or other unexpected errors
