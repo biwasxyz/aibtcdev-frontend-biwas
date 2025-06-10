@@ -1,14 +1,7 @@
 "use client";
 import { useCallback, useMemo } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
-import {
-  Search,
-  Users,
-  TrendingUp,
-  Activity,
-  Coins,
-  BarChart3,
-} from "lucide-react";
+import { Search, Users, Activity, Coins, BarChart3 } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
 
 import { DAOCard } from "@/components/daos/DaoCard";
@@ -35,12 +28,10 @@ interface TokenTrade {
 
 function CompactMetrics({
   totalDAOs,
-  activeDAOs,
   totalHolders,
   totalMarketCap,
 }: {
   totalDAOs: number;
-  activeDAOs: number;
   totalHolders: number;
   totalMarketCap: number;
 }) {
@@ -209,7 +200,6 @@ export default function DAOs() {
         {/* Compact Metrics */}
         <CompactMetrics
           totalDAOs={totalDAOs}
-          activeDAOs={activeDAOs}
           totalHolders={totalHolders}
           totalMarketCap={totalMarketCap}
         />
