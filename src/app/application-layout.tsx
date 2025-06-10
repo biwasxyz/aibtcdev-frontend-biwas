@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Users, Boxes, Menu, X, FileText, Vote } from "lucide-react";
+import { Users, Boxes, Menu, X, FileText, Vote, Bitcoin } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 // import { ThreadList } from "@/components/threads/thread-list";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { NetworkIndicator } from "@/components/reusables/NetworkIndicator";
 import AuthButton from "@/components/home/AuthButton";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Footer } from "@/components/reusables/Footer";
+import { useBitcoinBlockHeight } from "@/hooks/use-btc-block";
 
 interface ApplicationLayoutProps {
   children: React.ReactNode;
@@ -36,6 +37,7 @@ export default function ApplicationLayout({
   const [hasUser, setHasUser] = React.useState(false);
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   // const [stacksAddress, setStacksAddress] = React.useState<string | null>(null);
+  const { blockHeight } = useBitcoinBlockHeight();
 
   React.useEffect(() => {
     const checkUser = async () => {
@@ -230,7 +232,11 @@ export default function ApplicationLayout({
         </nav>
 
         <div className="w-1/4 flex justify-end items-center gap-6 relative z-10">
-          <div className="transition-all duration-300 hover:scale-105">
+          <div className="text-muted-foreground flex items-center">
+            <Bitcoin className="text-primary" />
+            {blockHeight}
+          </div>
+          <div className="transition-all duration-300 hover:scale-105 flex flex-col items-end text-xs md:text-sm">
             <NetworkIndicator />
           </div>
           {hasUser ? (
@@ -352,7 +358,9 @@ export default function ApplicationLayout({
             <div className="p-6 border-t border-border/20 bg-card/30 backdrop-blur-xl relative z-10">
               <div className="space-y-4">
                 <div className="transition-transform duration-300 hover:scale-105">
-                  <NetworkIndicator />
+                  <div className="flex items-start text-xs">
+                    <NetworkIndicator />
+                  </div>
                 </div>
                 {hasUser ? (
                   <Button

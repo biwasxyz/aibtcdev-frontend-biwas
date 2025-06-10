@@ -13,7 +13,6 @@ import {
 import { getStacksAddress } from "@/lib/address";
 import { getExplorerLink } from "@/helpers/helper";
 import { useClipboard } from "@/helpers/clipboard-utils";
-import { getAddressExplorerUrl } from "@/helpers/explorer";
 import { useState, useEffect } from "react";
 import { useWalletStore } from "@/store/wallet";
 import { useAuth } from "@/hooks/useAuth";
