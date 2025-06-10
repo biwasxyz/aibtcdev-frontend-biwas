@@ -17,6 +17,7 @@ import {
   Activity,
   TrendingUp,
   FileText,
+  XCircle,
 } from "lucide-react";
 import {
   Dialog,
@@ -48,7 +49,7 @@ interface VoteCardProps {
   currentBitcoinHeight: number;
 }
 
-type TabType = 'evaluation' | 'voting' | 'veto' | 'completed';
+type TabType = "evaluation" | "voting" | "veto" | "passed" | "failed";
 
 // Helper function to safely convert bigint to number for comparison
 const safeNumberFromBigInt = (value: bigint | null): number => {
@@ -61,14 +62,32 @@ const safeNumberFromBigInt = (value: bigint | null): number => {
 };
 
 // Helper function to check if a vote is in the veto window
-const isInVetoWindow = (vote: VoteType, currentBitcoinHeight: number): boolean => {
+const isInVetoWindow = (
+  vote: VoteType,
+  currentBitcoinHeight: number
+): boolean => {
   if (vote.voted !== true) return false;
   if (!vote.vote_end || !vote.exec_start) return false;
-  
+
   const voteEnd = safeNumberFromBigInt(vote.vote_end);
   const execStart = safeNumberFromBigInt(vote.exec_start);
-  
+
   return currentBitcoinHeight > voteEnd && currentBitcoinHeight <= execStart;
+};
+
+// Helper function to check if a vote has passed or failed
+const getVoteOutcome = (
+  vote: VoteType,
+  currentBitcoinHeight: number
+): "passed" | "failed" | "pending" => {
+  if (vote.voted !== true) return "pending";
+  if (!vote.exec_end) return "pending";
+
+  const execEnd = safeNumberFromBigInt(vote.exec_end);
+  if (currentBitcoinHeight <= execEnd) return "pending";
+
+  // Determine if vote passed based on the answer
+  return vote.answer ? "passed" : "failed";
 };
 
 // Helper function to get explorer URL for transaction
@@ -78,13 +97,21 @@ const getExplorerUrl = (txId: string) => {
   return `${baseUrl}/${txId}${isTestnet ? "?chain=testnet" : ""}`;
 };
 
-function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: VoteCardProps) {
+function VoteCard({
+  vote,
+  copiedText,
+  copyToClipboard,
+  currentBitcoinHeight,
+}: VoteCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const getStatusBadge = () => {
     if (vote.voted === false) {
       return (
-        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+        <Badge
+          variant="outline"
+          className="bg-primary/10 text-primary border-primary/20"
+        >
           <Search className="h-3 w-3 mr-1" />
           Evaluating
         </Badge>
@@ -93,34 +120,71 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
 
     if (isInVetoWindow(vote, currentBitcoinHeight)) {
       return (
-        <Badge variant="outline" className="bg-secondary/10 text-secondary border-secondary/20">
+        <Badge
+          variant="outline"
+          className="bg-secondary/10 text-secondary border-secondary/20"
+        >
           <Ban className="h-3 w-3 mr-1" />
           Veto Period
         </Badge>
       );
     }
 
+    const outcome = getVoteOutcome(vote, currentBitcoinHeight);
+    if (outcome === "passed") {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
+        >
+          <CheckCircle className="h-3 w-3 mr-1" />
+          Passed
+        </Badge>
+      );
+    } else if (outcome === "failed") {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
+        >
+          <XCircle className="h-3 w-3 mr-1" />
+          Failed
+        </Badge>
+      );
+    }
+
     return (
-      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-        <CheckCircle className="h-3 w-3 mr-1" />
-        Completed
+      <Badge
+        variant="outline"
+        className="bg-primary/10 text-primary border-primary/20"
+      >
+        <Clock className="h-3 w-3 mr-1" />
+        In Progress
       </Badge>
     );
   };
 
   const getVoteResult = () => {
     if (vote.voted === false) return null;
-    
+
     return (
-      <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${
-        vote.answer 
-          ? "bg-primary/10 text-primary" 
-          : "bg-secondary/10 text-secondary"
-      }`}>
+      <div
+        className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${
+          vote.answer
+            ? "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+            : "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+        }`}
+      >
         {vote.answer ? (
-          <><ThumbsUp className="h-3 w-3" />Voted Yes</>
+          <>
+            <ThumbsUp className="h-3 w-3" />
+            Voted Yes
+          </>
         ) : (
-          <><ThumbsDown className="h-3 w-3" />Voted No</>
+          <>
+            <ThumbsDown className="h-3 w-3" />
+            Voted No
+          </>
         )}
       </div>
     );
@@ -138,15 +202,19 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <p className="font-medium text-sm text-foreground truncate">{vote.dao_name}</p>
+                  <p className="font-medium text-sm text-foreground truncate">
+                    {vote.dao_name}
+                  </p>
                   {getStatusBadge()}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(vote.created_at), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(vote.created_at), {
+                    addSuffix: true,
+                  })}
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2 flex-shrink-0">
               {getVoteResult()}
               <Button
@@ -155,14 +223,21 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="p-1 h-6 w-6"
               >
-                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
 
           {/* Proposal Title - Prominent but Concise */}
           <div className="py-2">
-            <h3 className="text-base font-medium text-foreground leading-snug line-clamp-2" title={vote.proposal_title}>
+            <h3
+              className="text-base font-medium text-foreground leading-snug line-clamp-2"
+              title={vote.proposal_title}
+            >
               {vote.proposal_title}
             </h3>
           </div>
@@ -170,38 +245,59 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
           {/* Quick Actions Row */}
           <div className="flex items-center justify-between pt-2 border-t border-border/30">
             <div className="flex items-center gap-2">
-              <Link href={`/proposals/${vote.proposal_id}`} className="inline-flex">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary h-7 px-2 text-xs">
+              <Link
+                href={`/proposals/${vote.proposal_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex"
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-primary h-7 px-2 text-xs"
+                >
                   <FileText className="h-3 w-3 mr-1" />
                   View Proposal
+                  <ExternalLink className="h-2 w-2 ml-1" />
                 </Button>
               </Link>
-              
+
               {vote.tx_id && (
-                <Link href={getExplorerUrl(vote.tx_id)} target="_blank" rel="noopener noreferrer" className="inline-flex">
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary h-7 px-2 text-xs">
+                <Link
+                  href={getExplorerUrl(vote.tx_id)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex"
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-primary h-7 px-2 text-xs"
+                  >
                     <ExternalLink className="h-3 w-3 mr-1" />
                     Explorer
                   </Button>
                 </Link>
               )}
             </div>
-            
+
             <div className="flex items-center gap-2">
               {vote.confidence !== null && (
                 <span className="text-xs text-muted-foreground">
                   {Math.round(vote.confidence * 100)}% confidence
                 </span>
               )}
-              
-              {vote.dao_id && vote.proposal_id && isInVetoWindow(vote, currentBitcoinHeight) && (
-                <DAOVetoProposal
-                  daoId={vote.dao_id}
-                  proposalId={vote.proposal_id}
-                  size="sm"
-                  variant="outline"
-                />
-              )}
+
+              {vote.dao_id &&
+                vote.proposal_id &&
+                isInVetoWindow(vote, currentBitcoinHeight) && (
+                  <DAOVetoProposal
+                    daoId={vote.dao_id}
+                    proposalId={vote.proposal_id}
+                    size="sm"
+                    variant="outline"
+                  />
+                )}
             </div>
           </div>
 
@@ -212,31 +308,43 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {vote.amount !== null && vote.amount !== "0" && (
                   <div className="bg-muted/50 rounded-lg p-2">
-                    <div className="text-xs text-muted-foreground mb-1">Vote Amount</div>
+                    <div className="text-xs text-muted-foreground mb-1">
+                      Vote Amount
+                    </div>
                     <div className="text-sm font-medium">{vote.amount}</div>
                   </div>
                 )}
-                
+
                 <div className="bg-muted/50 rounded-lg p-2">
-                  <div className="text-xs text-muted-foreground mb-1">Proposal ID</div>
+                  <div className="text-xs text-muted-foreground mb-1">
+                    Proposal ID
+                  </div>
                   <div className="text-sm font-medium">{vote.proposal_id}</div>
                 </div>
-                
+
                 {vote.vote_start && (
                   <div className="bg-muted/50 rounded-lg p-2">
-                    <div className="text-xs text-muted-foreground mb-1">Vote Start</div>
-                    <div className="text-sm font-medium">{safeNumberFromBigInt(vote.vote_start)}</div>
+                    <div className="text-xs text-muted-foreground mb-1">
+                      Vote Start
+                    </div>
+                    <div className="text-sm font-medium">
+                      {safeNumberFromBigInt(vote.vote_start)}
+                    </div>
                   </div>
                 )}
-                
+
                 {vote.vote_end && (
                   <div className="bg-muted/50 rounded-lg p-2">
-                    <div className="text-xs text-muted-foreground mb-1">Vote End</div>
-                    <div className="text-sm font-medium">{safeNumberFromBigInt(vote.vote_end)}</div>
+                    <div className="text-xs text-muted-foreground mb-1">
+                      Vote End
+                    </div>
+                    <div className="text-sm font-medium">
+                      {safeNumberFromBigInt(vote.vote_end)}
+                    </div>
                   </div>
                 )}
               </div>
-              
+
               {/* Proposal Context */}
               {vote.prompt && (
                 <div className="bg-muted/30 rounded-lg p-3">
@@ -245,7 +353,11 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
                     <div className="flex items-center gap-1">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                          >
                             Read Full
                           </Button>
                         </DialogTrigger>
@@ -278,7 +390,7 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
                   </div>
                 </div>
               )}
-              
+
               {/* Reasoning - Compact Preview */}
               {vote.reasoning && (
                 <div className="bg-muted/30 rounded-lg p-3">
@@ -287,7 +399,11 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
                     <div className="flex items-center gap-1">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                          >
                             Read Full
                           </Button>
                         </DialogTrigger>
@@ -306,11 +422,11 @@ function VoteCard({ vote, copiedText, copyToClipboard, currentBitcoinHeight }: V
                         onClick={() => copyToClipboard(vote.reasoning || "")}
                         className="h-6 w-6 p-0"
                       >
-                                               {copiedText === vote.reasoning ? (
-                         <Check className="h-3 w-3 text-primary" />
-                       ) : (
-                         <Copy className="h-3 w-3" />
-                       )}
+                        {copiedText === vote.reasoning ? (
+                          <Check className="h-3 w-3 text-primary" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -350,7 +466,9 @@ function CompactMetrics({ votes }: { votes: VoteType[] }) {
           <metric.icon className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">{metric.value}</span>
           <span className="text-muted-foreground">{metric.label}</span>
-          {index < metrics.length - 1 && <div className="w-px h-4 bg-border/50 ml-2" />}
+          {index < metrics.length - 1 && (
+            <div className="w-px h-4 bg-border/50 ml-2" />
+          )}
         </div>
       ))}
     </div>
@@ -359,58 +477,64 @@ function CompactMetrics({ votes }: { votes: VoteType[] }) {
 
 export function VotesView({ votes }: VotesViewProps) {
   const { copyToClipboard, copiedText } = useClipboard();
-  const [activeTab, setActiveTab] = useState<TabType>('evaluation');
+  const [activeTab, setActiveTab] = useState<TabType>("evaluation");
 
   // Fetch current Bitcoin block height
   const { data: chainState } = useQuery({
-    queryKey: ['latestChainState'],
+    queryKey: ["latestChainState"],
     queryFn: fetchLatestChainState,
     staleTime: 60000,
     refetchInterval: 60000,
   });
 
-  const currentBitcoinHeight = chainState?.bitcoin_block_height 
-    ? parseInt(chainState.bitcoin_block_height) 
+  const currentBitcoinHeight = chainState?.bitcoin_block_height
+    ? Number.parseInt(chainState.bitcoin_block_height)
     : 0;
 
   // Filter votes based on tab with block height logic
   const filteredVotes = useMemo(() => {
     switch (activeTab) {
-      case 'evaluation':
-        return votes.filter(vote => vote.voted === false);
-      
-      case 'voting':
-        return votes.filter(vote => {
+      case "evaluation":
+        return votes.filter((vote) => vote.voted === false);
+
+      case "voting":
+        return votes.filter((vote) => {
           if (vote.voted !== true) return false;
           if (!vote.vote_start || !vote.vote_end) return false;
-          
+
           const voteStart = safeNumberFromBigInt(vote.vote_start);
           const voteEnd = safeNumberFromBigInt(vote.vote_end);
-          
-          return currentBitcoinHeight >= voteStart && currentBitcoinHeight <= voteEnd;
+
+          return (
+            currentBitcoinHeight >= voteStart && currentBitcoinHeight <= voteEnd
+          );
         });
-      
-      case 'veto':
-        return votes.filter(vote => {
+
+      case "veto":
+        return votes.filter((vote) => {
           if (vote.voted !== true) return false;
           if (!vote.vote_end || !vote.exec_start) return false;
-          
+
           const voteEnd = safeNumberFromBigInt(vote.vote_end);
           const execStart = safeNumberFromBigInt(vote.exec_start);
-          
-          return currentBitcoinHeight > voteEnd && currentBitcoinHeight <= execStart;
+
+          return (
+            currentBitcoinHeight > voteEnd && currentBitcoinHeight <= execStart
+          );
         });
-      
-      case 'completed':
-        return votes.filter(vote => {
-          if (vote.voted !== true) return false;
-          if (!vote.exec_end) return false;
-          
-          const execEnd = safeNumberFromBigInt(vote.exec_end);
-          
-          return currentBitcoinHeight > execEnd;
+
+      case "passed":
+        return votes.filter((vote) => {
+          const outcome = getVoteOutcome(vote, currentBitcoinHeight);
+          return outcome === "passed";
         });
-      
+
+      case "failed":
+        return votes.filter((vote) => {
+          const outcome = getVoteOutcome(vote, currentBitcoinHeight);
+          return outcome === "failed";
+        });
+
       default:
         return votes;
     }
@@ -418,31 +542,36 @@ export function VotesView({ votes }: VotesViewProps) {
 
   const getTabCount = (tab: TabType): number => {
     switch (tab) {
-      case 'evaluation':
-        return votes.filter(vote => vote.voted === false).length;
-      case 'voting':
-        return votes.filter(vote => {
+      case "evaluation":
+        return votes.filter((vote) => vote.voted === false).length;
+      case "voting":
+        return votes.filter((vote) => {
           if (vote.voted !== true) return false;
           if (!vote.vote_start || !vote.vote_end) return false;
           const voteStart = safeNumberFromBigInt(vote.vote_start);
           const voteEnd = safeNumberFromBigInt(vote.vote_end);
-          return currentBitcoinHeight >= voteStart && currentBitcoinHeight <= voteEnd;
+          return (
+            currentBitcoinHeight >= voteStart && currentBitcoinHeight <= voteEnd
+          );
         }).length;
-      case 'veto':
-        return votes.filter(vote => {
+      case "veto":
+        return votes.filter((vote) => {
           if (vote.voted !== true) return false;
           if (!vote.vote_end || !vote.exec_start) return false;
           const voteEnd = safeNumberFromBigInt(vote.vote_end);
           const execStart = safeNumberFromBigInt(vote.exec_start);
-          return currentBitcoinHeight > voteEnd && currentBitcoinHeight <= execStart;
+          return (
+            currentBitcoinHeight > voteEnd && currentBitcoinHeight <= execStart
+          );
         }).length;
-      case 'completed':
-        return votes.filter(vote => {
-          if (vote.voted !== true) return false;
-          if (!vote.exec_end) return false;
-          const execEnd = safeNumberFromBigInt(vote.exec_end);
-          return currentBitcoinHeight > execEnd;
-        }).length;
+      case "passed":
+        return votes.filter(
+          (vote) => getVoteOutcome(vote, currentBitcoinHeight) === "passed"
+        ).length;
+      case "failed":
+        return votes.filter(
+          (vote) => getVoteOutcome(vote, currentBitcoinHeight) === "failed"
+        ).length;
       default:
         return votes.length;
     }
@@ -450,42 +579,60 @@ export function VotesView({ votes }: VotesViewProps) {
 
   const getTabTitle = (tab: TabType): string => {
     switch (tab) {
-      case 'evaluation': return 'Evaluation';
-      case 'voting': return 'Active Voting';
-      case 'veto': return 'Veto Period';
-      case 'completed': return 'Completed';
-      default: return 'All Votes';
+      case "evaluation":
+        return "Evaluation";
+      case "voting":
+        return "Active Voting";
+      case "veto":
+        return "Veto Period";
+      case "passed":
+        return "Passed";
+      case "failed":
+        return "Failed";
+      default:
+        return "All Votes";
     }
   };
 
   const getTabIcon = (tab: TabType) => {
     switch (tab) {
-      case 'evaluation': return Search;
-      case 'voting': return Clock;
-      case 'veto': return Ban;
-      case 'completed': return CheckCircle;
-      default: return Vote;
+      case "evaluation":
+        return Search;
+      case "voting":
+        return Clock;
+      case "veto":
+        return Ban;
+      case "passed":
+        return CheckCircle;
+      case "failed":
+        return XCircle;
+      default:
+        return Vote;
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-                 {/* Compact Header */}
-         <div className="flex items-center gap-3">
-           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-             <Vote className="h-5 w-5 text-primary" />
-           </div>
-           <div>
-             <h1 className="text-2xl font-bold text-foreground">Voting Dashboard</h1>
-             <p className="text-sm text-muted-foreground">
-               Track your governance participation
-               {chainState?.bitcoin_block_height && (
-                 <span className="ml-2 text-primary">• Block {chainState.bitcoin_block_height}</span>
-               )}
-             </p>
-           </div>
-         </div>
+        {/* Compact Header */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Vote className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              Voting Dashboard
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Track your governance participation
+              {chainState?.bitcoin_block_height && (
+                <span className="ml-2 text-primary">
+                  • Block {chainState.bitcoin_block_height}
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
 
         {/* Compact Metrics */}
         <CompactMetrics votes={filteredVotes} />
@@ -493,11 +640,13 @@ export function VotesView({ votes }: VotesViewProps) {
         {/* Tab Navigation */}
         <div className="flex items-center justify-center">
           <div className="flex items-center p-1 bg-muted/50 rounded-lg">
-            {(['evaluation', 'voting', 'veto', 'completed'] as TabType[]).map((tab) => {
+            {(
+              ["evaluation", "voting", "veto", "passed", "failed"] as TabType[]
+            ).map((tab) => {
               const Icon = getTabIcon(tab);
               const isActive = activeTab === tab;
               const tabCount = getTabCount(tab);
-              
+
               return (
                 <button
                   key={tab}
@@ -532,10 +681,14 @@ export function VotesView({ votes }: VotesViewProps) {
                   No {getTabTitle(activeTab).toLowerCase()} found
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  {activeTab === 'evaluation' && "All proposals have moved beyond evaluation."}
-                  {activeTab === 'voting' && "No proposals are currently open for voting."}
-                  {activeTab === 'veto' && "No proposals are in the veto window."}
-                  {activeTab === 'completed' && "No proposals have completed their lifecycle yet."}
+                  {activeTab === "evaluation" &&
+                    "All proposals have moved beyond evaluation."}
+                  {activeTab === "voting" &&
+                    "No proposals are currently open for voting."}
+                  {activeTab === "veto" &&
+                    "No proposals are in the veto window."}
+                  {activeTab === "passed" && "No proposals have passed yet."}
+                  {activeTab === "failed" && "No proposals have failed yet."}
                 </p>
                 <Link href="/proposals">
                   <Button variant="outline" className="gap-2">
@@ -548,14 +701,19 @@ export function VotesView({ votes }: VotesViewProps) {
           ) : (
             <>
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-medium text-foreground">
-                  {getTabTitle(activeTab)} ({filteredVotes.length})
-                </h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-medium text-foreground">
+                    {getTabTitle(activeTab)} ({filteredVotes.length})
+                  </h2>
+                </div>
                 <p className="text-sm text-muted-foreground">
-                  {filteredVotes.length === 1 ? '1 proposal' : `${filteredVotes.length} proposals`} in this stage
+                  {filteredVotes.length === 1
+                    ? "1 proposal"
+                    : `${filteredVotes.length} proposals`}{" "}
+                  in this stage
                 </p>
               </div>
-              
+
               <div className="space-y-3">
                 {filteredVotes.map((vote) => (
                   <VoteCard
@@ -573,4 +731,4 @@ export function VotesView({ votes }: VotesViewProps) {
       </div>
     </div>
   );
-} 
+}
