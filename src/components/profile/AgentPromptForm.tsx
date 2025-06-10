@@ -368,7 +368,7 @@ function MobileConfigCard({
 
 export function AgentPromptForm() {
   const queryClient = useQueryClient();
-  const { agentWallets, balances, fetchWallets } = useWalletStore();
+  const { fetchWallets } = useWalletStore();
   const { userId } = useAuth();
   const { toast } = useToast();
 

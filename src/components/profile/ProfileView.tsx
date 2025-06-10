@@ -1,15 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  ExternalLink,
-  Copy,
-  Check,
-  User,
-  Wallet,
-  Coins,
-  TrendingUp,
-} from "lucide-react";
+import { ExternalLink, Copy, Check, User, Wallet, Coins } from "lucide-react";
 import { getStacksAddress } from "@/lib/address";
 import { useClipboard } from "@/helpers/clipboard-utils";
 import { getAddressExplorerUrl } from "@/helpers/explorer";
@@ -25,8 +17,12 @@ import {
   BtcBalance,
   TokenBalance,
 } from "@/components/reusables/BalanceDisplay";
+import { ReactNode, HTMLAttributes } from "react";
 // Table components inline since @/components/ui/table not available
-const Table = ({ children, ...props }: any) => (
+const Table = ({
+  children,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & { children: ReactNode }) => (
   <div className="w-full overflow-auto">
     <table className="w-full caption-bottom text-sm" {...props}>
       {children}
@@ -34,13 +30,20 @@ const Table = ({ children, ...props }: any) => (
   </div>
 );
 
-const TableHeader = ({ children, ...props }: any) => (
+const TableHeader = ({
+  children,
+  ...props
+}: HTMLAttributes<HTMLTableSectionElement> & { children: ReactNode }) => (
   <thead className="[&_tr]:border-b" {...props}>
     {children}
   </thead>
 );
 
-const TableRow = ({ children, className = "", ...props }: any) => (
+const TableRow = ({
+  children,
+  className = "",
+  ...props
+}: HTMLAttributes<HTMLTableRowElement> & { children: ReactNode }) => (
   <tr
     className={`border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted ${className}`}
     {...props}
@@ -49,7 +52,11 @@ const TableRow = ({ children, className = "", ...props }: any) => (
   </tr>
 );
 
-const TableHead = ({ children, className = "", ...props }: any) => (
+const TableHead = ({
+  children,
+  className = "",
+  ...props
+}: HTMLAttributes<HTMLTableCellElement> & { children: ReactNode }) => (
   <th
     className={`h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 ${className}`}
     {...props}
@@ -58,13 +65,20 @@ const TableHead = ({ children, className = "", ...props }: any) => (
   </th>
 );
 
-const TableBody = ({ children, ...props }: any) => (
+const TableBody = ({
+  children,
+  ...props
+}: HTMLAttributes<HTMLTableSectionElement> & { children: ReactNode }) => (
   <tbody className="[&_tr:last-child]:border-0" {...props}>
     {children}
   </tbody>
 );
 
-const TableCell = ({ children, className = "", ...props }: any) => (
+const TableCell = ({
+  children,
+  className = "",
+  ...props
+}: HTMLAttributes<HTMLTableCellElement> & { children: ReactNode }) => (
   <td
     className={`p-4 align-middle [&:has([role=checkbox])]:pr-0 ${className}`}
     {...props}
@@ -81,7 +95,7 @@ function IconButton({
   copied = false,
   size = "sm",
 }: {
-  icon: any;
+  icon: React.ElementType;
   onClick?: () => void;
   href?: string;
   copied?: boolean;
@@ -123,7 +137,7 @@ function AccountRow({
   title: string;
   subtitle: string;
   address: string | null;
-  icon: any;
+  icon: React.ElementType;
   iconBg?: string;
   iconColor?: string;
 }) {
@@ -195,7 +209,7 @@ function BalanceSummaryCard({
     fungible_tokens: Record<string, { balance: string }>;
     non_fungible_tokens: Record<string, { count: number }>;
   } | null;
-  icon: any;
+  icon: React.ElementType;
   iconBg?: string;
   iconColor?: string;
 }) {
