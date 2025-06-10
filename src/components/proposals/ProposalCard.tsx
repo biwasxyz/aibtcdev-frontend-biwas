@@ -9,10 +9,7 @@ import {
   XCircle,
   AlertCircle,
   Building2,
-  Eye,
-  EyeOff,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useVotingStatus } from "./TimeStatus";
 import type { Proposal, ProposalWithDAO } from "@/types/supabase";
 import { format } from "date-fns";
@@ -27,16 +24,12 @@ import VoteStatusChart from "./VoteStatusChart";
 
 interface ProposalCardProps {
   proposal: Proposal | ProposalWithDAO;
-  onToggleVisibility: (proposalId: string) => void;
-  isHidden: boolean;
   tokenSymbol?: string;
   showDAOInfo?: boolean;
 }
 
 export default function ProposalCard({
   proposal,
-  onToggleVisibility,
-  isHidden,
   tokenSymbol = "",
   showDAOInfo = false,
 }: ProposalCardProps) {
@@ -149,24 +142,6 @@ export default function ProposalCard({
                 {proposal.summary}
               </p>
             )}
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onToggleVisibility(proposal.id)}
-              className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-all duration-300"
-              title={isHidden ? "Show proposal" : "Hide proposal"}
-            >
-              {isHidden ? (
-                <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              ) : (
-                <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              )}
-            </Button>
-            {/* ExternalLink button removed since the whole card is now clickable */}
           </div>
         </div>
 

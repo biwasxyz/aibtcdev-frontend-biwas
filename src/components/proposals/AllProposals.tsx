@@ -38,12 +38,12 @@ type SortField =
   | "creator"
   | "dao";
 
-function CompactMetrics({ 
-  totalProposals, 
-  activeProposals, 
-  passedProposals, 
-  failedProposals 
-}: { 
+function CompactMetrics({
+  totalProposals,
+  activeProposals,
+  passedProposals,
+  failedProposals,
+}: {
   totalProposals: number;
   activeProposals: number;
   passedProposals: number;
@@ -63,7 +63,9 @@ function CompactMetrics({
           <metric.icon className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">{metric.value}</span>
           <span className="text-muted-foreground">{metric.label}</span>
-          {index < metrics.length - 1 && <div className="w-px h-4 bg-border/50 ml-2" />}
+          {index < metrics.length - 1 && (
+            <div className="w-px h-4 bg-border/50 ml-2" />
+          )}
         </div>
       ))}
     </div>
@@ -74,9 +76,6 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   // Fetch tokens and create lookup map
   const { tokenLookup } = useTokens();
   const proposalsRef = useRef<HTMLDivElement>(null);
-  const [hiddenProposals, setHiddenProposals] = useState<Set<string>>(
-    new Set(),
-  );
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Filter and pagination state
@@ -93,7 +92,7 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   // Get unique DAOs for filter options
   const daoOptions = useMemo(() => {
     const uniqueDAOs = Array.from(
-      new Set(proposals.map((p) => p.daos?.name).filter(Boolean)),
+      new Set(proposals.map((p) => p.daos?.name).filter(Boolean))
     ).sort();
 
     return [
@@ -152,9 +151,6 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
   // Filter and sort logic
   const filteredAndSortedProposals = useMemo(() => {
     const filtered = proposals.filter((proposal) => {
-      // Hide hidden proposals
-      if (hiddenProposals.has(proposal.id)) return false;
-
       // Search filter
       if (filterState.search && typeof filterState.search === "string") {
         const searchTerm = filterState.search.toLowerCase();
@@ -186,7 +182,8 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
       // Creator filter
       if (filterState.creator && typeof filterState.creator === "string") {
         const creatorTerm = filterState.creator.toLowerCase();
-        if (!proposal.creator?.toLowerCase().includes(creatorTerm)) return false;
+        if (!proposal.creator?.toLowerCase().includes(creatorTerm))
+          return false;
       }
 
       return true;
@@ -226,27 +223,27 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
     });
 
     return filtered;
-  }, [proposals, hiddenProposals, filterState]);
+  }, [proposals, filterState]);
 
   // Pagination logic
   const totalPages = Math.ceil(
-    filteredAndSortedProposals.length / itemsPerPage,
+    filteredAndSortedProposals.length / itemsPerPage
   );
   const paginatedProposals = filteredAndSortedProposals.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   // Calculate statistics
   const totalProposals = filteredAndSortedProposals.length;
   const activeProposals = filteredAndSortedProposals.filter(
-    (p) => p.status === "DEPLOYED",
+    (p) => p.status === "DEPLOYED"
   ).length;
   const passedProposals = filteredAndSortedProposals.filter(
-    (p) => p.passed === true,
+    (p) => p.passed === true
   ).length;
   const failedProposals = filteredAndSortedProposals.filter(
-    (p) => p.status === "FAILED",
+    (p) => p.status === "FAILED"
   ).length;
 
   // Summary stats for sidebar
@@ -290,19 +287,6 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
     setCurrentPage(1);
   };
 
-  // Toggle proposal visibility
-  const toggleProposalVisibility = (proposalId: string) => {
-    setHiddenProposals((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(proposalId)) {
-        newSet.delete(proposalId);
-      } else {
-        newSet.add(proposalId);
-      }
-      return newSet;
-    });
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
@@ -312,7 +296,9 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
             <Vote className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Governance Proposals</h1>
+            <h1 className="text-2xl font-bold text-foreground">
+              Governance Proposals
+            </h1>
             <p className="text-sm text-muted-foreground">
               Explore and participate in DAO governance decisions
             </p>
@@ -320,7 +306,7 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
         </div>
 
         {/* Compact Metrics */}
-        <CompactMetrics 
+        <CompactMetrics
           totalProposals={totalProposals}
           activeProposals={activeProposals}
           passedProposals={passedProposals}
@@ -334,10 +320,9 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
               All Proposals
             </h2>
             <p className="text-xs text-muted-foreground">
-              {filteredAndSortedProposals.length > 0 
-                ? `${filteredAndSortedProposals.length} ${filteredAndSortedProposals.length === 1 ? 'proposal' : 'proposals'}`
-                : 'No proposals found'
-              }
+              {filteredAndSortedProposals.length > 0
+                ? `${filteredAndSortedProposals.length} ${filteredAndSortedProposals.length === 1 ? "proposal" : "proposals"}`
+                : "No proposals found"}
             </p>
           </div>
           <Button
@@ -362,7 +347,9 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-4 border-b border-border/30 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-foreground">Filters</h3>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Filters
+                </h3>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -408,10 +395,9 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
                   All Proposals ({filteredAndSortedProposals.length})
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  {filteredAndSortedProposals.length > 0 
-                    ? `${filteredAndSortedProposals.length === 1 ? '1 proposal' : `${filteredAndSortedProposals.length} proposals`} available`
-                    : 'No proposals match your current filters'
-                  }
+                  {filteredAndSortedProposals.length > 0
+                    ? `${filteredAndSortedProposals.length === 1 ? "1 proposal" : `${filteredAndSortedProposals.length} proposals`} available`
+                    : "No proposals match your current filters"}
                 </p>
               </div>
             </div>
@@ -429,10 +415,9 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
                         No Proposals Found
                       </h3>
                       <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                        {totalProposals === 0 
+                        {totalProposals === 0
                           ? "No proposals have been created yet. Check back later for new governance proposals."
-                          : "No proposals match your current search and filter criteria. Try adjusting your filters or search terms."
-                        }
+                          : "No proposals match your current search and filter criteria. Try adjusting your filters or search terms."}
                       </p>
                     </div>
                   </div>
@@ -442,8 +427,6 @@ const AllProposals = ({ proposals }: AllProposalsProps) => {
                   <ProposalCard
                     key={proposal.id}
                     proposal={proposal}
-                    onToggleVisibility={toggleProposalVisibility}
-                    isHidden={hiddenProposals.has(proposal.id)}
                     tokenSymbol={tokenLookup[proposal.dao_id || ""] || ""}
                     showDAOInfo={true}
                   />
