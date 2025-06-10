@@ -20,7 +20,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { WalletInfoCard } from "@/components/profile/AgentWalletInfo";
 import {
   Select,
   SelectContent,
@@ -111,7 +110,9 @@ function MobileConfigCard({
   onCancelEditing: () => void;
   onSavePrompt: (daoId: string) => void;
   onDelete: (promptId: string) => void;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onInputChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
   onSelectChange: (field: keyof EditingData, value: string) => void;
   isLoading: boolean;
   createMutation: CreateMutationType;
@@ -124,9 +125,11 @@ function MobileConfigCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-secondary" />
-          <h4 className="font-bold text-foreground text-sm truncate">{daoName}</h4>
+          <h4 className="font-bold text-foreground text-sm truncate">
+            {daoName}
+          </h4>
         </div>
-        
+
         {/* Status Badge */}
         {prompt?.is_active ? (
           <Badge className="bg-gradient-to-r from-primary/20 to-accent/20 text-foreground border-primary/40 px-2 py-1 font-semibold text-xs">
@@ -145,41 +148,58 @@ function MobileConfigCard({
       <div className="space-y-3">
         {/* AI Model */}
         <div className="space-y-2">
-          <label className="text-xs font-medium text-muted-foreground">AI Model</label>
+          <label className="text-xs font-medium text-muted-foreground">
+            AI Model
+          </label>
           {isEditing ? (
             <Select
               value={editingData.model}
-              onValueChange={(value) => onSelectChange('model', value)}
+              onValueChange={(value) => onSelectChange("model", value)}
             >
               <SelectTrigger className="h-9 w-full bg-gradient-to-r from-card/80 to-card/60 backdrop-blur-sm border-border/40 text-foreground rounded-lg text-sm">
                 <SelectValue placeholder="Select model" />
               </SelectTrigger>
               <SelectContent className="bg-card/95 backdrop-blur-xl border-border/40 rounded-lg">
-                <SelectItem value="gpt-4.1" className="text-foreground hover:bg-primary/10 rounded-md text-sm">
+                <SelectItem
+                  value="gpt-4.1"
+                  className="text-foreground hover:bg-primary/10 rounded-md text-sm"
+                >
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-primary to-secondary" />
                     GPT-4.1
                   </div>
                 </SelectItem>
-                <SelectItem value="gpt-4o" className="text-foreground hover:bg-primary/10 rounded-md text-sm">
+                <SelectItem
+                  value="gpt-4o"
+                  className="text-foreground hover:bg-primary/10 rounded-md text-sm"
+                >
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                     GPT-4o
                   </div>
                 </SelectItem>
-                <SelectItem value="gpt-4o-mini" className="text-foreground hover:bg-primary/10 rounded-md text-sm">
+                <SelectItem
+                  value="gpt-4o-mini"
+                  className="text-foreground hover:bg-primary/10 rounded-md text-sm"
+                >
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
                     GPT-4o Mini
                   </div>
                 </SelectItem>
-                <SelectItem value="gpt-4.1-nano" className="text-foreground hover:bg-primary/10 rounded-md text-sm">
+                <SelectItem
+                  value="gpt-4.1-nano"
+                  className="text-foreground hover:bg-primary/10 rounded-md text-sm"
+                >
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-accent" />
                     GPT-4.1 Nano
                   </div>
                 </SelectItem>
-                <SelectItem value="gpt-4.1-mini" className="text-foreground hover:bg-primary/10 rounded-md text-sm">
+                <SelectItem
+                  value="gpt-4.1-mini"
+                  className="text-foreground hover:bg-primary/10 rounded-md text-sm"
+                >
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-muted" />
                     GPT-4.1 Mini
@@ -199,7 +219,9 @@ function MobileConfigCard({
 
         {/* Creativity Level */}
         <div className="space-y-2">
-          <label className="text-xs font-medium text-muted-foreground">Creativity Level</label>
+          <label className="text-xs font-medium text-muted-foreground">
+            Creativity Level
+          </label>
           {isEditing ? (
             <div className="space-y-1">
               <Input
@@ -222,9 +244,9 @@ function MobileConfigCard({
             <div className="p-2 bg-muted/20 rounded-lg border border-border/20">
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-muted/30 rounded-full h-1.5 overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-500"
-                    style={{ width: `${((prompt?.temperature || 0.1) * 100)}%` }}
+                    style={{ width: `${(prompt?.temperature || 0.1) * 100}%` }}
                   />
                 </div>
                 <span className="text-muted-foreground font-semibold text-xs w-6 text-right">
@@ -237,7 +259,9 @@ function MobileConfigCard({
 
         {/* Instructions */}
         <div className="space-y-2">
-          <label className="text-xs font-medium text-muted-foreground">Instructions</label>
+          <label className="text-xs font-medium text-muted-foreground">
+            Instructions
+          </label>
           {isEditing ? (
             <div className="space-y-1">
               <Textarea
@@ -344,7 +368,7 @@ function MobileConfigCard({
 
 export function AgentPromptForm() {
   const queryClient = useQueryClient();
-  const { agentWallets, balances, fetchWallets } = useWalletStore();
+  const { fetchWallets } = useWalletStore();
   const { userId } = useAuth();
   const { toast } = useToast();
 
@@ -501,11 +525,11 @@ export function AgentPromptForm() {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    
-    if (name === 'temperature') {
+
+    if (name === "temperature") {
       const numValue = parseFloat(value);
       setEditingData({ ...editingData, temperature: numValue });
     } else {
@@ -520,7 +544,7 @@ export function AgentPromptForm() {
 
   const handleSelectChange = (field: keyof EditingData, value: string) => {
     setEditingData({ ...editingData, [field]: value });
-    
+
     // Clear error for this field
     if (errors[field]) {
       setErrors({ ...errors, [field]: "" });
@@ -603,53 +627,24 @@ export function AgentPromptForm() {
     return dao ? dao.name : "";
   };
 
-  // Get wallet information for an agent
-  const getAgentWalletInfo = (agentId: string) => {
-    if (!agentId) return { walletAddress: null, walletBalance: null };
-
-    const agentWallet = agentWallets.find(
-      (wallet) => wallet.agent_id === agentId,
-    );
-
-    const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
-    const walletAddress =
-      network === "mainnet"
-        ? agentWallet?.mainnet_address
-        : agentWallet?.testnet_address;
-
-    const walletBalance = walletAddress ? balances[walletAddress] : null;
-
-    return { walletAddress, walletBalance };
-  };
-
-  // Get DAO Manager wallet info
-  const {
-    walletAddress: daoManagerWalletAddress,
-    walletBalance: daoManagerWalletBalance,
-  } = getAgentWalletInfo(daoManagerAgentId);
-
   // Get all DAOs
   const uniqueDaoIds = daos.map((dao) => dao.id);
 
   return (
     <div className="w-full space-y-6">
-      {/* Wallet Info Section */}
-      {daoManagerAgentId && (
-        <div>
-          <WalletInfoCard
-            walletAddress={daoManagerWalletAddress}
-            walletBalance={daoManagerWalletBalance}
-          />
-        </div>
-      )}
-
       {/* Agent Prompts Section */}
       <div className="space-y-4">
         <div className="space-y-2">
-          <h3 className="text-lg font-bold text-foreground">AI Agent Configuration</h3>
+          <h3 className="text-lg font-bold text-foreground">
+            AI Agent Configuration
+          </h3>
           <p className="text-sm text-muted-foreground">
-            Configure how your AI agent responds to DAO proposals across different organizations. 
-            <span className="text-primary font-medium"> Fine-tune behavior and decision-making parameters.</span>
+            Configure how your AI agent responds to DAO proposals across
+            different organizations.
+            <span className="text-primary font-medium">
+              {" "}
+              Fine-tune behavior and decision-making parameters.
+            </span>
           </p>
         </div>
 
@@ -661,8 +656,12 @@ export function AgentPromptForm() {
                 <Loader />
               </div>
               <div className="space-y-2">
-                <p className="text-base font-semibold text-foreground">Loading configurations...</p>
-                <p className="text-sm text-muted-foreground">Initializing AI agent settings</p>
+                <p className="text-base font-semibold text-foreground">
+                  Loading configurations...
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Initializing AI agent settings
+                </p>
               </div>
             </div>
           ) : uniqueDaoIds.length === 0 ? (
@@ -671,9 +670,12 @@ export function AgentPromptForm() {
                 <Settings className="h-6 w-6 text-muted-foreground/60" />
               </div>
               <div className="space-y-2 max-w-sm mx-auto">
-                <h4 className="text-base font-semibold text-foreground">No DAOs Available</h4>
+                <h4 className="text-base font-semibold text-foreground">
+                  No DAOs Available
+                </h4>
                 <p className="text-sm text-muted-foreground px-4">
-                  Available DAOs will appear here for AI agent configuration. Connect to organizations to begin automated governance.
+                  Available DAOs will appear here for AI agent configuration.
+                  Connect to organizations to begin automated governance.
                 </p>
               </div>
             </div>
@@ -743,8 +745,12 @@ export function AgentPromptForm() {
                           <Loader />
                         </div>
                         <div className="space-y-2">
-                          <p className="text-base font-semibold text-foreground">Loading configurations...</p>
-                          <p className="text-sm text-muted-foreground">Initializing AI agent settings</p>
+                          <p className="text-base font-semibold text-foreground">
+                            Loading configurations...
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Initializing AI agent settings
+                          </p>
                         </div>
                       </div>
                     </TableCell>
@@ -757,9 +763,13 @@ export function AgentPromptForm() {
                           <Settings className="h-6 w-6 text-muted-foreground/60" />
                         </div>
                         <div className="space-y-2 max-w-md">
-                          <h4 className="text-base font-semibold text-foreground">No DAOs Available</h4>
+                          <h4 className="text-base font-semibold text-foreground">
+                            No DAOs Available
+                          </h4>
                           <p className="text-sm text-muted-foreground">
-                            Available DAOs will appear here for AI agent configuration. Connect to organizations to begin automated governance.
+                            Available DAOs will appear here for AI agent
+                            configuration. Connect to organizations to begin
+                            automated governance.
                           </p>
                         </div>
                       </div>
@@ -772,8 +782,8 @@ export function AgentPromptForm() {
                     const isEditing = editingDaoId === daoId;
 
                     return (
-                      <TableRow 
-                        key={daoId} 
+                      <TableRow
+                        key={daoId}
                         className="border-border/20 hover:bg-gradient-to-r hover:from-muted/20 hover:via-muted/10 hover:to-transparent transition-all duration-300"
                       >
                         <TableCell className="font-bold text-foreground px-4 py-3 text-sm w-[150px]">
@@ -782,7 +792,7 @@ export function AgentPromptForm() {
                             <span className="truncate">{daoName}</span>
                           </div>
                         </TableCell>
-                        
+
                         <TableCell className="px-4 py-3 w-[100px]">
                           {prompt?.is_active ? (
                             <Badge className="bg-gradient-to-r from-primary/20 to-accent/20 text-foreground border-primary/40 px-2 py-1 font-semibold text-xs">
@@ -802,37 +812,54 @@ export function AgentPromptForm() {
                           {isEditing ? (
                             <Select
                               value={editingData.model}
-                              onValueChange={(value) => handleSelectChange('model', value)}
+                              onValueChange={(value) =>
+                                handleSelectChange("model", value)
+                              }
                             >
                               <SelectTrigger className="h-8 w-full bg-gradient-to-r from-card/80 to-card/60 backdrop-blur-sm border-border/40 text-foreground rounded-lg text-sm">
                                 <SelectValue placeholder="Select model" />
                               </SelectTrigger>
                               <SelectContent className="bg-card/95 backdrop-blur-xl border-border/40 rounded-lg">
-                                <SelectItem value="gpt-4.1" className="text-foreground hover:bg-primary/10 rounded-md text-sm">
+                                <SelectItem
+                                  value="gpt-4.1"
+                                  className="text-foreground hover:bg-primary/10 rounded-md text-sm"
+                                >
                                   <div className="flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-primary to-secondary" />
                                     GPT-4.1
                                   </div>
                                 </SelectItem>
-                                <SelectItem value="gpt-4o" className="text-foreground hover:bg-primary/10 rounded-md text-sm">
+                                <SelectItem
+                                  value="gpt-4o"
+                                  className="text-foreground hover:bg-primary/10 rounded-md text-sm"
+                                >
                                   <div className="flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                                     GPT-4o
                                   </div>
                                 </SelectItem>
-                                <SelectItem value="gpt-4o-mini" className="text-foreground hover:bg-primary/10 rounded-md text-sm">
+                                <SelectItem
+                                  value="gpt-4o-mini"
+                                  className="text-foreground hover:bg-primary/10 rounded-md text-sm"
+                                >
                                   <div className="flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
                                     GPT-4o Mini
                                   </div>
                                 </SelectItem>
-                                <SelectItem value="gpt-4.1-nano" className="text-foreground hover:bg-primary/10 rounded-md text-sm">
+                                <SelectItem
+                                  value="gpt-4.1-nano"
+                                  className="text-foreground hover:bg-primary/10 rounded-md text-sm"
+                                >
                                   <div className="flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-accent" />
                                     GPT-4.1 Nano
                                   </div>
                                 </SelectItem>
-                                <SelectItem value="gpt-4.1-mini" className="text-foreground hover:bg-primary/10 rounded-md text-sm">
+                                <SelectItem
+                                  value="gpt-4.1-mini"
+                                  className="text-foreground hover:bg-primary/10 rounded-md text-sm"
+                                >
                                   <div className="flex items-center gap-2">
                                     <div className="w-1.5 h-1.5 rounded-full bg-muted" />
                                     GPT-4.1 Mini
@@ -873,9 +900,11 @@ export function AgentPromptForm() {
                           ) : (
                             <div className="flex items-center gap-2">
                               <div className="flex-1 bg-muted/30 rounded-full h-1.5 overflow-hidden">
-                                <div 
+                                <div
                                   className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-500"
-                                  style={{ width: `${((prompt?.temperature || 0.1) * 100)}%` }}
+                                  style={{
+                                    width: `${(prompt?.temperature || 0.1) * 100}%`,
+                                  }}
                                 />
                               </div>
                               <span className="text-muted-foreground font-semibold text-xs w-6 text-right">
@@ -941,7 +970,8 @@ export function AgentPromptForm() {
                                 className="h-8 w-8 p-0 text-primary hover:text-primary hover:bg-gradient-to-r hover:from-primary/20 hover:to-accent/20 rounded-lg"
                                 title="Save configuration"
                               >
-                                {createMutation.isPending || updateMutation.isPending ? (
+                                {createMutation.isPending ||
+                                updateMutation.isPending ? (
                                   <Loader />
                                 ) : (
                                   <Check className="h-3 w-3" />

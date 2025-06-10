@@ -3,7 +3,14 @@
 import type React from "react";
 import Image from "next/image";
 import { DAOBuyToken } from "@/components/daos/DaoBuyToken";
-import { Activity, Info, Blocks, CoinsIcon as CoinIcon, TrendingUp, Users2, FileText } from "lucide-react";
+import {
+  Activity,
+  Info,
+  CoinsIcon as CoinIcon,
+  TrendingUp,
+  Users2,
+  FileText,
+} from "lucide-react";
 import Link from "next/link";
 
 interface DAOInfo {
@@ -32,13 +39,13 @@ interface DAOHeaderProps {
   currentPath: string;
 }
 
-export function DAOHeader({ 
-  dao, 
-  token, 
-  marketStats, 
-    proposalCount,
+export function DAOHeader({
+  dao,
+  token,
+  marketStats,
+  proposalCount,
   daoName,
-  currentPath
+  currentPath,
 }: DAOHeaderProps) {
   // Format number helper function
   const formatNumber = (num: number, isPrice = false) => {
@@ -63,22 +70,16 @@ export function DAOHeader({
       isActive: currentPath === `/daos/${daoName}`,
     },
     {
-      href: `/daos/${daoName}/mission`,
-      label: "Mission",
-      icon: Info,
-      isActive: currentPath === `/daos/${daoName}/mission`,
-    },
-    {
-      href: `/daos/${daoName}/extensions`,
-      label: "Extensions",
-      icon: Blocks,
-      isActive: currentPath === `/daos/${daoName}/extensions`,
-    },
-    {
       href: `/daos/${daoName}/holders`,
       label: "Holders",
       icon: Users2,
       isActive: currentPath === `/daos/${daoName}/holders`,
+    },
+    {
+      href: `/daos/${daoName}/mission`,
+      label: `About ${decodeURIComponent(daoName)}`,
+      icon: Info,
+      isActive: currentPath === `/daos/${daoName}/about`,
     },
   ];
 
@@ -102,7 +103,7 @@ export function DAOHeader({
                 />
               </div>
             )}
-            
+
             {/* DAO Details */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-3">
@@ -114,16 +115,14 @@ export function DAOHeader({
                   <span className="font-medium">Active</span>
                 </div>
               </div>
-              
+
               {/* Buy Token Button */}
-              {dao.id && (
-                <DAOBuyToken daoId={dao.id} daoName={dao.name}/> 
-              )}
+              {dao.id && <DAOBuyToken daoId={dao.id} daoName={dao.name} />}
             </div>
           </div>
 
-            {/* Compact Metrics - Right Side */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 lg:gap-6">
+          {/* Compact Metrics - Right Side */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 lg:gap-6">
             <div className="text-center">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                 <CoinIcon className="h-3 w-3" />
@@ -133,7 +132,7 @@ export function DAOHeader({
                 {formatNumber(marketStats.price, true)}
               </div>
             </div>
-            
+
             <div className="text-center">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                 <TrendingUp className="h-3 w-3" />
@@ -143,7 +142,7 @@ export function DAOHeader({
                 {formatNumber(marketStats.marketCap)}
               </div>
             </div>
-            
+
             <div className="text-center">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                 <Users2 className="h-3 w-3" />
@@ -153,7 +152,7 @@ export function DAOHeader({
                 {marketStats.holderCount.toLocaleString()}
               </div>
             </div>
-            
+
             <div className="text-center">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
                 <FileText className="h-3 w-3" />
@@ -191,4 +190,4 @@ export function DAOHeader({
       </div>
     </div>
   );
-} 
+}

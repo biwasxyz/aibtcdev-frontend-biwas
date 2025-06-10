@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useMemo } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
-import { Search, Users, TrendingUp, Activity, Coins, BarChart3 } from "lucide-react";
+import { Search, Users, Activity, Coins, BarChart3 } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
 
 import { DAOCard } from "@/components/daos/DaoCard";
@@ -26,22 +26,23 @@ interface TokenTrade {
   timestamp: number;
 }
 
-function CompactMetrics({ 
-  totalDAOs, 
-  activeDAOs, 
-  totalHolders, 
-  totalMarketCap 
-}: { 
+function CompactMetrics({
+  totalDAOs,
+  totalHolders,
+  totalMarketCap,
+}: {
   totalDAOs: number;
-  activeDAOs: number;
   totalHolders: number;
   totalMarketCap: number;
 }) {
   const metrics = [
-    { label: "Total DAOs", value: totalDAOs, icon: Activity },
-    { label: "Active DAOs", value: activeDAOs, icon: TrendingUp },
+    { label: "AI DAOs", value: totalDAOs, icon: Activity },
     { label: "Holders", value: totalHolders.toLocaleString(), icon: Users },
-    { label: "Market Cap", value: `$${totalMarketCap.toLocaleString()}`, icon: Coins },
+    {
+      label: "Market Cap",
+      value: `$${totalMarketCap.toLocaleString()}`,
+      icon: Coins,
+    },
   ];
 
   return (
@@ -51,7 +52,9 @@ function CompactMetrics({
           <metric.icon className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">{metric.value}</span>
           <span className="text-muted-foreground">{metric.label}</span>
-          {index < metrics.length - 1 && <div className="w-px h-4 bg-border/50 ml-2" />}
+          {index < metrics.length - 1 && (
+            <div className="w-px h-4 bg-border/50 ml-2" />
+          )}
         </div>
       ))}
     </div>
@@ -81,7 +84,7 @@ export default function DAOs() {
   // Helper function to get dex principal and token contract
   const getTokenContract = useCallback((dao: DAO) => {
     const dexExtension = dao.extensions?.find(
-      (ext) => ext.type === "dex" || ext.type === "TOKEN_DEX",
+      (ext) => ext.type === "dex" || ext.type === "TOKEN_DEX"
     );
     const dexPrincipal = dexExtension?.contract_principal;
     return dexPrincipal ? dexPrincipal.replace(/-dex$/, "") : null;
@@ -161,9 +164,7 @@ export default function DAOs() {
 
   // Calculate summary stats
   const totalDAOs = daos?.length || 0;
-  const activeDAOs =
-    daos?.filter((dao) => dao.extensions && dao.extensions.length > 0).length ||
-    0;
+
   const totalHolders =
     daos?.reduce((sum, dao) => {
       const holders =
@@ -186,17 +187,17 @@ export default function DAOs() {
             <BarChart3 className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">AI-Powered DAOs</h1>
+            <h1 className="text-2xl font-bold text-foreground">AI DAOs</h1>
             <p className="text-sm text-muted-foreground">
-              Discover autonomous organizations powered by artificial intelligence
+              Discover autonomous organizations powered by artificial
+              intelligence
             </p>
           </div>
         </div>
 
         {/* Compact Metrics */}
-        <CompactMetrics 
+        <CompactMetrics
           totalDAOs={totalDAOs}
-          activeDAOs={activeDAOs}
           totalHolders={totalHolders}
           totalMarketCap={totalMarketCap}
         />
@@ -210,7 +211,9 @@ export default function DAOs() {
                   <Loader />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-foreground">Loading AI DAOs</h3>
+                  <h3 className="text-lg font-medium text-foreground">
+                    Loading AI DAOs
+                  </h3>
                   <p className="text-sm text-muted-foreground">
                     Fetching autonomous organizations and their data...
                   </p>
@@ -228,22 +231,14 @@ export default function DAOs() {
                     No DAOs Found
                   </h3>
                   <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    No AI-powered DAOs are available at the moment. Check back later for new autonomous organizations.
+                    No AI DAOs are available at the moment. Check back later for
+                    new autonomous organizations.
                   </p>
                 </div>
               </div>
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-medium text-foreground">
-                  Active Organizations ({totalDAOs})
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {totalDAOs === 1 ? '1 organization' : `${totalDAOs} organizations`} available
-                </p>
-              </div>
-              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {daos.map((dao) => (
                   <DAOCard

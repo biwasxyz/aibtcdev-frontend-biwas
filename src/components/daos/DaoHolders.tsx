@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,6 +11,14 @@ import {
 } from "@/components/ui/select";
 import { Search, ArrowUpDown } from "lucide-react";
 import { TokenBalance } from "@/components/reusables/BalanceDisplay";
+import {
+  Table,
+  TableHeader,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 
 interface Holder {
   address: string;
@@ -32,7 +39,7 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
 
   const filteredHolders = useMemo(() => {
     return holders.filter((holder) =>
-      holder.address.toLowerCase().includes(searchQuery.toLowerCase()),
+      holder.address.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [holders, searchQuery]);
 
@@ -92,30 +99,47 @@ export default function DAOHolders({ holders, tokenSymbol }: DAOHoldersProps) {
             </Select>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {sortedHolders.map((holder, index) => (
-              <Card
-                key={holder.address}
-                className="bg-card/40 backdrop-blur-sm border border-border/30 rounded-xl p-4 space-y-3"
-              >
-                <CardContent className="p-0 space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-muted-foreground">#{index + 1}</span>
-                    <TokenBalance
-                      value={holder.balance}
-                      symbol={tokenSymbol}
-                      variant="rounded"
-                    />
-                  </div>
-                  <code className="block break-all text-xs text-muted-foreground">
-                    {holder.address}
-                  </code>
-                  <div className="text-right text-sm font-semibold">
-                    {holder.percentage.toFixed(2)}%
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-4">#</TableHead>
+                  <TableHead>Address</TableHead>
+                  <TableHead className="text-right">Balance</TableHead>
+                  <TableHead className="text-right">Percentage</TableHead>
+                  {holders[0]?.value_usd && (
+                    <TableHead className="text-right">Value (USD)</TableHead>
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedHolders.map((holder, index) => (
+                  <TableRow key={holder.address} className="hover:bg-accent/10">
+                    <TableCell className="pl-4 text-muted-foreground">
+                      {index + 1}
+                    </TableCell>
+                    <TableCell className="break-all font-medium">
+                      {holder.address}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <TokenBalance
+                        value={holder.balance}
+                        symbol={tokenSymbol}
+                        variant="rounded"
+                      />
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
+                      {holder.percentage.toFixed(2)}%
+                    </TableCell>
+                    {holders[0]?.value_usd && (
+                      <TableCell className="text-right">
+                        {holder.value_usd}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </div>
       </div>

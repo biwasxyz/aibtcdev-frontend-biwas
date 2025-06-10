@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Users, Boxes, Menu, X, FileText, Vote } from "lucide-react";
+import { Users, Boxes, Menu, X, FileText, Vote, Bitcoin } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 // import { ThreadList } from "@/components/threads/thread-list";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { NetworkIndicator } from "@/components/reusables/NetworkIndicator";
 import AuthButton from "@/components/home/AuthButton";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { Footer } from "@/components/reusables/Footer";
+import { useBitcoinBlockHeight } from "@/hooks/use-btc-block";
 
 interface ApplicationLayoutProps {
   children: React.ReactNode;
@@ -23,7 +24,7 @@ interface ApplicationLayoutProps {
 const navigation = [
   { id: "daos", name: "DAOs", href: "/daos", icon: Boxes },
   { id: "proposals", name: "Proposals", href: "/proposals", icon: FileText },
-  { id: "votes", name: "Votes", href: "/votes", icon: Vote },
+  { id: "votes", name: "Voting", href: "/votes", icon: Vote },
   { id: "profile", name: "Agent", href: "/profile", icon: Users },
 ];
 
@@ -36,6 +37,7 @@ export default function ApplicationLayout({
   const [hasUser, setHasUser] = React.useState(false);
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   // const [stacksAddress, setStacksAddress] = React.useState<string | null>(null);
+  const { blockHeight } = useBitcoinBlockHeight();
 
   React.useEffect(() => {
     const checkUser = async () => {
@@ -109,7 +111,10 @@ export default function ApplicationLayout({
         >
           <Menu className="h-6 w-6" />
         </Button>
-        <Link href="/daos" className="flex items-center gap-4 flex-1 justify-center">
+        <Link
+          href="/daos"
+          className="flex items-center gap-4 flex-1 justify-center"
+        >
           <div className="flex items-center gap-3 transition-transform duration-300 ease-in-out hover:scale-105">
             <Image
               src="/logos/aibtcdev-avatar-1000px.png"
@@ -134,7 +139,7 @@ export default function ApplicationLayout({
       <div className="hidden md:flex h-20 items-center px-8 bg-card/20 backdrop-blur-2xl border-b border-border/20 shadow-lg relative overflow-hidden">
         {/* Subtle gradient overlay for futuristic feel */}
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
-        
+
         <div className="w-1/4 relative z-10">
           <Link href="/daos" className="flex items-center gap-3 group">
             <div className="flex items-center gap-3 transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:drop-shadow-lg">
@@ -158,7 +163,7 @@ export default function ApplicationLayout({
             </div>
           </Link>
         </div>
-        
+
         {/* Desktop Navigation - Enhanced with Futuristic Styling */}
         <nav className="flex-1 flex justify-center relative z-10">
           <div className="inline-flex items-center gap-2">
@@ -174,31 +179,37 @@ export default function ApplicationLayout({
                     "hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50",
                     isActive
                       ? "text-primary-foreground bg-primary shadow-lg hover:shadow-xl hover:shadow-primary/20"
-                      : "text-muted-foreground hover:text-foreground hover:bg-card/30 hover:shadow-md hover:backdrop-blur-sm",
+                      : "text-muted-foreground hover:text-foreground hover:bg-card/30 hover:shadow-md hover:backdrop-blur-sm"
                   )}
                   style={{
-                    animationDelay: `${index * 0.1}s`
+                    animationDelay: `${index * 0.1}s`,
                   }}
                 >
                   {/* Icon with enhanced styling */}
-                  <div className={cn(
-                    "relative transition-all duration-300",
-                    isActive ? "drop-shadow-sm" : "group-hover:scale-110"
-                  )}>
+                  <div
+                    className={cn(
+                      "relative transition-all duration-300",
+                      isActive ? "drop-shadow-sm" : "group-hover:scale-110"
+                    )}
+                  >
                     <item.icon className="h-5 w-5 relative z-10" />
                     {isActive && (
                       <div className="absolute inset-0 bg-primary-foreground/20 rounded-full scale-150 blur-sm" />
                     )}
                   </div>
-                  
+
                   {/* Text with better typography */}
-                  <span className={cn(
-                    "font-medium tracking-wide transition-all duration-300",
-                    isActive ? "text-primary-foreground" : "group-hover:tracking-wider"
-                  )}>
+                  <span
+                    className={cn(
+                      "font-medium tracking-wide transition-all duration-300",
+                      isActive
+                        ? "text-primary-foreground"
+                        : "group-hover:tracking-wider"
+                    )}
+                  >
                     {item.name}
                   </span>
-                  
+
                   {/* Active indicator with glow effect */}
                   {isActive && (
                     <>
@@ -206,20 +217,26 @@ export default function ApplicationLayout({
                       <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-primary-foreground/20 rounded-full blur-sm" />
                     </>
                   )}
-                  
+
                   {/* Subtle hover glow effect */}
-                  <div className={cn(
-                    "absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-                    "bg-gradient-to-r from-primary/5 to-secondary/5"
-                  )} />
+                  <div
+                    className={cn(
+                      "absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+                      "bg-gradient-to-r from-primary/5 to-secondary/5"
+                    )}
+                  />
                 </Link>
               );
             })}
           </div>
         </nav>
-        
+
         <div className="w-1/4 flex justify-end items-center gap-6 relative z-10">
-          <div className="transition-all duration-300 hover:scale-105">
+          <div className="text-muted-foreground flex items-center">
+            <Bitcoin className="text-primary" />
+            {blockHeight}
+          </div>
+          <div className="transition-all duration-300 hover:scale-105 flex flex-col items-end text-xs md:text-sm">
             <NetworkIndicator />
           </div>
           {hasUser ? (
@@ -246,14 +263,14 @@ export default function ApplicationLayout({
             "md:hidden fixed inset-y-0 left-0 z-50",
             "w-80 bg-card/95 backdrop-blur-2xl border-r border-border/30 shadow-2xl",
             "transition-all duration-300 ease-&lsqb;cubic-bezier(0.4,0,0.2,1)&rsqb;",
-            leftPanelOpen ? "translate-x-0 shadow-3xl" : "-translate-x-full",
+            leftPanelOpen ? "translate-x-0 shadow-3xl" : "-translate-x-full"
           )}
         >
           {/* Mobile Sidebar Content */}
           <div className="flex flex-col h-full relative overflow-hidden">
             {/* Gradient overlay for mobile sidebar */}
             <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
-            
+
             {/* Close Button */}
             <div className="flex justify-end p-6 relative z-10">
               <Button
@@ -283,37 +300,51 @@ export default function ApplicationLayout({
                         "group flex items-center gap-4 px-6 py-4 text-base font-semibold rounded-2xl transition-all duration-300 ease-in-out relative overflow-hidden hover:scale-105",
                         isActive
                           ? "bg-primary text-primary-foreground shadow-xl scale-105 hover:shadow-2xl hover:shadow-primary/30"
-                          : "text-muted-foreground hover:bg-background/60 hover:text-foreground hover:shadow-lg",
+                          : "text-muted-foreground hover:bg-background/60 hover:text-foreground hover:shadow-lg"
                       )}
                       style={{
-                        animationDelay: `${index * 0.1}s`
+                        animationDelay: `${index * 0.1}s`,
                       }}
                     >
                       {/* Background glow effect */}
-                      <div className={cn(
-                        "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-                        isActive ? "bg-primary/20" : "bg-gradient-to-r from-primary/10 to-secondary/10"
-                      )} />
-                      
-                      <div className={cn(
-                        "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 relative z-10",
-                        isActive 
-                          ? "bg-primary-foreground/20 shadow-lg" 
-                          : "bg-muted/30 group-hover:bg-primary/20 group-hover:scale-110"
-                      )}>
-                        <item.icon className={cn(
-                          "h-6 w-6 transition-all duration-300",
-                          isActive ? "text-primary-foreground drop-shadow-sm" : "text-muted-foreground group-hover:text-primary group-hover:scale-110"
-                        )} />
+                      <div
+                        className={cn(
+                          "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+                          isActive
+                            ? "bg-primary/20"
+                            : "bg-gradient-to-r from-primary/10 to-secondary/10"
+                        )}
+                      />
+
+                      <div
+                        className={cn(
+                          "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 relative z-10",
+                          isActive
+                            ? "bg-primary-foreground/20 shadow-lg"
+                            : "bg-muted/30 group-hover:bg-primary/20 group-hover:scale-110"
+                        )}
+                      >
+                        <item.icon
+                          className={cn(
+                            "h-6 w-6 transition-all duration-300",
+                            isActive
+                              ? "text-primary-foreground drop-shadow-sm"
+                              : "text-muted-foreground group-hover:text-primary group-hover:scale-110"
+                          )}
+                        />
                       </div>
-                      
-                      <span className={cn(
-                        "font-semibold tracking-wide transition-all duration-300 relative z-10",
-                        isActive ? "text-primary-foreground" : "group-hover:tracking-wider"
-                      )}>
+
+                      <span
+                        className={cn(
+                          "font-semibold tracking-wide transition-all duration-300 relative z-10",
+                          isActive
+                            ? "text-primary-foreground"
+                            : "group-hover:tracking-wider"
+                        )}
+                      >
                         {item.name}
                       </span>
-                      
+
                       {isActive && (
                         <div className="absolute right-4 w-3 h-3 bg-primary-foreground rounded-full shadow-lg animate-pulse" />
                       )}
@@ -327,7 +358,9 @@ export default function ApplicationLayout({
             <div className="p-6 border-t border-border/20 bg-card/30 backdrop-blur-xl relative z-10">
               <div className="space-y-4">
                 <div className="transition-transform duration-300 hover:scale-105">
-                  <NetworkIndicator />
+                  <div className="flex items-start text-xs">
+                    <NetworkIndicator />
+                  </div>
                 </div>
                 {hasUser ? (
                   <Button
@@ -353,9 +386,7 @@ export default function ApplicationLayout({
         <main className="flex-1 min-w-0 bg-background">
           <ScrollArea className="h-full w-full">
             <div className="min-h-full flex flex-col">
-              <div className="flex-1">
-                {children}
-              </div>
+              <div className="flex-1">{children}</div>
               <Footer />
             </div>
           </ScrollArea>

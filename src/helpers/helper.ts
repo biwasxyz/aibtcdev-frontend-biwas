@@ -1,7 +1,7 @@
 export function truncateString(
   str: string,
   startLength: number,
-  endLength?: number,
+  endLength?: number
 ): string {
   if (!str) return "";
 
@@ -25,19 +25,26 @@ export function formatAction(action: string): string {
 
 export function getExplorerLink(
   type: "tx" | "address" | "contract",
-  txId: string,
+  txId: string
 ): string {
   const baseUrl = "https://explorer.stacks.co";
+  const network = process.env.NEXT_PUBLIC_STACKS_NETWORK;
+  const chainParam = network === "testnet" ? "testnet" : "mainnet";
+  let path: string;
   switch (type) {
     case "tx":
-      return `${baseUrl}/txid/${txId}`;
+      path = `/txid/${txId}`;
+      break;
     case "address":
-      return `${baseUrl}/address/${txId}`;
+      path = `/address/${txId}`;
+      break;
     case "contract":
-      return `${baseUrl}/contract/${txId}`;
+      path = `/contract/${txId}`;
+      break;
     default:
-      return baseUrl;
+      path = "";
   }
+  return `${baseUrl}${path}?chain=${chainParam}`;
 }
 
 export function formatDate(date: Date): string {

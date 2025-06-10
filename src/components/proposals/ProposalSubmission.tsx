@@ -2,7 +2,14 @@
 
 import type React from "react";
 import { useState, useEffect, useRef } from "react";
-import { Send, Sparkles, Edit3, Check, ExternalLink, AlertCircle } from "lucide-react";
+import {
+  Send,
+  Sparkles,
+  Edit3,
+  Check,
+  ExternalLink,
+  AlertCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/reusables/Loader";
 import type { DAO, Token } from "@/types/supabase";
@@ -16,13 +23,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { connectWebSocketClient } from '@stacks/blockchain-api-client';
+import { connectWebSocketClient } from "@stacks/blockchain-api-client";
 import { getAllErrorDetails } from "@aibtc/types";
-import { useUnicodeValidation, UnicodeIssueWarning } from "@/hooks/use-unicode-validation";
+import {
+  useUnicodeValidation,
+  UnicodeIssueWarning,
+} from "@/hooks/use-unicode-validation";
 
 interface WebSocketTransactionMessage {
   tx_id: string;
-  tx_status: 'success' | 'pending' | 'abort_by_response' | 'abort_by_post_condition' | 'dropped_replace_by_fee' | 'dropped_replace_across_fork' | 'dropped_too_expensive' | 'dropped_stale_garbage_collect' | 'dropped_problematic';
+  tx_status:
+    | "success"
+    | "pending"
+    | "abort_by_response"
+    | "abort_by_post_condition"
+    | "dropped_replace_by_fee"
+    | "dropped_replace_across_fork"
+    | "dropped_too_expensive"
+    | "dropped_stale_garbage_collect"
+    | "dropped_problematic";
   tx_result?: {
     hex: string;
     repr: string;
@@ -102,7 +121,9 @@ interface ProposalRecommendationError {
   dao_name?: string;
 }
 
-type ProposalRecommendationResult = ProposalRecommendationResponse | ProposalRecommendationError;
+type ProposalRecommendationResult =
+  | ProposalRecommendationResponse
+  | ProposalRecommendationError;
 
 // Type guard to check if the response is an error
 function isProposalRecommendationError(
@@ -153,7 +174,10 @@ function parseOutput(raw: string): ParsedOutput | null {
   return null;
 }
 
-export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmissionProps) {
+export function ProposalSubmission({
+  daoId,
+  onSubmissionSuccess,
+}: ProposalSubmissionProps) {
   const [proposal, setProposal] = useState("");
   const { issues, hasAnyIssues, cleanText } = useUnicodeValidation(proposal);
   const handleClean = () => {
@@ -163,23 +187,33 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
-  
+
   // WebSocket state
-  const [websocketMessage, setWebsocketMessage] = useState<WebSocketTransactionMessage | null>(null);
-  const websocketRef = useRef<Awaited<ReturnType<typeof connectWebSocketClient>> | null>(null);
-  const subscriptionRef = useRef<{ unsubscribe: () => Promise<void> } | null>(null);
+  const [websocketMessage, setWebsocketMessage] =
+    useState<WebSocketTransactionMessage | null>(null);
+  const websocketRef = useRef<Awaited<
+    ReturnType<typeof connectWebSocketClient>
+  > | null>(null);
+  const subscriptionRef = useRef<{ unsubscribe: () => Promise<void> } | null>(
+    null
+  );
 
   // Modal view state: "initial" = submitted, "confirmed-success" = chain confirmed, "confirmed-failure" = chain failed
-  const [txStatusView, setTxStatusView] = useState<"initial" | "confirmed-success" | "confirmed-failure">("initial");
+  const [txStatusView, setTxStatusView] = useState<
+    "initial" | "confirmed-success" | "confirmed-failure"
+  >("initial");
 
   const { accessToken, isLoading: isSessionLoading } = useAuth();
 
   // Error code mapping
   const errorDetailsArray = getAllErrorDetails();
-  const errorCodeMap = errorDetailsArray.reduce((map, err) => {
-    map[err.code] = err;
-    return map;
-  }, {} as Record<number, typeof errorDetailsArray[0]>);
+  const errorCodeMap = errorDetailsArray.reduce(
+    (map, err) => {
+      map[err.code] = err;
+      return map;
+    },
+    {} as Record<number, (typeof errorDetailsArray)[0]>
+  );
 
   const { data: daoExtensions, isLoading: isLoadingExtensions } = useQuery({
     queryKey: ["daoExtensions", daoId],
@@ -203,34 +237,37 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
       setTxStatusView("initial");
 
       // Determine WebSocket URL based on environment
-      const isMainnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === 'mainnet';
+      const isMainnet = process.env.NEXT_PUBLIC_STACKS_NETWORK === "mainnet";
       const websocketUrl = isMainnet
-        ? 'wss://api.mainnet.hiro.so/'
-        : 'wss://api.testnet.hiro.so/';
-      
+        ? "wss://api.mainnet.hiro.so/"
+        : "wss://api.testnet.hiro.so/";
+
       const client = await connectWebSocketClient(websocketUrl);
       websocketRef.current = client;
 
       // Subscribe to transaction updates for the specific txid
       const subscription = await client.subscribeTxUpdates(txid, (event) => {
-        console.log('WebSocket transaction update:', event);
+        console.log("WebSocket transaction update:", event);
         setWebsocketMessage(event);
 
         // Check if transaction has reached a final state
         const { tx_status } = event;
-        const isSuccess = tx_status === 'success';
-        const isFailed = tx_status === 'abort_by_response' || 
-                        tx_status === 'abort_by_post_condition' ||
-                        tx_status === 'dropped_replace_by_fee' ||
-                        tx_status === 'dropped_replace_across_fork' ||
-                        tx_status === 'dropped_too_expensive' ||
-                        tx_status === 'dropped_stale_garbage_collect' ||
-                        tx_status === 'dropped_problematic';
+        const isSuccess = tx_status === "success";
+        const isFailed =
+          tx_status === "abort_by_response" ||
+          tx_status === "abort_by_post_condition" ||
+          tx_status === "dropped_replace_by_fee" ||
+          tx_status === "dropped_replace_across_fork" ||
+          tx_status === "dropped_too_expensive" ||
+          tx_status === "dropped_stale_garbage_collect" ||
+          tx_status === "dropped_problematic";
         const isFinalState = isSuccess || isFailed;
 
         // Update modal state based on status
-        if (isSuccess) setTxStatusView("confirmed-success");
-        else if (isFailed) setTxStatusView("confirmed-failure");
+        if (isSuccess) {
+          setTxStatusView("confirmed-success");
+          setProposal(""); // Clear proposal only after successful confirmation
+        } else if (isFailed) setTxStatusView("confirmed-failure");
 
         if (isFinalState) {
           // Clean up subscription after receiving final update
@@ -242,11 +279,10 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
           console.log(`Transaction still pending with status: ${tx_status}`);
         }
       });
-      
-      subscriptionRef.current = subscription;
 
+      subscriptionRef.current = subscription;
     } catch (error) {
-      console.error('WebSocket connection error:', error);
+      console.error("WebSocket connection error:", error);
     }
   };
 
@@ -259,7 +295,7 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
 
     const actionProposalsVotingExt = findExt(
       "EXTENSIONS",
-      "ACTION_PROPOSAL_VOTING",
+      "ACTION_PROPOSAL_VOTING"
     );
     const actionProposalContractExt = findExt("ACTIONS", "SEND_MESSAGE");
     const daoTokenExt = findExt("TOKEN", "DAO");
@@ -285,13 +321,13 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
     try {
       const res = await fetch(
         `https://core-staging.aibtc.dev/tools/dao/action_proposals/propose_send_message?token=${encodeURIComponent(
-          accessToken,
+          accessToken
         )}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        },
+        }
       );
 
       const json = (await res.json()) as ApiResponse;
@@ -324,16 +360,15 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
       if (response.success) {
         const parsed = parseOutput(response.output);
         const txid = parsed?.data?.txid;
-        
+
         if (txid) {
           await connectToWebSocket(txid);
         }
-        
-        // Call success callback and clear form
-        onSubmissionSuccess?.();
-        setProposal("");
-      }
 
+        // Call success callback
+        onSubmissionSuccess?.();
+        // setProposal(""); // Do NOT clear here; will clear after confirmed-success
+      }
     } catch (err) {
       // Handle network errors or other unexpected errors
       const networkErrorResponse: ApiResponse = {
@@ -360,12 +395,13 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
     setIsGenerating(true);
     try {
       console.log("Generating AI proposal for DAO:", daoId);
-      
+
       // Create the API request
       const request: ProposalRecommendationRequest = {
         dao_id: daoId,
         focus_area: "governance", // Default focus area, could be made configurable
-        specific_needs: "Generate a comprehensive proposal that addresses current DAO needs and opportunities",
+        specific_needs:
+          "Generate a comprehensive proposal that addresses current DAO needs and opportunities",
         model_name: "gpt-4.1", // Use the recommended model
         temperature: 0.3, // Balance between creativity and focus
       };
@@ -394,17 +430,16 @@ export function ProposalSubmission({ daoId, onSubmissionSuccess }: ProposalSubmi
 
       // Set the generated content as the proposal text
       setProposal(result.content);
-      
+
       console.log("AI proposal generated successfully:", {
         title: result.title,
         priority: result.priority,
         proposalsAnalyzed: result.proposals_analyzed,
         tokenUsage: result.token_usage,
       });
-
     } catch (error) {
       console.error("Failed to generate AI proposal:", error);
-      
+
       // Fallback to a basic template if the API fails
       const fallbackText = `## Proposal Title
 [Insert your proposal title here]
@@ -428,7 +463,7 @@ Provide an estimated timeline for completion.
 List any resources or funding needed.
 
 Note: This is a template generated after AI assistance encountered an issue. Please customize it with your specific proposal details.`;
-      
+
       setProposal(fallbackText);
     } finally {
       setIsGenerating(false);
@@ -456,8 +491,12 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
             <Edit3 className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground">Create Proposal</h2>
-            <p className="text-muted-foreground">Submit a new governance proposal to the DAO</p>
+            <h2 className="text-xl font-bold text-foreground">
+              Create Proposal
+            </h2>
+            <p className="text-muted-foreground">
+              Submit a new governance proposal to the DAO
+            </p>
           </div>
         </div>
 
@@ -465,14 +504,23 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
           <div className="relative">
             <textarea
               value={proposal}
-              onChange={(e) => setProposal(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setProposal(value);
+              }}
               placeholder={
                 hasAccessToken
                   ? "Describe your proposal in detail. What changes do you want to make? What are the benefits? Include any relevant context or rationale..."
                   : "Connect your wallet to create a proposal"
               }
               className="w-full min-h-[120px] p-4 bg-background/50 border border-border/50 rounded-xl text-foreground placeholder-muted-foreground resize-y focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-200"
-              disabled={!hasAccessToken || isSubmitting || isGenerating || isLoadingExtensions}
+              disabled={
+                !hasAccessToken ||
+                isSubmitting ||
+                isGenerating ||
+                isLoadingExtensions
+              }
+              maxLength={2043}
             />
             {proposal.length > 0 && (
               <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
@@ -480,6 +528,12 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
               </div>
             )}
           </div>
+          {proposal.length >= 2043 && (
+            <div className="text-xs text-red-500 mt-1">
+              ⚠️ Proposal exceeds the 2043-character limit. Please shorten your
+              message.
+            </div>
+          )}
           <UnicodeIssueWarning issues={issues} />
 
           <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -487,11 +541,18 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
               type="button"
               variant="outline"
               onClick={handleAIGenerate}
-              disabled={!hasAccessToken || isSubmitting || isGenerating || isLoadingExtensions}
+              disabled={
+                !hasAccessToken ||
+                isSubmitting ||
+                isGenerating ||
+                isLoadingExtensions
+              }
               className="flex items-center gap-2 border-secondary/50 text-secondary hover:bg-secondary/10 hover:border-secondary"
             >
-              <Sparkles className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-              {isGenerating ? 'Generating...' : 'Generate Message'}
+              <Sparkles
+                className={`h-4 w-4 ${isGenerating ? "animate-spin" : ""}`}
+              />
+              {isGenerating ? "Generating..." : "Generate Message"}
             </Button>
             {hasAnyIssues && (
               <Button
@@ -505,34 +566,46 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
             )}
             <Button
               type="submit"
-              disabled={!hasAccessToken || !proposal.trim() || proposal.trim().length < 50 || isSubmitting || isGenerating || isLoadingExtensions || hasAnyIssues}
+              disabled={
+                !hasAccessToken ||
+                !proposal.trim() ||
+                proposal.trim().length < 50 ||
+                isSubmitting ||
+                isGenerating ||
+                isLoadingExtensions ||
+                hasAnyIssues ||
+                proposal.length >= 2043
+              }
               className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-6"
             >
-              {isSubmitting ? (
-                <Loader />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-              {isSubmitting ? 'Submitting...' : 'Submit Proposal'}
+              {isSubmitting ? <Loader /> : <Send className="h-4 w-4" />}
+              {isSubmitting ? "Submitting..." : "Submit Proposal"}
             </Button>
           </div>
 
           {/* Error/Status Messages */}
           {!hasAccessToken && (
             <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3">
-              💡 <strong>Note:</strong> Connect your wallet to submit proposals to the DAO.
-            </div>
-          )}
-          
-          {hasAccessToken && proposal.trim().length > 0 && proposal.trim().length < 50 && (
-            <div className="text-sm text-red-500 bg-red-50 rounded-lg p-3">
-              <strong>Minimum Length Required:</strong> Proposal needs {50 - proposal.trim().length} more characters (minimum 50 characters)
+              💡 <strong>Note:</strong> Connect your wallet to submit proposals
+              to the DAO.
             </div>
           )}
 
+          {hasAccessToken &&
+            proposal.trim().length > 0 &&
+            proposal.trim().length < 50 && (
+              <div className="text-sm text-red-500 bg-red-50 rounded-lg p-3">
+                <strong>Minimum Length Required:</strong> Proposal needs{" "}
+                {50 - proposal.trim().length} more characters (minimum 50
+                characters)
+              </div>
+            )}
+
           {hasAccessToken && proposal.trim().length >= 50 && (
             <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3">
-              💡 <strong>Tip:</strong> Make sure your proposal is clear and includes specific actionable items. The community will vote on this proposal.
+              💡 <strong>Tip:</strong> Make sure your proposal is clear and
+              includes specific actionable items. The community will vote on
+              this proposal.
             </div>
           )}
 
@@ -545,10 +618,13 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
       </div>
 
       {/* ----------------------------- Result modal ----------------------------- */}
-      <Dialog open={showResultDialog} onOpenChange={(open) => {
-        setShowResultDialog(open);
-        if (!open) setTxStatusView("initial");
-      }}>
+      <Dialog
+        open={showResultDialog}
+        onOpenChange={(open) => {
+          setShowResultDialog(open);
+          if (!open) setTxStatusView("initial");
+        }}
+      >
         <DialogContent className="sm:max-w-2xl">
           {apiResponse?.success ? (
             <>
@@ -567,22 +643,25 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                             Proposal Submitted
                           </DialogTitle>
                           <DialogDescription className="text-base text-muted-foreground">
-                            Your proposal is being processed on the blockchain. This may take a few minutes.
+                            Your proposal is being processed on the blockchain.
+                            This may take a few minutes.
                           </DialogDescription>
                         </DialogHeader>
-                        
+
                         <div className="mt-8 space-y-4">
                           {parsed?.data?.txid && (
                             <div className="bg-background/50 border border-border/50 rounded-xl p-4">
                               <div className="flex items-center justify-between">
-                                <span className="text-sm text-muted-foreground">Transaction Status</span>
+                                <span className="text-sm text-muted-foreground">
+                                  Transaction Status
+                                </span>
                                 <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
                                   Processing
                                 </span>
                               </div>
                             </div>
                           )}
-                          
+
                           <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             {parsed?.data?.link && (
                               <Button variant="outline" asChild>
@@ -609,7 +688,7 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                         </div>
                       </div>
                     )}
-                    
+
                     {txStatusView === "confirmed-success" && (
                       <div className="text-center py-8">
                         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
@@ -620,26 +699,33 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                             Proposal Confirmed
                           </DialogTitle>
                           <DialogDescription className="text-base text-muted-foreground">
-                            Your proposal has been successfully submitted to the DAO and is now live for voting.
+                            Your proposal has been successfully submitted to the
+                            DAO and is now live for voting.
                           </DialogDescription>
                         </DialogHeader>
-                        
+
                         <div className="mt-8 space-y-4">
                           <div className="bg-background/50 border border-border/50 rounded-xl p-4">
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm text-muted-foreground">Transaction Status</span>
+                              <span className="text-sm text-muted-foreground">
+                                Transaction Status
+                              </span>
                               <span className="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
                                 Confirmed
                               </span>
                             </div>
                             {websocketMessage?.block_height && (
                               <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">Block Height</span>
-                                <span className="font-mono">{websocketMessage.block_height.toLocaleString()}</span>
+                                <span className="text-muted-foreground">
+                                  Block Height
+                                </span>
+                                <span className="font-mono">
+                                  {websocketMessage.block_height.toLocaleString()}
+                                </span>
                               </div>
                             )}
                           </div>
-                          
+
                           <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             {parsed?.data?.link && (
                               <Button variant="outline" asChild>
@@ -666,7 +752,7 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                         </div>
                       </div>
                     )}
-                    
+
                     {txStatusView === "confirmed-failure" && (
                       <div className="text-center py-8">
                         <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-6">
@@ -677,29 +763,39 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                             Proposal Failed
                           </DialogTitle>
                           <DialogDescription className="text-base text-muted-foreground">
-                            The proposal transaction could not be completed. Please try again.
+                            The proposal transaction could not be completed.
+                            Please try again.
                           </DialogDescription>
                         </DialogHeader>
-                        
+
                         <div className="mt-8 space-y-4">
                           <div className="bg-background/50 border border-border/50 rounded-xl p-4">
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm text-muted-foreground">Transaction Status</span>
+                              <span className="text-sm text-muted-foreground">
+                                Transaction Status
+                              </span>
                               <span className="px-3 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary border border-secondary/20">
                                 Failed
                               </span>
                             </div>
                             {websocketMessage?.tx_result && (
                               <div className="text-sm">
-                                <span className="text-muted-foreground">Reason: </span>
+                                <span className="text-muted-foreground">
+                                  Reason:{" "}
+                                </span>
                                 <span className="font-medium">
                                   {(() => {
-                                    const raw = websocketMessage.tx_result.repr || websocketMessage.tx_result.hex;
+                                    const raw =
+                                      websocketMessage.tx_result.repr ||
+                                      websocketMessage.tx_result.hex;
                                     const match = raw.match(/u?(\d{4,})/);
                                     if (match) {
                                       const code = parseInt(match[1], 10);
-                                      const description = errorCodeMap[code]?.description;
-                                      return description || "Transaction failed";
+                                      const description =
+                                        errorCodeMap[code]?.description;
+                                      return (
+                                        description || "Transaction failed"
+                                      );
                                     }
                                     return "Transaction failed";
                                   })()}
@@ -707,7 +803,7 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                               </div>
                             )}
                           </div>
-                          
+
                           <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <Button variant="outline" onClick={handleRetry}>
                               Try Again
@@ -752,10 +848,11 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                   Submission Failed
                 </DialogTitle>
                 <DialogDescription className="text-base text-muted-foreground">
-                  There was an error processing your proposal. Please check your connection and try again.
+                  There was an error processing your proposal. Please check your
+                  connection and try again.
                 </DialogDescription>
               </DialogHeader>
-              
+
               <div className="mt-8 space-y-4">
                 {apiResponse?.error && (
                   <div className="bg-background/50 border border-border/50 rounded-xl p-4">
@@ -765,7 +862,7 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
                     </div>
                   </div>
                 )}
-                
+
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button variant="outline" onClick={handleRetry}>
                     Try Again
@@ -786,4 +883,4 @@ Note: This is a template generated after AI assistance encountered an issue. Ple
       </Dialog>
     </>
   );
-} 
+}
