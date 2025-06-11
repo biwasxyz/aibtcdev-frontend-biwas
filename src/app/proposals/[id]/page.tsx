@@ -8,6 +8,7 @@ import ProposalDetails from "@/components/proposals/ProposalDetails";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { getStatusConfig } from "@/helpers/proposal-status";
 import { useVotingStatus } from "@/components/proposals/TimeStatus";
 import { safeNumberFromBigInt, safeString } from "@/helpers/proposal-utils";
 import { format } from "date-fns";
@@ -50,32 +51,14 @@ export default function ProposalDetailsPage() {
 
   const getStatusBadge = () => {
     if (!proposal) return null;
-    
-    if (isActive) {
-      return (
-        <Badge className="bg-primary/20 text-primary hover:bg-primary/30 border-primary/50 transition-colors duration-150">
-          Active
-        </Badge>
-      );
-    } else if (isEnded && proposal.passed) {
-      return (
-        <Badge className="bg-green-500/20 text-green-500 hover:bg-green-500/30 border-green-500/50 transition-colors duration-150">
-          Passed
-        </Badge>
-      );
-    } else if (isEnded && !proposal.passed) {
-      return (
-        <Badge className="bg-destructive/20 text-destructive hover:bg-destructive/30 border-destructive/50 transition-colors duration-150">
-          Failed
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge className="bg-muted/50 text-muted-foreground hover:bg-muted/70 border-muted transition-colors duration-150">
-          Pending
-        </Badge>
-      );
-    }
+    const status = getStatusConfig(isActive, isEnded, proposal.passed);
+    return (
+      <Badge
+        className={`${status.bg} ${status.color} ${status.border} transition-colors duration-150`}
+      >
+        {status.label}
+      </Badge>
+    );
   };
 
   if (loading) {
