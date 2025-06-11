@@ -5,11 +5,9 @@ import {
   Clock,
   User,
   BarChart3,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
   Building2,
 } from "lucide-react";
+import { getStatusConfig } from "@/helpers/proposal-status";
 import { useVotingStatus } from "./TimeStatus";
 import type { Proposal, ProposalWithDAO } from "@/types/supabase";
 import { format } from "date-fns";
@@ -39,43 +37,7 @@ export default function ProposalCard({
     safeNumberFromBigInt(proposal.vote_end)
   );
 
-  const getStatusConfig = () => {
-    if (isActive) {
-      return {
-        icon: BarChart3,
-        color: "text-primary",
-        bg: "bg-primary/10",
-        border: "border-primary/20",
-        label: "Active",
-      };
-    } else if (isEnded && proposal.passed) {
-      return {
-        icon: CheckCircle,
-        color: "text-green-500",
-        bg: "bg-green-500/10",
-        border: "border-green-500/20",
-        label: "Passed",
-      };
-    } else if (isEnded && !proposal.passed) {
-      return {
-        icon: XCircle,
-        color: "text-red-500",
-        bg: "bg-red-500/10",
-        border: "border-red-500/20",
-        label: "Failed",
-      };
-    } else {
-      return {
-        icon: AlertCircle,
-        color: "text-muted-foreground",
-        bg: "bg-muted/10",
-        border: "border-muted/20",
-        label: "Pending",
-      };
-    }
-  };
-
-  const statusConfig = getStatusConfig();
+  const statusConfig = getStatusConfig(isActive, isEnded, proposal.passed);
   const StatusIcon = statusConfig.icon;
 
   const formatNumber = (num: number) => {
