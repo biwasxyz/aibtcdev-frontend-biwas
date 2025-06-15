@@ -5,9 +5,10 @@ import { fetchDAOByName } from "@/services/dao.service";
 export default async function Page({
   params,
 }: {
-  params: { name: string };
+  params: Promise<{ name: string }>;
 }) {
-  await fetchDAOByName(params.name);
+  const { name } = await params;
+  await fetchDAOByName(name);
   const PageClient = (await import("./PageClient")).default;
   return <PageClient />;
 }
