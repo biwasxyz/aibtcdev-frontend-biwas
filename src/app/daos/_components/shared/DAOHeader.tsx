@@ -2,7 +2,7 @@
 
 import type React from "react";
 import Image from "next/image";
-import { DAOBuyToken } from "@/components/daos/DaoBuyToken";
+import { DAOBuyToken } from "../DaoActions/DaoBuyToken";
 import {
   Activity,
   Info,

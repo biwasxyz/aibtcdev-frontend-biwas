@@ -2,8 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import DAOExtensions from "@/components/daos/DaoExtensions";
-import { MissionContent } from "@/components/daos/MissionContent";
+import DAOExtensions from "../../_components/shared/DaoExtensions";
+import { MissionContent } from "../../_components/shared/MissionContent";
 import { fetchDAOExtensions, fetchDAOByName } from "@/services/dao.service";
 import { Loader } from "@/components/reusables/Loader";
 

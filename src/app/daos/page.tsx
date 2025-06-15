@@ -1,5 +1,5 @@
 import React from "react";
-import AllDaos from "@/components/daos/AllDaos";
+import { AllDaos } from "./_components";
 
 const page = () => {
   return <AllDaos />;

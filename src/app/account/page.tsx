@@ -20,7 +20,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAgents } from "@/services/agent.service";
-import { AgentPromptForm } from "@/components/account/AgentPromptForm";
+import { AgentPromptForm } from "./_components";
 import { fundTestnetSBTC, fundTestnetSTX } from "@/services/tool.service";
 import {
   StxBalance,

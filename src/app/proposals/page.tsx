@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Loader } from "@/components/reusables/Loader";
-import AllProposals from "@/components/proposals/AllProposals";
+import { AllProposals } from "./_components";
 import { fetchAllProposals } from "@/services/dao.service";
 
 export const runtime = "edge";

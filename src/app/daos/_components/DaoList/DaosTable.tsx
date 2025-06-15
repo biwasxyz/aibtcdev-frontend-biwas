@@ -21,10 +21,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { DAOBuyToken } from "@/components/daos/DaoBuyToken";
+import { DAOBuyToken } from "../DaoActions/DaoBuyToken";
 import { useRouter } from "next/navigation";
 import { formatNumber } from "@/utils/format";
-import { FormatMission } from "@/components/daos/format-mission";
+import { FormatMission } from "../shared/format-mission";
 
 interface DAOTableProps {
   daos: DAO[];

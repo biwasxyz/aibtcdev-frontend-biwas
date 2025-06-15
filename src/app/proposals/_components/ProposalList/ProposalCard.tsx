@@ -18,7 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import VoteStatusChart from "./VoteStatusChart";
 import { useMemo } from "react";
-import { useVotingStatus } from "./TimeStatus";
+import { useVotingStatus } from "../shared/TimeStatus";
 
 interface ProposalCardProps {
   proposal: Proposal | ProposalWithDAO;

@@ -4,9 +4,8 @@ import type React from "react";
 import { usePathname } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
-import { DAOHeader } from "@/components/daos/DAOHeader";
-import { MissionContent } from "@/components/daos/MissionContent";
-import { ProposalSubmission } from "@/components/proposals/ProposalSubmission";
+import { DAOHeader, MissionContent } from "@/app/daos/_components";
+import { ProposalSubmission } from "@/app/proposals/_components";
 
 interface DAOInfo {
   id: string;

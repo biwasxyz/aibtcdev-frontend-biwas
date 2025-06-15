@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import ProposalCard from "@/components/proposals/ProposalCard";
+import ProposalCard from "../ProposalList/ProposalCard";
 import type { Proposal } from "@/types";
 
 interface DAOProposalsProps {

@@ -1,6 +1,6 @@
 "use client";
 
-import ProposalCard from "@/components/proposals/ProposalCard";
+import ProposalCard from "./ProposalCard";
 import type { Proposal, ProposalWithDAO } from "@/types";
 import { FileText } from "lucide-react";
 

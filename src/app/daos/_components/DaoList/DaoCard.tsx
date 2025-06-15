@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { formatNumber } from "@/utils/format";
-import { DAOBuyToken } from "./DaoBuyToken";
+import { DAOBuyToken } from "../DaoActions/DaoBuyToken";
 
 interface DAOCardProps {
   dao: DAO;

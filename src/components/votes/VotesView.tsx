@@ -32,7 +32,7 @@ import { useClipboard } from "@/hooks/useClipboard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Vote as VoteType } from "@/types";
-import { DAOVetoProposal } from "@/components/proposals/DAOVetoProposal";
+import { DAOVetoProposal } from "@/app/proposals/_components";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLatestChainState } from "@/services/chain-state.service";

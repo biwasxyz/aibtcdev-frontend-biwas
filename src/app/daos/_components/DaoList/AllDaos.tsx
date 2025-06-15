@@ -4,7 +4,7 @@ import { useQuery, useQueries } from "@tanstack/react-query";
 import { Search, Users, Activity, Coins, BarChart3 } from "lucide-react";
 import { Loader } from "@/components/reusables/Loader";
 
-import { DAOCard } from "@/components/daos/DaoCard";
+import { DAOCard } from "./DaoCard";
 import type { DAO, Holder } from "@/types";
 import {
   fetchDAOsWithExtension,

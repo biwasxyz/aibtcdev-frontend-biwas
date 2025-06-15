@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import ReactMarkdown from "react-markdown";
-import CopyButton from "@/components/proposals/CopyButton";
+import CopyButton from "../shared/CopyButton";
 
 interface VotesTableProps {
   proposalId: string;

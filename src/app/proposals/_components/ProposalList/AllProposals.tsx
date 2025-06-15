@@ -3,7 +3,7 @@
 import { useRef, useState, useMemo, useCallback } from "react";
 // Removed unused Card imports
 import { Button } from "@/components/ui/button";
-import ProposalCard from "@/components/proposals/ProposalCard";
+import ProposalCard from "./ProposalCard";
 import {
   FilterSidebar,
   type FilterConfig,

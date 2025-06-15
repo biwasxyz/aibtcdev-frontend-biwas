@@ -24,7 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import { safeNumberFromBigInt } from "@/utils/proposal";
 import type { Proposal, ProposalWithDAO } from "@/types";
-import { useVotingStatus } from "./TimeStatus";
+import { useVotingStatus } from "../shared/TimeStatus";
 
 interface VotingProgressChartProps {
   proposal: Proposal | ProposalWithDAO;
