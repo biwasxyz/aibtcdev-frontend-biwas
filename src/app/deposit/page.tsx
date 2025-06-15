@@ -1,10 +1,9 @@
 import BitcoinDeposit from "@/components/btc-deposit";
 
-const page = () => {
+export default async function Page() {
   return (
     <div>
       <BitcoinDeposit />
     </div>
   );
-};
-export default page;
+}

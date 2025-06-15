@@ -1,8 +1,5 @@
-import React from "react";
 import AllDaos from "@/components/daos/AllDaos";
 
-const page = () => {
+export default async function Page() {
   return <AllDaos />;
-};
-
-export default page;
+}
