@@ -1,58 +1,40 @@
-# AIBTCDEV Frontend
+# aibtcdev-frontend-biwas
 
-## Prerequisites
-- Node.js (recommended version 18+)
-- npm
-- Backend repository: [aibtcdev-backend](https://github.com/aibtcdev/aibtcdev-backend)
+![Status](https://img.shields.io/badge/Status-Inactive-orange) ![Public](https://img.shields.io/badge/Public-blue) ![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) ![Next.js](https://img.shields.io/badge/Next.js-black?logo=next.js) ![TailwindCSS](https://img.shields.io/badge/Tailwind-06B6D4?logo=tailwindcss&logoColor=white) ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black) ![Stacks](https://img.shields.io/badge/Stacks-5546FF?logo=stacks&logoColor=white)
 
-## Getting Started
+Create, schedule, run, and chat with crews of agents that have their own wallets. Create and manage DAOs, trade, transfer, and more!
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/aibtcdev/aibtcdev-frontend.git
-cd aibtcdev-frontend
+> **Note:** This is a fork. See the original repository for upstream changes.
+
+## Tech Stack
+
+- Node.js
+- TypeScript
+- Docker
+- Next.js
+- TailwindCSS
+- React
+- Stacks
+
+## Project Structure
+
+```
+Dockerfile
+README.md
+components.json
+next.config.js
+package-lock.json
+package.json
+postcss.config.mjs
+public/
+src/
+supabase-image-loader.js
+tailwind.config.ts
+tsconfig.json
 ```
 
-### 2. Environment Setup
-Create a `.env.local` file in the project root and add the following variables:
-```
-NEXT_PUBLIC_SUPABASE_URL=https://addyourown.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=add_your_anon_key
-HIRO_API_KEY=hiro_api_key
-NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
-NEXT_PUBLIC_STACKS_NETWORK=testnet
-```
+## Timeline
 
-### 3. Install Dependencies
-```bash
-npm install
-```
-
-### 4. Setup Husky for Pre-commit Hooks
-Install and configure Husky to ensure code quality before commits:
-
-```bash
-# Initialize husky
-npx husky init
-
-# Add a pre-commit hook to run Prettier on staged TypeScript files
-echo 'npx prettier --write --list-different "**/*.{ts,tsx}"' > .husky/pre-commit
-
-# Make the pre-commit hook executable
-chmod +x .husky/pre-commit
-```
-
-This setup will automatically format your TypeScript and TSX files before each commit, ensuring consistent code formatting across the project.
-
-### 5. Run Backend
-Clone and set up the backend repository:
-```bash
-git clone https://github.com/aibtcdev/aibtcdev-backend.git
-cd aibtcdev-backend
-# Follow backend setup instructions
-```
-
-### 6. Run Frontend Development Server
-```bash
-npm run dev
-```
+- **Created:** 2025-03-20
+- **Last Updated:** 2025-07-13
+- **Status:** Inactive
